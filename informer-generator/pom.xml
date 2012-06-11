@@ -1,0 +1,52 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+	<parent>
+		<artifactId>gaedo</artifactId>
+		<groupId>com.dooapp</groupId>
+		<version>0.2.19-SNAPSHOT</version>
+	</parent>
+	<modelVersion>4.0.0</modelVersion>
+	<groupId>com.dooapp</groupId>
+	<artifactId>gaedo-informer-generator</artifactId>
+	<packaging>maven-plugin</packaging>
+	<name>Gaedo informer generator</name>
+	<version>0.2.19-SNAPSHOT</version>
+	<description>Generates Informer for all bean classes of given project sources trees</description>
+	<properties>
+		<maven.version>3.0</maven.version>
+	</properties>
+	<prerequisites>
+		<maven>${maven.version}</maven>
+	</prerequisites>
+	<dependencies>
+		<dependency>
+			<groupId>org.apache.maven</groupId>
+			<artifactId>maven-plugin-api</artifactId>
+			<version>${maven.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.maven</groupId>
+			<artifactId>maven-core</artifactId>
+			<version>${maven.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.codehaus.plexus</groupId>
+			<artifactId>plexus-utils</artifactId>
+			<version>${maven.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>com.dooapp</groupId>
+			<artifactId>gaedo-definition</artifactId>
+			<version>0.2.19-SNAPSHOT</version>
+		</dependency>
+		<dependency>
+			<groupId>com.google.code.javaparser</groupId>
+			<artifactId>javaparser</artifactId>
+			<version>1.0.8</version>
+		</dependency>
+		<dependency>
+			<groupId>junit</groupId>
+			<artifactId>junit</artifactId>
+			<scope>test</scope>
+		</dependency>
+	</dependencies>
+</project>

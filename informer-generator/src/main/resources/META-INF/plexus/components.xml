@@ -1,0 +1,15 @@
+<component-set>
+    <components>
+        <component>
+            <role>org.apache.maven.lifecycle.mapping.LifecycleMapping</role>
+            <implementation>
+                org.apache.maven.lifecycle.mapping.DefaultLifecycleMapping
+            </implementation>
+            <configuration>
+                <phases>
+                	<generate-sources>com.dooapp.gaedo.informer.InformerMojo</generate-sources>
+                </phases>
+            </configuration>
+        </component>
+    </components>
+</component-set>

@@ -1,0 +1,50 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+	<parent>
+		<artifactId>gaedo</artifactId>
+		<groupId>com.dooapp</groupId>
+		<version>0.2.19-SNAPSHOT</version>
+	</parent>
+	<modelVersion>4.0.0</modelVersion>
+	<groupId>com.dooapp</groupId>
+	<artifactId>gaedo-tapestry</artifactId>
+	<name>Taspestry module for gaedo</name>
+	<version>0.2.19-SNAPSHOT</version>
+	<description>This project is a module to use gaedo in tapestry</description>
+	<build>
+		<plugins>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-jar-plugin</artifactId>
+				<version>2.2</version>
+				<configuration>
+					<archive>
+						<manifestEntries>
+							<Tapestry-Module-Classes>com.dooapp.gaedo.tapestry.GaedoModule</Tapestry-Module-Classes>
+						</manifestEntries>
+					</archive>
+				</configuration>
+			</plugin>
+		</plugins>
+	</build>
+	<dependencies>
+		<dependency>
+			<groupId>com.dooapp</groupId>
+			<artifactId>gaedo-definition</artifactId>
+			<version>0.2.19-SNAPSHOT</version>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.tapestry</groupId>
+			<artifactId>tapestry-core</artifactId>
+			<version>${tapestry-release-version}</version>
+			<scope>provided</scope>
+		</dependency>
+	</dependencies>
+	<properties>
+		<tapestry-release-version>5.1.0.5</tapestry-release-version>
+	</properties>
+	<scm>
+		<connection>scm:svn:https://svn.origo.ethz.ch/gaedo/gaedo-tapestry/trunk</connection>
+		<developerConnection>scm:svn:https://svn.origo.ethz.ch/gaedo/gaedo-tapestry/trunk</developerConnection>
+		<url>https://svn.origo.ethz.ch/gaedo/gaedo-tapestry/trunk</url>
+	</scm>
+</project>

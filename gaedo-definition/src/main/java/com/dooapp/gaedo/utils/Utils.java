@@ -1,0 +1,243 @@
+package com.dooapp.gaedo.utils;
+
+import java.lang.reflect.Constructor;
+import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.NavigableSet;
+import java.util.Queue;
+import java.util.Set;
+import java.util.SortedMap;
+import java.util.SortedSet;
+import java.util.TreeMap;
+import java.util.TreeSet;
+import java.util.concurrent.ArrayBlockingQueue;
+import java.util.concurrent.BlockingQueue;
+
+import com.dooapp.gaedo.properties.Property;
+
+public class Utils {
+
+	/**
+	 * From an input container type, and a possibly null input value, generates a Map corresponding to the container interface kind
+	 * @param rawContainerClass
+	 * @param property
+	 * @return
+	 */
+	@SuppressWarnings("unchecked")
+	public static Map<?, ?> generateMap(Class<?> rawContainerClass, Map<?, ?> property) {
+		if (property == null) {
+			if (SortedMap.class.isAssignableFrom(rawContainerClass)) {
+				property = new TreeMap();
+			} else if (Map.class.isAssignableFrom(rawContainerClass)) {
+				property = new HashMap();
+			}
+		}
+		return property;
+	}
+
+	/**
+	 * Generate an instance of one of the concrete types corresponding to input
+	 * type (if input type is not cocnrete)
+	 * 
+	 * @param rawContainerType
+	 * @param property
+	 * @return
+	 */
+	@SuppressWarnings("unchecked")
+	public static <DataType> Collection<DataType> generateCollection(Class<?> rawContainerType,
+			Collection<DataType> property) {
+		if (property == null) {
+			if (rawContainerType.isInterface()) {
+				if (BlockingQueue.class.isAssignableFrom(rawContainerType)) {
+					property = new ArrayBlockingQueue<DataType>(10);
+				} else if (Queue.class.isAssignableFrom(rawContainerType)) {
+					property = new ArrayBlockingQueue<DataType>(10);
+				} else if (NavigableSet.class.isAssignableFrom(rawContainerType)) {
+					property = new TreeSet<DataType>();
+				} else if (Set.class.isAssignableFrom(rawContainerType)) {
+					property = new HashSet<DataType>();
+				} else if (SortedSet.class.isAssignableFrom(rawContainerType)) {
+					property = new TreeSet<DataType>();
+				} else if (List.class.isAssignableFrom(rawContainerType)) {
+					property = new LinkedList<DataType>();
+				} else if (Collection.class.isAssignableFrom(rawContainerType)) {
+					property = new LinkedList<DataType>();
+				}
+			} else if (Modifier.isAbstract(rawContainerType.getModifiers())) {
+				throw new UnsupportedOperationException(
+						"are you kiddin or what ? Replace your abstract type "
+								+ rawContainerType.getName()
+								+ "by an interface, it's wayyyy better !");
+			} else {
+				try {
+					property = (Collection<DataType>) rawContainerType.newInstance();
+				} catch (Exception e) {
+					throw new UnableToCreateObjectException(e, rawContainerType);
+				}
+			}
+		}
+		return property;
+	}
+	
+	/**
+	 * Maybe transform type in object one. if type is not a primitive, nothing is done
+	 * @param toObjectify
+	 * @return
+	 */
+	public static Class<?> maybeObjectify(Class<?> toObjectify) {
+		Class<?> returned = objectify(toObjectify);
+		if(returned==null)
+			returned = toObjectify;
+		return returned;
+	}
+
+	/**
+	 * Transform a primitive type into its associated class : Integer.Type will become Integer.class, and so on ...
+	 * @param toCompareClass
+	 * @return
+	 */
+	public static Class<?> objectify(Class<?> toCompareClass) {
+		if(Integer.TYPE.equals(toCompareClass)) {
+			return Integer.class;
+		} else if(Long.TYPE.equals(toCompareClass)) {
+			return Long.class;
+		} else if(Short.TYPE.equals(toCompareClass)) {
+			return Short.class;
+		} else if(Float.TYPE.equals(toCompareClass)) {
+			return Float.class;
+		} else if(Double.TYPE.equals(toCompareClass)) {
+			return Double.class;
+		} else if(Byte.TYPE.equals(toCompareClass)) {
+			return Byte.class;
+		} else if(Character.TYPE.equals(toCompareClass)) {
+			return Character.class;
+		}
+		return null;
+	}
+
+	/**
+	 * Generates a map linking uppercased field name to lwoercased one from a list of properties objects
+	 */
+	public static Map<String, String> getUppercasedMap(Property[] fields) {
+		Map<String, String> fieldNames = new HashMap<String, String>();
+		for(Property f : fields) {
+			String name = f.getName();
+			fieldNames.put(uppercaseFirst(name), name);
+		}
+		return fieldNames;
+	}
+
+	/**
+	 * Build a map linking method names to their associated object.
+	 * As a convenience, methods declared by Object class are excluded from the returned map
+	 * @param methods object visible methods (public ones)
+	 * @return a map linking their first-upcased letter name to the {@link Method} object
+	 */
+	public static Map<String, Method> getUppercasedMap(Method[] methods) {
+		Map<String, Method> fieldNames = new HashMap<String, Method>();
+		for(Method method : methods) {
+			if(!method.getDeclaringClass().equals(Object.class)) {
+				String name = method.getName();
+				fieldNames.put(uppercaseFirst(name), method);
+			}
+		}
+		return fieldNames;
+	}
+
+	public static String uppercaseFirst(String name) {
+		return name.substring(0, 1).toUpperCase()+name.substring(1);
+	}
+
+	/**
+	 * Convert a string into an object of the class it is supposed to come from.
+	 * This method is expected to work only for String (quite logical, isn't ?) and classes providing either a constructor using String as an argument,
+	 * or a valueOf method having String as an argument. Any other case will miserably fail (ie a NoFromStringConversionExists will be thrown)
+	 * @param value input string value
+	 * @param type expected output type
+	 * @return an object of that type
+	 */
+	public static <Type> Type fromString(String value, Class<Type> type) {
+		if(String.class.equals(type)) {
+			return (Type) value.toString();
+		} else if(type.isPrimitive()) {
+			return (Type) fromString(value, objectify(type));
+		} else if(Class.class.equals(type)) {
+			return classFromString(value);
+		} else {
+			/* First check if a constructor exists */
+			try {
+				Constructor<Type> withString = type.getDeclaredConstructor(String.class);
+				return withString.newInstance(value);
+			} catch(Exception e) {
+				/* This constructor does not seems to exists. Is there any chance a "valueOf" method exists (useful for numbers objects) ? */
+				try {
+					Method valueOf = type.getDeclaredMethod("valueOf", String.class);
+					return (Type) valueOf.invoke(null, value);
+				} catch (Exception e1) {
+					/* Seems like the reply is no */
+					throw new NoFromStringConversionExistsException(type, e, e1);
+				}
+			}
+		}
+	}
+	
+	/**
+	 * Try to load given type class
+	 * @param value
+	 * @return
+	 */
+	private static <Type> Type classFromString(String value) {
+		ClassLoader[] used = new ClassLoader[] {value.getClass().getClassLoader(), Utils.class.getClassLoader(), Thread.currentThread().getContextClassLoader()};
+		for(ClassLoader c : used) {
+			if(c!=null) {
+				try {
+					return (Type) c.loadClass(value);
+				} catch (ClassNotFoundException e) {
+					// nothing to do, a better exception will be built later
+				}
+			}
+		}
+		throw new UnableToLoadClassException(value, used);
+	}
+
+	/**
+	 * Similarly to {@link #getUppercasedMap(Method[])}, this method produces a map linking name (in their initial case) to the method object used to call them
+	 * @param methods
+	 * @return
+	 */
+	public static Map<String, Method> getNameMap(Method[] methods) {
+		Map<String, Method> methodsNames = new HashMap<String, Method>();
+		for(Method method : methods) {
+			if(!method.getDeclaringClass().equals(Object.class)) {
+				String name = method.getName();
+				methodsNames.put(name, method);
+			}
+		}
+		return methodsNames;
+	}
+
+	/**
+	 * Put all classes extended or implemented by this one (including itself) in a collection
+	 * @param declaring
+	 * @return
+	 */
+	public static Collection<Class> allClassesOf(Class<?> declaring) {
+		Collection<Class> returned = new LinkedList<Class>();
+		if(declaring!=null) {
+			if(!declaring.equals(Object.class)) {
+				returned.add(declaring);
+				returned.addAll(allClassesOf(declaring.getSuperclass()));
+				for(Class i : declaring.getInterfaces()) {
+					returned.addAll(allClassesOf(i));
+				}
+			}
+		}
+		return returned;
+	}
+}
