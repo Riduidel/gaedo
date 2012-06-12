@@ -16,12 +16,12 @@ All other dependencies are pulled by these two artifacts. So, as an example, if 
 	<dependency>
 		<groupId>com.dooapp</groupId>
 		<artifactId>gaedo-google-datastore</artifactId>
-		<version>0.0.2</version>
+		<version>0.2.19</version>
 	</dependency>
 	<dependency>
 		<groupId>com.dooapp</groupId>
 		<artifactId>gaedo-tapestry</artifactId>
-		<version>0.0.2</version>
+		<version>0.2.19</version>
 	</dependency>
 
 in you dependencies, all required gaedo modules will come. 

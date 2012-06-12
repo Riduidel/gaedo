@@ -5,7 +5,7 @@ Gaedo initially standed for Google App Engine Data Object, but has since evolved
 
 * Google App Engine
 * Prevalence
-* All graph implementations compatible with Blueprints stack.
+* All graph implementations compatible with [Blueprints][7] stack.
 
 Resurected from some lost space on the web, Gaedo documentation is made of a bunch of useful (or not) blog articles _beware_ ! links below only work when file is directly viewed (that's to say not when the file list is visible) :
 
@@ -14,6 +14,7 @@ Resurected from some lost space on the web, Gaedo documentation is made of a bun
  3. [method_missing vs invokeLater][3] explaining some very nice gaedo magic
  4. [Compilable queries][4] or how to use that magic for the good
  5. [dynamic finders the reference][5] for you, crazy (G)Rails punks !
+ 6. [How to include gaedo in my application ?] a hint ? maven ... another hint ? current version is `0.2.19`
 
 There are other blog articles, but of less interest, unfortunatly
 
@@ -22,3 +23,5 @@ There are other blog articles, but of less interest, unfortunatly
   [3]: src/site/markdown/method_missing_vs_invokeLater.md
   [4]: src/site/markdown/compilable_queries_a_senseless_concept.md
   [5]: src/site/markdown/dynamic_finders_the_reference.md
+  [6]: src/site/markdown/how_to_include_gaedo_in_my_application.md
+  [7]: https://github.com/tinkerpop/blueprints/wiki/
