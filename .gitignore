@@ -1,22 +1,4 @@
-# borrowed from https://github.com/github/gitignore/blob/master/Maven.gitignore
-
-###############################
-# Java part
-
-*.class
-
-# Package Files #
-*.jar
-*.war
-*.ear
-
-###############################
-# Maven part
-
-target/
-
-###############################
-# Eclipse part
-.settings/
 .classpath
 .project
+.settings/
+target/
