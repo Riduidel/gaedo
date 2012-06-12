@@ -1,0 +1,38 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+	<parent>
+		<artifactId>gaedo</artifactId>
+		<groupId>com.dooapp</groupId>
+		<version>0.2.19-SNAPSHOT</version>
+	</parent>
+	<groupId>com.dooapp</groupId>
+	<artifactId>gaedo-prevalence</artifactId>
+	<version>0.2.19-SNAPSHOT</version>
+	<name>Gaedo prevalence layer and service</name>
+	<description>A gaedo-inspired prevalence layer and the associated service, for making the most gaedo-efficient use of that layer</description>
+	<dependencies>
+		<dependency>
+			<groupId>com.dooapp</groupId>
+			<artifactId>gaedo-definition</artifactId>
+			<version>${project.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.jmock</groupId>
+			<artifactId>jmock-junit4</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>com.dooapp</groupId>
+			<artifactId>gaedo-collections</artifactId>
+			<version>${project.version}</version>
+			<type>jar</type>
+			<scope>compile</scope>
+		</dependency>
+		<dependency>
+			<groupId>com.dooapp</groupId>
+			<artifactId>gaedo-test-beans</artifactId>
+			<version>${project.version}</version>
+			<type>jar</type>
+			<scope>test</scope>
+		</dependency>
+	</dependencies>
+</project>
