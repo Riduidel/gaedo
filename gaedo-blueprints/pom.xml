@@ -3,7 +3,7 @@
 	<parent>
 		<artifactId>gaedo</artifactId>
 		<groupId>com.dooapp</groupId>
-		<version>0.2.19</version>
+		<version>0.2.20-SNAPSHOT</version>
 		<relativePath>..</relativePath>
 	</parent>
 	<artifactId>gaedo-blueprints</artifactId>
