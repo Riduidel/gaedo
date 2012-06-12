@@ -14,7 +14,7 @@ Resurected from some lost space on the web, Gaedo documentation is made of a bun
  3. [method_missing vs invokeLater][3] explaining some very nice gaedo magic
  4. [Compilable queries][4] or how to use that magic for the good
  5. [dynamic finders the reference][5] for you, crazy (G)Rails punks !
- 6. [How to include gaedo in my application ?] a hint ? maven ... another hint ? current version is `0.2.19`
+ 6. [How to include gaedo in my application ?][6] a hint ? maven ... another hint ? current version is `0.2.19`
 
 There are other blog articles, but of less interest, unfortunatly
 
