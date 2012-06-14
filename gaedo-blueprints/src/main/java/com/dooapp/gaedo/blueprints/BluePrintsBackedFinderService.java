@@ -194,7 +194,7 @@ public class BluePrintsBackedFinderService <DataType, InformerType extends Infor
 	 * @param toDelete
 	 */
 	private void doDelete(DataType toDelete, Map<String, Object> objectsBeingAccessed) {
-		String vertexId = getIdVertexId(toDelete, idProperty);
+		String vertexId = getIdVertexId(toDelete, idProperty, false /* no id generation on delete */);
 		Vertex objectVertex = GraphUtils.locateVertex(database, Properties.vertexId.name(), vertexId);
 		if(objectVertex!=null) {
 			Map<Property, Collection<CascadeType>> containedProperties = getContainedProperties(toDelete);
@@ -352,17 +352,18 @@ public class BluePrintsBackedFinderService <DataType, InformerType extends Infor
 	 * @return first matching node if found, and null if not
 	 */
 	private Vertex getIdVertexFor(DataType object) {
-		return GraphUtils.locateVertex(database, Properties.vertexId.name(), getIdVertexId(object, idProperty));
+		return GraphUtils.locateVertex(database, Properties.vertexId.name(), getIdVertexId(object, idProperty, false));
 	}
 
 	/**
 	 * Notice it only works if id is a literal type
 	 * @param object object for which we want the id vertex id property
 	 * @param idProperty property used to extract id from object
+	 * @param requiresIdGeneration set to true when effective id generation is required. Allow to generate id only on create operations
 	 * @return a composite id containing the service class, the data class and the the instance value
 	 * @see GraphUtils#getIdVertexId(IndexableGraph, Class, Object, Property)
 	 */
-	private String getIdVertexId(DataType object, Property idProperty) {
+	private String getIdVertexId(DataType object, Property idProperty, boolean requiresIdGeneration) {
 		if(requiresIdGeneration) {
 			// Check value of idProperty
 			Object value = idProperty.get(object);
@@ -384,7 +385,7 @@ public class BluePrintsBackedFinderService <DataType, InformerType extends Infor
 	 * @return id of that object
 	 */
 	public Object getIdOf(DataType data) {
-		return getIdVertexId(data, idProperty);
+		return getIdVertexId(data, idProperty, false);
 	}
 
 	@Override
@@ -392,9 +393,18 @@ public class BluePrintsBackedFinderService <DataType, InformerType extends Infor
 		return doUpdate(toUpdate, CascadeType.MERGE, new TreeMap<String, Object>());
 	}
 
-	private DataType doUpdate(DataType toUpdate, CascadeType merge, Map<String, Object> treeMap) {
-		String objectVertexId = getIdVertexId(toUpdate, idProperty);
-		return (DataType) persister.performUpdate(this, objectVertexId, toUpdate.getClass(), getContainedProperties(toUpdate), toUpdate, merge, treeMap);
+	/**
+	 * here is a trick : we want id generation to happen only on first persist (that's to say on call to #create), but not on subsequent ones.
+	 * So, as first call uses CascadeType.PERSIST and others uses CascadeType.MERGE, we can use that indication to separate them.
+	 * It has the unfortunate inconvenient to force us to use only PERSIST during #create
+	 * @param toUpdate object to update
+	 * @param cascade type. As mentionned upper, beware to value used !
+	 * @param treeMap map of objects already used
+	 */
+	private DataType doUpdate(DataType toUpdate, CascadeType cascade, Map<String, Object> treeMap) {
+		boolean generatesId = requiresIdGeneration ? (CascadeType.PERSIST==cascade) : false;
+		String objectVertexId = getIdVertexId(toUpdate, idProperty, generatesId);
+		return (DataType) persister.performUpdate(this, objectVertexId, toUpdate.getClass(), getContainedProperties(toUpdate), toUpdate, cascade, treeMap);
 	}
 
 	/**
@@ -564,7 +574,7 @@ public class BluePrintsBackedFinderService <DataType, InformerType extends Infor
 		idProperty.set(value, id[0]);
 		if(getIdVertexFor(value)==null) {
 			try {
-				persister.createIdVertex(database, containedClass, getIdVertexId(value, idProperty));
+				persister.createIdVertex(database, containedClass, getIdVertexId(value, idProperty, requiresIdGeneration));
 				return true;
 			} catch(Exception e) {
 				return false;
@@ -572,6 +582,24 @@ public class BluePrintsBackedFinderService <DataType, InformerType extends Infor
 		} else {
 			return false;
 		}
+	}
+
+	/**
+	 * @param requiresIdGeneration the requiresIdGeneration to set
+	 * @category setter
+	 * @category requiresIdGeneration
+	 */
+	void setRequiresIdGeneration(boolean requiresIdGeneration) {
+		this.requiresIdGeneration = requiresIdGeneration;
+	}
+
+	/**
+	 * @return the requiresIdGeneration
+	 * @category getter
+	 * @category requiresIdGeneration
+	 */
+	public boolean isRequiresIdGeneration() {
+		return requiresIdGeneration;
 	}
 
 }

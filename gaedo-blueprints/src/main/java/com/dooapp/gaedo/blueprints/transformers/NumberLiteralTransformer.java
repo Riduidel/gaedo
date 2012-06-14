@@ -4,6 +4,11 @@ public class NumberLiteralTransformer extends AbstractLiteralTransformer<Number>
 
 	@Override
 	protected Object getVertexValue(Number value) {
-		return value.toString();
+		return value==null ? "0" : value.toString();
+	}
+
+	@Override
+	protected Class getValueClass(Number value) {
+		return value==null ? Number.class : value.getClass();
 	}
 }

@@ -1,4 +1,4 @@
-package com.dooapp.gaedo;
+package com.dooapp.gaedo.blueprints;
 
 import static org.junit.Assert.assertThat;
 

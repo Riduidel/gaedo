@@ -4,7 +4,12 @@ public class BooleanLiteralTransformer extends AbstractLiteralTransformer<Boolea
 
 	@Override
 	protected Object getVertexValue(Boolean value) {
-		return value.toString();
+		return value==null ? Boolean.FALSE.toString() : value.toString();
+	}
+
+	@Override
+	protected Class getValueClass(Boolean value) {
+		return Boolean.class;
 	}
 
 }

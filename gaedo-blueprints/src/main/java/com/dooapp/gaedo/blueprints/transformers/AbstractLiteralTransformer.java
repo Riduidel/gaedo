@@ -57,7 +57,7 @@ public abstract class AbstractLiteralTransformer<Type> {
 	/**
 	 * Get vertex value for object. notice it is better to get it as a string than anything else
 	 * @param value
-	 * @return
+	 * @return a value for that vertex. Again, null is NOT allowed.
 	 */
 	protected abstract Object getVertexValue(Type value);
 
@@ -67,8 +67,15 @@ public abstract class AbstractLiteralTransformer<Type> {
 	 * @return
 	 */
 	public String getVertexId(Graph database, Type value) {
-		String idString = value.getClass().getCanonicalName()+":"+getVertexValue(value).toString();
+		String idString = getValueClass(value).getCanonicalName()+":"+getVertexValue(value).toString();
 		return idString;
 	}
+
+	/**
+	 * Get value class name for this literal
+	 * @param value
+	 * @return usually should return value.getClass(). The main thing to understand is that null is NOT allowed
+	 */
+	protected abstract Class getValueClass(Type value);
 
 }

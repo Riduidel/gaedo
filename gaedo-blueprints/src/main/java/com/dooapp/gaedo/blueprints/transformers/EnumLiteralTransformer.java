@@ -7,4 +7,9 @@ public class EnumLiteralTransformer extends AbstractLiteralTransformer<Enum> imp
 		return value.name();
 	}
 
+	@Override
+	protected Class getValueClass(Enum value) {
+		return value==null ? Enum.class : value.getClass();
+	}
+
 }

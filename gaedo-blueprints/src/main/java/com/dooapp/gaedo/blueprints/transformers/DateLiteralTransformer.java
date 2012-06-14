@@ -51,4 +51,9 @@ public class DateLiteralTransformer extends AbstractLiteralTransformer<Date> imp
 			throw new BadLiteralException("\"" + property + "\" can't be efficiently parsed to a date", e);
 		}
 	}
+
+	@Override
+	protected Class getValueClass(Date value) {
+		return Date.class;
+	}
 }

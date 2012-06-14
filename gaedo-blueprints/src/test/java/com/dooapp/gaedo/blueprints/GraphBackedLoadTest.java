@@ -1,30 +1,26 @@
-package com.dooapp.gaedo;
+package com.dooapp.gaedo.blueprints;
 
 import static org.junit.Assert.assertThat;
 
 import java.io.File;
 import java.net.MalformedURLException;
 import java.util.Collection;
-import java.util.Iterator;
 import java.util.LinkedList;
+import java.util.logging.Logger;
 
-import org.hamcrest.core.Is;
 import org.junit.After;
-import org.junit.Assert;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
-import org.junit.internal.matchers.IsCollectionContaining;
+import org.junit.internal.matchers.StringContains;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 import org.junit.runners.Parameterized.Parameters;
 
 import com.dooapp.gaedo.blueprints.BluePrintsBackedFinderService;
-import com.dooapp.gaedo.finders.FieldInformer;
 import com.dooapp.gaedo.finders.FinderCrudService;
 import com.dooapp.gaedo.finders.QueryBuilder;
 import com.dooapp.gaedo.finders.QueryExpression;
-import com.dooapp.gaedo.finders.expressions.Expressions;
-import com.dooapp.gaedo.finders.informers.StringFieldInformer;
 import com.dooapp.gaedo.finders.repository.ServiceBackedFieldLocator;
 import com.dooapp.gaedo.finders.repository.SimpleServiceRepository;
 import com.dooapp.gaedo.finders.root.BasicFieldInformerLocator;
@@ -43,8 +39,12 @@ import com.tinkerpop.blueprints.pgm.impls.neo4j.Neo4jGraph;
 import com.tinkerpop.blueprints.pgm.impls.orientdb.OrientGraph;
 import com.tinkerpop.blueprints.pgm.impls.tg.TinkerGraph;
 
+@Ignore
 @RunWith(Parameterized.class)
-public class GraphBackedTagFinderServiceTest {
+public class GraphBackedLoadTest {
+	
+	private static final Logger logger = Logger.getLogger(GraphBackedLoadTest.class.getName());
+	
 	private static interface GraphProvider {
 		IndexableGraph get();
 	}
@@ -81,19 +81,27 @@ public class GraphBackedTagFinderServiceTest {
 	private SimpleServiceRepository repository;
 	private String name;
 	private GraphProvider graphProvider;
+	private long instanceCount;
 	
 	@Parameters
 	public static Collection<Object[]> parameters() {
 		Collection<Object[]> returned = new LinkedList<Object[]>();
-		returned.add(new Object[] { "tinkergraph", new Tinker()});
-		returned.add(new Object[] { "orientgraph", new OrientDB()});
-		returned.add(new Object[] { "neo4jgraph", new Neo4j()});
+//		returned.add(new Object[] { "tinkergraph", new Tinker()});
+//		returned.add(new Object[] { "orientgraph", new OrientDB()});
+		returned.add(new Object[] { "neo4jgraph", new Neo4j(),10l});
+		returned.add(new Object[] { "neo4jgraph", new Neo4j(),1000l});
+		returned.add(new Object[] { "neo4jgraph", new Neo4j(),10000l});
+		returned.add(new Object[] { "neo4jgraph", new Neo4j(),100000l});
+//		returned.add(new Object[] { "neo4jgraph", new Neo4j(),1000000l});
+//		returned.add(new Object[] { "neo4jgraph", new Neo4j(),1000000000l});
+//		returned.add(new Object[] { "neo4jgraph", new Neo4j(),1000000000000l});
 		return returned;
 	}
 	
-	public GraphBackedTagFinderServiceTest(String name, GraphProvider graph) {
+	public GraphBackedLoadTest(String name, GraphProvider graph, long instanceCount) {
 		this.name = name;
 		this.graphProvider = graph;
+		this.instanceCount = instanceCount;
 	}
 
 	@Before
@@ -123,113 +131,31 @@ public class GraphBackedTagFinderServiceTest {
 	}
 
 	@Test
-	public void testCreate() {
-		Tag input = new Tag(A).withId(1l);
-		Tag returned = tagService.create(input);
-		Assert.assertEquals(returned.getText(), input.getText());
-		tagService.delete(input);
-	}
-
-	@Test
-	public void testFindByName() {
-		Tag a = new Tag(A).withId(2l);
-		tagService.create(a);
-		Tag b = tagService.create(new Tag(B).withId(3l));
-		Tag c = tagService.create(new Tag(C).withId(4l));
-		Iterable<Tag> values = tagService.find().matching(
-				new QueryBuilder<TagInformer>() {
-
-					public QueryExpression createMatchingExpression(
-							TagInformer object) {
-						return object.get("text").equalsTo(A);
-					}
-				}).getAll();
-		Iterator<Tag> valuesIterator = values.iterator();
-		assertThat(valuesIterator.hasNext(), Is.is(true));
-		assertThat(valuesIterator.next(), Is.is(a));
-		// may have next, as previous tests may fail
-		tagService.delete(a);
-		tagService.delete(b);
-		tagService.delete(c);
-	}
-
-	@Test
-	public void testFindUsingEqualsTo() {
-		final Tag a = new Tag(A).withId(5l);
-		tagService.create(a);
-		Tag b = tagService.create(new Tag(B).withId(6l));
-		Tag c = tagService.create(new Tag(C).withId(7l));
-		Iterable<Tag> values = tagService.find().matching(
-				new QueryBuilder<TagInformer>() {
-
-					public QueryExpression createMatchingExpression(
-							TagInformer object) {
-						return object.getText().equalsTo(A);
-					}
-				}).getAll();
-		Iterator<Tag> valuesIterator = values.iterator();
-		assertThat(valuesIterator.hasNext(), Is.is(true));
-		assertThat(valuesIterator.next(), Is.is(a));
-		// may have next, as previous tests may fail
-		tagService.delete(a);
-		tagService.delete(b);
-		tagService.delete(c);
-	}
-
-	@Test
-	public void testFindByTwoPossibleNames() {
-		Tag a = new Tag(A).withId(8l);
-		tagService.create(a);
-		Tag b = tagService.create(new Tag(B).withId(9l));
-		Tag c = tagService.create(new Tag(C).withId(10l));
-		Iterable<Tag> values = tagService.find().matching(
-				new QueryBuilder<TagInformer>() {
-
-					public QueryExpression createMatchingExpression(
-							TagInformer object) {
-						FieldInformer field = object.get("text");
-						return Expressions.or(field.equalsTo(A), field
-								.equalsTo(B));
-					}
-				}).getAll();
-		Collection<Tag> matching = new LinkedList<Tag>();
-		for(Tag t : values) {
-			matching.add(t);
+	public void loadDbWithABunchOfTags() {
+		logger.info("loading DB with "+instanceCount+" tags");
+		for(long index = 1l; index < instanceCount; index++) {
+			final Tag a = new Tag(A+index).withId(128+index);
+			tagService.create(a);
 		}
-		assertThat(matching, IsCollectionContaining.hasItems(a, b));
-		// TODO test
-		tagService.delete(a);
-		tagService.delete(b);
-		tagService.delete(c);
-	}
-
-	/**
-	 * This is the deadly test that check that synthetic getter calls work
-	 * correctly
-	 */
-	@Test
-	public void testFindByTwoPossibleNamesWithSyntheticAccessor() {
-		Tag a = new Tag(A).withId(11l);
-		tagService.create(a);
-		Tag b = tagService.create(new Tag(B).withId(12l));
-		Tag c = tagService.create(new Tag(C).withId(13l));
+		logger.info("now doing some brute-force scanning on "+instanceCount+" tags");
 		Iterable<Tag> values = tagService.find().matching(
 				new QueryBuilder<TagInformer>() {
 
 					public QueryExpression createMatchingExpression(
 							TagInformer object) {
-						StringFieldInformer field = object.getText();
-						return Expressions.or(field.equalsTo(A), field
-								.equalsTo(B));
+						return object.getText().startsWith(A+(instanceCount/2));
 					}
 				}).getAll();
-		Collection<Tag> matching = new LinkedList<Tag>();
+		logger.info("doing something with the found tags in "+instanceCount+" tags");
 		for(Tag t : values) {
-			matching.add(t);
+			assertThat(t.getText(), StringContains.containsString(A));
 		}
-		assertThat(matching, IsCollectionContaining.hasItems(a, b));
-		tagService.delete(a);
-		tagService.delete(b);
-		tagService.delete(c);
+		
+		logger.info("deleting "+instanceCount+" tags");
+		for(long index = 1l; index < instanceCount; index++) {
+			final Tag a = new Tag(A+index).withId(128+index);
+			tagService.delete(a);
+		}
+		logger.info("job's done for "+instanceCount+" tags");
 	}
 }
