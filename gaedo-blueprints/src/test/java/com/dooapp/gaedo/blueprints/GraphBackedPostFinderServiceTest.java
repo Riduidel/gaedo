@@ -155,33 +155,6 @@ public class GraphBackedPostFinderServiceTest {
 			return informer.getNote().equalsTo(1);
 		}
 	}
-
-	private static interface GraphProvider {
-		IndexableGraph get();
-	}
-	
-	private static class Tinker implements GraphProvider {
-		@Override
-		public IndexableGraph get() {
-			return new TinkerGraph(GRAPH_DIR+"/tinker");
-		}
-	}
-	
-	private static class OrientDB implements GraphProvider {
-		@Override
-		public IndexableGraph get() {
-			return new OrientGraph("local:/"+GRAPH_DIR+"/orient.db");
-		}
-	}
-	
-	private static class Neo4j implements GraphProvider {
-		@Override
-		public IndexableGraph get() {
-			Neo4jGraph neo4jgraph = new Neo4jGraph(GRAPH_DIR+"/neo4j");
-			neo4jgraph.setMaxBufferSize(1000000);
-			return neo4jgraph;
-		}
-	}
 	
 	private static final String GRAPH_DIR = System.getProperty("user.dir")+"/target/tests/graph";
 	private static final String A = "A";
@@ -257,7 +230,7 @@ public class GraphBackedPostFinderServiceTest {
 //		postService.delete(post2);
 //		postService.delete(post3);
 		graph.shutdown();
-		File f = new File(GRAPH_DIR);
+		File f = new File(GraphBackedLoadTest.GRAPH_DIR);
 		f.delete();
 	}
 

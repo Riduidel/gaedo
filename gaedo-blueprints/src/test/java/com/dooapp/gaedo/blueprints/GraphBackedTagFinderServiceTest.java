@@ -45,34 +45,6 @@ import com.tinkerpop.blueprints.pgm.impls.tg.TinkerGraph;
 
 @RunWith(Parameterized.class)
 public class GraphBackedTagFinderServiceTest {
-	private static interface GraphProvider {
-		IndexableGraph get();
-	}
-	
-	private static class Tinker implements GraphProvider {
-		@Override
-		public IndexableGraph get() {
-			return new TinkerGraph(GRAPH_DIR+"/tinker");
-		}
-	}
-	
-	private static class OrientDB implements GraphProvider {
-		@Override
-		public IndexableGraph get() {
-			return new OrientGraph("local:/"+GRAPH_DIR+"/orient.db");
-		}
-	}
-	
-	private static class Neo4j implements GraphProvider {
-		@Override
-		public IndexableGraph get() {
-			Neo4jGraph neo4jgraph = new Neo4jGraph(GRAPH_DIR+"/neo4j");
-			neo4jgraph.setMaxBufferSize(1000000);
-			return neo4jgraph;
-		}
-	}
-	
-	private static final String GRAPH_DIR = System.getProperty("user.dir")+"/target/tests/graph";
 	private static final String A = "A";
 	private static final String B = "B";
 	private static final String C = "C";
@@ -118,7 +90,7 @@ public class GraphBackedTagFinderServiceTest {
 	@After
 	public void unload() {
 		graph.shutdown();
-		File f = new File(GRAPH_DIR);
+		File f = new File(GraphBackedLoadTest.GRAPH_DIR);
 		f.delete();
 	}
 

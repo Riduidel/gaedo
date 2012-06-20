@@ -35,9 +35,6 @@ import com.dooapp.gaedo.test.beans.PostInformer;
 import com.dooapp.gaedo.test.beans.Tag;
 import com.dooapp.gaedo.test.beans.TagInformer;
 import com.tinkerpop.blueprints.pgm.IndexableGraph;
-import com.tinkerpop.blueprints.pgm.impls.neo4j.Neo4jGraph;
-import com.tinkerpop.blueprints.pgm.impls.orientdb.OrientGraph;
-import com.tinkerpop.blueprints.pgm.impls.tg.TinkerGraph;
 
 @Ignore
 @RunWith(Parameterized.class)
@@ -45,34 +42,7 @@ public class GraphBackedLoadTest {
 	
 	private static final Logger logger = Logger.getLogger(GraphBackedLoadTest.class.getName());
 	
-	private static interface GraphProvider {
-		IndexableGraph get();
-	}
-	
-	private static class Tinker implements GraphProvider {
-		@Override
-		public IndexableGraph get() {
-			return new TinkerGraph(GRAPH_DIR+"/tinker");
-		}
-	}
-	
-	private static class OrientDB implements GraphProvider {
-		@Override
-		public IndexableGraph get() {
-			return new OrientGraph("local:/"+GRAPH_DIR+"/orient.db");
-		}
-	}
-	
-	private static class Neo4j implements GraphProvider {
-		@Override
-		public IndexableGraph get() {
-			Neo4jGraph neo4jgraph = new Neo4jGraph(GRAPH_DIR+"/neo4j");
-			neo4jgraph.setMaxBufferSize(1000000);
-			return neo4jgraph;
-		}
-	}
-	
-	private static final String GRAPH_DIR = System.getProperty("user.dir")+"/target/tests/graph";
+	static final String GRAPH_DIR = System.getProperty("user.dir")+"/target/tests/graph";
 	private static final String A = "A";
 	private static final String B = "B";
 	private static final String C = "C";
