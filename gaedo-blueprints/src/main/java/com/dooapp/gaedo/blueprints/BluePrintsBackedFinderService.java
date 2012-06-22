@@ -571,12 +571,19 @@ public class BluePrintsBackedFinderService <DataType, InformerType extends Infor
 	 */
 	@Override
 	public boolean assignId(DataType value, Object... id) {
-		idProperty.set(value, id[0]);
-		if(getIdVertexFor(value)==null) {
-			try {
-				persister.createIdVertex(database, containedClass, getIdVertexId(value, idProperty, requiresIdGeneration));
-				return true;
-			} catch(Exception e) {
+		/* We first make sure object is an instance of containedClass.
+		 * This way, we can then use value class to create id vertex
+		 */
+		if(containedClass.isInstance(value)) {
+			idProperty.set(value, id[0]);
+			if(getIdVertexFor(value)==null) {
+				try {
+					persister.createIdVertex(database, value.getClass(), getIdVertexId(value, idProperty, requiresIdGeneration));
+					return true;
+				} catch(Exception e) {
+					return false;
+				}
+			} else {
 				return false;
 			}
 		} else {
