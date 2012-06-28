@@ -7,7 +7,7 @@ class Neo4j implements GraphProvider {
 	@Override
 	public IndexableGraph get() {
 		Neo4jGraph neo4jgraph = new Neo4jGraph(GraphBackedLoadTest.GRAPH_DIR+"/neo4j");
-		neo4jgraph.setMaxBufferSize(1000000);
+		neo4jgraph.setMaxBufferSize(0);
 		return neo4jgraph;
 	}
 }

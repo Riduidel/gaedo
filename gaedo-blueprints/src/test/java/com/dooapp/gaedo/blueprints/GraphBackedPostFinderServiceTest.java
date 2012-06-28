@@ -64,7 +64,7 @@ public class GraphBackedPostFinderServiceTest {
 	public static Collection<Object[]> parameters() {
 		Collection<Object[]> returned = new LinkedList<Object[]>();
 		returned.add(new Object[] { "tinkergraph", new Tinker()});
-		returned.add(new Object[] { "orientgraph", new OrientDB()});
+//		returned.add(new Object[] { "orientgraph", new OrientDB()});
 		returned.add(new Object[] { "neo4jgraph", new Neo4j()});
 		return returned;
 	}
