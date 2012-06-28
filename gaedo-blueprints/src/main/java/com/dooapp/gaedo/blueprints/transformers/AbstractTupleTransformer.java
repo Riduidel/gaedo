@@ -18,7 +18,7 @@ import com.tinkerpop.blueprints.pgm.Vertex;
 
 public abstract class AbstractTupleTransformer<TupleType> {
 
-	private BluePrintsPersister persister = new BluePrintsPersister(Kind.tuple);
+	protected final BluePrintsPersister persister = new BluePrintsPersister(Kind.tuple);
 
 	public <DataType> Vertex getVertexFor(BluePrintsBackedFinderService<DataType, ?> service, TupleType cast, Map<String, Object> objectsBeingUpdated) {
 		// First step is to build an id for given tuple by concatenating key and value id (which is hopefully done separately)
@@ -28,7 +28,12 @@ public abstract class AbstractTupleTransformer<TupleType> {
 		return GraphUtils.locateVertex(service.getDatabase(), Properties.vertexId, entryVertexId);
 	}
 
-	protected abstract Class<TupleType> getContainedClass();
+	/**
+	 * As there can be a difference between effectively contained class and claimed contained class, this method don't use the TupleType generics, but rather let subclass
+	 * decide how tuples are persisted
+	 * @return
+	 */
+	protected abstract Class<?> getContainedClass();
 
 	protected abstract Map<Property, Collection<CascadeType>> getContainedProperties();
 

@@ -84,15 +84,10 @@ public class BluePrintsPersister {
 	 * @param valueClass
 	 * @param objectVertexId
 	 * @return
+	 * @see GraphUtils#createVertexWithoutValue(IndexableGraph, Object, Kind, Class)
 	 */
 	public Vertex createIdVertex(IndexableGraph database, Class<?> valueClass, String objectVertexId) {
-		Vertex objectVertex;
-		objectVertex = database.addVertex(objectVertexId);
-		// As an aside, we add some indications regarding object id
-		objectVertex.setProperty(Properties.vertexId.name(), objectVertexId);
-		objectVertex.setProperty(Properties.kind.name(), nodeKind.name());
-		objectVertex.setProperty(Properties.type.name(), valueClass.getName());
-		return objectVertex;
+		return GraphUtils.createVertexWithoutValue(database, objectVertexId, nodeKind, valueClass);
 	}
 
 	/**

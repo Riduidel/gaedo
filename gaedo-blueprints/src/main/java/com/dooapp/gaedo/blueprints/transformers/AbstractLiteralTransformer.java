@@ -26,11 +26,8 @@ public abstract class AbstractLiteralTransformer<Type> {
 		Vertex returned = GraphUtils.locateVertex(database, Properties.vertexId.name(), vertexId);
 		// Finally create vertex
 		if(returned==null) {
-			returned = database.addVertex(vertexId);
+			returned = GraphUtils.createVertexWithoutValue(database, vertexId, Kind.literal, value.getClass());
 			returned.setProperty(Properties.value.name(), getVertexValue(value));
-			returned.setProperty(Properties.vertexId.name(), vertexId);
-			returned.setProperty(Properties.kind.name(), Kind.literal.name());
-			returned.setProperty(Properties.type.name(), value.getClass().getCanonicalName());
 		}
 		return returned;
 	}

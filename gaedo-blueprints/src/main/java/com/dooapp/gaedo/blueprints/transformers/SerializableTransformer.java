@@ -82,11 +82,8 @@ public class SerializableTransformer implements TupleTransformer<Serializable> {
 		Vertex returned = GraphUtils.locateVertex(database, Properties.vertexId.name(), vertexId);
 		// Finally create vertex
 		if(returned==null) {
-			returned = database.addVertex(vertexId);
+			returned = GraphUtils.createVertexWithoutValue(database, vertexId, Kind.tuple, Serializable.class);
 			returned.setProperty(Properties.value.name(), serialized);
-			returned.setProperty(Properties.vertexId.name(), vertexId);
-			returned.setProperty(Properties.kind.name(), Kind.tuple.name());
-			returned.setProperty(Properties.type.name(), Serializable.class.getCanonicalName());
 		}
 		return returned;
 	}

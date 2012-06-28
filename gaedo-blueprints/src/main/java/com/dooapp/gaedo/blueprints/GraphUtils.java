@@ -74,7 +74,6 @@ public class GraphUtils {
 			throw new ObjectIsNotARealLiteralException(value, valueClass);
 			// TODO do not forget to set id property
 		}
-		returned.setProperty(Properties.type.name(), valueClass.getName());
 		return returned;
 	}
 
@@ -206,6 +205,22 @@ public class GraphUtils {
 			returned.add(CascadeType.REFRESH);
 			returned.add(CascadeType.REMOVE);
 		}
+		return returned;
+	}
+
+	/**
+	 * Create a vertex in graph with the given properties. Notice {@link Properties#value} won't be set here.
+	 * @param database database in which vertex is created
+	 * @param vertexId vertex id (associated to {@link Properties#vertexId})
+	 * @param kind vertex kind (associated to {@link Properties#kind})
+	 * @param type (associated to {@link Properties#type})
+	 * @return the newly created vertex (which DOESN'T contain the {@link Properties#value} property)
+	 */
+	public static Vertex createVertexWithoutValue(IndexableGraph database, Object vertexId, Kind kind, Class<? extends Object> type) {
+		Vertex returned = database.addVertex(vertexId);
+		returned.setProperty(Properties.vertexId.name(), vertexId);
+		returned.setProperty(Properties.kind.name(), kind.name());
+		returned.setProperty(Properties.type.name(), type.getName());
 		return returned;
 	}
 

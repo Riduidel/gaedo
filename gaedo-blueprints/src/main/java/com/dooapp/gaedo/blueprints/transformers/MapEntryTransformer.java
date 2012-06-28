@@ -83,8 +83,13 @@ public class MapEntryTransformer extends AbstractTupleTransformer<Map.Entry> imp
 		}
 	}
 
+	/**
+	 * 
+	 * @return
+	 * @see com.dooapp.gaedo.blueprints.transformers.AbstractTupleTransformer#getContainedClass()
+	 */
 	@Override
-	protected Class<Entry> getContainedClass() {
-		return Entry.class;
+	protected Class<?> getContainedClass() {
+		return WriteableKeyEntry.class;
 	}
 }
