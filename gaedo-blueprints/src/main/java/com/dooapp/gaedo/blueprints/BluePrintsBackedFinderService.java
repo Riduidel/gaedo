@@ -42,7 +42,9 @@ import com.dooapp.gaedo.properties.PropertyProviderUtils;
 import com.dooapp.gaedo.utils.Utils;
 import com.tinkerpop.blueprints.pgm.Edge;
 import com.tinkerpop.blueprints.pgm.IndexableGraph;
+import com.tinkerpop.blueprints.pgm.TransactionalGraph;
 import com.tinkerpop.blueprints.pgm.Vertex;
+import com.tinkerpop.blueprints.pgm.TransactionalGraph.Conclusion;
 
 /**
  * Standard blueprints backed implementation of FinderService
@@ -55,12 +57,63 @@ public class BluePrintsBackedFinderService <DataType, InformerType extends Infor
 	extends AbstractFinderService<DataType, InformerType> 
 	implements FinderCrudService<DataType, InformerType>, IdBasedService<DataType>{
 	
+	/**
+	 * Transaction supporting "closure" base : it decorates given operation with transaction support.
+	 * @author ndx
+	 *
+	 * @param <ResultType>
+	 */
+	private abstract class TransactionalOperation<ResultType> {
+		public ResultType perform() {
+			if(transactionSupport!=null) {
+				try {
+					transactionSupport.startTransaction();
+					try {
+						ResultType returned = doPerform();
+						transactionSupport.stopTransaction(Conclusion.SUCCESS);
+						return returned;
+					} catch(RuntimeException e) {
+						transactionSupport.stopTransaction(Conclusion.FAILURE);
+						throw e;
+					}
+				} catch(RuntimeException e) {
+					/*
+					 * People of tinkerpop : I hate you for that code block !
+					 * Why on earth didn't you send a specific exception conveying that very purpose ? I could have handled it clearly.
+					 * Instead, I have to rely on messy and slow string comparison. OMG
+					 */
+					if("Stop current transaction before starting another".equals(e.getMessage())) {
+						// Anyway, perform operation in transaction
+						return doPerform();
+						// And obviously, I won't close a transaction I didn't opened
+					} else {
+						throw e;
+					}
+				}
+			} else {
+				return doPerform();
+			}
+		}
+
+		/**
+		 * Operation that will be performed (in transactional context or not)
+		 * @return effective result
+		 */
+		protected abstract ResultType doPerform();
+	}
+	
 	private static final Logger logger = Logger.getLogger(BluePrintsBackedFinderService.class.getName());
 	
 	/**
 	 * Graph used as database
 	 */
 	private final IndexableGraph database;
+	
+	/**
+	 * Graph casted as transactional one if possible. It is used to offer support of transactionnal read operations (if graph is indeed a transactional one).
+	 * This field may be NULL. 
+	 */
+	private final TransactionalGraph transactionSupport;
 	/**
 	 * Property used to store id
 	 */
@@ -100,6 +153,11 @@ public class BluePrintsBackedFinderService <DataType, InformerType extends Infor
 		this.repository = repository;
 		this.propertyProvider = provider;
 		this.database = graph;
+		if (graph instanceof TransactionalGraph) {
+			transactionSupport = (TransactionalGraph) graph;
+		} else {
+			transactionSupport = null;
+		}
 		this.idProperty = AnnotationUtils.locateIdField(provider, containedClass, Long.TYPE, Long.class, String.class);
 		this.requiresIdGeneration = idProperty.getAnnotation(GeneratedValue.class)!=null;
 		this.migrator = VersionMigratorFactory.create(containedClass);
@@ -158,8 +216,14 @@ public class BluePrintsBackedFinderService <DataType, InformerType extends Infor
 	 * @see com.dooapp.gaedo.AbstractCrudService#create(java.lang.Object)
 	 */
 	@Override
-	public DataType create(DataType toCreate) {
-		return doUpdate(toCreate, CascadeType.PERSIST, new TreeMap<String, Object>());
+	public DataType create(final DataType toCreate) {
+		return new TransactionalOperation<DataType>() {
+
+			@Override
+			protected DataType doPerform() {
+				return doUpdate(toCreate, CascadeType.PERSIST, new TreeMap<String, Object>());
+			}
+		}.perform();
 	}
 
 	private void generateIdFor(DataType toCreate) {
@@ -183,9 +247,16 @@ public class BluePrintsBackedFinderService <DataType, InformerType extends Infor
 	 * @see com.dooapp.gaedo.AbstractCrudService#delete(java.lang.Object)
 	 */
 	@Override
-	public void delete(DataType toDelete) {
+	public void delete(final DataType toDelete) {
 		if(toDelete!=null) {
-			doDelete(toDelete, new TreeMap<String, Object>());
+			new TransactionalOperation<Void>() {
+
+				@Override
+				protected Void doPerform() {
+					doDelete(toDelete, new TreeMap<String, Object>());
+					return null;
+				}
+			}.perform();
 		}
 	}
 
@@ -389,8 +460,14 @@ public class BluePrintsBackedFinderService <DataType, InformerType extends Infor
 	}
 
 	@Override
-	public DataType update(DataType toUpdate) {
-		return doUpdate(toUpdate, CascadeType.MERGE, new TreeMap<String, Object>());
+	public DataType update(final DataType toUpdate) {
+		return new TransactionalOperation<DataType>() {
+
+			@Override
+			protected DataType doPerform() {
+				return doUpdate(toUpdate, CascadeType.MERGE, new TreeMap<String, Object>());
+			}
+		}.perform();
 	}
 
 	/**
@@ -570,7 +647,7 @@ public class BluePrintsBackedFinderService <DataType, InformerType extends Infor
 	 * @see com.dooapp.gaedo.finders.id.IdBasedService#assignId(java.lang.Object, java.lang.Object[])
 	 */
 	@Override
-	public boolean assignId(DataType value, Object... id) {
+	public boolean assignId(final DataType value, Object... id) {
 		/* We first make sure object is an instance of containedClass.
 		 * This way, we can then use value class to create id vertex
 		 */
@@ -578,8 +655,15 @@ public class BluePrintsBackedFinderService <DataType, InformerType extends Infor
 			idProperty.set(value, id[0]);
 			if(getIdVertexFor(value)==null) {
 				try {
-					persister.createIdVertex(database, value.getClass(), getIdVertexId(value, idProperty, requiresIdGeneration));
-					return true;
+					TransactionalOperation<Boolean> operation = new TransactionalOperation<Boolean>() {
+
+						@Override
+						protected Boolean doPerform() {
+							persister.createIdVertex(database, value.getClass(), getIdVertexId(value, idProperty, requiresIdGeneration));
+							return true;
+						}
+					};
+					return operation.perform();
 				} catch(Exception e) {
 					return false;
 				}
