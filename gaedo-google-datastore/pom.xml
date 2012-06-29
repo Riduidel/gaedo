@@ -3,13 +3,13 @@
 	<parent>
 		<artifactId>gaedo</artifactId>
 		<groupId>com.dooapp</groupId>
-		<version>0.2.21</version>
+		<version>0.2.22-SNAPSHOT</version>
 	</parent>
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>com.dooapp</groupId>
 	<artifactId>gaedo-google-datastore</artifactId>
 	<name>gaedo-google-datastore</name>
-	<version>0.2.21</version>
+	<version>0.2.22-SNAPSHOT</version>
 	<url>http://maven.apache.org</url>
 	<properties>
 		<gae.group>com.google.appengine</gae.group>
