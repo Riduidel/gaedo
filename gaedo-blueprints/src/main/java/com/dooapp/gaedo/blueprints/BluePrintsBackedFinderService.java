@@ -419,11 +419,12 @@ public class BluePrintsBackedFinderService <DataType, InformerType extends Infor
 
 	/**
 	 * Gets the id vertex for the given object (if that object exists)
-	 * @param object
+	 * @param object object to get id vertex for
+	 * @param allowIdGeneration when set to true, an id may be created for that object
 	 * @return first matching node if found, and null if not
 	 */
-	private Vertex getIdVertexFor(DataType object) {
-		return GraphUtils.locateVertex(database, Properties.vertexId.name(), getIdVertexId(object, idProperty, false));
+	private Vertex getIdVertexFor(DataType object, boolean allowIdGeneration) {
+		return GraphUtils.locateVertex(database, Properties.vertexId.name(), getIdVertexId(object, idProperty, allowIdGeneration));
 	}
 
 	/**
@@ -492,12 +493,13 @@ public class BluePrintsBackedFinderService <DataType, InformerType extends Infor
 	 * @return
 	 */
 	public Vertex getVertexFor(Object value, CascadeType cascade, Map<String, Object> objectsBeingUpdated) {
+		boolean allowIdGeneration = CascadeType.PERSIST.equals(cascade) || CascadeType.MERGE.equals(cascade);
 		// Here we suppose the service is the right one for the job (which may not be the case)
 		if(containedClass.isInstance(value)) {
-			Vertex returned = getIdVertexFor(containedClass.cast(value));
+			Vertex returned = getIdVertexFor(containedClass.cast(value), allowIdGeneration);
 			if(returned==null) {
 				doUpdate(containedClass.cast(value), cascade, objectsBeingUpdated);
-				returned = getIdVertexFor(containedClass.cast(value));
+				returned = getIdVertexFor(containedClass.cast(value), allowIdGeneration);
 			} else {
 				// vertex already exist, but maybe object needs an update
 				if(CascadeType.PERSIST==cascade || CascadeType.MERGE==cascade) {
@@ -653,7 +655,7 @@ public class BluePrintsBackedFinderService <DataType, InformerType extends Infor
 		 */
 		if(containedClass.isInstance(value)) {
 			idProperty.set(value, id[0]);
-			if(getIdVertexFor(value)==null) {
+			if(getIdVertexFor(value, false /* no id generation when assigning an id ! */)==null) {
 				try {
 					TransactionalOperation<Boolean> operation = new TransactionalOperation<Boolean>() {
 

@@ -55,6 +55,8 @@ import com.tinkerpop.blueprints.pgm.IndexableGraph;
 @RunWith(Parameterized.class)
 public class GraphBackedPostFinderServiceTest {
 	
+	private static final String TAG_TEXT = "tag text";
+	private static final String LOGIN_FOR_UPDATE_ON_CREATE = "login for update on create";
 	private static final String TEST_TAG_FOR_CREATE_ON_UPDATE = "test tag for create on update";
 
 	@Parameters
@@ -168,6 +170,7 @@ public class GraphBackedPostFinderServiceTest {
 	private Post post1;
 	private Post post2;
 	private Post post3;
+	private Tag tag1;
 	
 	public GraphBackedPostFinderServiceTest(String name, GraphProvider graph) {
 		this.name = name;
@@ -204,6 +207,7 @@ public class GraphBackedPostFinderServiceTest {
 		post1 = postService.create(new Post(ID_POST_1, "post text for 1", 1, State.PUBLIC, author, theseMappings("a", "b")));
 		post2 = postService.create(new Post(2, "post text for 2", 2, State.PUBLIC, author));
 		post3 = postService.create(new Post(3, "post text for 3", 3, State.PUBLIC, author));
+		tag1 = tagService.create(new Tag(1, TAG_TEXT));
 		author.posts.add(post1);
 		author.posts.add(post2);
 		author.posts.add(post3);
@@ -417,6 +421,10 @@ public class GraphBackedPostFinderServiceTest {
 	@Test
 	public void ensureCreateOnUpdateWorks() throws IOException, ClassNotFoundException {
 		Post first = postService.find().matching(new FindFirstPostByNote()).getFirst();
+		if(first.tags.size()>0) {
+			first.tags.clear();
+			first = postService.update(first);
+		}
 		assertThat(first.tags.size(), Is.is(0));
 		Tag t = new Tag();
 		t.setText(TEST_TAG_FOR_CREATE_ON_UPDATE);
@@ -431,5 +439,36 @@ public class GraphBackedPostFinderServiceTest {
 		}).getFirst();
 		assertThat(inDB.getText(), Is.is(t.getText()));
 		assertThat(inDB.getId(), IsNot.not(0l));
+	}
+
+	@Test
+	public void ensureUpdateOnCreateWorks() throws IOException, ClassNotFoundException {
+		Post newxONe = new Post().withText("some new text").withAuthor(author);
+		author.setLogin(LOGIN_FOR_UPDATE_ON_CREATE);
+		tag1.setText(TEST_TAG_FOR_CREATE_ON_UPDATE);
+		newxONe.tags.add(tag1);
+		newxONe = postService.create(newxONe);
+		try {
+			author = userService.find().matching(new QueryBuilder<UserInformer>() {
+	
+				@Override
+				public QueryExpression createMatchingExpression(UserInformer informer) {
+					return informer.getPassword().equalsTo(author.password);
+				}
+			}).getFirst();
+			assertThat(author.getLogin(), Is.is(LOGIN_FOR_UPDATE_ON_CREATE));
+			Tag official = tagService.find().matching(new QueryBuilder<TagInformer>() {
+	
+				@Override
+				public QueryExpression createMatchingExpression(TagInformer informer) {
+					return informer.getId().equalsTo(tag1.getId());
+				}
+			}).getFirst();
+			assertThat(official.getText(), Is.is(TEST_TAG_FOR_CREATE_ON_UPDATE));
+		} finally {
+			postService.delete(newxONe);
+			tag1.setText(TAG_TEXT);
+			tagService.update(tag1);
+		}
 	}
 }

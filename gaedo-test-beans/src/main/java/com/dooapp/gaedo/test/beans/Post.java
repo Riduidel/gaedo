@@ -8,6 +8,9 @@ import java.util.Set;
 import java.util.TreeMap;
 import java.util.logging.Logger;
 
+import javax.persistence.CascadeType;
+import javax.persistence.ManyToMany;
+
 import com.dooapp.gaedo.extensions.hierarchy.Parent;
 
 /**
@@ -28,6 +31,7 @@ public class Post extends Identified implements Serializable, Message {
 
 	public Map<String, String> annotations = new TreeMap<String, String>();
 	
+	@ManyToMany(cascade={CascadeType.PERSIST, CascadeType.MERGE})
 	public Set<Tag> tags = new HashSet<Tag>();
 	
 	public Date publicationDate = new Date();

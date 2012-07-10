@@ -14,6 +14,11 @@ public class Tag extends Identified implements Serializable {
 		
 	}
 	
+	public Tag(long id, String text) {
+		this.id = id;
+		this.text = text;
+	}
+	
 	public Tag(String text) {
 		this.text = text;
 	}
