@@ -16,7 +16,6 @@ import java.util.LinkedList;
 import java.util.Map;
 import java.util.TreeMap;
 
-import org.codehaus.jackson.map.ObjectWriter;
 import org.hamcrest.core.Is;
 import org.hamcrest.core.IsNot;
 import org.hamcrest.core.IsNull;
@@ -28,7 +27,6 @@ import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 import org.junit.runners.Parameterized.Parameters;
 
-import com.dooapp.gaedo.blueprints.BluePrintsBackedFinderService;
 import com.dooapp.gaedo.finders.FinderCrudService;
 import com.dooapp.gaedo.finders.QueryBuilder;
 import com.dooapp.gaedo.finders.QueryExpression;
@@ -53,13 +51,12 @@ import com.dooapp.gaedo.test.beans.UserInformer;
 import com.dooapp.gaedo.test.beans.specific.Theme;
 import com.dooapp.gaedo.test.beans.specific.ThemeInformer;
 import com.tinkerpop.blueprints.pgm.IndexableGraph;
-import com.tinkerpop.blueprints.pgm.impls.neo4j.Neo4jGraph;
-import com.tinkerpop.blueprints.pgm.impls.orientdb.OrientGraph;
-import com.tinkerpop.blueprints.pgm.impls.tg.TinkerGraph;
 
 @RunWith(Parameterized.class)
 public class GraphBackedPostFinderServiceTest {
 	
+	private static final String TEST_TAG_FOR_CREATE_ON_UPDATE = "test tag for create on update";
+
 	@Parameters
 	public static Collection<Object[]> parameters() {
 		Collection<Object[]> returned = new LinkedList<Object[]>();
@@ -415,5 +412,24 @@ public class GraphBackedPostFinderServiceTest {
 		assertThat(newOne.id, Is.is(0l));
 		newOne = postService.create(newOne);
 		assertThat(newOne.id, IsNot.not(0l));
+	}
+
+	@Test
+	public void ensureCreateOnUpdateWorks() throws IOException, ClassNotFoundException {
+		Post first = postService.find().matching(new FindFirstPostByNote()).getFirst();
+		assertThat(first.tags.size(), Is.is(0));
+		Tag t = new Tag();
+		t.setText(TEST_TAG_FOR_CREATE_ON_UPDATE);
+		first.tags.add(t);
+		first = postService.update(first);
+		Tag inDB = tagService.find().matching(new QueryBuilder<TagInformer>() {
+
+			@Override
+			public QueryExpression createMatchingExpression(TagInformer informer) {
+				return informer.getText().equalsTo(TEST_TAG_FOR_CREATE_ON_UPDATE);
+			}
+		}).getFirst();
+		assertThat(inDB.getText(), Is.is(t.getText()));
+		assertThat(inDB.getId(), IsNot.not(0l));
 	}
 }
