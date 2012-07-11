@@ -27,9 +27,9 @@ public class MapEntryTransformer extends AbstractTupleTransformer<Map.Entry> imp
 	/**
 	 * Beware : order of elements is signifiant here (as it is used to build id), as a consequence we use a LinkedHashMap 
 	 */
-	private static final Map<Property, Collection<CascadeType>> ENTRY_PROPERTIES = new LinkedHashMap<Property, Collection<CascadeType>>();
+	private final Map<Property, Collection<CascadeType>> containedProperties = new LinkedHashMap<Property, Collection<CascadeType>>();
 	
-	static {
+	public MapEntryTransformer() {
 		Collection<CascadeType> cascade = GraphUtils.extractCascadeOf(new CascadeType[] {CascadeType.ALL});
 		try {
 			Class<Map.Entry> interfaceClass = Map.Entry.class; 
@@ -38,11 +38,11 @@ public class MapEntryTransformer extends AbstractTupleTransformer<Map.Entry> imp
 			PropertyDescriptor valueProperty = new PropertyDescriptor("value", interfaceClass.getDeclaredMethod("getValue"), interfaceClass.getDeclaredMethod("setValue", Object.class));
 			
 			
-			ENTRY_PROPERTIES.put(
+			containedProperties.put(
 							new DescribedProperty(keyProperty, Map.Entry.class), 
 							cascade);
-			ENTRY_PROPERTIES.put(
-							new DescribedProperty(valueProperty,	Map.Entry.class), 
+			containedProperties.put(
+							new DescribedProperty(valueProperty, Map.Entry.class), 
 							cascade);
 		} catch(Exception e) {
 			throw new UnableToGetKeyOrValueProperty(e);
@@ -50,11 +50,11 @@ public class MapEntryTransformer extends AbstractTupleTransformer<Map.Entry> imp
 	}
 	
 	/**
-	 * Should return one property for key, and one for value
+	 * Should return one property for key, and one for value. ethod is made public for making sure https://github.com/Riduidel/gaedo/issues/5 is behind us
 	 * @return
 	 */
-	protected Map<Property, Collection<CascadeType>> getContainedProperties() {
-		return ENTRY_PROPERTIES;
+	public Map<Property, Collection<CascadeType>> getContainedProperties() {
+		return containedProperties;
 	}
 	
 	/**
@@ -74,7 +74,7 @@ public class MapEntryTransformer extends AbstractTupleTransformer<Map.Entry> imp
 	}
 
 	@Override
-	protected Entry instanciateTupleFor(ClassLoader classLoader, Vertex key) {
+	public Entry instanciateTupleFor(ClassLoader classLoader, Vertex key) {
 		try {
 			return new WriteableKeyEntry();
 //			return (Entry) classLoader.loadClass(WriteableKeyEntry.class.getCanonicalName()).newInstance();

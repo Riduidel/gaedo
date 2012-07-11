@@ -15,6 +15,8 @@ import java.util.Collection;
 import java.util.LinkedList;
 import java.util.Map;
 import java.util.TreeMap;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import org.hamcrest.core.Is;
 import org.hamcrest.core.IsNot;
@@ -54,7 +56,9 @@ import com.tinkerpop.blueprints.pgm.IndexableGraph;
 
 @RunWith(Parameterized.class)
 public class GraphBackedPostFinderServiceTest {
+	private static final Logger logger = Logger.getLogger(GraphBackedPostFinderServiceTest.class.getName());
 	
+	private static final String SOME_NEW_TEXT = "some new text";
 	private static final String TAG_TEXT = "tag text";
 	private static final String LOGIN_FOR_UPDATE_ON_CREATE = "login for update on create";
 	private static final String TEST_TAG_FOR_CREATE_ON_UPDATE = "test tag for create on update";
@@ -443,7 +447,7 @@ public class GraphBackedPostFinderServiceTest {
 
 	@Test
 	public void ensureUpdateOnCreateWorks() throws IOException, ClassNotFoundException {
-		Post newxONe = new Post().withText("some new text").withAuthor(author);
+		Post newxONe = new Post().withText(SOME_NEW_TEXT).withAuthor(author);
 		author.setLogin(LOGIN_FOR_UPDATE_ON_CREATE);
 		tag1.setText(TEST_TAG_FOR_CREATE_ON_UPDATE);
 		newxONe.tags.add(tag1);
@@ -469,6 +473,33 @@ public class GraphBackedPostFinderServiceTest {
 			postService.delete(newxONe);
 			tag1.setText(TAG_TEXT);
 			tagService.update(tag1);
+		}
+	}
+	
+	@Test
+	public void ensureMapWorksInAllCases() throws Exception {
+		Post newxONe = new Post().withText(SOME_NEW_TEXT).withAuthor(author);
+		final long id = newxONe.id;
+		newxONe = postService.create(newxONe);
+		try {
+			newxONe.annotations.put(A, null);
+			postService.update(newxONe);
+			newxONe = postService.find().matching(new QueryBuilder<PostInformer>() {
+
+				@Override
+				public QueryExpression createMatchingExpression(PostInformer informer) {
+					return informer.getText().equalsTo(SOME_NEW_TEXT);
+				}
+			}).getFirst();
+			assertThat(newxONe.annotations.size(), Is.is(1));
+			assertThat(newxONe.annotations.containsKey(A), Is.is(true));
+		} catch(Exception e) {
+			if (logger.isLoggable(Level.SEVERE)) {
+				logger.log(Level.SEVERE, "unable to run test", e);
+			}
+			throw e;
+		} finally {
+			postService.delete(newxONe);
 		}
 	}
 }

@@ -44,8 +44,10 @@ public abstract class AbstractTupleTransformer<TupleType> {
 		StringBuilder sOut = new StringBuilder();
 		for(Property p : getContainedProperties().keySet()) {
 			Object propertyValue = p.get(value);
-			String id = GraphUtils.getIdOf(graph, repository, propertyValue);
-			sOut.append(p.getName()).append(":").append(id).append("-");
+			if(propertyValue!=null) {
+				String id = GraphUtils.getIdOf(graph, repository, propertyValue);
+				sOut.append(p.getName()).append(":").append(id).append("-");
+			}
 		}
 		return sOut.toString();
 	}

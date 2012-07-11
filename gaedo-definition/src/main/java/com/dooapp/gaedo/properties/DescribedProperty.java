@@ -18,22 +18,44 @@ import com.dooapp.gaedo.utils.Utils;
  */
 public class DescribedProperty implements Property {
 
+	private final Class<?> declaringClass;
 	/**
-	 * Property descriptor used to manage property
+	 * Method used to read field value
 	 */
-	private PropertyDescriptor descriptor;
-	
-	private Class<?> declaringClass;
+	private final Method readMethod;
+	/**
+	 * Method used to write field value
+	 */
+	private final Method writeMethod;
+	/**
+	 * Array of usable methods, used to grab annotations and other infos
+	 */
+	private final Method[] methods;
+	private final String name;
+	private final Class<?> type;
+	private final String descriptorString;
 
+	/**
+	 * Known declaring class of property. 
+	 * @param descriptor Property descriptor used to provide infos on which methods to call.
+	 * Due to the very nature of PropertyDescriptor and its Soft/Weak references to write and read methods, all infos are copied here (we hope PropertyDescriptor is fresh enough
+	 * to not have been GCed).
+	 * @param declaringClass
+	 */
 	public DescribedProperty(PropertyDescriptor descriptor, Class<?> declaringClass) {
-		this.descriptor = descriptor;
 		this.declaringClass = declaringClass;
+		this.readMethod = descriptor.getReadMethod();
+		this.writeMethod = descriptor.getWriteMethod();
+		this.methods = new Method[] {readMethod, writeMethod};
+		type = descriptor.getPropertyType();
+		name = descriptor.getName();
+		descriptorString = descriptor.toString();
 	}
 
 	@Override
 	public Object get(Object bean) {
 		try {
-			return descriptor.getReadMethod().invoke(bean);
+			return readMethod.invoke(bean);
 		} catch (Exception e) {
 			throw new UnableToGetPropertyException(this, e);
 		}
@@ -44,7 +66,7 @@ public class DescribedProperty implements Property {
 	 */
 	@Override
 	public <T extends Annotation> T getAnnotation(Class<T> annotationClass) {
-		for(Method m : new Method[] {descriptor.getReadMethod(), descriptor.getWriteMethod()}) {
+		for(Method m : methods) {
 			if(m.getAnnotation(annotationClass)!=null)
 				return m.getAnnotation(annotationClass);
 		}
@@ -54,7 +76,7 @@ public class DescribedProperty implements Property {
 	@Override
 	public Collection<? extends Annotation> getAnnotations() {
 		Collection<Annotation> returned = new HashSet<Annotation>();
-		for(Method m : new Method[] {descriptor.getReadMethod(), descriptor.getWriteMethod()}) {
+		for(Method m : methods) {
 			// beware : for read-only/write-only fields, one o the two methods is null
 			if(m!=null) {
 				returned.addAll(Arrays.asList(m.getAnnotations()));
@@ -70,17 +92,17 @@ public class DescribedProperty implements Property {
 
 	@Override
 	public Type getGenericType() {
-		return descriptor.getPropertyType();
+		return type;
 	}
 
 	@Override
 	public String getName() {
-		return descriptor.getName();
+		return name;
 	}
 
 	@Override
 	public Class<?> getType() {
-		return descriptor.getPropertyType();
+		return type;
 	}
 
 	/**
@@ -94,7 +116,7 @@ public class DescribedProperty implements Property {
 	@Override
 	public void set(Object bean, Object value) {
 		try {
-			descriptor.getWriteMethod().invoke(bean, value);
+			writeMethod.invoke(bean, value);
 		} catch (Exception e) {
 			throw new UnableToSetPropertyException(this, e);
 		}
@@ -102,7 +124,7 @@ public class DescribedProperty implements Property {
 
 	@Override
 	public String toGenericString() {
-		return descriptor.toString();
+		return descriptorString;
 	}
 
 	@Override
@@ -118,7 +140,10 @@ public class DescribedProperty implements Property {
 	public int hashCode() {
 		final int prime = 31;
 		int result = 1;
-		result = prime * result + ((descriptor == null) ? 0 : descriptor.hashCode());
+		result = prime * result + ((declaringClass == null) ? 0 : declaringClass.hashCode());
+		result = prime * result + ((descriptorString == null) ? 0 : descriptorString.hashCode());
+		result = prime * result + ((readMethod == null) ? 0 : readMethod.hashCode());
+		result = prime * result + ((writeMethod == null) ? 0 : writeMethod.hashCode());
 		return result;
 	}
 
@@ -139,12 +164,22 @@ public class DescribedProperty implements Property {
 		if (declaringClass == null) {
 			if (other.declaringClass != null)
 				return false;
-		} else if (!declaringClass.getCanonicalName().equals(other.declaringClass.getCanonicalName()))
+		} else if (!declaringClass.equals(other.declaringClass))
 			return false;
-		if (descriptor == null) {
-			if (other.descriptor != null)
+		if (descriptorString == null) {
+			if (other.descriptorString != null)
 				return false;
-		} else if (!descriptor.equals(other.descriptor))
+		} else if (!descriptorString.equals(other.descriptorString))
+			return false;
+		if (readMethod == null) {
+			if (other.readMethod != null)
+				return false;
+		} else if (!readMethod.equals(other.readMethod))
+			return false;
+		if (writeMethod == null) {
+			if (other.writeMethod != null)
+				return false;
+		} else if (!writeMethod.equals(other.writeMethod))
 			return false;
 		return true;
 	}
