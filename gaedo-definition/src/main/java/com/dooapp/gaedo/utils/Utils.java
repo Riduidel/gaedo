@@ -98,6 +98,41 @@ public class Utils {
 	}
 
 	/**
+	 * Apply the {@link #maybeObjectify(Class)} algorithm to a string containing a class name
+	 * @param toObjectify class name to objectify
+	 * @return
+	 */
+	public static String maybeObjectify(String toObjectify) {
+		String returned = objectify(toObjectify);
+		if(returned==null)
+			returned = toObjectify;
+		return returned;
+	}
+	/**
+	 * Transform a primitive type into its associated class : Integer.Type will become Integer.class, and so on ...
+	 * @param toCompareClass
+	 * @return
+	 */
+	public static String objectify(String toCompareClass) {
+		if(Integer.TYPE.getName().equals(toCompareClass)) {
+			return Integer.class.getName();
+		} else if(Long.TYPE.getName().equals(toCompareClass)) {
+			return Long.class.getName();
+		} else if(Short.TYPE.getName().equals(toCompareClass)) {
+			return Short.class.getName();
+		} else if(Float.TYPE.getName().equals(toCompareClass)) {
+			return Float.class.getName();
+		} else if(Double.TYPE.getName().equals(toCompareClass)) {
+			return Double.class.getName();
+		} else if(Byte.TYPE.getName().equals(toCompareClass)) {
+			return Byte.class.getName();
+		} else if(Character.TYPE.getName().equals(toCompareClass)) {
+			return Character.class.getName();
+		}
+		return null;
+	}
+
+	/**
 	 * Transform a primitive type into its associated class : Integer.Type will become Integer.class, and so on ...
 	 * @param toCompareClass
 	 * @return
@@ -193,6 +228,7 @@ public class Utils {
 	 * @return
 	 */
 	private static <Type> Type classFromString(String value) {
+		value = maybeObjectify(value);
 		ClassLoader[] used = new ClassLoader[] {value.getClass().getClassLoader(), Utils.class.getClassLoader(), Thread.currentThread().getContextClassLoader()};
 		for(ClassLoader c : used) {
 			if(c!=null) {
