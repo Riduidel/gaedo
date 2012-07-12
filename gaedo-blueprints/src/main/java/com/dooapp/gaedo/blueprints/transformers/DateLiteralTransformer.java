@@ -20,8 +20,9 @@ import com.tinkerpop.blueprints.pgm.Vertex;
  * @author ndx
  * 
  */
-public class DateLiteralTransformer extends AbstractLiteralTransformer<Date> implements LiteralTransformer<Date> {
+public class DateLiteralTransformer extends AbstractSimpleLiteralTransformer<Date> implements LiteralTransformer<Date> {
 	public static final String FORMAT = "yyyy-MM-dd'T'HH:mm:ssz";
+	
 	private static final ThreadLocal<SoftReference<DateFormat>> format = new ThreadLocal<SoftReference<DateFormat>>();
 
 	private static DateFormat getDateFormat() {
@@ -37,6 +38,10 @@ public class DateLiteralTransformer extends AbstractLiteralTransformer<Date> imp
 		format.set(softRef);
 		return result;
 	}
+	
+	public DateLiteralTransformer() {
+		super(Date.class);
+	}
 
 	@Override
 	protected Object getVertexValue(Date value) {
@@ -50,10 +55,5 @@ public class DateLiteralTransformer extends AbstractLiteralTransformer<Date> imp
 		} catch (ParseException e) {
 			throw new BadLiteralException("\"" + property + "\" can't be efficiently parsed to a date", e);
 		}
-	}
-
-	@Override
-	protected Class getValueClass(Date value) {
-		return Date.class;
 	}
 }

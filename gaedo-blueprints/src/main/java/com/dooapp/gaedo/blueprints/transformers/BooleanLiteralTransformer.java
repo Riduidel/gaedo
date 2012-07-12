@@ -1,6 +1,11 @@
 package com.dooapp.gaedo.blueprints.transformers;
 
-public class BooleanLiteralTransformer extends AbstractLiteralTransformer<Boolean> implements LiteralTransformer<Boolean> {
+import com.tinkerpop.blueprints.pgm.Vertex;
+
+public class BooleanLiteralTransformer extends AbstractSimpleLiteralTransformer<Boolean> implements LiteralTransformer<Boolean> {
+	public BooleanLiteralTransformer() {
+		super(Boolean.class);
+	}
 
 	@Override
 	protected Object getVertexValue(Boolean value) {
@@ -8,8 +13,7 @@ public class BooleanLiteralTransformer extends AbstractLiteralTransformer<Boolea
 	}
 
 	@Override
-	protected Class getValueClass(Boolean value) {
-		return Boolean.class;
+	public boolean canHandle(String effectiveType) {
+		return Boolean.TYPE.getName().equals(effectiveType) || Boolean.class.getName().equals(effectiveType);
 	}
-
 }

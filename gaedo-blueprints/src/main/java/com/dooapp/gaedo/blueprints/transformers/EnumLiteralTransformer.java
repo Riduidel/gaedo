@@ -12,4 +12,18 @@ public class EnumLiteralTransformer extends AbstractLiteralTransformer<Enum> imp
 		return value==null ? Enum.class : value.getClass();
 	}
 
+	@Override
+	protected String resolveType(String effectiveType) {
+		return effectiveType;
+	}
+
+	@Override
+	public boolean canHandle(String effectiveType) {
+		try {
+			return Enum.class.isAssignableFrom(Class.forName(effectiveType));
+		} catch (ClassNotFoundException e) {
+			throw new UnsupportedOperationException("class "+effectiveType+" isn't considered to be an enum ... Maybe is there any classloader issue hidden there", e);
+		}
+	}
+
 }

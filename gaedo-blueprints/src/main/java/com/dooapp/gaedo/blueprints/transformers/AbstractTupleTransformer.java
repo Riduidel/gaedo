@@ -52,6 +52,12 @@ public abstract class AbstractTupleTransformer<TupleType> {
 		return sOut.toString();
 	}
 
+	public Object loadObject(ClassLoader classLoader, String effectiveType, Vertex key, ServiceRepository repository, Map<String, Object> objectsBeingAccessed) {
+		TupleType tuple = instanciateTupleFor(classLoader, key);
+		persister.loadObjectProperties(classLoader, repository, key, tuple, getContainedProperties(), objectsBeingAccessed);
+		return tuple;
+	}
+
 	public TupleType loadObject(ClassLoader classLoader, Class effectiveClass, Vertex key, ServiceRepository repository, Map<String, Object> objectsBeingAccessed) {
 		TupleType tuple = instanciateTupleFor(classLoader, key);
 		persister.loadObjectProperties(classLoader, repository, key, tuple, getContainedProperties(), objectsBeingAccessed);
@@ -59,5 +65,10 @@ public abstract class AbstractTupleTransformer<TupleType> {
 	}
 
 	protected abstract TupleType instanciateTupleFor(ClassLoader classLoader, Vertex key);
+
+	public boolean canHandle(String effectiveType) {
+		// TODO Auto-generated method stub
+		throw new UnsupportedOperationException("method "+Transformer.class.getName()+"#canHandle has not yet been implemented AT ALL");
+	}
 
 }

@@ -32,8 +32,16 @@ public enum Literals implements TransformerAssociation<LiteralTransformer> {
 		this.transformer = transformer;
 	}
 	
+	public static LiteralTransformer get(String effectiveType) {
+		return Transformers.get(Literals.values(), effectiveType);
+	}
+	
 	public static LiteralTransformer get(Class dataClass) {
 		return Transformers.get(Literals.values(), dataClass);
+	}
+	
+	public static boolean containsKey(String effectiveType) {
+		return Transformers.containsKey(Literals.values(), effectiveType);
 	}
 
 	public static boolean containsKey(Class<? extends Object> valueClass) {
@@ -48,5 +56,10 @@ public enum Literals implements TransformerAssociation<LiteralTransformer> {
 	@Override
 	public LiteralTransformer getTransformer() {
 		return transformer;
+	}
+
+	@Override
+	public boolean canHandle(String effectiveType) {
+		return transformer.canHandle(effectiveType);
 	}
 }

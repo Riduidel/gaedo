@@ -8,6 +8,15 @@ import com.dooapp.gaedo.utils.Utils;
  *
  */
 public class Transformers {
+	
+	public static <TransformerType extends Transformer> TransformerType get(TransformerAssociation<TransformerType>[] values, String effectiveType) {
+		for(TransformerAssociation l : values) {
+			if(l.canHandle(effectiveType)) {
+				return (TransformerType) l.getTransformer();
+			}
+		}
+		throw new ClassIsNotAKnownLiteralException(effectiveType);
+	}
 
 	public static <TransformerType extends Transformer> TransformerType get(TransformerAssociation<TransformerType>[] values, Class dataClass) {
 		// Notice all primitive types are objectified before all
@@ -24,6 +33,15 @@ public class Transformers {
 	public static boolean containsKey(TransformerAssociation[] values, Class<? extends Object> valueClass) {
 		for(TransformerAssociation l : values) {
 			if(l.getDataClass().isAssignableFrom(valueClass)) {
+				return true;
+			}
+		}
+		return false;
+	}
+
+	public static boolean containsKey(TransformerAssociation[] values, String effectiveType) {
+		for(TransformerAssociation l : values) {
+			if(l.canHandle(effectiveType)) {
 				return true;
 			}
 		}

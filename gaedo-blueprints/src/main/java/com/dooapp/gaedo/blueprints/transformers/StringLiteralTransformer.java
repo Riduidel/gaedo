@@ -1,15 +1,13 @@
 package com.dooapp.gaedo.blueprints.transformers;
 
 
-public class StringLiteralTransformer extends AbstractLiteralTransformer<String> implements LiteralTransformer<String> {
+public class StringLiteralTransformer extends AbstractSimpleLiteralTransformer<String> implements LiteralTransformer<String> {
+	public StringLiteralTransformer() {
+		super(String.class);
+	}
 
 	@Override
 	protected Object getVertexValue(String value) {
 		return value==null ? "null" : value;
-	}
-
-	@Override
-	protected Class getValueClass(String value) {
-		return String.class;
 	}
 }

@@ -10,6 +10,11 @@ public class Tag extends Identified implements Serializable {
 	
 	public Tag parent;
 	
+	/**
+	 * a faked rendering class, used to ensure all works ok with class persistence in graph
+	 */
+	public Class<?> rendering;
+	
 	public Tag() {
 		
 	}

@@ -6,4 +6,11 @@ public interface TransformerAssociation<TransformerKind extends Transformer> {
 
 	TransformerKind getTransformer();
 
+	/**
+	 * Check if that transformer association can handle the hiven value
+	 * @param effectiveType
+	 * @return
+	 */
+	boolean canHandle(String effectiveType);
+
 }

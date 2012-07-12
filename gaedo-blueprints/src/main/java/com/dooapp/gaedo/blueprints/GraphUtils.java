@@ -91,15 +91,18 @@ public class GraphUtils {
 			throw new UnspecifiedClassLoader();
 		}
 		try {
-			Class effectiveClass = classLoader.loadClass(effectiveType);
-			if(Literals.containsKey(effectiveClass) && !repository.containsKey(effectiveClass)) {
-				LiteralTransformer transformer = Literals.get(effectiveClass);
-				return transformer.loadObject(effectiveClass, key);
-			} else if(Tuples.containsKey(effectiveClass) && !repository.containsKey(effectiveClass)) {
-				TupleTransformer transformer = Tuples.get(effectiveClass);
-				return transformer.loadObject(classLoader, effectiveClass, key, repository, objectsBeingAccessed);
+			if(Literals.containsKey(effectiveType) && !repository.containsKey(effectiveType)) {
+				LiteralTransformer transformer = Literals.get(effectiveType);
+				return transformer.loadObject(classLoader, effectiveType, key);
 			} else {
-				return  effectiveClass.newInstance();
+				Class<?> type = classLoader.loadClass(effectiveType);
+				if(Tuples.containsKey(type) && !repository.containsKey(type)) {
+					// Tuples are handled the object way (easier, but more dangerous
+					TupleTransformer transformer = Tuples.get(type);
+					return transformer.loadObject(classLoader, type, key, repository, objectsBeingAccessed);
+				} else {
+					return  type.newInstance();
+				}
 			}
 		} catch(Exception e) {
 			throw new UnableToCreateException(effectiveType, e);

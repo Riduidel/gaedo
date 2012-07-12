@@ -38,5 +38,15 @@ public interface LiteralTransformer<Type> extends Transformer {
 	 * @return
 	 */
 	public Type loadObject(Class effectiveClass, Vertex key);
+	
+	/**
+	 * Method loading class in given classloader and the loading given object
+	 * @param classLoader used classloader
+	 * @param effectiveType type name
+	 * @param key vertex associated to value
+	 * @return loaded object
+	 * @see #loadObject(Class, Vertex)
+	 */
+	public Object loadObject(ClassLoader classLoader, String effectiveType, Vertex key);
 
 }

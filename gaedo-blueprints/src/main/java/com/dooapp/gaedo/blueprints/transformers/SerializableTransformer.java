@@ -117,4 +117,15 @@ public class SerializableTransformer implements TupleTransformer<Serializable> {
 	public Object loadObject(ClassLoader classLoader, Class effectiveClass, Vertex key, ServiceRepository repository, Map<String, Object> objectsBeingAccessed) {
 		return readSerializable(key.getProperty(Properties.value.name()).toString());
 	}
+
+	@Override
+	public Object loadObject(ClassLoader classLoader, String effectiveType, Vertex key, ServiceRepository repository, Map<String, Object> objectsBeingAccessed) {
+		return readSerializable(key.getProperty(Properties.value.name()).toString());
+	}
+
+	@Override
+	public boolean canHandle(String effectiveType) {
+		// TODO Auto-generated method stub
+		throw new UnsupportedOperationException("method "+Transformer.class.getName()+"#canHandle has not yet been implemented AT ALL");
+	}
 }

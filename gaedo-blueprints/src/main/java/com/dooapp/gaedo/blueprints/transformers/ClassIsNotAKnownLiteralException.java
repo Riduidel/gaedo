@@ -11,4 +11,8 @@ public class ClassIsNotAKnownLiteralException extends BluePrintsCrudServiceExcep
 		super("given class "+dataClass.getCanonicalName()+" is not associated to any transformer. Known literals types are "+Arrays.asList(Literals.values()));
 	}
 
+	public ClassIsNotAKnownLiteralException(String effectiveType) {
+		super("given class "+effectiveType+" is not associated to any transformer. Known literals types are "+Arrays.asList(Literals.values()));
+	}
+
 }

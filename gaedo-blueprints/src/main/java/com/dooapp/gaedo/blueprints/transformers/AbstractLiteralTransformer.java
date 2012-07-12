@@ -42,6 +42,23 @@ public abstract class AbstractLiteralTransformer<Type> {
 		}
 	}
 
+	public Object loadObject(ClassLoader classLoader, String effectiveType, Vertex key) {
+		try {
+			Class<?> loadedClass;
+			loadedClass = classLoader.loadClass(resolveType(effectiveType));
+			return loadObject(loadedClass, key);
+		} catch (ClassNotFoundException e) {
+			throw new UnableToCreateException(effectiveType, e);
+		}
+	}
+
+	/**
+	 * Resolve type to a loadable one
+	 * @param effectiveType
+	 * @return
+	 */
+	protected abstract String resolveType(String effectiveType);
+
 	public Type loadObject(Class valueClass, Vertex key) {
 		String valueString = key.getProperty(Properties.value.name()).toString();
 		return loadObject(valueClass, key, valueString);
@@ -74,5 +91,4 @@ public abstract class AbstractLiteralTransformer<Type> {
 	 * @return usually should return value.getClass(). The main thing to understand is that null is NOT allowed
 	 */
 	protected abstract Class getValueClass(Type value);
-
 }

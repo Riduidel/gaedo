@@ -34,4 +34,16 @@ public interface TupleTransformer<Type> extends Transformer {
 	 */
 	public Object loadObject(ClassLoader classLoader, Class effectiveClass, Vertex key, ServiceRepository repository, Map<String, Object> objectsBeingAccessed);
 
+
+	/**
+	 * Load object from vertice, using all provided informations
+	 * @param classLoader
+	 * @param effectiveClass
+	 * @param key
+	 * @param repository
+	 * @param objectsBeingAccessed
+	 * @return
+	 */
+	public Object loadObject(ClassLoader classLoader, String effectiveType, Vertex key, ServiceRepository repository, Map<String, Object> objectsBeingAccessed);
+
 }

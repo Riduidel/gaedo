@@ -204,4 +204,61 @@ public class GraphBackedTagFinderServiceTest {
 		tagService.delete(b);
 		tagService.delete(c);
 	}
+
+	/**
+	 * Ensures string type work
+	 */
+	@Test
+	public void ensureStringTypeWorks() {
+		Tag a = new Tag(A).withId(12l);
+		a.rendering = String.class;
+		tagService.create(a);
+		Tag b = tagService.find().matching(
+						new QueryBuilder<TagInformer>() {
+
+							public QueryExpression createMatchingExpression(
+									TagInformer object) {
+								return object.getId().equalsTo(12l);
+							}
+						}).getFirst();
+		assertThat(b.rendering, Is.is(Class.class));
+	}
+
+	/**
+	 * Ensures string type work
+	 */
+	@Test
+	public void ensureBooleanClassTypeWorks() {
+		Tag a = new Tag(A).withId(13l);
+		a.rendering = Boolean.class;
+		tagService.create(a);
+		Tag b = tagService.find().matching(
+						new QueryBuilder<TagInformer>() {
+
+							public QueryExpression createMatchingExpression(
+									TagInformer object) {
+								return object.getId().equalsTo(12l);
+							}
+						}).getFirst();
+		assertThat(b.rendering, Is.is(Class.class));
+	}
+
+	/**
+	 * Ensures string type work
+	 */
+	@Test
+	public void ensureBooleanTypeTypeWorks() {
+		Tag a = new Tag(A).withId(14l);
+		a.rendering = Boolean.TYPE;
+		tagService.create(a);
+		Tag b = tagService.find().matching(
+						new QueryBuilder<TagInformer>() {
+
+							public QueryExpression createMatchingExpression(
+									TagInformer object) {
+								return object.getId().equalsTo(12l);
+							}
+						}).getFirst();
+		assertThat(b.rendering, Is.is(Class.class));
+	}
 }
