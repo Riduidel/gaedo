@@ -128,6 +128,8 @@ public class Utils {
 			return Byte.class.getName();
 		} else if(Character.TYPE.getName().equals(toCompareClass)) {
 			return Character.class.getName();
+		} else if(Boolean.TYPE.getName().equals(toCompareClass)) {
+			return Boolean.class.getName();
 		}
 		return null;
 	}
@@ -152,6 +154,8 @@ public class Utils {
 			return Byte.class;
 		} else if(Character.TYPE.equals(toCompareClass)) {
 			return Character.class;
+		} else if(Boolean.TYPE.equals(toCompareClass)) {
+			return Boolean.class;
 		}
 		return null;
 	}
