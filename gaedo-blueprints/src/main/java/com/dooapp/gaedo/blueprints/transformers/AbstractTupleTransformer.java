@@ -66,7 +66,7 @@ public abstract class AbstractTupleTransformer<TupleType> {
 
 	protected abstract TupleType instanciateTupleFor(ClassLoader classLoader, Vertex key);
 
-	public boolean canHandle(String effectiveType) {
+	public boolean canHandle(ClassLoader classLoader, String effectiveType) {
 		// TODO Auto-generated method stub
 		throw new UnsupportedOperationException("method "+Transformer.class.getName()+"#canHandle has not yet been implemented AT ALL");
 	}

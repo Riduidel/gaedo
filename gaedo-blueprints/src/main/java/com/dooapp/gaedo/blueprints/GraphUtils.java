@@ -91,8 +91,8 @@ public class GraphUtils {
 			throw new UnspecifiedClassLoader();
 		}
 		try {
-			if(Literals.containsKey(effectiveType) && !repository.containsKey(effectiveType)) {
-				LiteralTransformer transformer = Literals.get(effectiveType);
+			if(Literals.containsKey(classLoader, effectiveType) && !repository.containsKey(effectiveType)) {
+				LiteralTransformer transformer = Literals.get(classLoader, effectiveType);
 				return transformer.loadObject(classLoader, effectiveType, key);
 			} else {
 				Class<?> type = classLoader.loadClass(effectiveType);

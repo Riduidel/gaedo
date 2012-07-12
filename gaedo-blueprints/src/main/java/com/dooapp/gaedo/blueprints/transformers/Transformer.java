@@ -7,8 +7,9 @@ public interface Transformer {
 	
 	/**
 	 * Check if that transformer can handle the given value
+	 * @param classLoader 
 	 * @param effectiveType
 	 * @return
 	 */
-	public boolean canHandle(String effectiveType);
+	public boolean canHandle(ClassLoader classLoader, String effectiveType);
 }

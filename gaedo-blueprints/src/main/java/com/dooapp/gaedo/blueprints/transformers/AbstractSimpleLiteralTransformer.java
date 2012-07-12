@@ -19,7 +19,7 @@ public abstract class AbstractSimpleLiteralTransformer<Type> extends AbstractLit
 		return type.getName();
 	}
 
-	public boolean canHandle(String effectiveType) {
+	public boolean canHandle(ClassLoader classLoader, String effectiveType) {
 		return type.getName().equals(effectiveType);
 	}
 }

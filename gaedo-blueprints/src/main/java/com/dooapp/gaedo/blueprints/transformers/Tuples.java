@@ -32,16 +32,16 @@ public enum Tuples implements TransformerAssociation<TupleTransformer> {
 		return Transformers.get(Tuples.values(), dataClass);
 	}
 	
-	public static TupleTransformer get(String effectiveType) {
-		return Transformers.get(Tuples.values(), effectiveType);
+	public static TupleTransformer get(ClassLoader classLoader, String effectiveType) {
+		return Transformers.get(Tuples.values(), classLoader, effectiveType);
 	}
 
 	public static boolean containsKey(Class<? extends Object> valueClass) {
 		return Transformers.containsKey(Tuples.values(), valueClass);
 	}
 	
-	public static boolean containsKey(String effectiveType) {
-		return Transformers.containsKey(Tuples.values(), effectiveType);
+	public static boolean containsKey(ClassLoader classLoader, String effectiveType) {
+		return Transformers.containsKey(Tuples.values(), classLoader, effectiveType);
 	}
 
 	@Override
@@ -55,7 +55,7 @@ public enum Tuples implements TransformerAssociation<TupleTransformer> {
 	}
 
 	@Override
-	public boolean canHandle(String effectiveType) {
-		return transformer.canHandle(effectiveType);
+	public boolean canHandle(ClassLoader classLoader, String effectiveType) {
+		return transformer.canHandle(classLoader, effectiveType);
 	}
 }

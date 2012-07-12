@@ -8,9 +8,10 @@ public interface TransformerAssociation<TransformerKind extends Transformer> {
 
 	/**
 	 * Check if that transformer association can handle the hiven value
+	 * @param classLoader classloader used to load class
 	 * @param effectiveType
 	 * @return
 	 */
-	boolean canHandle(String effectiveType);
+	boolean canHandle(ClassLoader classLoader, String effectiveType);
 
 }

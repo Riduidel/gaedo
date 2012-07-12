@@ -13,7 +13,7 @@ public class BooleanLiteralTransformer extends AbstractSimpleLiteralTransformer<
 	}
 
 	@Override
-	public boolean canHandle(String effectiveType) {
+	public boolean canHandle(ClassLoader classLoader, String effectiveType) {
 		return Boolean.TYPE.getName().equals(effectiveType) || Boolean.class.getName().equals(effectiveType);
 	}
 }

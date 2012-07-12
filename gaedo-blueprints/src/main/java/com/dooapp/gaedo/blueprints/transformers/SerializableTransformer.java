@@ -124,7 +124,7 @@ public class SerializableTransformer implements TupleTransformer<Serializable> {
 	}
 
 	@Override
-	public boolean canHandle(String effectiveType) {
+	public boolean canHandle(ClassLoader classLoader, String effectiveType) {
 		// TODO Auto-generated method stub
 		throw new UnsupportedOperationException("method "+Transformer.class.getName()+"#canHandle has not yet been implemented AT ALL");
 	}

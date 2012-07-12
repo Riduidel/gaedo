@@ -48,7 +48,7 @@ public class NumberLiteralTransformer extends AbstractLiteralTransformer<Number>
 	}
 
 	@Override
-	public boolean canHandle(String effectiveType) {
+	public boolean canHandle(ClassLoader classLoader, String effectiveType) {
 		for(Class<?> c : NUMBER_CLASSES) {
 			if(c.getName().equals(effectiveType))
 				return true;

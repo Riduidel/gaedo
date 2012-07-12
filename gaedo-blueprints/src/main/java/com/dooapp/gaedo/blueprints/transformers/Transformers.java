@@ -9,9 +9,9 @@ import com.dooapp.gaedo.utils.Utils;
  */
 public class Transformers {
 	
-	public static <TransformerType extends Transformer> TransformerType get(TransformerAssociation<TransformerType>[] values, String effectiveType) {
+	public static <TransformerType extends Transformer> TransformerType get(TransformerAssociation<TransformerType>[] values, ClassLoader classLoader, String effectiveType) {
 		for(TransformerAssociation l : values) {
-			if(l.canHandle(effectiveType)) {
+			if(l.canHandle(classLoader, effectiveType)) {
 				return (TransformerType) l.getTransformer();
 			}
 		}
@@ -39,9 +39,9 @@ public class Transformers {
 		return false;
 	}
 
-	public static boolean containsKey(TransformerAssociation[] values, String effectiveType) {
+	public static boolean containsKey(TransformerAssociation[] values, ClassLoader classLoader, String effectiveType) {
 		for(TransformerAssociation l : values) {
-			if(l.canHandle(effectiveType)) {
+			if(l.canHandle(classLoader, effectiveType)) {
 				return true;
 			}
 		}
