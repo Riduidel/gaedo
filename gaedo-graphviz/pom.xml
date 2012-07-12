@@ -3,13 +3,13 @@
 	<parent>
 		<artifactId>gaedo</artifactId>
 		<groupId>com.dooapp</groupId>
-		<version>0.2.24</version>
+		<version>0.2.25-SNAPSHOT</version>
 	</parent>
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>com.dooapp</groupId>
 	<artifactId>gaedo-graphviz</artifactId>
 	<name>gaedo-graphviz</name>
-	<version>0.2.24</version>
+	<version>0.2.25-SNAPSHOT</version>
 	<url>http://maven.apache.org</url>
 	<dependencies>
 		<dependency>
