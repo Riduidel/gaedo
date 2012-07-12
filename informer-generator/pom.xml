@@ -2,14 +2,14 @@
 	<parent>
 		<artifactId>gaedo</artifactId>
 		<groupId>com.dooapp</groupId>
-		<version>0.2.24-SNAPSHOT</version>
+		<version>0.2.24</version>
 	</parent>
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>com.dooapp</groupId>
 	<artifactId>gaedo-informer-generator</artifactId>
 	<packaging>maven-plugin</packaging>
 	<name>Gaedo informer generator</name>
-	<version>0.2.24-SNAPSHOT</version>
+	<version>0.2.24</version>
 	<description>Generates Informer for all bean classes of given project sources trees</description>
 	<properties>
 		<maven.version>3.0</maven.version>
@@ -36,7 +36,7 @@
 		<dependency>
 			<groupId>com.dooapp</groupId>
 			<artifactId>gaedo-definition</artifactId>
-			<version>0.2.24-SNAPSHOT</version>
+			<version>0.2.24</version>
 		</dependency>
 		<dependency>
 			<groupId>com.google.code.javaparser</groupId>
