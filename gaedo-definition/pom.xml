@@ -2,13 +2,13 @@
 	<parent>
 		<artifactId>gaedo</artifactId>
 		<groupId>com.dooapp</groupId>
-		<version>0.2.26-SNAPSHOT</version>
+		<version>0.2.26</version>
 	</parent>
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>com.dooapp</groupId>
 	<artifactId>gaedo-definition</artifactId>
 	<name>gaedo definition</name>
-	<version>0.2.26-SNAPSHOT</version>
+	<version>0.2.26</version>
 	<description>Hold the services interfaces, informers and expressions </description>
 	<scm>
 		<connection>scm:svn:https://svn.origo.ethz.ch/gaedo/gaedo-definition/trunk</connection>
