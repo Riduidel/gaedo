@@ -448,7 +448,7 @@ public class BluePrintsBackedFinderService <DataType, InformerType extends Infor
 				}
 			}
 		}
-		return GraphUtils.getIdVertexId(database, containedClass, object, idProperty);
+		return GraphUtils.getIdVertexId(database, object.getClass(), object, idProperty);
 	}
 	
 	/**

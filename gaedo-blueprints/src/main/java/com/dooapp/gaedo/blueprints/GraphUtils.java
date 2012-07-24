@@ -221,10 +221,14 @@ public class GraphUtils {
 	 */
 	public static Vertex createVertexWithoutValue(IndexableGraph database, Object vertexId, Kind kind, Class<? extends Object> type) {
 		Vertex returned = database.addVertex(vertexId);
+		saveVertexValues(returned, vertexId, kind, type);
+		return returned;
+	}
+
+	public static void saveVertexValues(Vertex returned, Object vertexId, Kind kind, Class<? extends Object> type) {
 		returned.setProperty(Properties.vertexId.name(), vertexId);
 		returned.setProperty(Properties.kind.name(), kind.name());
 		returned.setProperty(Properties.type.name(), type.getName());
-		return returned;
 	}
 
 }
