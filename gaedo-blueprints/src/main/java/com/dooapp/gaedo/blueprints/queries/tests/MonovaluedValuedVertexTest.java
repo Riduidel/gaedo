@@ -9,6 +9,8 @@ import com.dooapp.gaedo.blueprints.transformers.LiteralTransformer;
 import com.dooapp.gaedo.blueprints.transformers.Literals;
 import com.dooapp.gaedo.finders.repository.ServiceRepository;
 import com.dooapp.gaedo.properties.Property;
+import com.dooapp.gaedo.utils.PrimitiveUtils;
+import com.dooapp.gaedo.utils.Utils;
 import com.tinkerpop.blueprints.pgm.Edge;
 import com.tinkerpop.blueprints.pgm.Vertex;
 
@@ -84,29 +86,18 @@ public abstract class MonovaluedValuedVertexTest<ValueType extends Object> exten
 	 * Check vertex corresponding to given final property matches with a managed object (that's to say an object 
 	 * for which exist a {@link BluePrintsBackedFinderService}
 	 * @param currentVertex vertex corresponding to finalProperty in property path
-	 * @param finalProperty
+	 * @param finalProperty property giving infos on class to use to read vertex value (when needed)
 	 * @return true if managed value matches ... yup, really awesome
 	 */
 	protected abstract boolean callMatchManaged(Vertex currentVertex, Property finalProperty);
 
 	/**
-	 * Call the {@link #matchesLiteral(Object)} method after getting property value
-	 * @param currentVertex
-	 * @param finalProperty
-	 * @return
+	 * Check if literal (or tuple) value matches
+	 * @param currentVertex vertex corresponding to finalProperty in property path
+	 * @param finalProperty property giving infos on class to use to read vertex value (when needed)
+	 * @return true if literal value matches ... yup, really awesome
 	 */
-	protected boolean callMatchLiteral(Vertex currentVertex, Property finalProperty) {
-		Object value = currentVertex.getProperty(Properties.value.name());
-		return matchesLiteral((ValueType) finalProperty.fromString(value.toString()));
-	}
-
-
-	/**
-	 * Check if literal values match
-	 * @param effective
-	 * @return
-	 */
-	protected abstract boolean matchesLiteral(ValueType effective);
+	protected abstract boolean callMatchLiteral(Vertex currentVertex, Property finalProperty);
 
 	/**
 	 * Obtain service associated to expected value
@@ -122,6 +113,20 @@ public abstract class MonovaluedValuedVertexTest<ValueType extends Object> exten
 	 * @category expected
 	 */
 	public ValueType getExpected() {
+		return expected;
+	}
+	
+	public Object getExpectedAsValue() {
+		return getExpectedAsValueOf(getEndProperty(), getExpected());
+	}
+
+	public static Object getExpectedAsValueOf(Property used, Object expected) {
+		Class<?> usedType = Utils.maybeObjectify(used.getType());
+		Class<?> expectedValueClass = Utils.maybeObjectify(expected.getClass());
+		if(Number.class.isAssignableFrom(expectedValueClass) && Number.class.isAssignableFrom(usedType)) {
+			// same class cases are already handled with calls to maybeObjectify
+			return PrimitiveUtils.as((Number) expected, (Class<? extends Number>) usedType);
+		}
 		return expected;
 	}
 

@@ -48,5 +48,13 @@ public interface LiteralTransformer<Type> extends Transformer {
 	 * @see #loadObject(Class, Vertex)
 	 */
 	public Object loadObject(ClassLoader classLoader, String effectiveType, Vertex key);
+	
+	/**
+	 * Check if vertex content is equals to provided object
+	 * @param currentVertex currently analyzed vertex
+	 * @param expected expected value
+	 * @return true if vertex is supposed ton contain value, false otherwise
+	 */
+	public boolean isVertexEqualsTo(Vertex currentVertex, Type expected);
 
 }

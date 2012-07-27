@@ -79,8 +79,8 @@ public class OptimizedGraphExecutableQuery extends AbstractGraphExecutableQuery 
 	protected Iterable<Vertex> getVerticesToExamine() {
 		// First step is to get all possible query root vertices
 		Map<Vertex, Iterable<Property>> possibleRoots = getPossibleRootsOf(test);
-		Entry<Vertex, Iterable<Property>> bestMatch = findBestRootIn(possibleRoots);
-		return Collections.emptyList();
+		VertexValueRange bestMatch = findBestRootIn(possibleRoots);
+		return bestMatch.getValues();
 	}
 
 	/**
@@ -88,13 +88,13 @@ public class OptimizedGraphExecutableQuery extends AbstractGraphExecutableQuery 
 	 * @param possibleRoots
 	 * @return
 	 */
-	private Entry<Vertex, Iterable<Property>> findBestRootIn(Map<Vertex, Iterable<Property>> possibleRoots) {
-		EntryScore initial = new EntryScore();
+	private VertexValueRange findBestRootIn(Map<Vertex, Iterable<Property>> possibleRoots) {
+		VertexValueRange initial = new VertexValueRange();
 		Vertex root;
 		for(Entry<Vertex, Iterable<Property>> entry : possibleRoots.entrySet()) {
 			initial = initial.findBestMatch(entry); 
 		}
-		return initial.entry;
+		return initial;
 	}
 
 	/**

@@ -602,15 +602,20 @@ public class BluePrintsBackedFinderService <DataType, InformerType extends Infor
 			String vertexIdValue = GraphUtils.getIdOfLiteral(database, containedClass, idProperty, id[0]).toString();
 			Vertex rootVertex = GraphUtils.locateVertex(database, Properties.vertexId.name(), vertexIdValue);
 			if(rootVertex==null) {
-				// root vertex couldn't be found directly, mostly due to https://github.com/Riduidel/gaedo/issues/11
-				// So perform the longer (but always working) query
-				return find().matching(new QueryBuilder<InformerType>() {
-
-					@Override
-					public QueryExpression createMatchingExpression(InformerType informer) {
-						return informer.get(idProperty.getName()).equalsTo(id[0]);
-					}
-				}).getFirst();
+				try {
+					// root vertex couldn't be found directly, mostly due to https://github.com/Riduidel/gaedo/issues/11
+					// So perform the longer (but always working) query
+					return find().matching(new QueryBuilder<InformerType>() {
+	
+						@Override
+						public QueryExpression createMatchingExpression(InformerType informer) {
+							return informer.get(idProperty.getName()).equalsTo(id[0]);
+						}
+					}).getFirst();
+				} catch(NoReturnableVertexException e) {
+					// due to getFirst semantics, an exception has to be thrown when no entry is found, which is off lesser interest here, that why we catch it to return null instead
+					return null;
+				}
 			} else {
 				// root vertex can be directly found ! so load it immediatly
 				return loadObject(vertexIdValue, new TreeMap<String, Object>());

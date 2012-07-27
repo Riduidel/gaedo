@@ -1,23 +1,21 @@
 package com.dooapp.gaedo.blueprints.queries.executable;
 
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.TreeMap;
 
 import javax.persistence.CascadeType;
 
 import com.dooapp.gaedo.blueprints.BluePrintsBackedFinderService;
-import com.dooapp.gaedo.blueprints.GraphUtils;
 import com.dooapp.gaedo.blueprints.queries.tests.CollectionContains;
 import com.dooapp.gaedo.blueprints.queries.tests.EqualsTo;
 import com.dooapp.gaedo.blueprints.queries.tests.MapContainsKey;
 import com.dooapp.gaedo.blueprints.queries.tests.MapContainsValue;
 import com.dooapp.gaedo.blueprints.queries.tests.NotVertexTest;
+import com.dooapp.gaedo.blueprints.queries.tests.OrVertexTest;
 import com.dooapp.gaedo.blueprints.queries.tests.VertexTestVisitor;
 import com.dooapp.gaedo.blueprints.queries.tests.VertexTestVisitorAdapter;
-import com.dooapp.gaedo.finders.repository.ServiceRepository;
 import com.dooapp.gaedo.properties.Property;
-import com.tinkerpop.blueprints.pgm.IndexableGraph;
 import com.tinkerpop.blueprints.pgm.Vertex;
 
 /**
@@ -26,7 +24,10 @@ import com.tinkerpop.blueprints.pgm.Vertex;
  *
  */
 public class VertexRootsCollector extends VertexTestVisitorAdapter implements VertexTestVisitor {
-	private Map<Vertex, Iterable<Property>> result = new HashMap<Vertex, Iterable<Property>>();
+	/**
+	 * We use a {@link LinkedHashMap} to keep test ordering, as it allows us to avoid loading all object values (usuall the class test will be set as last one)
+	 */
+	private Map<Vertex, Iterable<Property>> result = new LinkedHashMap<Vertex, Iterable<Property>>();
 	
 	private final BluePrintsBackedFinderService<?, ?> service;
 
@@ -55,9 +56,20 @@ public class VertexRootsCollector extends VertexTestVisitorAdapter implements Ve
 		return false;
 	}
 	
+	/**
+	 * We should of course support OR queries, but for now we don't, as it implies concatenating result lists and having a very specific behaviour during the search for the best matching vertex
+	 * @param orVertexTest
+	 * @return
+	 * @see com.dooapp.gaedo.blueprints.queries.tests.VertexTestVisitorAdapter#startVisit(com.dooapp.gaedo.blueprints.queries.tests.OrVertexTest)
+	 */
+	@Override
+	public boolean startVisit(OrVertexTest orVertexTest) {
+		return false;
+	}
+	
 	@Override
 	public void visit(CollectionContains collectionContains) {
-		result.put(load(collectionContains.getExpected()), collectionContains.getPath());
+		result.put(load(collectionContains.getExpectedAsValue()), collectionContains.getPath());
 	}
 
 	private Vertex load(Object expected) {
@@ -66,7 +78,7 @@ public class VertexRootsCollector extends VertexTestVisitorAdapter implements Ve
 	
 	@Override
 	public void visit(EqualsTo equalsTo) {
-		result.put(load(equalsTo.getExpected()), equalsTo.getPath());
+		result.put(load(equalsTo.getExpectedAsValue()), equalsTo.getPath());
 	}
 	
 	@Override

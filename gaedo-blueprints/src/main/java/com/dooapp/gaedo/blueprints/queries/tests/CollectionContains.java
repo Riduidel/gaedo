@@ -53,4 +53,8 @@ public class CollectionContains extends CollectionTargettedVertexTest implements
 		returned.append(getExpected());
 		return returned;
 	}
+	
+	public Object getExpectedAsValue() {
+		return MonovaluedValuedVertexTest.getExpectedAsValueOf(getEndProperty(), getExpected());
+	}
 }

@@ -91,4 +91,9 @@ public abstract class AbstractLiteralTransformer<Type> {
 	 * @return usually should return value.getClass(). The main thing to understand is that null is NOT allowed
 	 */
 	protected abstract Class getValueClass(Type value);
+
+	public boolean isVertexEqualsTo(Vertex currentVertex, Type expected) {
+		return ((expected==null && currentVertex==null) || 
+						(expected!=null && getVertexValue(expected).equals(currentVertex.getProperty(Properties.value.name())))); 
+	}
 }

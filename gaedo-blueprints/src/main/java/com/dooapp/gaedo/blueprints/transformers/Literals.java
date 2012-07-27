@@ -1,6 +1,7 @@
 package com.dooapp.gaedo.blueprints.transformers;
 
 import java.io.Serializable;
+import java.lang.reflect.Type;
 import java.util.Date;
 
 import com.dooapp.gaedo.utils.Utils;
@@ -38,6 +39,10 @@ public enum Literals implements TransformerAssociation<LiteralTransformer> {
 	
 	public static LiteralTransformer get(Class dataClass) {
 		return Transformers.get(Literals.values(), dataClass);
+	}
+	
+	public static LiteralTransformer get(Type genericType) {
+		return Transformers.get(Literals.values(), genericType);
 	}
 	
 	public static boolean containsKey(ClassLoader classLoader, String effectiveType) {

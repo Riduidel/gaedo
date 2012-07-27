@@ -27,8 +27,9 @@ public class MapContainsValue extends MonovaluedValuedVertexTest<Object> impleme
 	}
 
 	@Override
-	protected boolean matchesLiteral(Vertex currentVertex, LiteralTransformer literalTransformer) {
-		return literalTransformer.isVertexEqualsTo(currentVertex, getExpected());
+	protected boolean callMatchLiteral(Vertex currentVertex, Property finalProperty) {
+		// TODO Auto-generated method stub
+		throw new UnsupportedOperationException("method "+MonovaluedValuedVertexTest.class.getName()+"#callMatchLiteral has not yet been implemented AT ALL");
 	}
 
 }

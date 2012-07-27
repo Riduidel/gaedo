@@ -48,6 +48,10 @@ public class TargettedVertexTest {
 	 * Used path length, useful for checking that a null value can be found
 	 */
 	protected final int pathLength;
+	/**
+	 * Lazy loaded end of path property
+	 */
+	private transient Property endProperty;
 
 	/**
 	 * Builds the vertex test
@@ -108,5 +112,14 @@ public class TargettedVertexTest {
 	
 	public String toString() {
 		return toString(0, new StringBuilder()).toString();
+	}
+
+	protected Property getEndProperty() {
+		if(endProperty==null) {
+			for(Property p : path) {
+				endProperty = p;
+			}
+		}
+		return endProperty;
 	}
 }

@@ -52,8 +52,8 @@ public class BluePrintsQueryBuilder<DataType, InformerType extends Informer<Data
 		if(tests.size()!=1) {
 			throw new InvalidTestStructureException(tests);
 		}
-//		return new OptimizedGraphExecutableQuery(service, tests.peek(), sortingExpression);
-		return new BasicGraphExecutableQuery(service, tests.peek(), sortingExpression);
+		return new OptimizedGraphExecutableQuery(service, tests.peek(), sortingExpression);
+//		return new BasicGraphExecutableQuery(service, tests.peek(), sortingExpression);
 	}
 
 	@Override

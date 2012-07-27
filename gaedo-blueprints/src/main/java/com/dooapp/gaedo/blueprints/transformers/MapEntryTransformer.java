@@ -4,6 +4,7 @@ import java.beans.IntrospectionException;
 import java.beans.PropertyDescriptor;
 import java.util.Collection;
 import java.util.LinkedHashMap;
+import java.util.LinkedList;
 import java.util.Map;
 import java.util.Map.Entry;
 
@@ -28,6 +29,8 @@ public class MapEntryTransformer extends AbstractTupleTransformer<Map.Entry> imp
 	 * Beware : order of elements is signifiant here (as it is used to build id), as a consequence we use a LinkedHashMap 
 	 */
 	private final Map<Property, Collection<CascadeType>> containedProperties = new LinkedHashMap<Property, Collection<CascadeType>>();
+	private DescribedProperty KEY_PROPERTY;
+	private DescribedProperty VALUE_PROPERTY;
 	
 	public MapEntryTransformer() {
 		Collection<CascadeType> cascade = GraphUtils.extractCascadeOf(new CascadeType[] {CascadeType.ALL});
@@ -37,12 +40,14 @@ public class MapEntryTransformer extends AbstractTupleTransformer<Map.Entry> imp
 			PropertyDescriptor keyProperty = new PropertyDescriptor("key", interfaceClass.getDeclaredMethod("getKey"), implementationClass.getDeclaredMethod("setKey", Object.class));
 			PropertyDescriptor valueProperty = new PropertyDescriptor("value", interfaceClass.getDeclaredMethod("getValue"), interfaceClass.getDeclaredMethod("setValue", Object.class));
 			
+			KEY_PROPERTY = new DescribedProperty(keyProperty, Map.Entry.class);
+			VALUE_PROPERTY = new DescribedProperty(valueProperty, Map.Entry.class); 
 			
 			containedProperties.put(
-							new DescribedProperty(keyProperty, Map.Entry.class), 
+							KEY_PROPERTY, 
 							cascade);
 			containedProperties.put(
-							new DescribedProperty(valueProperty, Map.Entry.class), 
+							VALUE_PROPERTY, 
 							cascade);
 		} catch(Exception e) {
 			throw new UnableToGetKeyOrValueProperty(e);
@@ -91,5 +96,33 @@ public class MapEntryTransformer extends AbstractTupleTransformer<Map.Entry> imp
 	@Override
 	protected Class<?> getContainedClass() {
 		return WriteableKeyEntry.class;
+	}
+
+	/**
+	 * Construct from the initial iterable an iterable allowing us to navigate to vertex key
+	 * @param p
+	 * @return
+	 */
+	public Iterable<Property> constructMapEntryKeyIterable(Iterable<Property> properties) {
+		Collection<Property> returned = new LinkedList<Property>();
+		for(Property p : properties) {
+			returned.add(p);
+		}
+		returned.add(KEY_PROPERTY);
+		return returned;
+	}
+
+	/**
+	 * Construct from the initial iterable an iterable allowing us to navigate to vertex key
+	 * @param p
+	 * @return
+	 */
+	public Iterable<Property> constructMapEntryValueIterable(Iterable<Property> properties) {
+		Collection<Property> returned = new LinkedList<Property>();
+		for(Property p : properties) {
+			returned.add(p);
+		}
+		returned.add(VALUE_PROPERTY);
+		return returned;
 	}
 }
