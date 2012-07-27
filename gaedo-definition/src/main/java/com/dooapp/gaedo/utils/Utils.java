@@ -108,6 +108,7 @@ public class Utils {
 			returned = toObjectify;
 		return returned;
 	}
+
 	/**
 	 * Transform a primitive type into its associated class : Integer.Type will become Integer.class, and so on ...
 	 * @param toCompareClass
@@ -130,6 +131,58 @@ public class Utils {
 			return Character.class.getName();
 		} else if(Boolean.TYPE.getName().equals(toCompareClass)) {
 			return Boolean.class.getName();
+		}
+		return null;
+	}
+
+	/**
+	 * Transform an object type into associated primitive type
+	 * @param toCompareClass
+	 * @return
+	 */
+	public static String primitize(String toCompareClass) {
+		if(Integer.class.getName().equals(toCompareClass)) {
+			return Integer.TYPE.getName();
+		} else if(Long.class.getName().equals(toCompareClass)) {
+			return Long.TYPE.getName();
+		} else if(Short.class.getName().equals(toCompareClass)) {
+			return Short.TYPE.getName();
+		} else if(Float.class.getName().equals(toCompareClass)) {
+			return Float.TYPE.getName();
+		} else if(Double.class.getName().equals(toCompareClass)) {
+			return Double.TYPE.getName();
+		} else if(Byte.class.getName().equals(toCompareClass)) {
+			return Byte.TYPE.getName();
+		} else if(Character.class.getName().equals(toCompareClass)) {
+			return Character.TYPE.getName();
+		} else if(Boolean.class.getName().equals(toCompareClass)) {
+			return Boolean.TYPE.getName();
+		}
+		return null;
+	}
+
+	/**
+	 * Transform an object type into associated primitive type
+	 * @param toCompareClass
+	 * @return
+	 */
+	public static Class primitize(Class<? extends Number> toCompareClass) {
+		if(Integer.class.equals(toCompareClass)) {
+			return Integer.TYPE;
+		} else if(Long.class.equals(toCompareClass)) {
+			return Long.TYPE;
+		} else if(Short.class.equals(toCompareClass)) {
+			return Short.TYPE;
+		} else if(Float.class.equals(toCompareClass)) {
+			return Float.TYPE;
+		} else if(Double.class.equals(toCompareClass)) {
+			return Double.TYPE;
+		} else if(Byte.class.equals(toCompareClass)) {
+			return Byte.TYPE;
+		} else if(Character.class.equals(toCompareClass)) {
+			return Character.TYPE;
+		} else if(Boolean.class.equals(toCompareClass)) {
+			return Boolean.TYPE;
 		}
 		return null;
 	}
