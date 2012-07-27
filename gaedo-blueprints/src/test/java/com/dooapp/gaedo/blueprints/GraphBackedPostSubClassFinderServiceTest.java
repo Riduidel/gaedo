@@ -23,6 +23,7 @@ import com.dooapp.gaedo.finders.FinderCrudService;
 import com.dooapp.gaedo.finders.Informer;
 import com.dooapp.gaedo.finders.QueryBuilder;
 import com.dooapp.gaedo.finders.QueryExpression;
+import com.dooapp.gaedo.finders.id.IdBasedService;
 import com.dooapp.gaedo.finders.repository.ServiceBackedFieldLocator;
 import com.dooapp.gaedo.finders.repository.SimpleServiceRepository;
 import com.dooapp.gaedo.finders.root.BasicFieldInformerLocator;
@@ -82,7 +83,7 @@ public class GraphBackedPostSubClassFinderServiceTest {
 		returned.add(new Object[] { "neo4jgraph", new Neo4j()});
 		return returned;
 	}
-	private static final long ID_POST_1 = 1;
+	private static final long ID_POST_1 = 1001;
 	private static final long ABOUT_ID = 10;
 	private static final String USER_PASSWORD = "user password";
 	private static final String USER_LOGIN = "user login";
@@ -176,6 +177,10 @@ public class GraphBackedPostSubClassFinderServiceTest {
 			}
 		}).getFirst();
 		assertThat(loaded, Is.is(PostSubClass.class));
+		if(postService instanceof IdBasedService) {
+			Post fromId = ((IdBasedService<Post>) postService).findById(loaded.id);
+			assertThat(fromId, Is.is(PostSubClass.class));
+		}
 	}
 
 }

@@ -1,4 +1,4 @@
-package com.dooapp.gaedo.blueprints.queries;
+package com.dooapp.gaedo.blueprints.queries.tests;
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -29,7 +29,7 @@ public abstract class CollectionTargettedVertexTest extends TargettedVertexTest 
 	 * To match node
 	 * @param examined
 	 * @return
-	 * @see com.dooapp.gaedo.blueprints.queries.VertexTest#matches(com.tinkerpop.blueprints.pgm.Vertex)
+	 * @see com.dooapp.gaedo.blueprints.queries.tests.VertexTest#matches(com.tinkerpop.blueprints.pgm.Vertex)
 	 */
 	@Override
 	public boolean matches(Vertex examined) {

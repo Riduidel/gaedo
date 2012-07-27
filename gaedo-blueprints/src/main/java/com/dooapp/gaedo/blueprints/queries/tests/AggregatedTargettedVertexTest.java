@@ -1,4 +1,4 @@
-package com.dooapp.gaedo.blueprints.queries;
+package com.dooapp.gaedo.blueprints.queries.tests;
 
 import java.util.Collection;
 import java.util.LinkedList;
@@ -35,7 +35,7 @@ public abstract class AggregatedTargettedVertexTest extends TargettedVertexTest 
 	 * Adds a new {@link EqualsTo} test to {@link #tests} and returns it
 	 * @param path
 	 * @param value
-	 * @see com.dooapp.gaedo.blueprints.queries.CompoundVertexTest#equalsTo(com.dooapp.gaedo.properties.Property, java.lang.Object)
+	 * @see com.dooapp.gaedo.blueprints.queries.tests.CompoundVertexTest#equalsTo(com.dooapp.gaedo.properties.Property, java.lang.Object)
 	 * @category simple
 	 */
 	public VertexTest equalsTo(Iterable<Property> path, Object value) {

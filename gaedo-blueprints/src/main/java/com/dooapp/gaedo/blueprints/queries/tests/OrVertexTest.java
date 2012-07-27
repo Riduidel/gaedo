@@ -1,4 +1,4 @@
-package com.dooapp.gaedo.blueprints.queries;
+package com.dooapp.gaedo.blueprints.queries.tests;
 
 import com.dooapp.gaedo.finders.repository.ServiceRepository;
 import com.dooapp.gaedo.properties.Property;
@@ -20,4 +20,15 @@ public class OrVertexTest extends AggregatedTargettedVertexTest implements Verte
 		}
 		return returned;
 	}
+
+	@Override
+	public void accept(VertexTestVisitor visitor) {
+		if(visitor.startVisit(this)) {
+			for(VertexTest v : tests) {
+				v.accept(visitor);
+			}
+		}
+		visitor.endVisit(this);
+	}
+
 }

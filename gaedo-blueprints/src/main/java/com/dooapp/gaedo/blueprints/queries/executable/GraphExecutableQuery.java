@@ -1,4 +1,4 @@
-package com.dooapp.gaedo.blueprints.queries;
+package com.dooapp.gaedo.blueprints.queries.executable;
 
 import com.tinkerpop.blueprints.pgm.Vertex;
 

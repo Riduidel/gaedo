@@ -1,4 +1,4 @@
-package com.dooapp.gaedo.blueprints.queries;
+package com.dooapp.gaedo.blueprints.queries.tests;
 
 import java.util.Iterator;
 
@@ -38,7 +38,7 @@ public abstract class MonovaluedValuedVertexTest<ValueType extends Object> exten
 	 * To match node
 	 * @param examined
 	 * @return
-	 * @see com.dooapp.gaedo.blueprints.queries.VertexTest#matches(com.tinkerpop.blueprints.pgm.Vertex)
+	 * @see com.dooapp.gaedo.blueprints.queries.tests.VertexTest#matches(com.tinkerpop.blueprints.pgm.Vertex)
 	 */
 	@Override
 	public boolean matches(Vertex examined) {
@@ -112,6 +112,15 @@ public abstract class MonovaluedValuedVertexTest<ValueType extends Object> exten
 	 */
 	protected BluePrintsBackedFinderService getService() {
 		return (BluePrintsBackedFinderService) repository.get(expected.getClass());
+	}
+
+	/**
+	 * @return the expected
+	 * @category getter
+	 * @category expected
+	 */
+	public ValueType getExpected() {
+		return expected;
 	}
 
 }

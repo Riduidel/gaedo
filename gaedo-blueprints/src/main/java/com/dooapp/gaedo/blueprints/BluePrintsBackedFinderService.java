@@ -596,11 +596,25 @@ public class BluePrintsBackedFinderService <DataType, InformerType extends Infor
 	 * @see com.dooapp.gaedo.finders.id.IdBasedService#findById(java.lang.Object[])
 	 */
 	@Override
-	public DataType findById(Object... id) {
+	public DataType findById(final Object... id) {
 		// make sure entered type is a valid one
 		if(Utils.maybeObjectify(idProperty.getType()).isAssignableFrom(Utils.maybeObjectify(id[0].getClass()))) {
 			String vertexIdValue = GraphUtils.getIdOfLiteral(database, containedClass, idProperty, id[0]).toString();
-			return loadObject(vertexIdValue, new TreeMap<String, Object>());
+			Vertex rootVertex = GraphUtils.locateVertex(database, Properties.vertexId.name(), vertexIdValue);
+			if(rootVertex==null) {
+				// root vertex couldn't be found directly, mostly due to https://github.com/Riduidel/gaedo/issues/11
+				// So perform the longer (but always working) query
+				return find().matching(new QueryBuilder<InformerType>() {
+
+					@Override
+					public QueryExpression createMatchingExpression(InformerType informer) {
+						return informer.get(idProperty.getName()).equalsTo(id[0]);
+					}
+				}).getFirst();
+			} else {
+				// root vertex can be directly found ! so load it immediatly
+				return loadObject(vertexIdValue, new TreeMap<String, Object>());
+			}
 		} else {
 			throw new UnsupportedIdException(id[0].getClass(), idProperty.getType());
 		}

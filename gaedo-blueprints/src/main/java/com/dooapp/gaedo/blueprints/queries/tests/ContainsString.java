@@ -1,4 +1,4 @@
-package com.dooapp.gaedo.blueprints.queries;
+package com.dooapp.gaedo.blueprints.queries.tests;
 
 import com.dooapp.gaedo.finders.repository.ServiceRepository;
 import com.dooapp.gaedo.properties.Property;
@@ -23,11 +23,16 @@ public class ContainsString extends MonovaluedValuedVertexTest<String> implement
 	 * @param finalProperty
 	 * @return
 	 * @see #callMatchLiteral(Vertex, Property)
-	 * @see com.dooapp.gaedo.blueprints.queries.MonovaluedValuedVertexTest#callMatchManaged(com.tinkerpop.blueprints.pgm.Vertex, com.dooapp.gaedo.properties.Property)
+	 * @see com.dooapp.gaedo.blueprints.queries.tests.MonovaluedValuedVertexTest#callMatchManaged(com.tinkerpop.blueprints.pgm.Vertex, com.dooapp.gaedo.properties.Property)
 	 */
 	@Override
 	protected boolean callMatchManaged(Vertex currentVertex, Property finalProperty) {
 		return callMatchLiteral(currentVertex, finalProperty);
+	}
+
+	@Override
+	public void accept(VertexTestVisitor visitor) {
+		visitor.visit(this);
 	}
 
 }

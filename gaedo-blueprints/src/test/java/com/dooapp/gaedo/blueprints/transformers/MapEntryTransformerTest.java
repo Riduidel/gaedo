@@ -28,7 +28,7 @@ import com.dooapp.gaedo.properties.UnableToSetPropertyException;
  * @author ndx
  *
  */
-public class MapEntryTransformerTest extends MapEntryTransformer {
+public class MapEntryTransformerTest {
 	private static class MapEntryHandler implements InvocationHandler {
 		private WriteableKeyEntry entry = new WriteableKeyEntry();
 

@@ -5,7 +5,7 @@ import java.util.TreeMap;
 
 import com.dooapp.gaedo.blueprints.queries.BluePrintsQueryBuilder;
 import com.dooapp.gaedo.blueprints.queries.DataTypeIterable;
-import com.dooapp.gaedo.blueprints.queries.GraphExecutableQuery;
+import com.dooapp.gaedo.blueprints.queries.executable.GraphExecutableQuery;
 import com.dooapp.gaedo.exceptions.range.BadRangeDefinitionException;
 import com.dooapp.gaedo.exceptions.range.BadStartIndexException;
 import com.dooapp.gaedo.finders.Informer;
@@ -52,7 +52,7 @@ public class BluePrintsGraphQueryStatement<DataType, InformerType extends Inform
 
 	private GraphExecutableQuery prepareQuery() {
 		try {
-			BluePrintsQueryBuilder<DataType, InformerType> builder = new BluePrintsQueryBuilder<DataType, InformerType>(repository, service.getContainedClass());
+			BluePrintsQueryBuilder<DataType, InformerType> builder = new BluePrintsQueryBuilder<DataType, InformerType>(service);
 			InformerType informer = service.getInformer();
 			filterExpression = query.createMatchingExpression(informer);
 			filterExpression.accept(builder);

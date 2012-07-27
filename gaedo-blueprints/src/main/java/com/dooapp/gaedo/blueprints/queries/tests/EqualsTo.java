@@ -1,4 +1,4 @@
-package com.dooapp.gaedo.blueprints.queries;
+package com.dooapp.gaedo.blueprints.queries.tests;
 
 import com.dooapp.gaedo.blueprints.BluePrintsBackedFinderService;
 import com.dooapp.gaedo.blueprints.GraphUtils;
@@ -34,7 +34,7 @@ public class EqualsTo extends MonovaluedValuedVertexTest<Object> implements Vert
 	 * @param currentVertex
 	 * @param finalProperty
 	 * @return
-	 * @see com.dooapp.gaedo.blueprints.queries.MonovaluedValuedVertexTest#callMatchManaged(com.tinkerpop.blueprints.pgm.Vertex,
+	 * @see com.dooapp.gaedo.blueprints.queries.tests.MonovaluedValuedVertexTest#callMatchManaged(com.tinkerpop.blueprints.pgm.Vertex,
 	 *      com.dooapp.gaedo.properties.Property)
 	 */
 	@Override
@@ -42,6 +42,11 @@ public class EqualsTo extends MonovaluedValuedVertexTest<Object> implements Vert
 		// First check if id is the same
 		BluePrintsBackedFinderService service = getService();
 		return isVertexEqualsTo(currentVertex, service, expected, false);
+	}
+
+	@Override
+	public void accept(VertexTestVisitor visitor) {
+		visitor.visit(this);
 	}
 
 }

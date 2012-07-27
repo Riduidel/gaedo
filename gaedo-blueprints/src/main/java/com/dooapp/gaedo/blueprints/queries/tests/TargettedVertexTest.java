@@ -1,4 +1,4 @@
-package com.dooapp.gaedo.blueprints.queries;
+package com.dooapp.gaedo.blueprints.queries.tests;
 
 import java.util.TreeMap;
 
@@ -67,5 +67,23 @@ public class TargettedVertexTest {
 			}
 		}
 		return returned;
+	}
+
+	/**
+	 * @return the path
+	 * @category getter
+	 * @category path
+	 */
+	public Iterable<Property> getPath() {
+		return path;
+	}
+
+	/**
+	 * @return the repository
+	 * @category getter
+	 * @category repository
+	 */
+	public ServiceRepository getRepository() {
+		return repository;
 	}
 }

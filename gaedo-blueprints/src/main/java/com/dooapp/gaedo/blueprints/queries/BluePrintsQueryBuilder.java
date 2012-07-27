@@ -2,6 +2,13 @@ package com.dooapp.gaedo.blueprints.queries;
 
 import java.util.Stack;
 
+import com.dooapp.gaedo.blueprints.BluePrintsBackedFinderService;
+import com.dooapp.gaedo.blueprints.queries.executable.BasicGraphExecutableQuery;
+import com.dooapp.gaedo.blueprints.queries.executable.GraphExecutableQuery;
+import com.dooapp.gaedo.blueprints.queries.executable.OptimizedGraphExecutableQuery;
+import com.dooapp.gaedo.blueprints.queries.tests.AndVertexTest;
+import com.dooapp.gaedo.blueprints.queries.tests.CompoundVertexTest;
+import com.dooapp.gaedo.blueprints.queries.tests.InvalidTestStructureException;
 import com.dooapp.gaedo.finders.Informer;
 import com.dooapp.gaedo.finders.SortingExpression;
 import com.dooapp.gaedo.finders.expressions.AndQueryExpression;
@@ -18,28 +25,20 @@ import com.dooapp.gaedo.finders.expressions.OrQueryExpression;
 import com.dooapp.gaedo.finders.expressions.QueryExpressionVisitor;
 import com.dooapp.gaedo.finders.expressions.StartsWithExpression;
 import com.dooapp.gaedo.finders.informers.MapContainingValueExpression;
-import com.dooapp.gaedo.finders.repository.ServiceRepository;
 import com.tinkerpop.blueprints.pgm.IndexableGraph;
 
 public class BluePrintsQueryBuilder<DataType, InformerType extends Informer<DataType>> implements QueryExpressionVisitor {
 
-	private ServiceRepository repository;
+	private BluePrintsBackedFinderService<DataType, InformerType> service;
 	/**
 	 * This stack contains only the tests allowing tree building
 	 */
 	private Stack<CompoundVertexTest> tests = new Stack<CompoundVertexTest>();
-	private Class<DataType> searchedClass;
-	
-	/**
-	 * Service repository should allow us to match properties to vertices definitions
-	 * @param repository
-	 * @paramd defaultSearchedClass class used as graph traversal root if no other is specified
-	 */
-	public BluePrintsQueryBuilder(ServiceRepository repository, Class<DataType> defaultSearchedClass) {
-		this.repository = repository;
-		this.searchedClass = defaultSearchedClass;
-		/* Base test is always a AND one */
-		this.tests.push(new AndVertexTest(repository, null /* null indicates no property is navigated */));
+
+	public BluePrintsQueryBuilder(BluePrintsBackedFinderService<DataType, InformerType> service) {
+		this.service = service;
+		/* Base test is always a AND one, associated to a test on class (will be used for optimized query building) */
+		this.tests.push(new AndVertexTest(service.getRepository(), null /* null indicates no property is navigated */));
 	}
 
 	/**
@@ -53,8 +52,8 @@ public class BluePrintsQueryBuilder<DataType, InformerType extends Informer<Data
 		if(tests.size()!=1) {
 			throw new InvalidTestStructureException(tests);
 		}
-//		return new OptimizedGraphExecutableQuery(database, tests.peek(), sortingExpression, searchedClass);
-		return new BasicGraphExecutableQuery(database, tests.peek(), sortingExpression, searchedClass);
+//		return new OptimizedGraphExecutableQuery(service, tests.peek(), sortingExpression);
+		return new BasicGraphExecutableQuery(service, tests.peek(), sortingExpression);
 	}
 
 	@Override

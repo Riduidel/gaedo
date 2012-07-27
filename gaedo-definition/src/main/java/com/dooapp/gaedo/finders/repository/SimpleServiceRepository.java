@@ -99,7 +99,11 @@ public class SimpleServiceRepository implements ServiceRepository {
 	}
 
 	public FinderCrudService<?, ?> get(Object key) {
-		return delegateMap.get(key);
+		if(key instanceof Class) {
+			return (FinderCrudService<?, ?>) get((Class) key);
+		} else {
+			return (FinderCrudService<?, ?>) get(key.getClass());
+		}
 	}
 
 	public int hashCode() {
