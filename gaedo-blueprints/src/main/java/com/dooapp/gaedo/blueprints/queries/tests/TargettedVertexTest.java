@@ -1,5 +1,6 @@
 package com.dooapp.gaedo.blueprints.queries.tests;
 
+import java.util.Iterator;
 import java.util.TreeMap;
 
 import com.dooapp.gaedo.blueprints.BluePrintsBackedFinderService;
@@ -85,5 +86,27 @@ public class TargettedVertexTest {
 	 */
 	public ServiceRepository getRepository() {
 		return repository;
+	}
+	
+	protected StringBuilder toString(int deepness, StringBuilder builder) {
+		for(int i=0;i<deepness;i++) {
+			builder.append("\t");
+		}
+		if(path!=null) {
+			Iterator<Property> pathIter = path.iterator();
+			while (pathIter.hasNext()) {
+				Property property = (Property) pathIter.next();
+				builder.append(property.getName());
+				if(pathIter.hasNext()) {
+					builder.append(".");
+				}
+			}
+		}
+		builder.append(" ").append(getClass().getSimpleName()).append(" ");
+		return builder;
+	}
+	
+	public String toString() {
+		return toString(0, new StringBuilder()).toString();
 	}
 }

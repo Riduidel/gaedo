@@ -47,4 +47,10 @@ public class CollectionContains extends CollectionTargettedVertexTest implements
 		return expected;
 	}
 
+	@Override
+	protected StringBuilder toString(int deepness, StringBuilder builder) {
+		StringBuilder returned = super.toString(deepness, builder);
+		returned.append(getExpected());
+		return returned;
+	}
 }

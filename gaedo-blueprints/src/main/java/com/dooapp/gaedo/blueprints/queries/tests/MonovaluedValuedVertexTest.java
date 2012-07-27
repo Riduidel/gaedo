@@ -5,6 +5,8 @@ import java.util.Iterator;
 import com.dooapp.gaedo.blueprints.BluePrintsBackedFinderService;
 import com.dooapp.gaedo.blueprints.GraphUtils;
 import com.dooapp.gaedo.blueprints.Properties;
+import com.dooapp.gaedo.blueprints.transformers.LiteralTransformer;
+import com.dooapp.gaedo.blueprints.transformers.Literals;
 import com.dooapp.gaedo.finders.repository.ServiceRepository;
 import com.dooapp.gaedo.properties.Property;
 import com.tinkerpop.blueprints.pgm.Edge;
@@ -123,4 +125,10 @@ public abstract class MonovaluedValuedVertexTest<ValueType extends Object> exten
 		return expected;
 	}
 
+	@Override
+	protected StringBuilder toString(int deepness, StringBuilder builder) {
+		StringBuilder returned = super.toString(deepness, builder);
+		returned.append(expected).append("\n");
+		return returned;
+	}
 }

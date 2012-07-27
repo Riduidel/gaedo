@@ -1,5 +1,10 @@
 package com.dooapp.gaedo.blueprints.queries.tests;
 
+import java.util.Map;
+
+import com.dooapp.gaedo.blueprints.transformers.LiteralTransformer;
+import com.dooapp.gaedo.blueprints.transformers.MapEntryTransformer;
+import com.dooapp.gaedo.blueprints.transformers.Tuples;
 import com.dooapp.gaedo.finders.repository.ServiceRepository;
 import com.dooapp.gaedo.properties.Property;
 import com.tinkerpop.blueprints.pgm.Vertex;
@@ -7,13 +12,7 @@ import com.tinkerpop.blueprints.pgm.Vertex;
 public class MapContainsValue extends MonovaluedValuedVertexTest<Object> implements VertexTest {
 
 	public MapContainsValue(ServiceRepository repository, Iterable<Property> p, Object value) {
-		super(repository, p, value);
-	}
-
-	@Override
-	protected boolean matchesLiteral(Object effective) {
-		// TODO Auto-generated method stub
-		throw new UnsupportedOperationException("method "+MonovaluedValuedVertexTest.class.getName()+"#matches has not yet been implemented AT ALL");
+		super(repository, ((MapEntryTransformer) Tuples.get(Map.Entry.class)).constructMapEntryValueIterable(p), value);
 	}
 
 	@Override
@@ -25,6 +24,11 @@ public class MapContainsValue extends MonovaluedValuedVertexTest<Object> impleme
 	@Override
 	public void accept(VertexTestVisitor visitor) {
 		visitor.visit(this);
+	}
+
+	@Override
+	protected boolean matchesLiteral(Vertex currentVertex, LiteralTransformer literalTransformer) {
+		return literalTransformer.isVertexEqualsTo(currentVertex, getExpected());
 	}
 
 }

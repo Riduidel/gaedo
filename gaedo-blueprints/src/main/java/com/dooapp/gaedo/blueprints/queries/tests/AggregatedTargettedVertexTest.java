@@ -99,4 +99,17 @@ public abstract class AggregatedTargettedVertexTest extends TargettedVertexTest 
 	public VertexTest anything(Iterable<Property> path) {
 		return add(new Anything(repository, path));
 	}
+
+	@Override
+	protected StringBuilder toString(int deepness, StringBuilder builder) {
+		StringBuilder returned = super.toString(deepness, builder).append("\n");
+		for(VertexTest v : tests) {
+			if(v instanceof TargettedVertexTest) {
+				returned = ((TargettedVertexTest) v).toString(deepness+1, returned);
+			} else {
+				returned.append("\nwhat ? a non targettted vertex test ? what the hell ?");
+			}
+		}
+		return returned;
+	}
 }
