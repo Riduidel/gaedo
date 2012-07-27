@@ -2,13 +2,13 @@
 	<parent>
 		<artifactId>gaedo</artifactId>
 		<groupId>com.dooapp</groupId>
-		<version>0.2.27</version>
+		<version>0.2.28-SNAPSHOT</version>
 	</parent>
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>com.dooapp</groupId>
 	<artifactId>gaedo-test-beans</artifactId>
 	<name>gaedo test beans</name>
-	<version>0.2.27</version>
+	<version>0.2.28-SNAPSHOT</version>
 	<description>Some gaedo test beans and bean descriptors</description>
 	<dependencies>
 		<dependency>
