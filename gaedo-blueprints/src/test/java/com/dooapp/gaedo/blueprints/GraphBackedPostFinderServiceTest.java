@@ -72,6 +72,19 @@ public class GraphBackedPostFinderServiceTest {
 		return returned;
 	}
 
+	private final class FindPostByText implements QueryBuilder<PostInformer> {
+		private final String text;
+
+		private FindPostByText(String text) {
+			this.text = text;
+		}
+
+		@Override
+		public QueryExpression createMatchingExpression(PostInformer informer) {
+			return informer.getText().equalsTo(text);
+		}
+	}
+
 	public static class UnknownSerializable implements Serializable {
 		private String text;
 		
@@ -484,15 +497,34 @@ public class GraphBackedPostFinderServiceTest {
 		try {
 			newxONe.annotations.put(A, null);
 			postService.update(newxONe);
-			newxONe = postService.find().matching(new QueryBuilder<PostInformer>() {
-
-				@Override
-				public QueryExpression createMatchingExpression(PostInformer informer) {
-					return informer.getText().equalsTo(SOME_NEW_TEXT);
-				}
-			}).getFirst();
+			newxONe = postService.find().matching(new FindPostByText(SOME_NEW_TEXT)).getFirst();
 			assertThat(newxONe.annotations.size(), Is.is(1));
 			assertThat(newxONe.annotations.containsKey(A), Is.is(true));
+		} catch(Exception e) {
+			if (logger.isLoggable(Level.SEVERE)) {
+				logger.log(Level.SEVERE, "unable to run test", e);
+			}
+			throw e;
+		} finally {
+			postService.delete(newxONe);
+		}
+	}
+	
+	@Test
+	public void ensureMapCanBeEmptiedForIssue13() throws Exception {
+		final String text = "#ensureMapCanBeEmptiedForIssue13";
+		Post newxONe = new Post().withText(text).withAuthor(author);
+		newxONe = postService.create(newxONe);
+		try {
+			newxONe.annotations.put(A, null);
+			postService.update(newxONe);
+			newxONe = postService.find().matching(new FindPostByText(text)).getFirst();
+			assertThat(newxONe.annotations.size(), Is.is(1));
+			assertThat(newxONe.annotations.containsKey(A), Is.is(true));
+			newxONe.annotations.clear();
+			postService.update(newxONe);
+			newxONe = postService.find().matching(new FindPostByText(text)).getFirst();
+			assertThat(newxONe.annotations.size(), Is.is(0));
 		} catch(Exception e) {
 			if (logger.isLoggable(Level.SEVERE)) {
 				logger.log(Level.SEVERE, "unable to run test", e);

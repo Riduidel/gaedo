@@ -154,7 +154,7 @@ public class BluePrintsPersister {
 		// Cast should work like a charm
 		Map value = (Map) p.get(toUpdate);
 		// As a convention, null values are never stored
-		if(value!=null && value.size()>0) {
+		if(value!=null /* && value.size()>0 that case precisely created https://github.com/Riduidel/gaedo/issues/13 */) {
 			// Get previously existing vertices
 			String collectionEdgeName = GraphUtils.getEdgeNameFor(p);
 			Iterable<Edge> existingIterator = rootVertex.getOutEdges(collectionEdgeName);
@@ -196,7 +196,7 @@ public class BluePrintsPersister {
 		// Cast should work like a charm
 		Collection value = (Collection) p.get(toUpdate);
 		// As a convention, null values are never stored
-		if(value!=null && value.size()>0) {
+		if(value!=null /* && value.size()>0 that case precisely created https://github.com/Riduidel/gaedo/issues/13 */) {
 			// Get previously existing vertices
 			String collectionEdgeName = GraphUtils.getEdgeNameFor(p);
 			Iterable<Edge> existingIterator = rootVertex.getOutEdges(collectionEdgeName);
