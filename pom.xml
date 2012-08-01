@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>com.dooapp</groupId>
 	<artifactId>gaedo</artifactId>
@@ -37,12 +38,9 @@
 		<module>gaedo-blueprints</module>
 	</modules>
 	<issueManagement>
-		<system>Origo</system>
-		<url>http://gaedo.origo.ethz.ch/issues</url>
+		<system>GitHub</system>
+		<url>https://github.com/Riduidel/gaedo/issues</url>
 	</issueManagement>
-	<ciManagement>
-		<system>Hudson</system>
-	</ciManagement>
 	<developers>
 		<developer>
 			<id>riduidel</id>
@@ -168,6 +166,18 @@
 					<inputEncoding>UTF-8</inputEncoding>
 					<outputEncoding>UTF-8</outputEncoding>
 				</configuration>
+			</plugin>
+			<plugin>
+				<groupId>com.github.danielflower.mavenplugins</groupId>
+				<artifactId>maven-gitlog-plugin</artifactId>
+				<version>1.4.11</version>
+				<executions>
+					<execution>
+						<goals>
+							<goal>generate</goal>
+						</goals>
+					</execution>
+				</executions>
 			</plugin>
 		</plugins>
 		<pluginManagement>
