@@ -3,11 +3,11 @@
 	<parent>
 		<artifactId>gaedo</artifactId>
 		<groupId>com.dooapp</groupId>
-		<version>0.2.28-SNAPSHOT</version>
+		<version>0.2.28</version>
 	</parent>
 	<groupId>com.dooapp</groupId>
 	<artifactId>gaedo-prevalence</artifactId>
-	<version>0.2.28-SNAPSHOT</version>
+	<version>0.2.28</version>
 	<name>Gaedo prevalence layer and service</name>
 	<description>A gaedo-inspired prevalence layer and the associated service, for making the most gaedo-efficient use of that layer</description>
 	<dependencies>
