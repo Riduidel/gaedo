@@ -49,8 +49,8 @@ public class CollectionLazyLoader extends AbstractLazyLoader implements Invocati
 				Object temporaryValue = GraphUtils.createInstance(classLoader, value, repository, objectsBeingAccessed);
 				if(repository.containsKey(temporaryValue.getClass())) {
 					FinderCrudService service = repository.get(temporaryValue.getClass());
-					if (service instanceof BluePrintsBackedFinderService) {
-						BluePrintsBackedFinderService blueprints= (BluePrintsBackedFinderService) service;
+					if (service instanceof IndexableGraphBackedFinderService) {
+						IndexableGraphBackedFinderService blueprints= (IndexableGraphBackedFinderService) service;
 						collection.add(blueprints.loadObject(value, objectsBeingAccessed));
 					}
 				} else {

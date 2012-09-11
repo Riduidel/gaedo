@@ -4,7 +4,7 @@ import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
 
-import com.dooapp.gaedo.blueprints.BluePrintsBackedFinderService;
+import com.dooapp.gaedo.blueprints.IndexableGraphBackedFinderService;
 import com.dooapp.gaedo.blueprints.queries.tests.CompoundVertexTest;
 import com.dooapp.gaedo.blueprints.queries.tests.VertexTest;
 import com.dooapp.gaedo.finders.SortingExpression;
@@ -16,9 +16,9 @@ public abstract class AbstractGraphExecutableQuery implements GraphExecutableQue
 
 	protected final VertexTest test;
 	protected final SortingExpression sort;
-	protected final BluePrintsBackedFinderService<?, ?> service;
+	protected final IndexableGraphBackedFinderService<?, ?> service;
 
-	public AbstractGraphExecutableQuery(BluePrintsBackedFinderService<?, ?> service, CompoundVertexTest vertexTest, SortingExpression sortingExpression) {
+	public AbstractGraphExecutableQuery(IndexableGraphBackedFinderService<?, ?> service, CompoundVertexTest vertexTest, SortingExpression sortingExpression) {
 		this.service = service;
 		this.test = vertexTest;
 		this.sort = sortingExpression;

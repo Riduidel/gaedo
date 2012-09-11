@@ -154,9 +154,9 @@ public class MultithreadedGraphBackedTest {
 		
 		graph = graphProvider.get();
 		// Now add some services
-		repository.add(new BluePrintsBackedFinderService(Tag.class, TagInformer.class, proxyInformerFactory, repository, provider, graph));
-		repository.add(new BluePrintsBackedFinderService(User.class, UserInformer.class, proxyInformerFactory, repository, provider, graph));
-		repository.add(new BluePrintsBackedFinderService(Post.class, PostInformer.class, proxyInformerFactory, repository, provider, graph));
+		repository.add(new IndexableGraphBackedFinderService(Tag.class, TagInformer.class, proxyInformerFactory, repository, provider, graph));
+		repository.add(new IndexableGraphBackedFinderService(User.class, UserInformer.class, proxyInformerFactory, repository, provider, graph));
+		repository.add(new IndexableGraphBackedFinderService(Post.class, PostInformer.class, proxyInformerFactory, repository, provider, graph));
 		tagService = repository.get(Tag.class);
 		postService = repository.get(Post.class);
 		tagService.create(new Tag(A).withId(1l));

@@ -6,7 +6,6 @@ import com.dooapp.gaedo.blueprints.Properties;
 import com.dooapp.gaedo.blueprints.UnableToCreateException;
 import com.dooapp.gaedo.utils.Utils;
 import com.tinkerpop.blueprints.pgm.Graph;
-import com.tinkerpop.blueprints.pgm.IndexableGraph;
 import com.tinkerpop.blueprints.pgm.Vertex;
 
 /**
@@ -16,7 +15,7 @@ import com.tinkerpop.blueprints.pgm.Vertex;
  */
 public abstract class AbstractLiteralTransformer<Type> {
 
-	public Vertex getVertexFor(IndexableGraph database, Type value) {
+	public Vertex getVertexFor(Graph database, Type value) {
 		Object vertexId = getVertexId(database, value);
 		// First try direct vertexId access
 		if(database.getVertex(vertexId)!=null) {

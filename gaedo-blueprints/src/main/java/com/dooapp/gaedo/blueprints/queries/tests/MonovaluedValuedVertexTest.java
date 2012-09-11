@@ -2,7 +2,7 @@ package com.dooapp.gaedo.blueprints.queries.tests;
 
 import java.util.Iterator;
 
-import com.dooapp.gaedo.blueprints.BluePrintsBackedFinderService;
+import com.dooapp.gaedo.blueprints.IndexableGraphBackedFinderService;
 import com.dooapp.gaedo.blueprints.GraphUtils;
 import com.dooapp.gaedo.blueprints.Properties;
 import com.dooapp.gaedo.blueprints.transformers.LiteralTransformer;
@@ -84,7 +84,7 @@ public abstract class MonovaluedValuedVertexTest<ValueType extends Object> exten
 
 	/**
 	 * Check vertex corresponding to given final property matches with a managed object (that's to say an object 
-	 * for which exist a {@link BluePrintsBackedFinderService}
+	 * for which exist a {@link IndexableGraphBackedFinderService}
 	 * @param currentVertex vertex corresponding to finalProperty in property path
 	 * @param finalProperty property giving infos on class to use to read vertex value (when needed)
 	 * @return true if managed value matches ... yup, really awesome
@@ -103,8 +103,8 @@ public abstract class MonovaluedValuedVertexTest<ValueType extends Object> exten
 	 * Obtain service associated to expected value
 	 * @return 
 	 */
-	protected BluePrintsBackedFinderService getService() {
-		return (BluePrintsBackedFinderService) repository.get(expected.getClass());
+	protected IndexableGraphBackedFinderService getService() {
+		return (IndexableGraphBackedFinderService) repository.get(expected.getClass());
 	}
 
 	/**

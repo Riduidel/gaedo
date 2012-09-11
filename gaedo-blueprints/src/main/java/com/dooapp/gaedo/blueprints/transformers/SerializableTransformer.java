@@ -6,17 +6,14 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.Serializable;
-import java.util.Collection;
 import java.util.Map;
 
-import javax.persistence.CascadeType;
-
-import com.dooapp.gaedo.blueprints.BluePrintsBackedFinderService;
+import com.dooapp.gaedo.blueprints.AbstractBluePrintsBackedFinderService;
 import com.dooapp.gaedo.blueprints.GraphUtils;
 import com.dooapp.gaedo.blueprints.Kind;
 import com.dooapp.gaedo.blueprints.Properties;
 import com.dooapp.gaedo.finders.repository.ServiceRepository;
-import com.dooapp.gaedo.properties.Property;
+import com.tinkerpop.blueprints.pgm.Graph;
 import com.tinkerpop.blueprints.pgm.IndexableGraph;
 import com.tinkerpop.blueprints.pgm.Vertex;
 
@@ -53,11 +50,11 @@ public class SerializableTransformer implements TupleTransformer<Serializable> {
 	 * @param cast
 	 * @param objectsBeingUpdated
 	 * @return
-	 * @see com.dooapp.gaedo.blueprints.transformers.TupleTransformer#getVertexFor(com.dooapp.gaedo.blueprints.BluePrintsBackedFinderService, java.lang.Object, java.util.Map)
+	 * @see com.dooapp.gaedo.blueprints.transformers.TupleTransformer#getVertexFor(AbstractBluePrintsBackedFinderService<? extends Graph, DataType, ?>, java.lang.Object, java.util.Map)
 	 */
 	@Override
-	public <DataType> Vertex getVertexFor(BluePrintsBackedFinderService<DataType, ?> service, Serializable cast, Map<String, Object> objectsBeingUpdated) {
-		IndexableGraph database = service.getDatabase();
+	public <DataType> Vertex getVertexFor(AbstractBluePrintsBackedFinderService<? extends Graph, DataType, ?> service, Serializable cast, Map<String, Object> objectsBeingUpdated) {
+		Graph database = service.getDatabase();
 		ServiceRepository repository = service.getRepository();
 		// some first-level check to see if someone else than this transformer has any knowledge of value (because, well, this id will be longer than hell)
 		Class<? extends Serializable> valueClass = cast.getClass();
@@ -71,7 +68,7 @@ public class SerializableTransformer implements TupleTransformer<Serializable> {
 	}
 
 	
-	private Vertex getVertextForUnknownSerializable(IndexableGraph database, ServiceRepository repository, Serializable value) {
+	private Vertex getVertextForUnknownSerializable(Graph database, ServiceRepository repository, Serializable value) {
 		String serialized = writeSerializable(value);
 		Object vertexId = serialized;
 		// First try direct vertexId access
@@ -89,7 +86,7 @@ public class SerializableTransformer implements TupleTransformer<Serializable> {
 	}
 
 	@Override
-	public String getIdOfTuple(IndexableGraph graph, ServiceRepository repository, Serializable value) {
+	public String getIdOfTuple(Graph graph, ServiceRepository repository, Serializable value) {
 		// some first-level check to see if someone else than this transformer has any knowledge of value (because, well, this id will be longer than hell)
 		Class<? extends Serializable> valueClass = value.getClass();
 		if(Tuples.containsKey(valueClass)) {

@@ -2,9 +2,9 @@ package com.dooapp.gaedo.blueprints.transformers;
 
 import java.util.Map;
 
-import com.dooapp.gaedo.blueprints.BluePrintsBackedFinderService;
+import com.dooapp.gaedo.blueprints.AbstractBluePrintsBackedFinderService;
 import com.dooapp.gaedo.finders.repository.ServiceRepository;
-import com.tinkerpop.blueprints.pgm.IndexableGraph;
+import com.tinkerpop.blueprints.pgm.Graph;
 import com.tinkerpop.blueprints.pgm.Vertex;
 
 public interface TupleTransformer<Type> extends Transformer {
@@ -16,12 +16,12 @@ public interface TupleTransformer<Type> extends Transformer {
 	 * @param objectsBeingUpdated map of already accessed objects
 	 * @return
 	 */
-	public <DataType> Vertex getVertexFor(BluePrintsBackedFinderService<DataType, ?> service, Type cast, Map<String, Object> objectsBeingUpdated);
+	public <DataType> Vertex getVertexFor(AbstractBluePrintsBackedFinderService<? extends Graph, DataType, ?> service, Type cast, Map<String, Object> objectsBeingUpdated);
 	
 	/**
 	 * Create an identifier for tuple value, which can be done in any fashion
 	 */
-	public String getIdOfTuple(IndexableGraph graph, ServiceRepository repository, Type value);
+	public String getIdOfTuple(Graph graph, ServiceRepository repository, Type value);
 
 	/**
 	 * Load object from vertice, using all provided informations

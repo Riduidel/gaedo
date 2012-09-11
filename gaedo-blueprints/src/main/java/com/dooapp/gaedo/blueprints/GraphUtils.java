@@ -5,6 +5,7 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import javax.persistence.CascadeType;
@@ -18,13 +19,48 @@ import com.dooapp.gaedo.blueprints.transformers.Tuples;
 import com.dooapp.gaedo.finders.repository.ServiceRepository;
 import com.dooapp.gaedo.properties.Property;
 import com.tinkerpop.blueprints.pgm.CloseableSequence;
+import com.tinkerpop.blueprints.pgm.Graph;
 import com.tinkerpop.blueprints.pgm.Index;
 import com.tinkerpop.blueprints.pgm.IndexableGraph;
 import com.tinkerpop.blueprints.pgm.Vertex;
+import com.tinkerpop.blueprints.pgm.impls.sail.SailGraph;
 
 public class GraphUtils {
 	private static final Logger logger = Logger.getLogger(GraphUtils.class.getName());
 
+	public static Vertex locateVertex(Graph graph, String property, Object value) {
+		if (graph instanceof IndexableGraph) {
+			return locateVertex((IndexableGraph) graph, property, value);
+		} else if(graph instanceof SailGraph) {
+			return locateVertex((SailGraph) graph, property, value);
+		} else {
+			if (logger.isLoggable(Level.WARNING)) {
+				logger.log(Level.WARNING, "used graph is neither an IndexableGraph nor a SailGraph. " +
+						"As a consequence, we have no fast way to search and must rely upon enumerating values to find " +
+						"vertex for which property \""+property+"\" has value \""+value+"\" ....\n" +
+						"And believe me, few are the chances we find anything this way !");
+			}
+			for(Vertex v : graph.getVertices()) {
+				if(v.getProperty(property).equals(value)) {
+					return v;
+				}
+			}
+			throw new UnableToLocateVertexException(property, value);
+		}
+	}
+	
+
+	/**
+	 * Locate vertex having given property value in a SailGraph
+	 * @param graph
+	 * @param property
+	 * @param value
+	 * @return
+	 */
+	public static Vertex locateVertex(SailGraph graph, String property, Object value) {
+		throw new UnsupportedOperationException("not yet implemented");
+	}
+	
 	/**
 	 * Helper function locating first matching vertex with the given property value
 	 * @param graph
@@ -48,7 +84,7 @@ public class GraphUtils {
 	 * @param value property value
 	 * @return vertex corresponding to property, or null if none found
 	 */
-	public static Vertex locateVertex(IndexableGraph graph, Properties p, Object value) {
+	public static Vertex locateVertex(Graph graph, Properties p, Object value) {
 		return locateVertex(graph, p.name(), value);
 	}
 
@@ -76,7 +112,7 @@ public class GraphUtils {
 	 * @param value
 	 * @return
 	 */
-	public static Vertex getVertexForLiteral(IndexableGraph database, Object value) {
+	public static Vertex getVertexForLiteral(Graph database, Object value) {
 		Vertex returned = null;
 		// Now distinct behaviour between known objects and unknown ones
 		Class<? extends Object> valueClass = value.getClass();
@@ -130,7 +166,7 @@ public class GraphUtils {
 	 * @param idProperty id property
 	 * @return a composite id made of id container class, and the result of {@link LiteralTransformer#getVertexId(com.tinkerpop.blueprints.pgm.Graph, Object)}
 	 */
-	public static String getIdVertexId(IndexableGraph database, Class<?> declaredClass, Object object, Property idProperty) {
+	public static String getIdVertexId(Graph database, Class<?> declaredClass, Object object, Property idProperty) {
 		Object objectId = idProperty.get(object);
 		return getIdOfLiteral(database, declaredClass, idProperty, objectId);
 	}
@@ -141,10 +177,10 @@ public class GraphUtils {
 	 * @param value
 	 * @return
 	 */
-	public static <DataType> String getIdOf(IndexableGraph graph, ServiceRepository repository, DataType value) {
+	public static <DataType> String getIdOf(Graph graph, ServiceRepository repository, DataType value) {
 		Class<? extends Object> valueClass = value.getClass();
 		if(repository.containsKey(valueClass)) {
-			BluePrintsBackedFinderService<DataType, ?> service = (BluePrintsBackedFinderService<DataType, ?>) repository.get(valueClass);
+			IndexableGraphBackedFinderService<DataType, ?> service = (IndexableGraphBackedFinderService<DataType, ?>) repository.get(valueClass);
 			// All ids are string, don't worry about it
 			return service.getIdOf(value).toString();
 		} else if(Literals.containsKey(valueClass)) {
@@ -165,7 +201,7 @@ public class GraphUtils {
 	 * @param objectId object id value
 	 * @return the value used by {@link Properties#vertexId} to identify the vertex associated to that object
 	 */
-	public static String getIdOfLiteral(IndexableGraph database, Class<?> declaredClass, Property idProperty, Object objectId) {
+	public static String getIdOfLiteral(Graph database, Class<?> declaredClass, Property idProperty, Object objectId) {
 		StringBuilder sOut = new StringBuilder();
 		sOut.append(declaredClass.getCanonicalName()).append(":");
 		if(idProperty==null) {
@@ -185,7 +221,7 @@ public class GraphUtils {
 	 * @param value object id value
 	 * @return the value used by {@link Properties#vertexId} to identify the vertex associated to that object
 	 */
-	public static String getIdOfTuple(IndexableGraph database, ServiceRepository repository, Class<?> declaredClass, Object value) {
+	public static String getIdOfTuple(Graph database, ServiceRepository repository, Class<?> declaredClass, Object value) {
 		return Tuples.get(declaredClass).getIdOfTuple(database, repository, value);
 	}
 
@@ -197,7 +233,7 @@ public class GraphUtils {
 	 * @param objectsBeingUpdated map of objects already being accessed. Links object id to object
 	 * @return the
 	 */
-	public static Vertex getVertexForTuple(BluePrintsBackedFinderService<?, ?> service, ServiceRepository repository, Object value, Map<String, Object> objectsBeingUpdated) {
+	public static Vertex getVertexForTuple(AbstractBluePrintsBackedFinderService<? extends Graph, ?, ?> service, ServiceRepository repository, Object value, Map<String, Object> objectsBeingUpdated) {
 		Vertex returned = null;
 		// Now distinct behaviour between known objects and unknown ones
 		Class<? extends Object> valueClass = value.getClass();
@@ -232,7 +268,7 @@ public class GraphUtils {
 	 * @param type (associated to {@link Properties#type})
 	 * @return the newly created vertex (which DOESN'T contain the {@link Properties#value} property)
 	 */
-	public static Vertex createVertexWithoutValue(IndexableGraph database, Object vertexId, Kind kind, Class<? extends Object> type) {
+	public static Vertex createVertexWithoutValue(Graph database, Object vertexId, Kind kind, Class<? extends Object> type) {
 		Vertex returned = database.addVertex(vertexId);
 		saveVertexValues(returned, vertexId, kind, type);
 		return returned;

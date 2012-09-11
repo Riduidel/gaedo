@@ -20,10 +20,10 @@ import com.dooapp.gaedo.finders.sort.SortingExpressionImpl;
 import com.tinkerpop.blueprints.pgm.IndexableGraph;
 import com.tinkerpop.blueprints.pgm.Vertex;
 
-public class BluePrintsGraphQueryStatement<DataType, InformerType extends Informer<DataType>> implements QueryStatement<DataType, InformerType> {
+public class IndexableGraphQueryStatement<DataType, InformerType extends Informer<DataType>> implements QueryStatement<DataType, InformerType> {
 
 	private QueryBuilder<InformerType> query;
-	private BluePrintsBackedFinderService<DataType, InformerType> service;
+	private IndexableGraphBackedFinderService<DataType, InformerType> service;
 	private IndexableGraph database;
 	private ServiceRepository repository;
 	/**
@@ -41,8 +41,8 @@ public class BluePrintsGraphQueryStatement<DataType, InformerType extends Inform
 	private SortingExpression sortingExpression = new SortingExpressionImpl();
 	private QueryExpression filterExpression;
 
-	public BluePrintsGraphQueryStatement(QueryBuilder<InformerType> query,
-					BluePrintsBackedFinderService<DataType, InformerType> service, IndexableGraph database, ServiceRepository repository) {
+	public IndexableGraphQueryStatement(QueryBuilder<InformerType> query,
+					IndexableGraphBackedFinderService<DataType, InformerType> service, IndexableGraph database, ServiceRepository repository) {
 		this.query = query;
 		this.service = service;
 		this.database = database;

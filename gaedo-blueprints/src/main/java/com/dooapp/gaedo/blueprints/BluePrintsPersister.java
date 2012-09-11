@@ -26,6 +26,7 @@ import com.dooapp.gaedo.patterns.WriteReplaceable;
 import com.dooapp.gaedo.properties.Property;
 import com.dooapp.gaedo.utils.Utils;
 import com.tinkerpop.blueprints.pgm.Edge;
+import com.tinkerpop.blueprints.pgm.Graph;
 import com.tinkerpop.blueprints.pgm.IndexableGraph;
 import com.tinkerpop.blueprints.pgm.Vertex;
 
@@ -45,6 +46,7 @@ public class BluePrintsPersister {
 	 * Create or update given object
 	 * @param service source of modification
 	 * @param objectVertexId object expected vertex id
+	 * @param objectVertex vertex corresponding to object to update
 	 * @param valueClass TODO
 	 * @param containedProperties list of contained properties
 	 * @param toUpdate object to update
@@ -52,9 +54,8 @@ public class BluePrintsPersister {
 	 * @param objectsBeingUpdated map containing subgraph of obejcts currently being updated, this is used to avoid loops, and NOT as a cache
 	 * @return updated object
 	 */
-	public <DataType> Object performUpdate(BluePrintsBackedFinderService<DataType, ?> service, String objectVertexId, Class<?> valueClass, Map<Property, Collection<CascadeType>> containedProperties, Object toUpdate, CascadeType cascade, Map<String, Object> objectsBeingUpdated) {
-		IndexableGraph database = service.getDatabase();
-		Vertex objectVertex = GraphUtils.locateVertex(database, Properties.vertexId, objectVertexId);
+	public <DataType> Object performUpdate(AbstractBluePrintsBackedFinderService<? extends Graph, DataType, ?> service, String objectVertexId, Vertex objectVertex, Class<?> valueClass, Map<Property, Collection<CascadeType>> containedProperties, Object toUpdate, CascadeType cascade, Map<String, Object> objectsBeingUpdated) {
+		Graph database = service.getDatabase();
 		// it's in fact an object creation
 		if(objectVertex==null) {
 			if (logger.isLoggable(Level.FINER)) {
@@ -86,7 +87,7 @@ public class BluePrintsPersister {
 	 * @return
 	 * @see GraphUtils#createVertexWithoutValue(IndexableGraph, Object, Kind, Class)
 	 */
-	public Vertex createIdVertex(IndexableGraph database, Class<?> valueClass, String objectVertexId) {
+	public Vertex createIdVertex(Graph database, Class<?> valueClass, String objectVertexId) {
 		return GraphUtils.createVertexWithoutValue(database, objectVertexId, nodeKind, valueClass);
 	}
 
@@ -98,7 +99,7 @@ public class BluePrintsPersister {
 	 * @param cascade cascade type used to perform this operation, depend if this method is called from a {@link #create(Object)} or an {@link #update(Object)}
 	 * @param objectsBeingAccessed cache of objects being accessed during that write
 	 */
-	private <DataType> void updateProperties(BluePrintsBackedFinderService<DataType, ?> service, IndexableGraph database, Object toUpdate, Vertex objectVertex, Map<Property, Collection<CascadeType>> containedProperties, CascadeType cascade, Map<String, Object> objectsBeingAccessed) {
+	private <DataType> void updateProperties(AbstractBluePrintsBackedFinderService<? extends Graph, DataType, ?> service, Graph database, Object toUpdate, Vertex objectVertex, Map<Property, Collection<CascadeType>> containedProperties, CascadeType cascade, Map<String, Object> objectsBeingAccessed) {
 		for(Map.Entry<Property, Collection<CascadeType>> entry : containedProperties.entrySet()) {
 			Property p = entry.getKey();
 			// Static properties are by design not written
@@ -138,7 +139,7 @@ public class BluePrintsPersister {
 	 */
 	private Collection<Vertex> createVerticesFor(Map value) {
 		// TODO Auto-generated method stub
-		throw new UnsupportedOperationException("method "+BluePrintsBackedFinderService.class.getName()+"#createVerticesFor has not yet been implemented AT ALL");
+		throw new UnsupportedOperationException("method "+IndexableGraphBackedFinderService.class.getName()+"#createVerticesFor has not yet been implemented AT ALL");
 	}
 	
 	/**
@@ -150,7 +151,7 @@ public class BluePrintsPersister {
 	 * @param rootVertex object root vertex
 	 * @param cascade used cascade type, can be either {@link CascadeType#PERSIST} or {@link CascadeType#MERGE}
 	 */
-	private <DataType> void updateMap(BluePrintsBackedFinderService<DataType, ?> service, IndexableGraph database, Property p, Object toUpdate, Vertex rootVertex, CascadeType cascade, Map<String, Object> objectsBeingAccessed) {
+	private <DataType> void updateMap(AbstractBluePrintsBackedFinderService<? extends Graph, DataType, ?> service, Graph database, Property p, Object toUpdate, Vertex rootVertex, CascadeType cascade, Map<String, Object> objectsBeingAccessed) {
 		// Cast should work like a charm
 		Map value = (Map) p.get(toUpdate);
 		// As a convention, null values are never stored
@@ -192,7 +193,7 @@ public class BluePrintsPersister {
 	 * @param cascade used cascade type, can be either {@link CascadeType#PERSIST} or {@link CascadeType#MERGE}
 	 * @category update
 	 */
-	private <DataType> void updateCollection(BluePrintsBackedFinderService<DataType, ?> service, IndexableGraph database, Property p, Object toUpdate, Vertex rootVertex, CascadeType cascade, Map<String, Object> objectsBeingAccessed) {
+	private <DataType> void updateCollection(AbstractBluePrintsBackedFinderService<? extends Graph, DataType, ?> service, Graph database, Property p, Object toUpdate, Vertex rootVertex, CascadeType cascade, Map<String, Object> objectsBeingAccessed) {
 		// Cast should work like a charm
 		Collection value = (Collection) p.get(toUpdate);
 		// As a convention, null values are never stored
@@ -231,7 +232,7 @@ public class BluePrintsPersister {
 	 * @param cascade used cascade type, can be either {@link CascadeType#PERSIST} or {@link CascadeType#MERGE}
 	 * @return collection of vertices created by {@link #getVertexFor(Object)}
 	 */
-	private Collection<Vertex> createCollectionVerticesFor(BluePrintsBackedFinderService<?, ?> service, Collection value, CascadeType cascade, Map<String, Object> objectsBeingAccessed) {
+	private Collection<Vertex> createCollectionVerticesFor(AbstractBluePrintsBackedFinderService<? extends Graph, ?, ?> service, Collection value, CascadeType cascade, Map<String, Object> objectsBeingAccessed) {
 		Collection<Vertex> returned = new HashSet<Vertex>();
 		for(Object o : value) {
 			returned.add(service.getVertexFor(o, cascade, objectsBeingAccessed));
@@ -244,9 +245,9 @@ public class BluePrintsPersister {
 	 * @param value map of values to create vertices for
 	 * @param cascade used cascade type, can be either {@link CascadeType#PERSIST} or {@link CascadeType#MERGE}
 	 * @return collection of vertices created by {@link #getVertexFor(Object)}
-	 * @see #getVertexFor(Object, CascadeType, Map) for details about the way to generate a vertex for a Map.Entry node
+	 * @see #getVertexFor(AbstractBluePrintsBackedFinderService<? extends Graph, DataType, ?>, CascadeType, Map) for details about the way to generate a vertex for a Map.Entry node
 	 */
-	private Collection<Vertex> createMapVerticesFor(BluePrintsBackedFinderService<?, ?> service, Map value, CascadeType cascade, Map<String, Object> objectsBeingAccessed) {
+	private Collection<Vertex> createMapVerticesFor(AbstractBluePrintsBackedFinderService<? extends Graph, ?, ?> service, Map value, CascadeType cascade, Map<String, Object> objectsBeingAccessed) {
 		Collection<Vertex> returned = new HashSet<Vertex>();
 		// Strangely, the entrySet is not seen as a Set<Entry>
 		for(Entry o : (Set<Entry>) value.entrySet()) {
@@ -263,7 +264,7 @@ public class BluePrintsPersister {
 	 * @param cascade used cascade type, can be either {@link CascadeType#PERSIST} or {@link CascadeType#MERGE}
 	 * @category update
 	 */
-	private <DataType> void updateSingle(BluePrintsBackedFinderService<DataType, ?> service, IndexableGraph database, Property p, Object toUpdate, Vertex rootVertex, CascadeType cascade, Map<String, Object> objectsBeingAccessed) {
+	private <DataType> void updateSingle(AbstractBluePrintsBackedFinderService<? extends Graph, DataType, ?> service, Graph database, Property p, Object toUpdate, Vertex rootVertex, CascadeType cascade, Map<String, Object> objectsBeingAccessed) {
 		Object value = p.get(toUpdate);
 		// As a convention, null values are never stored
 		if(value!=null) {
@@ -304,7 +305,7 @@ public class BluePrintsPersister {
 		}
 	}
 
-	public <DataType> DataType loadObject(BluePrintsBackedFinderService<DataType, ?> service, Vertex objectVertex, Map<String, Object> objectsBeingAccessed) {
+	public <DataType> DataType loadObject(AbstractBluePrintsBackedFinderService<? extends Graph, DataType, ?> service, Vertex objectVertex, Map<String, Object> objectsBeingAccessed) {
 		String objectVertexId = objectVertex.getProperty(Properties.vertexId.name()).toString();
 		return loadObject(service, objectVertexId, objectVertex, objectsBeingAccessed);
 	}
@@ -316,7 +317,7 @@ public class BluePrintsPersister {
 	 * @param objectsBeingAccessed map of objects currently being accessed, it avoid some loops during loading, but is absolutely NOT a persistent cache
 	 * @return loaded object
 	 */
-	public <DataType> DataType loadObject(BluePrintsBackedFinderService<DataType, ?> service, String objectVertexId, Vertex objectVertex, Map<String, Object> objectsBeingAccessed) {
+	public <DataType> DataType loadObject(AbstractBluePrintsBackedFinderService<? extends Graph, DataType, ?> service, String objectVertexId, Vertex objectVertex, Map<String, Object> objectsBeingAccessed) {
 		if(objectsBeingAccessed.containsKey(objectVertexId))
 			return (DataType) objectsBeingAccessed.get(objectVertexId);
 		// Shortcut
@@ -403,7 +404,7 @@ public class BluePrintsPersister {
 			Object value = GraphUtils.createInstance(classloader, firstVertex, repository, objectsBeingAccessed);
 			if(repository.containsKey(value.getClass())) {
 				// value requires fields loading
-				BluePrintsBackedFinderService blueprints= (BluePrintsBackedFinderService) repository.get(value.getClass());
+				IndexableGraphBackedFinderService blueprints= (IndexableGraphBackedFinderService) repository.get(value.getClass());
 				p.set(returned, loadObject(blueprints, firstVertex, objectsBeingAccessed));
 			} else {
 				p.set(returned, value);

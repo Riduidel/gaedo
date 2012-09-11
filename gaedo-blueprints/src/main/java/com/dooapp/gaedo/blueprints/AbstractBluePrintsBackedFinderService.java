@@ -41,114 +41,62 @@ import com.dooapp.gaedo.properties.PropertyProvider;
 import com.dooapp.gaedo.properties.PropertyProviderUtils;
 import com.dooapp.gaedo.utils.Utils;
 import com.tinkerpop.blueprints.pgm.Edge;
+import com.tinkerpop.blueprints.pgm.Graph;
 import com.tinkerpop.blueprints.pgm.IndexableGraph;
 import com.tinkerpop.blueprints.pgm.TransactionalGraph;
 import com.tinkerpop.blueprints.pgm.Vertex;
-import com.tinkerpop.blueprints.pgm.TransactionalGraph.Conclusion;
 
 /**
- * Standard blueprints backed implementation of FinderService
- * 
- * Notice we maintain {@link AbstractCooperantFinderService} infos about objects being accessed as String containing, in fact, vertex ids
+ * Base class for all finder service using blueprints graphs as storage
  * @author ndx
  *
+ * @param <GraphClass>
+ * @param <DataType>
+ * @param <InformerType>
  */
-public class BluePrintsBackedFinderService <DataType, InformerType extends Informer<DataType>> 
+public abstract class AbstractBluePrintsBackedFinderService<GraphClass extends Graph, DataType, InformerType extends Informer<DataType>> 
 	extends AbstractFinderService<DataType, InformerType> 
 	implements FinderCrudService<DataType, InformerType>, IdBasedService<DataType>{
-	
-	/**
-	 * Transaction supporting "closure" base : it decorates given operation with transaction support.
-	 * @author ndx
-	 *
-	 * @param <ResultType>
-	 */
-	private abstract class TransactionalOperation<ResultType> {
-		public ResultType perform() {
-			if(transactionSupport!=null) {
-				try {
-					transactionSupport.startTransaction();
-					try {
-						ResultType returned = doPerform();
-						transactionSupport.stopTransaction(Conclusion.SUCCESS);
-						return returned;
-					} catch(RuntimeException e) {
-						transactionSupport.stopTransaction(Conclusion.FAILURE);
-						throw e;
-					}
-				} catch(RuntimeException e) {
-					/*
-					 * People of tinkerpop : I hate you for that code block !
-					 * Why on earth didn't you send a specific exception conveying that very purpose ? I could have handled it clearly.
-					 * Instead, I have to rely on messy and slow string comparison. OMG
-					 */
-					if("Stop current transaction before starting another".equals(e.getMessage())) {
-						// Anyway, perform operation in transaction
-						return doPerform();
-						// And obviously, I won't close a transaction I didn't opened
-					} else {
-						throw e;
-					}
-				}
-			} else {
-				return doPerform();
-			}
-		}
 
-		/**
-		 * Operation that will be performed (in transactional context or not)
-		 * @return effective result
-		 */
-		protected abstract ResultType doPerform();
-	}
-	
-	private static final Logger logger = Logger.getLogger(BluePrintsBackedFinderService.class.getName());
-	
+	private static final Logger logger = Logger.getLogger(IndexableGraphBackedFinderService.class.getName());
 	/**
 	 * Graph used as database
 	 */
-	private final IndexableGraph database;
-	
+	protected final GraphClass database;
 	/**
 	 * Graph casted as transactional one if possible. It is used to offer support of transactionnal read operations (if graph is indeed a transactional one).
 	 * This field may be NULL. 
 	 */
-	private final TransactionalGraph transactionSupport;
+	protected final TransactionalGraph transactionSupport;
 	/**
 	 * Property used to store id
 	 */
 	private Property idProperty;
-
 	/**
 	 * Accelerator cache linking classes objects to the collection of properties and cascade informations associated to
 	 * persist those fields.
 	 */
 	protected Map<Class<?>, Map<Property, Collection<CascadeType>>> classes = new HashMap<Class<?>, Map<Property, Collection<CascadeType>>>();
-
 	/**
 	 * Property provider indicating what, and how, saving infos from object
 	 */
 	protected PropertyProvider propertyProvider;
-
 	/**
 	 * Migrator for given contained class
 	 */
 	protected Migrator migrator;
-
 	/**
 	 * Get access to the service repository to handle links between objects
 	 */
 	protected final ServiceRepository repository;
-
 	/**
 	 * Adaptation layer
 	 */
 	private BluePrintsPersister persister;
-
 	private boolean requiresIdGeneration;
-	
-	public BluePrintsBackedFinderService(Class<DataType> containedClass, Class<InformerType> informerClass, InformerFactory factory, ServiceRepository repository,
-					PropertyProvider provider, IndexableGraph graph) {
+
+	public AbstractBluePrintsBackedFinderService(GraphClass graph, Class<DataType> containedClass, Class<InformerType> informerClass,
+					InformerFactory factory, ServiceRepository repository, PropertyProvider provider) {
 		super(containedClass, informerClass, factory);
 		this.repository = repository;
 		this.propertyProvider = provider;
@@ -170,7 +118,7 @@ public class BluePrintsBackedFinderService <DataType, InformerType extends Infor
 					"supporting migration ? "+(migrator!=null)+"\n");
 		}
 	}
-	
+
 	/**
 	 * Get map linking properties to their respective cascading informations
 	 * @param provider used provider
@@ -217,8 +165,8 @@ public class BluePrintsBackedFinderService <DataType, InformerType extends Infor
 	 */
 	@Override
 	public DataType create(final DataType toCreate) {
-		return new TransactionalOperation<DataType>() {
-
+		return new TransactionalOperation<DataType, DataType, InformerType>(this) {
+	
 			@Override
 			protected DataType doPerform() {
 				return doUpdate(toCreate, CascadeType.PERSIST, new TreeMap<String, Object>());
@@ -249,8 +197,8 @@ public class BluePrintsBackedFinderService <DataType, InformerType extends Infor
 	@Override
 	public void delete(final DataType toDelete) {
 		if(toDelete!=null) {
-			new TransactionalOperation<Void>() {
-
+			new TransactionalOperation<Void, DataType, InformerType>(this) {
+	
 				@Override
 				protected Void doPerform() {
 					doDelete(toDelete, new TreeMap<String, Object>());
@@ -366,7 +314,7 @@ public class BluePrintsBackedFinderService <DataType, InformerType extends Infor
 			}
 		}
 	}
-	
+
 	/**
 	 * Delete an out edge vertex. Those are vertex corresponding to properties.
 	 * @param objectVertex source object vertex, used for debugging purpose only
@@ -450,7 +398,7 @@ public class BluePrintsBackedFinderService <DataType, InformerType extends Infor
 		}
 		return GraphUtils.getIdVertexId(database, object.getClass(), object, idProperty);
 	}
-	
+
 	/**
 	 * Get id of given object, provided of course it's an instance of this class
 	 * @param data object to extract an id for
@@ -462,8 +410,8 @@ public class BluePrintsBackedFinderService <DataType, InformerType extends Infor
 
 	@Override
 	public DataType update(final DataType toUpdate) {
-		return new TransactionalOperation<DataType>() {
-
+		return new TransactionalOperation<DataType, DataType, InformerType>(this) {
+	
 			@Override
 			protected DataType doPerform() {
 				return doUpdate(toUpdate, CascadeType.MERGE, new TreeMap<String, Object>());
@@ -482,7 +430,9 @@ public class BluePrintsBackedFinderService <DataType, InformerType extends Infor
 	private DataType doUpdate(DataType toUpdate, CascadeType cascade, Map<String, Object> treeMap) {
 		boolean generatesId = requiresIdGeneration ? (CascadeType.PERSIST==cascade) : false;
 		String objectVertexId = getIdVertexId(toUpdate, idProperty, generatesId);
-		return (DataType) persister.performUpdate(this, objectVertexId, toUpdate.getClass(), getContainedProperties(toUpdate), toUpdate, cascade, treeMap);
+		Vertex objectVertex = GraphUtils.locateVertex(database, Properties.vertexId, objectVertexId);
+		return (DataType) persister.performUpdate(this, objectVertexId, objectVertex, 
+						toUpdate.getClass(), getContainedProperties(toUpdate), toUpdate, cascade, treeMap);
 	}
 
 	/**
@@ -493,45 +443,45 @@ public class BluePrintsBackedFinderService <DataType, InformerType extends Infor
 	 * @return
 	 */
 	public Vertex getVertexFor(Object value, CascadeType cascade, Map<String, Object> objectsBeingUpdated) {
-		boolean allowIdGeneration = CascadeType.PERSIST.equals(cascade) || CascadeType.MERGE.equals(cascade);
-		// Here we suppose the service is the right one for the job (which may not be the case)
-		if(containedClass.isInstance(value)) {
-			Vertex returned = getIdVertexFor(containedClass.cast(value), allowIdGeneration);
-			if(returned==null) {
-				doUpdate(containedClass.cast(value), cascade, objectsBeingUpdated);
-				returned = getIdVertexFor(containedClass.cast(value), allowIdGeneration);
-			} else {
-				// vertex already exist, but maybe object needs an update
-				if(CascadeType.PERSIST==cascade || CascadeType.MERGE==cascade) {
+			boolean allowIdGeneration = CascadeType.PERSIST.equals(cascade) || CascadeType.MERGE.equals(cascade);
+			// Here we suppose the service is the right one for the job (which may not be the case)
+			if(containedClass.isInstance(value)) {
+				Vertex returned = getIdVertexFor(containedClass.cast(value), allowIdGeneration);
+				if(returned==null) {
 					doUpdate(containedClass.cast(value), cascade, objectsBeingUpdated);
+					returned = getIdVertexFor(containedClass.cast(value), allowIdGeneration);
+				} else {
+					// vertex already exist, but maybe object needs an update
+					if(CascadeType.PERSIST==cascade || CascadeType.MERGE==cascade) {
+						doUpdate(containedClass.cast(value), cascade, objectsBeingUpdated);
+					}
 				}
+				return returned;
 			}
-			return returned;
-		}
-		Class<? extends Object> valueClass = value.getClass();
-		if(repository.containsKey(valueClass)) {
-			FinderCrudService service = repository.get(valueClass);
-			if(service instanceof BluePrintsBackedFinderService) {
-				return ((BluePrintsBackedFinderService) service).getVertexFor(value, cascade, objectsBeingUpdated);
+			Class<? extends Object> valueClass = value.getClass();
+			if(repository.containsKey(valueClass)) {
+				FinderCrudService service = repository.get(valueClass);
+				if(service instanceof IndexableGraphBackedFinderService) {
+					return ((IndexableGraphBackedFinderService) service).getVertexFor(value, cascade, objectsBeingUpdated);
+				} else {
+					throw new IncompatibleServiceException(service, valueClass);
+				}
+			} else if(Literals.containsKey(valueClass)){
+				return GraphUtils.getVertexForLiteral(database, value);
+			} else if(Tuples.containsKey(valueClass)){
+				return GraphUtils.getVertexForTuple(this, repository, value, objectsBeingUpdated);
 			} else {
-				throw new IncompatibleServiceException(service, valueClass);
+	/*			// OK, we will persist this object by ourselves, which is really error-prone, but we do we have any other solution ?
+				// But notice object is by design consderie
+				Vertex objectVertex = 
+				objectVertex.setProperty(Properties.vertexId.name(), getIdVertexId(toUpdate));
+				objectVertex.setProperty(Properties.kind.name(), Kind.managed.name());
+				objectVertex.setProperty(Properties.type.name(), toUpdate.getClass().getName());
+	*/
+				throw new ObjectIsNotARealLiteralException(value, valueClass);
+				
 			}
-		} else if(Literals.containsKey(valueClass)){
-			return GraphUtils.getVertexForLiteral(database, value);
-		} else if(Tuples.containsKey(valueClass)){
-			return GraphUtils.getVertexForTuple(this, repository, value, objectsBeingUpdated);
-		} else {
-/*			// OK, we will persist this object by ourselves, which is really error-prone, but we do we have any other solution ?
-			// But notice object is by design consderie
-			Vertex objectVertex = 
-			objectVertex.setProperty(Properties.vertexId.name(), getIdVertexId(toUpdate));
-			objectVertex.setProperty(Properties.kind.name(), Kind.managed.name());
-			objectVertex.setProperty(Properties.type.name(), toUpdate.getClass().getName());
-*/
-			throw new ObjectIsNotARealLiteralException(value, valueClass);
-			
 		}
-	}
 
 	/**
 	 * Object query is done by simply looking up all objects of that class using a standard query
@@ -541,7 +491,7 @@ public class BluePrintsBackedFinderService <DataType, InformerType extends Infor
 	@Override
 	public Iterable<DataType> findAll() {
 		return find().matching(new QueryBuilder<InformerType>() {
-
+	
 			/**
 			 * An empty and starts with an initial match of true, but degrades it for each failure.
 			 * So creating an empty and() is like creating a "true" statement, which in turn results into searching all objects of that class.
@@ -556,12 +506,6 @@ public class BluePrintsBackedFinderService <DataType, InformerType extends Infor
 		}).getAll();
 	}
 
-	@Override
-	protected QueryStatement<DataType, InformerType> createQueryStatement(QueryBuilder<InformerType> query) {
-		return new BluePrintsGraphQueryStatement<DataType, InformerType>(query,
-						this, database, repository);
-	}
-
 	/**
 	 * Load object starting with the given vertex root.
 	 * Notice object is added to the accessed set with a weak key, this way, it should be faster to load it and to maintain instance unicity
@@ -573,9 +517,16 @@ public class BluePrintsBackedFinderService <DataType, InformerType extends Infor
 	 */
 	public DataType loadObject(String objectVertexId, Map<String, Object> objectsBeingAccessed) {
 		// If cast fails, well, that's some fuckin mess, no ? 
-		Vertex objectVertex = GraphUtils.locateVertex(database, Properties.vertexId, objectVertexId);
+		Vertex objectVertex = loadVertexFor(objectVertexId);
 		return persister.loadObject(this, objectVertexId, objectVertex, objectsBeingAccessed);
 	}
+
+	/**
+	 * Load veretx associated to given object id
+	 * @param objectVertexId
+	 * @return
+	 */
+	protected abstract Vertex loadVertexFor(String objectVertexId);
 
 	/**
 	 * Load object from a vertex
@@ -587,7 +538,6 @@ public class BluePrintsBackedFinderService <DataType, InformerType extends Infor
 	public DataType loadObject(Vertex objectVertex, Map<String, Object> objectsBeingAccessed) {
 		return persister.loadObject(this, objectVertex, objectsBeingAccessed);
 	}
-
 
 	/**
 	 * we only consider first id element
@@ -647,7 +597,7 @@ public class BluePrintsBackedFinderService <DataType, InformerType extends Infor
 	 * @category getter
 	 * @category database
 	 */
-	public IndexableGraph getDatabase() {
+	public GraphClass getDatabase() {
 		return database;
 	}
 
@@ -676,8 +626,8 @@ public class BluePrintsBackedFinderService <DataType, InformerType extends Infor
 			idProperty.set(value, id[0]);
 			if(getIdVertexFor(value, false /* no id generation when assigning an id ! */)==null) {
 				try {
-					TransactionalOperation<Boolean> operation = new TransactionalOperation<Boolean>() {
-
+					TransactionalOperation<Boolean, DataType, InformerType> operation = new TransactionalOperation<Boolean, DataType, InformerType>(this) {
+	
 						@Override
 						protected Boolean doPerform() {
 							persister.createIdVertex(database, value.getClass(), getIdVertexId(value, idProperty, requiresIdGeneration));

@@ -6,7 +6,7 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Map.Entry;
 
-import com.dooapp.gaedo.blueprints.BluePrintsBackedFinderService;
+import com.dooapp.gaedo.blueprints.IndexableGraphBackedFinderService;
 import com.dooapp.gaedo.blueprints.queries.tests.AndVertexTest;
 import com.dooapp.gaedo.blueprints.queries.tests.CollectionContains;
 import com.dooapp.gaedo.blueprints.queries.tests.CompoundVertexTest;
@@ -47,7 +47,7 @@ public class OptimizedGraphExecutableQuery extends AbstractGraphExecutableQuery 
 	 * @param searchedClass
 	 *            searched value class
 	 */
-	public OptimizedGraphExecutableQuery(BluePrintsBackedFinderService<?, ?> service, CompoundVertexTest vertexTest, SortingExpression sortingExpression) {
+	public OptimizedGraphExecutableQuery(IndexableGraphBackedFinderService<?, ?> service, CompoundVertexTest vertexTest, SortingExpression sortingExpression) {
 		super(service, addClassSearchTo(vertexTest, service.getContainedClass()), sortingExpression);
 	}
 

@@ -6,7 +6,7 @@ import java.util.TreeMap;
 
 import javax.persistence.CascadeType;
 
-import com.dooapp.gaedo.blueprints.BluePrintsBackedFinderService;
+import com.dooapp.gaedo.blueprints.IndexableGraphBackedFinderService;
 import com.dooapp.gaedo.blueprints.queries.tests.CollectionContains;
 import com.dooapp.gaedo.blueprints.queries.tests.EqualsTo;
 import com.dooapp.gaedo.blueprints.queries.tests.MapContainsKey;
@@ -29,14 +29,14 @@ public class VertexRootsCollector extends VertexTestVisitorAdapter implements Ve
 	 */
 	private Map<Vertex, Iterable<Property>> result = new LinkedHashMap<Vertex, Iterable<Property>>();
 	
-	private final BluePrintsBackedFinderService<?, ?> service;
+	private final IndexableGraphBackedFinderService<?, ?> service;
 
 	/**
 	 * Cache of objects being loaded during roots collection building
 	 */
 	private transient Map<String, Object> objectsBeingAccessed = new TreeMap<String, Object>();
 
-	public VertexRootsCollector(BluePrintsBackedFinderService<?, ?> service) {
+	public VertexRootsCollector(IndexableGraphBackedFinderService<?, ?> service) {
 		super();
 		this.service = service;
 	}

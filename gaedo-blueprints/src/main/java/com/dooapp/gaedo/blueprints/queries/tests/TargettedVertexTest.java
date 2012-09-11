@@ -3,7 +3,7 @@ package com.dooapp.gaedo.blueprints.queries.tests;
 import java.util.Iterator;
 import java.util.TreeMap;
 
-import com.dooapp.gaedo.blueprints.BluePrintsBackedFinderService;
+import com.dooapp.gaedo.blueprints.IndexableGraphBackedFinderService;
 import com.dooapp.gaedo.blueprints.Properties;
 import com.dooapp.gaedo.finders.repository.ServiceRepository;
 import com.dooapp.gaedo.properties.Property;
@@ -24,7 +24,7 @@ public class TargettedVertexTest {
 	 * @param deepInspect should we perform deep object inspection to check equaality ? This requires object loading and is as a consequence by far slower
 	 * @return true if object is equals to vertex associated object
 	 */
-	protected static boolean isVertexEqualsTo(Vertex currentVertex, BluePrintsBackedFinderService service, Object expected, boolean deepInspect) {
+	protected static boolean isVertexEqualsTo(Vertex currentVertex, IndexableGraphBackedFinderService service, Object expected, boolean deepInspect) {
 		Object expectedId = service.getIdOf(expected);
 		if (expectedId.equals(currentVertex.getProperty(Properties.vertexId.name()))) {
 			return true;

@@ -6,7 +6,7 @@ import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import com.dooapp.gaedo.blueprints.BluePrintsBackedFinderService;
+import com.dooapp.gaedo.blueprints.IndexableGraphBackedFinderService;
 import com.dooapp.gaedo.blueprints.GraphUtils;
 import com.dooapp.gaedo.blueprints.Properties;
 import com.dooapp.gaedo.blueprints.queries.tests.CompoundVertexTest;
@@ -27,7 +27,7 @@ import com.tinkerpop.blueprints.pgm.Vertex;
 public class BasicGraphExecutableQuery extends AbstractGraphExecutableQuery implements GraphExecutableQuery {
 	private static final Logger logger = Logger.getLogger(BasicGraphExecutableQuery.class.getName());
 	
-	public BasicGraphExecutableQuery(BluePrintsBackedFinderService<?, ?> service, CompoundVertexTest peek, SortingExpression sortingExpression) {
+	public BasicGraphExecutableQuery(IndexableGraphBackedFinderService<?, ?> service, CompoundVertexTest peek, SortingExpression sortingExpression) {
 		super(service, peek, sortingExpression);
 	}
 

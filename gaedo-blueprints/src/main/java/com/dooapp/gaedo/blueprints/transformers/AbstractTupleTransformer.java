@@ -2,17 +2,17 @@ package com.dooapp.gaedo.blueprints.transformers;
 
 import java.util.Collection;
 import java.util.Map;
-import java.util.Map.Entry;
 
 import javax.persistence.CascadeType;
 
-import com.dooapp.gaedo.blueprints.BluePrintsBackedFinderService;
+import com.dooapp.gaedo.blueprints.AbstractBluePrintsBackedFinderService;
 import com.dooapp.gaedo.blueprints.BluePrintsPersister;
 import com.dooapp.gaedo.blueprints.GraphUtils;
 import com.dooapp.gaedo.blueprints.Kind;
 import com.dooapp.gaedo.blueprints.Properties;
 import com.dooapp.gaedo.finders.repository.ServiceRepository;
 import com.dooapp.gaedo.properties.Property;
+import com.tinkerpop.blueprints.pgm.Graph;
 import com.tinkerpop.blueprints.pgm.IndexableGraph;
 import com.tinkerpop.blueprints.pgm.Vertex;
 
@@ -20,12 +20,14 @@ public abstract class AbstractTupleTransformer<TupleType> {
 
 	protected final BluePrintsPersister persister = new BluePrintsPersister(Kind.tuple);
 
-	public <DataType> Vertex getVertexFor(BluePrintsBackedFinderService<DataType, ?> service, TupleType cast, Map<String, Object> objectsBeingUpdated) {
+	public <DataType> Vertex getVertexFor(AbstractBluePrintsBackedFinderService<? extends Graph, DataType, ?> service, TupleType cast, Map<String, Object> objectsBeingUpdated) {
 		// First step is to build an id for given tuple by concatenating key and value id (which is hopefully done separately)
 		String entryVertexId = getIdOfTuple(service.getDatabase(), service.getRepository(), cast);
+		Graph g = service.getDatabase();
 		// No need to memorize updated version
-		persister.performUpdate(service, entryVertexId, getContainedClass(), getContainedProperties(), cast, CascadeType.PERSIST, objectsBeingUpdated);
-		return GraphUtils.locateVertex(service.getDatabase(), Properties.vertexId, entryVertexId);
+		Vertex objectVertex = GraphUtils.locateVertex(g, Properties.vertexId, entryVertexId);
+		persister.performUpdate(service, entryVertexId, objectVertex, getContainedClass(), getContainedProperties(), cast, CascadeType.PERSIST, objectsBeingUpdated);
+		return GraphUtils.locateVertex(g, Properties.vertexId, entryVertexId);
 	}
 
 	/**
@@ -40,7 +42,7 @@ public abstract class AbstractTupleTransformer<TupleType> {
 	/**
 	 * Create a long string id by concatenating all contained properties ones
 	 */
-	public String getIdOfTuple(IndexableGraph graph, ServiceRepository repository, TupleType value) {
+	public String getIdOfTuple(Graph graph, ServiceRepository repository, TupleType value) {
 		StringBuilder sOut = new StringBuilder();
 		for(Property p : getContainedProperties().keySet()) {
 			Object propertyValue = p.get(value);

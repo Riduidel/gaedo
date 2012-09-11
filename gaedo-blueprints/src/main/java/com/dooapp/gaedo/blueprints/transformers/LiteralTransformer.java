@@ -1,7 +1,6 @@
 package com.dooapp.gaedo.blueprints.transformers;
 
 import com.tinkerpop.blueprints.pgm.Graph;
-import com.tinkerpop.blueprints.pgm.IndexableGraph;
 import com.tinkerpop.blueprints.pgm.Vertex;
 
 /**
@@ -23,7 +22,7 @@ public interface LiteralTransformer<Type> extends Transformer {
 	 * @param value
 	 * @return
 	 */
-	Vertex getVertexFor(IndexableGraph database, Type value);
+	Vertex getVertexFor(Graph database, Type value);
 	
 	/**
 	 * Load given vertex into an object

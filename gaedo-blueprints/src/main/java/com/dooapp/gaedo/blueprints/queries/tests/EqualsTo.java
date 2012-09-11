@@ -1,6 +1,6 @@
 package com.dooapp.gaedo.blueprints.queries.tests;
 
-import com.dooapp.gaedo.blueprints.BluePrintsBackedFinderService;
+import com.dooapp.gaedo.blueprints.IndexableGraphBackedFinderService;
 import com.dooapp.gaedo.blueprints.GraphUtils;
 import com.dooapp.gaedo.blueprints.transformers.LiteralTransformer;
 import com.dooapp.gaedo.blueprints.transformers.Literals;
@@ -25,7 +25,7 @@ public class EqualsTo extends MonovaluedValuedVertexTest<Object> implements Vert
 	@Override
 	protected boolean callMatchManaged(Vertex currentVertex, Property finalProperty) {
 		// First check if id is the same
-		BluePrintsBackedFinderService service = getService();
+		IndexableGraphBackedFinderService service = getService();
 		return isVertexEqualsTo(currentVertex, service, expected, false);
 	}
 

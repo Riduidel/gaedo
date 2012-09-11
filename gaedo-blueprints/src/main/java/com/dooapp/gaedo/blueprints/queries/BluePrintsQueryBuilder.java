@@ -2,7 +2,7 @@ package com.dooapp.gaedo.blueprints.queries;
 
 import java.util.Stack;
 
-import com.dooapp.gaedo.blueprints.BluePrintsBackedFinderService;
+import com.dooapp.gaedo.blueprints.IndexableGraphBackedFinderService;
 import com.dooapp.gaedo.blueprints.queries.executable.BasicGraphExecutableQuery;
 import com.dooapp.gaedo.blueprints.queries.executable.GraphExecutableQuery;
 import com.dooapp.gaedo.blueprints.queries.executable.OptimizedGraphExecutableQuery;
@@ -29,13 +29,13 @@ import com.tinkerpop.blueprints.pgm.IndexableGraph;
 
 public class BluePrintsQueryBuilder<DataType, InformerType extends Informer<DataType>> implements QueryExpressionVisitor {
 
-	private BluePrintsBackedFinderService<DataType, InformerType> service;
+	private IndexableGraphBackedFinderService<DataType, InformerType> service;
 	/**
 	 * This stack contains only the tests allowing tree building
 	 */
 	private Stack<CompoundVertexTest> tests = new Stack<CompoundVertexTest>();
 
-	public BluePrintsQueryBuilder(BluePrintsBackedFinderService<DataType, InformerType> service) {
+	public BluePrintsQueryBuilder(IndexableGraphBackedFinderService<DataType, InformerType> service) {
 		this.service = service;
 		/* Base test is always a AND one, associated to a test on class (will be used for optimized query building) */
 		this.tests.push(new AndVertexTest(service.getRepository(), null /* null indicates no property is navigated */));
