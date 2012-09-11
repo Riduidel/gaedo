@@ -52,6 +52,8 @@ import com.dooapp.gaedo.test.beans.User;
 import com.dooapp.gaedo.test.beans.UserInformer;
 import com.dooapp.gaedo.test.beans.specific.Theme;
 import com.dooapp.gaedo.test.beans.specific.ThemeInformer;
+import com.tinkerpop.blueprints.pgm.Edge;
+import com.tinkerpop.blueprints.pgm.Index;
 import com.tinkerpop.blueprints.pgm.IndexableGraph;
 
 @RunWith(Parameterized.class)
@@ -250,6 +252,18 @@ public class GraphBackedPostFinderServiceTest {
 		graph.shutdown();
 		File f = new File(GraphBackedLoadTest.GRAPH_DIR);
 		f.delete();
+	}
+
+	/**
+	 * This test makes sure property rewriting works ok (by checking no {@link Post#text} property is written to graph.
+	 * As one may has notice, posts are created during @Before method and as a consequence are available before each test (including this one).
+	 */
+	@Test 
+	public void makeSureGraphDoesntContainAnyEdgeNamedText() {
+		Index<Edge> edgeIndex = graph.getIndex(Index.EDGES, Edge.class);
+		assertThat(edgeIndex.count("label", "Identified.id"), IsNot.not(Is.is(0l)));
+		assertThat(edgeIndex.count("label", "post_text"), IsNot.not(Is.is(0l)));
+		assertThat(edgeIndex.count("label", "Post.text"), Is.is(0l));
 	}
 
 	@Test 

@@ -5,9 +5,12 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+import java.util.logging.Logger;
 
 import javax.persistence.CascadeType;
+import javax.persistence.Column;
 
+import com.dooapp.gaedo.blueprints.annotations.GraphProperty;
 import com.dooapp.gaedo.blueprints.transformers.LiteralTransformer;
 import com.dooapp.gaedo.blueprints.transformers.Literals;
 import com.dooapp.gaedo.blueprints.transformers.TupleTransformer;
@@ -20,6 +23,7 @@ import com.tinkerpop.blueprints.pgm.IndexableGraph;
 import com.tinkerpop.blueprints.pgm.Vertex;
 
 public class GraphUtils {
+	private static final Logger logger = Logger.getLogger(GraphUtils.class.getName());
 
 	/**
 	 * Helper function locating first matching vertex with the given property value
@@ -49,12 +53,21 @@ public class GraphUtils {
 	}
 
 	/**
-	 * Generate edge name from property infos
+	 * Generate edge name from property infos. Notice generated edge name will first be searched in property annotations, and only 
+	 * if none compatile found by generating a basic property name
 	 * @param p source property
 	 * @return an edge name (by default property container class name + "." + property name
 	 */
 	public static String getEdgeNameFor(Property p) {
-		return p.getDeclaringClass().getSimpleName()+"."+p.getName();
+		if(p.getAnnotation(GraphProperty.class)!=null) {
+			GraphProperty graph = p.getAnnotation(GraphProperty.class);
+			return graph.name();
+		} else  if(p.getAnnotation(Column.class)!=null) {
+			Column column = p.getAnnotation(Column.class);
+			return column.name();
+		} else {
+			return p.getDeclaringClass().getSimpleName()+"."+p.getName();
+		}
 	}
 
 	/**

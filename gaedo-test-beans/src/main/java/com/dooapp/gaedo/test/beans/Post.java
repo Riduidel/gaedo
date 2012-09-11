@@ -9,6 +9,7 @@ import java.util.TreeMap;
 import java.util.logging.Logger;
 
 import javax.persistence.CascadeType;
+import javax.persistence.Column;
 import javax.persistence.ManyToMany;
 
 import com.dooapp.gaedo.extensions.hierarchy.Parent;
@@ -22,7 +23,9 @@ import com.dooapp.gaedo.extensions.hierarchy.Parent;
 public class Post extends Identified implements Serializable, Message {
 
 	private static final Logger logger = Logger.getLogger(Post.class.getName());
+	@Column(name="post_text")
 	public String text;
+	@Column(name="post_note")
 	public float note;
 	public boolean test;
 	public State state = State.PRIVATE;
