@@ -5,16 +5,18 @@
 		<version>0.2.29-SNAPSHOT</version>
 	</parent>
 	<modelVersion>4.0.0</modelVersion>
-	<groupId>com.dooapp</groupId>
 	<artifactId>gaedo-test-beans</artifactId>
 	<name>gaedo test beans</name>
-	<version>0.2.29-SNAPSHOT</version>
 	<description>Some gaedo test beans and bean descriptors</description>
 	<dependencies>
 		<dependency>
 			<groupId>com.dooapp</groupId>
 			<artifactId>gaedo-definition</artifactId>
 			<version>${project.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>junit</groupId>
+			<artifactId>junit</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>org.apache.geronimo.specs</groupId>

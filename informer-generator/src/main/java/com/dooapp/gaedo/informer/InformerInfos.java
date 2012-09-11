@@ -2,6 +2,7 @@ package com.dooapp.gaedo.informer;
 
 import japa.parser.ast.ImportDeclaration;
 
+import java.io.File;
 import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
@@ -28,6 +29,10 @@ public class InformerInfos {
 	public Collection<PropertyInfos> properties;
 	
 	public String getInformerName() {
+		return buildInformerName(className);
+	}
+
+	public static String buildInformerName(String className) {
 		return className + "Informer";
 	}
 	
@@ -50,5 +55,17 @@ public class InformerInfos {
 
 	public String getQualifiedInformerName() {
 		return classPackage+"."+getInformerName();
+	}
+
+	/**
+	 * Create an abstract informer interface containing only method declarations
+	 * @return
+	 */
+	public String getAbstractInformerName() {
+		return buildAbstractInformerName(className);
+	}
+
+	public static String buildAbstractInformerName(String className) {
+		return "Abstract"+buildInformerName(className);
 	}
 }

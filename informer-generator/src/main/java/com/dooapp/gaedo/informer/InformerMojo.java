@@ -214,8 +214,12 @@ public class InformerMojo extends AbstractMojo implements Serializable {
 	public void createInformerFileFrom(InformerInfos informerInfos, File baseOutput, Collection<String> qualifiedEnums, Map<String, Class> resolvedInformers) throws IOException {
 		getLog().info("generating informer for "+informerInfos.classPackage+"."+informerInfos.className);
 		getLog().debug("it should have as FieldInformers "+informerInfos.properties);
-		CompilationUnit cu = InformerTextGenerator.generateCompilationUnit(informerInfos, qualifiedEnums, resolvedInformers);
+		CompilationUnit cu = InformerTextGenerator.generateVisibleInformer(informerInfos, qualifiedEnums, resolvedInformers);
 		File effective = new File(baseOutput+"/"+informerInfos.classPackage.replace('.', '/')+"/"+informerInfos.getInformerName()+".java");
+		effective.getParentFile().mkdirs();
+		FileUtils.fileWrite(effective, cu.toString());
+		cu = InformerTextGenerator.generateAbstractInformer(informerInfos, qualifiedEnums, resolvedInformers);
+		effective = new File(baseOutput+"/"+informerInfos.classPackage.replace('.', '/')+"/"+informerInfos.getAbstractInformerName()+".java");
 		effective.getParentFile().mkdirs();
 		FileUtils.fileWrite(effective, cu.toString());
 		if(generateMappings) {
