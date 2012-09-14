@@ -1,4 +1,4 @@
-package com.dooapp.gaedo.blueprints;
+package com.dooapp.gaedo.blueprints.indexable;
 
 import static org.junit.Assert.assertThat;
 
@@ -18,7 +18,10 @@ import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 import org.junit.runners.Parameterized.Parameters;
 
+import com.dooapp.gaedo.blueprints.GraphProvider;
 import com.dooapp.gaedo.blueprints.IndexableGraphBackedFinderService;
+import com.dooapp.gaedo.blueprints.Neo4j;
+import com.dooapp.gaedo.blueprints.Tinker;
 import com.dooapp.gaedo.finders.FieldInformer;
 import com.dooapp.gaedo.finders.FinderCrudService;
 import com.dooapp.gaedo.finders.QueryBuilder;
@@ -80,7 +83,7 @@ public class GraphBackedTagFinderServiceTest {
 		InformerFactory proxyInformerFactory = new ProxyBackedInformerFactory(
 				reflectiveFactory);
 		
-		graph = graphProvider.get();
+		graph = graphProvider.get(GraphProvider.GRAPH_DIR+"/indexable");
 		// Now add some services
 		repository.add(new IndexableGraphBackedFinderService(Tag.class, TagInformer.class, proxyInformerFactory, repository, provider, graph));
 		repository.add(new IndexableGraphBackedFinderService(Post.class, PostInformer.class, proxyInformerFactory, repository, provider, graph));
@@ -90,7 +93,7 @@ public class GraphBackedTagFinderServiceTest {
 	@After
 	public void unload() {
 		graph.shutdown();
-		File f = new File(GraphBackedLoadTest.GRAPH_DIR);
+		File f = new File(GraphProvider.GRAPH_DIR);
 		f.delete();
 	}
 

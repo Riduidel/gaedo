@@ -9,10 +9,10 @@ import com.tinkerpop.blueprints.pgm.impls.orientdb.OrientGraph;
  *
  */
 @Deprecated
-class OrientDB implements GraphProvider {
+public class OrientDB implements GraphProvider {
 	@Override
-	public IndexableGraph get() {
-		OrientGraph returned = new OrientGraph("local:/"+GraphBackedLoadTest.GRAPH_DIR+"/orient.db");
+	public IndexableGraph get(String path) {
+		OrientGraph returned = new OrientGraph("local:/"+path+"/orient.db");
 		return returned;
 	}
 }
