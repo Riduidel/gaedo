@@ -1,4 +1,5 @@
-package com.dooapp.gaedo.blueprints.sail;
+package com.dooapp.gaedo.blueprints;
+import static com.dooapp.gaedo.blueprints.TestUtils.*;
 
 import static org.junit.Assert.assertThat;
 
@@ -23,9 +24,7 @@ import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 import org.junit.runners.Parameterized.Parameters;
 
-import com.dooapp.gaedo.blueprints.GraphProvider;
 import com.dooapp.gaedo.blueprints.IndexableGraphBackedFinderService;
-import com.dooapp.gaedo.blueprints.TestUtils;
 import com.dooapp.gaedo.blueprints.providers.Neo4j;
 import com.dooapp.gaedo.finders.FinderCrudService;
 import com.dooapp.gaedo.finders.Informer;
@@ -48,13 +47,10 @@ import com.dooapp.gaedo.test.beans.TagInformer;
 import com.dooapp.gaedo.test.beans.User;
 import com.dooapp.gaedo.test.beans.UserInformer;
 import com.tinkerpop.blueprints.pgm.IndexableGraph;
-import com.tinkerpop.blueprints.pgm.impls.sail.SailGraph;
-
-import static com.dooapp.gaedo.blueprints.TestUtils.*;
 
 @Ignore
 @RunWith(Parameterized.class)
-public class SailMultithreadedTest extends AbstractSailGraphTest {
+public class GraphMultithreadedTest extends AbstractGraphTest {
 	private class Work implements Runnable {
 
 		private long index;
@@ -67,7 +63,7 @@ public class SailMultithreadedTest extends AbstractSailGraphTest {
 		public void run() {
 			try {
 				logger.info("working on "+index);
-				Tag a = tagService.find().matching(new QueryBuilder<TagInformer>() {
+				Tag a = getTagService().find().matching(new QueryBuilder<TagInformer>() {
 	
 					@Override
 					public QueryExpression createMatchingExpression(TagInformer informer) {
@@ -78,13 +74,13 @@ public class SailMultithreadedTest extends AbstractSailGraphTest {
 				
 				Tag newOne = new Tag(A+"_"+index).withId(1000+index);
 				newOne.parent = a;
-				tagService.create(newOne);
+				getTagService().create(newOne);
 				logger.info(index +" : tag created");
 				// Now create a post linking to latest 10 tags created (but for that retrieve them)
 				List<Tag> tags = new LinkedList<Tag>();
 				for (long i = index; i > index-10 && i>0; i--) {
 					final long value = i;
-					tags.add(tagService.find().matching(new QueryBuilder<TagInformer>() {
+					tags.add(getTagService().find().matching(new QueryBuilder<TagInformer>() {
 	
 						@Override
 						public QueryExpression createMatchingExpression(TagInformer informer) {
@@ -95,7 +91,7 @@ public class SailMultithreadedTest extends AbstractSailGraphTest {
 				logger.info(index +" : tags list grabbed");
 				Post toCreate = new Post(index, "a new post for "+index, 2.5f, State.PUBLIC, author);
 				toCreate.tags.addAll(tags);
-				postService.create(toCreate);
+				getPostService().create(toCreate);
 				logger.info(index +" : post created");
 			} catch(RuntimeException e) {
 				if (logger.isLoggable(Level.WARNING)) {
@@ -106,25 +102,21 @@ public class SailMultithreadedTest extends AbstractSailGraphTest {
 		
 	}
 	
-	private static final Logger logger = Logger.getLogger(SailMultithreadedTest.class.getName());
+	private static final Logger logger = Logger.getLogger(GraphMultithreadedTest.class.getName());
 	
 	private long instanceCount;
 
 	private ExecutorService executorService;
 
-	private FinderCrudService<Post, Informer<Post>> postService;
-
 	private User author;
-
-	private FinderCrudService<Tag, TagInformer> tagService;
 	
 	@Parameters
 	public static Collection<Object[]> parameters() {
 		return loadTest();
 	}
 	
-	public SailMultithreadedTest(GraphProvider graph, long instanceCount) {
-		super(graph);
+	public GraphMultithreadedTest(AbstractGraphEnvironment<?> environment, long instanceCount) {
+		super(environment);
 		this.instanceCount = instanceCount;
 	}
 
@@ -132,16 +124,7 @@ public class SailMultithreadedTest extends AbstractSailGraphTest {
 	public void loadService() throws Exception {
 		executorService = Executors.newFixedThreadPool(50);
 		super.loadService();
-		// Now add some services
-		repository.add(createServiceFor(Tag.class, TagInformer.class));
-		repository.add(createServiceFor(User.class, UserInformer.class));
-		repository.add(createServiceFor(Post.class, PostInformer.class));
-		tagService = repository.get(Tag.class);
-		postService = repository.get(Post.class);
-		tagService.create(new Tag(A).withId(1l));
-		tagService.create(new Tag(B).withId(2l));
-		FinderCrudService<User, UserInformer> userService = repository.get(User.class);
-		author = userService.create(new User().withId(0).withLogin("test author").withPassword("a poassword"));
+		author = getUserService().create(new User().withId(0).withLogin("test author").withPassword("a poassword"));
 	}
 	
 	@After

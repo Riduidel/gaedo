@@ -3,7 +3,6 @@ package com.dooapp.gaedo.blueprints;
 import java.util.Collection;
 import java.util.logging.Logger;
 
-import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.internal.matchers.StringContains;
@@ -11,21 +10,19 @@ import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 import org.junit.runners.Parameterized.Parameters;
 
-import com.dooapp.gaedo.blueprints.sail.AbstractSailGraphTest;
 import com.dooapp.gaedo.finders.FinderCrudService;
 import com.dooapp.gaedo.finders.QueryBuilder;
 import com.dooapp.gaedo.finders.QueryExpression;
-import com.dooapp.gaedo.test.beans.Post;
-import com.dooapp.gaedo.test.beans.PostInformer;
 import com.dooapp.gaedo.test.beans.Tag;
 import com.dooapp.gaedo.test.beans.TagInformer;
 
+import static com.dooapp.gaedo.blueprints.TestUtils.A;
+
 import static org.junit.Assert.assertThat;
-import static com.dooapp.gaedo.blueprints.TestUtils.*;
 
 @Ignore
 @RunWith(Parameterized.class)
-public class GraphBackedLoadTest extends AbstractSailGraphTest {
+public class GraphBackedLoadTest extends AbstractGraphTest {
 	
 	private static final Logger logger = Logger.getLogger(GraphBackedLoadTest.class.getName());
 	
@@ -37,20 +34,11 @@ public class GraphBackedLoadTest extends AbstractSailGraphTest {
 		return TestUtils.loadTest();
 	}
 	
-	public GraphBackedLoadTest(GraphProvider graph, long instanceCount) {
+	public GraphBackedLoadTest(AbstractGraphEnvironment<?> graph, long instanceCount) {
 		super(graph);
 		this.instanceCount = instanceCount;
 	}
 
-	@Before
-	public void loadService() throws Exception {
-		super.loadService();
-		// Now add some services
-		repository.add(createServiceFor(Tag.class, TagInformer.class));
-		repository.add(createServiceFor(Post.class, PostInformer.class));
-		tagService = repository.get(Tag.class);
-	}
-	
 	@Test
 	public void loadDbWithABunchOfTags() {
 		logger.info("loading DB with "+instanceCount+" tags");

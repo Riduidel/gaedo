@@ -430,7 +430,7 @@ public abstract class AbstractBluePrintsBackedFinderService<GraphClass extends G
 	private DataType doUpdate(DataType toUpdate, CascadeType cascade, Map<String, Object> treeMap) {
 		boolean generatesId = requiresIdGeneration ? (CascadeType.PERSIST==cascade) : false;
 		String objectVertexId = getIdVertexId(toUpdate, idProperty, generatesId);
-		Vertex objectVertex = GraphUtils.locateVertex(database, Properties.vertexId, objectVertexId);
+		Vertex objectVertex = loadVertexFor(objectVertexId);
 		return (DataType) persister.performUpdate(this, objectVertexId, objectVertex, 
 						toUpdate.getClass(), getContainedProperties(toUpdate), toUpdate, cascade, treeMap);
 	}

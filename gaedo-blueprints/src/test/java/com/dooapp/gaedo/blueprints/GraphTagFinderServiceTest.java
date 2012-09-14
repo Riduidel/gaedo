@@ -1,17 +1,10 @@
-package com.dooapp.gaedo.blueprints.indexable;
+package com.dooapp.gaedo.blueprints;
 
-import static com.dooapp.gaedo.blueprints.TestUtils.*;
-
-import static org.junit.Assert.assertThat;
-
-import java.io.File;
-import java.net.MalformedURLException;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.LinkedList;
 
 import org.hamcrest.core.Is;
-import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -20,72 +13,51 @@ import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 import org.junit.runners.Parameterized.Parameters;
 
-import com.dooapp.gaedo.blueprints.GraphProvider;
-import com.dooapp.gaedo.blueprints.IndexableGraphBackedFinderService;
-import com.dooapp.gaedo.blueprints.TestUtils;
-import com.dooapp.gaedo.blueprints.providers.Neo4j;
-import com.dooapp.gaedo.blueprints.providers.Tinker;
 import com.dooapp.gaedo.finders.FieldInformer;
 import com.dooapp.gaedo.finders.FinderCrudService;
 import com.dooapp.gaedo.finders.QueryBuilder;
 import com.dooapp.gaedo.finders.QueryExpression;
 import com.dooapp.gaedo.finders.expressions.Expressions;
 import com.dooapp.gaedo.finders.informers.StringFieldInformer;
-import com.dooapp.gaedo.finders.repository.ServiceBackedFieldLocator;
-import com.dooapp.gaedo.finders.repository.SimpleServiceRepository;
-import com.dooapp.gaedo.finders.root.BasicFieldInformerLocator;
-import com.dooapp.gaedo.finders.root.CumulativeFieldInformerLocator;
-import com.dooapp.gaedo.finders.root.InformerFactory;
-import com.dooapp.gaedo.finders.root.ProxyBackedInformerFactory;
-import com.dooapp.gaedo.finders.root.ReflectionBackedInformerFactory;
-import com.dooapp.gaedo.properties.FieldBackedPropertyProvider;
-import com.dooapp.gaedo.properties.PropertyProvider;
 import com.dooapp.gaedo.test.beans.Post;
 import com.dooapp.gaedo.test.beans.PostInformer;
 import com.dooapp.gaedo.test.beans.Tag;
 import com.dooapp.gaedo.test.beans.TagInformer;
-import com.tinkerpop.blueprints.pgm.IndexableGraph;
-import com.tinkerpop.blueprints.pgm.impls.neo4j.Neo4jGraph;
-import com.tinkerpop.blueprints.pgm.impls.orientdb.OrientGraph;
-import com.tinkerpop.blueprints.pgm.impls.tg.TinkerGraph;
+
+import static com.dooapp.gaedo.blueprints.TestUtils.A;
+import static com.dooapp.gaedo.blueprints.TestUtils.B;
+import static com.dooapp.gaedo.blueprints.TestUtils.C;
+import static com.dooapp.gaedo.blueprints.TestUtils.simpleTest;
+
+import static org.junit.Assert.assertThat;
 
 @RunWith(Parameterized.class)
-public class IndexableTagFinderServiceTest extends AbstractIndexableGraphTest {
-	private FinderCrudService<Tag, TagInformer> tagService;
+public class GraphTagFinderServiceTest extends AbstractGraphTest {
 	
 	@Parameters
 	public static Collection<Object[]> parameters() {
 		return simpleTest();
 	}
 	
-	public IndexableTagFinderServiceTest(GraphProvider graph) {
+	public GraphTagFinderServiceTest(AbstractGraphEnvironment<?> graph) {
 		super(graph);
-	}
-
-	@Before
-	public void loadService() throws Exception {
-		super.loadService();
-		// Now add some services
-		repository.add(createServiceFor(Tag.class, TagInformer.class));
-		repository.add(createServiceFor(Post.class, PostInformer.class));
-		tagService = repository.get(Tag.class);
 	}
 
 	@Test
 	public void testCreate() {
 		Tag input = new Tag(A).withId(1l);
-		Tag returned = tagService.create(input);
+		Tag returned = getTagService().create(input);
 		Assert.assertEquals(returned.getText(), input.getText());
-		tagService.delete(input);
+		getTagService().delete(input);
 	}
 
 	@Test
 	public void testFindByName() {
 		Tag a = new Tag(A).withId(2l);
-		tagService.create(a);
-		Tag b = tagService.create(new Tag(B).withId(3l));
-		Tag c = tagService.create(new Tag(C).withId(4l));
-		Iterable<Tag> values = tagService.find().matching(
+		getTagService().create(a);
+		Tag b = getTagService().create(new Tag(B).withId(3l));
+		Tag c = getTagService().create(new Tag(C).withId(4l));
+		Iterable<Tag> values = getTagService().find().matching(
 				new QueryBuilder<TagInformer>() {
 
 					public QueryExpression createMatchingExpression(
@@ -97,18 +69,18 @@ public class IndexableTagFinderServiceTest extends AbstractIndexableGraphTest {
 		assertThat(valuesIterator.hasNext(), Is.is(true));
 		assertThat(valuesIterator.next(), Is.is(a));
 		// may have next, as previous tests may fail
-		tagService.delete(a);
-		tagService.delete(b);
-		tagService.delete(c);
+		getTagService().delete(a);
+		getTagService().delete(b);
+		getTagService().delete(c);
 	}
 
 	@Test
 	public void testFindUsingEqualsTo() {
 		final Tag a = new Tag(A).withId(5l);
-		tagService.create(a);
-		Tag b = tagService.create(new Tag(B).withId(6l));
-		Tag c = tagService.create(new Tag(C).withId(7l));
-		Iterable<Tag> values = tagService.find().matching(
+		getTagService().create(a);
+		Tag b = getTagService().create(new Tag(B).withId(6l));
+		Tag c = getTagService().create(new Tag(C).withId(7l));
+		Iterable<Tag> values = getTagService().find().matching(
 				new QueryBuilder<TagInformer>() {
 
 					public QueryExpression createMatchingExpression(
@@ -120,18 +92,18 @@ public class IndexableTagFinderServiceTest extends AbstractIndexableGraphTest {
 		assertThat(valuesIterator.hasNext(), Is.is(true));
 		assertThat(valuesIterator.next(), Is.is(a));
 		// may have next, as previous tests may fail
-		tagService.delete(a);
-		tagService.delete(b);
-		tagService.delete(c);
+		getTagService().delete(a);
+		getTagService().delete(b);
+		getTagService().delete(c);
 	}
 
 	@Test
 	public void testFindByTwoPossibleNames() {
 		Tag a = new Tag(A).withId(8l);
-		tagService.create(a);
-		Tag b = tagService.create(new Tag(B).withId(9l));
-		Tag c = tagService.create(new Tag(C).withId(10l));
-		Iterable<Tag> values = tagService.find().matching(
+		getTagService().create(a);
+		Tag b = getTagService().create(new Tag(B).withId(9l));
+		Tag c = getTagService().create(new Tag(C).withId(10l));
+		Iterable<Tag> values = getTagService().find().matching(
 				new QueryBuilder<TagInformer>() {
 
 					public QueryExpression createMatchingExpression(
@@ -147,9 +119,9 @@ public class IndexableTagFinderServiceTest extends AbstractIndexableGraphTest {
 		}
 		assertThat(matching, IsCollectionContaining.hasItems(a, b));
 		// TODO test
-		tagService.delete(a);
-		tagService.delete(b);
-		tagService.delete(c);
+		getTagService().delete(a);
+		getTagService().delete(b);
+		getTagService().delete(c);
 	}
 
 	/**
@@ -159,10 +131,10 @@ public class IndexableTagFinderServiceTest extends AbstractIndexableGraphTest {
 	@Test
 	public void testFindByTwoPossibleNamesWithSyntheticAccessor() {
 		Tag a = new Tag(A).withId(11l);
-		tagService.create(a);
-		Tag b = tagService.create(new Tag(B).withId(12l));
-		Tag c = tagService.create(new Tag(C).withId(13l));
-		Iterable<Tag> values = tagService.find().matching(
+		getTagService().create(a);
+		Tag b = getTagService().create(new Tag(B).withId(12l));
+		Tag c = getTagService().create(new Tag(C).withId(13l));
+		Iterable<Tag> values = getTagService().find().matching(
 				new QueryBuilder<TagInformer>() {
 
 					public QueryExpression createMatchingExpression(
@@ -177,9 +149,9 @@ public class IndexableTagFinderServiceTest extends AbstractIndexableGraphTest {
 			matching.add(t);
 		}
 		assertThat(matching, IsCollectionContaining.hasItems(a, b));
-		tagService.delete(a);
-		tagService.delete(b);
-		tagService.delete(c);
+		getTagService().delete(a);
+		getTagService().delete(b);
+		getTagService().delete(c);
 	}
 
 	/**
@@ -189,8 +161,8 @@ public class IndexableTagFinderServiceTest extends AbstractIndexableGraphTest {
 	public void ensureStringTypeWorks() {
 		Tag a = new Tag(A).withId(12l);
 		a.rendering = String.class;
-		tagService.create(a);
-		Tag b = tagService.find().matching(
+		getTagService().create(a);
+		Tag b = getTagService().find().matching(
 						new QueryBuilder<TagInformer>() {
 
 							public QueryExpression createMatchingExpression(
@@ -208,8 +180,8 @@ public class IndexableTagFinderServiceTest extends AbstractIndexableGraphTest {
 	public void ensureBooleanClassTypeWorks() {
 		Tag a = new Tag(A).withId(13l);
 		a.rendering = Boolean.class;
-		tagService.create(a);
-		Tag b = tagService.find().matching(
+		getTagService().create(a);
+		Tag b = getTagService().find().matching(
 						new QueryBuilder<TagInformer>() {
 
 							public QueryExpression createMatchingExpression(
@@ -227,8 +199,8 @@ public class IndexableTagFinderServiceTest extends AbstractIndexableGraphTest {
 	public void ensureBooleanTypeTypeWorks() {
 		Tag a = new Tag(A).withId(14l);
 		a.rendering = Boolean.TYPE;
-		tagService.create(a);
-		Tag b = tagService.find().matching(
+		getTagService().create(a);
+		Tag b = getTagService().find().matching(
 						new QueryBuilder<TagInformer>() {
 
 							public QueryExpression createMatchingExpression(

@@ -1,9 +1,7 @@
-package com.dooapp.gaedo.blueprints.indexable;
+package com.dooapp.gaedo.blueprints;
 
-import static com.dooapp.gaedo.blueprints.TestUtils.*;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
-import java.io.File;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
@@ -18,7 +16,6 @@ import java.util.logging.Logger;
 import org.hamcrest.core.Is;
 import org.hamcrest.core.IsNot;
 import org.hamcrest.core.IsNull;
-import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -26,12 +23,9 @@ import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 import org.junit.runners.Parameterized.Parameters;
 
-import com.dooapp.gaedo.blueprints.GraphProvider;
-import com.dooapp.gaedo.blueprints.UnknownSerializable;
 import com.dooapp.gaedo.blueprints.finders.FindFirstPostByNote;
 import com.dooapp.gaedo.blueprints.finders.FindFirstUserByLogin;
 import com.dooapp.gaedo.blueprints.finders.FindPostByText;
-import com.dooapp.gaedo.finders.FinderCrudService;
 import com.dooapp.gaedo.finders.QueryBuilder;
 import com.dooapp.gaedo.finders.QueryExpression;
 import com.dooapp.gaedo.finders.id.IdBasedService;
@@ -42,8 +36,6 @@ import com.dooapp.gaedo.test.beans.Tag;
 import com.dooapp.gaedo.test.beans.TagInformer;
 import com.dooapp.gaedo.test.beans.User;
 import com.dooapp.gaedo.test.beans.UserInformer;
-import com.dooapp.gaedo.test.beans.specific.Theme;
-import com.dooapp.gaedo.test.beans.specific.ThemeInformer;
 import com.tinkerpop.blueprints.pgm.Edge;
 import com.tinkerpop.blueprints.pgm.Index;
 
@@ -61,23 +53,20 @@ import static com.dooapp.gaedo.blueprints.TestUtils.simpleTest;
 import static org.junit.Assert.assertThat;
 
 @RunWith(Parameterized.class)
-public class IndexablePostFinderServiceTest extends AbstractIndexableGraphTest {
-	private static final Logger logger = Logger.getLogger(IndexablePostFinderServiceTest.class.getName());
+public class GraphPostFinderServiceTest extends AbstractGraphTest {
+	private static final Logger logger = Logger.getLogger(GraphPostFinderServiceTest.class.getName());
 
 	@Parameters
 	public static Collection<Object[]> parameters() {
 		return simpleTest();
 	}
-	private FinderCrudService<Tag, TagInformer> tagService;
-	private FinderCrudService<Post, PostInformer> postService;
-	private FinderCrudService<User, UserInformer> userService;
 	private User author;
 	private Post post1;
 	private Post post2;
 	private Post post3;
 	private Tag tag1;
 	
-	public IndexablePostFinderServiceTest(GraphProvider graph) {
+	public GraphPostFinderServiceTest(AbstractGraphEnvironment<?> graph) {
 		super(graph);
 	}
 
@@ -85,26 +74,19 @@ public class IndexablePostFinderServiceTest extends AbstractIndexableGraphTest {
 	public void loadService() throws Exception {
 		super.loadService();
 		// Now add some services
-		repository.add(createServiceFor(Tag.class, TagInformer.class));
-		repository.add(createServiceFor(Post.class, PostInformer.class));
-		repository.add(createServiceFor(User.class, UserInformer.class));
-		repository.add(createServiceFor(Theme.class, ThemeInformer.class));
-		tagService = repository.get(Tag.class);
-		postService = repository.get(Post.class);
-		userService = repository.get(User.class);
 
 		// create some objects
 		author = new User().withId(1).withLogin(USER_LOGIN).withPassword(USER_PASSWORD);
 		author.about = new Post(ABOUT_ID, "a message about that user", 5, State.PUBLIC, author);
-		author = userService.create(author);
-		post1 = postService.create(new Post(ID_POST_1, "post text for 1", 1, State.PUBLIC, author, theseMappings("a", "b")));
-		post2 = postService.create(new Post(2, "post text for 2", 2, State.PUBLIC, author));
-		post3 = postService.create(new Post(3, "post text for 3", 3, State.PUBLIC, author));
-		tag1 = tagService.create(new Tag(1, TAG_TEXT));
+		author = getUserService().create(author);
+		post1 = getPostService().create(new Post(ID_POST_1, "post text for 1", 1, State.PUBLIC, author, theseMappings("a", "b")));
+		post2 = getPostService().create(new Post(2, "post text for 2", 2, State.PUBLIC, author));
+		post3 = getPostService().create(new Post(3, "post text for 3", 3, State.PUBLIC, author));
+		tag1 = getTagService().create(new Tag(1, TAG_TEXT));
 		author.posts.add(post1);
 		author.posts.add(post2);
 		author.posts.add(post3);
-		author = userService.update(author);
+		author = getUserService().update(author);
 	}
 	
 	private Map<String, String> theseMappings(String...strings) {
@@ -121,17 +103,17 @@ public class IndexablePostFinderServiceTest extends AbstractIndexableGraphTest {
 	 * This test makes sure property rewriting works ok (by checking no {@link Post#text} property is written to graph.
 	 * As one may has notice, posts are created during @Before method and as a consequence are available before each test (including this one).
 	 */
-	@Test 
-	public void makeSureGraphDoesntContainAnyEdgeNamedText() {
-		Index<Edge> edgeIndex = graph.getIndex(Index.EDGES, Edge.class);
-		assertThat(edgeIndex.count("label", "Identified.id"), IsNot.not(Is.is(0l)));
-		assertThat(edgeIndex.count("label", "post_text"), IsNot.not(Is.is(0l)));
-		assertThat(edgeIndex.count("label", "Post.text"), Is.is(0l));
-	}
+//	@Test 
+//	public void makeSureGraphDoesntContainAnyEdgeNamedText() {
+//		Index<Edge> edgeIndex = graph.getIndex(Index.EDGES, Edge.class);
+//		assertThat(edgeIndex.count("label", "Identified.id"), IsNot.not(Is.is(0l)));
+//		assertThat(edgeIndex.count("label", "post_text"), IsNot.not(Is.is(0l)));
+//		assertThat(edgeIndex.count("label", "Post.text"), Is.is(0l));
+//	}
 
 	@Test 
 	public void searchPostByNote() {
-		Post noted2 = postService.find().matching(new QueryBuilder<PostInformer>() {
+		Post noted2 = getPostService().find().matching(new QueryBuilder<PostInformer>() {
 
 			@Override
 			public QueryExpression createMatchingExpression(PostInformer informer) {
@@ -144,7 +126,7 @@ public class IndexablePostFinderServiceTest extends AbstractIndexableGraphTest {
 
 	@Test
 	public void searchPostByAuthorLogin() {
-		int postsOf  = postService.find().matching(new QueryBuilder<PostInformer>() {
+		int postsOf  = getPostService().find().matching(new QueryBuilder<PostInformer>() {
 
 			@Override
 			public QueryExpression createMatchingExpression(PostInformer informer) {
@@ -161,7 +143,7 @@ public class IndexablePostFinderServiceTest extends AbstractIndexableGraphTest {
 	 */
 	@Test
 	public void searchPostByAuthorObject() {
-		int postsOf  = postService.find().matching(new QueryBuilder<PostInformer>() {
+		int postsOf  = getPostService().find().matching(new QueryBuilder<PostInformer>() {
 
 			@Override
 			public QueryExpression createMatchingExpression(PostInformer informer) {
@@ -179,8 +161,8 @@ public class IndexablePostFinderServiceTest extends AbstractIndexableGraphTest {
 		// here we modify about and let author update it for us
 		String aboutText = "this is now user "+author.getLogin();
 		((Post) author.about).text = aboutText;
-		userService.update(author);
-		Post about = ((IdBasedService<Post>) postService).findById(ABOUT_ID);
+		getUserService().update(author);
+		Post about = ((IdBasedService<Post>) getPostService()).findById(ABOUT_ID);
 		assertThat(about, IsNull.notNullValue());
 		assertThat(about.text, Is.is(aboutText));
 	}
@@ -190,17 +172,17 @@ public class IndexablePostFinderServiceTest extends AbstractIndexableGraphTest {
 		User other = new User().withId(2).withLogin("other login").withPassword("other password");
 		long id = 55;
 		other.about = new Post(id, "a post about another user", 2, State.PUBLIC, other);
-		userService.create(other);
-		Post about = ((IdBasedService<Post>) postService).findById(id);
+		getUserService().create(other);
+		Post about = ((IdBasedService<Post>) getPostService()).findById(id);
 		assertThat(about, IsNull.notNullValue());
-		userService.delete(other);
-		about = ((IdBasedService<Post>) postService).findById(id);
+		getUserService().delete(other);
+		about = ((IdBasedService<Post>) getPostService()).findById(id);
 		assertThat(about, IsNull.nullValue());
 	}
 
 	@Test
 	public void ensureLoadCascadesWell() {
-		User u1 = userService.find().matching(new FindFirstUserByLogin()).getFirst();
+		User u1 = getUserService().find().matching(new FindFirstUserByLogin()).getFirst();
 		assertThat(u1.about, IsNull.notNullValue());
 		assertThat(u1.about, Is.is(Post.class));
 		assertThat(((Post) u1.about).text, IsNull.notNullValue());
@@ -208,12 +190,12 @@ public class IndexablePostFinderServiceTest extends AbstractIndexableGraphTest {
 	
 	@Test
 	public void serializeAuthorAndPosts() throws IOException, ClassNotFoundException {
-		User u1 = userService.find().matching(new FindFirstUserByLogin()).getFirst();
+		User u1 = getUserService().find().matching(new FindFirstUserByLogin()).getFirst();
 		assertThat(u1, IsNull.notNullValue());
 		assertThat(u1.posts.size(), IsNot.not(0));
 		
 		// Now serialize and deserialize a second version of author
-		User u2 = userService.find().matching(new FindFirstUserByLogin()).getFirst();
+		User u2 = getUserService().find().matching(new FindFirstUserByLogin()).getFirst();
 		
 		// Serialize it
 		ByteArrayOutputStream bos = new ByteArrayOutputStream();
@@ -235,7 +217,7 @@ public class IndexablePostFinderServiceTest extends AbstractIndexableGraphTest {
 	
 	@Test
 	public void ensureMapIsWellLoaded() throws IOException, ClassNotFoundException {
-		Post first = postService.find().matching(new FindFirstPostByNote()).getFirst();
+		Post first = getPostService().find().matching(new FindFirstPostByNote()).getFirst();
 		
 		assertThat(first.id, Is.is(1L));
 		assertThat(first.annotations.size(), IsNot.not(0));
@@ -255,8 +237,8 @@ public class IndexablePostFinderServiceTest extends AbstractIndexableGraphTest {
 	
 	@Test
 	public void ensureFindByIdWorksWell() {
-		if (postService instanceof IdBasedService) {
-			IdBasedService idPosts = (IdBasedService) postService;
+		if (getPostService() instanceof IdBasedService) {
+			IdBasedService idPosts = (IdBasedService) getPostService();
 			Post first = (Post) idPosts.findById(ID_POST_1);
 			assertThat(first, IsNull.notNullValue());
 		} else { 
@@ -266,40 +248,40 @@ public class IndexablePostFinderServiceTest extends AbstractIndexableGraphTest {
 
 	@Test
 	public void ensureSerializableIsWellLoadedWithString() throws IOException, ClassNotFoundException {
-		Post first = postService.find().matching(new FindFirstPostByNote()).getFirst();
+		Post first = getPostService().find().matching(new FindFirstPostByNote()).getFirst();
 		
 		String string = "a string";
 		first.associatedData = string;
-		first = postService.update(first);
+		first = getPostService().update(first);
 		
-		first = postService.find().matching(new FindFirstPostByNote()).getFirst();;
+		first = getPostService().find().matching(new FindFirstPostByNote()).getFirst();;
 		
 		assertThat(first.associatedData, Is.is((Serializable) string));
 	}
 
 	@Test
 	public void ensureSerializableIsWellLoadedWithPost() throws IOException, ClassNotFoundException {
-		Post first = postService.find().matching(new FindFirstPostByNote()).getFirst();
-		User user = userService.find().matching(new FindFirstUserByLogin()).getFirst();
+		Post first = getPostService().find().matching(new FindFirstPostByNote()).getFirst();
+		User user = getUserService().find().matching(new FindFirstUserByLogin()).getFirst();
 		
 		first.associatedData = user;
-		first = postService.update(first);
+		first = getPostService().update(first);
 		
-		first = postService.find().matching(new FindFirstPostByNote()).getFirst();;
+		first = getPostService().find().matching(new FindFirstPostByNote()).getFirst();;
 		
 		assertThat(first.associatedData, Is.is((Serializable) user));
 	}
 
 	@Test
 	public void ensureSerializableIsWellLoadedWithUnknownSerializable() throws IOException, ClassNotFoundException {
-		Post first = postService.find().matching(new FindFirstPostByNote()).getFirst();
-		User user = userService.find().matching(new FindFirstUserByLogin()).getFirst();
+		Post first = getPostService().find().matching(new FindFirstPostByNote()).getFirst();
+		User user = getUserService().find().matching(new FindFirstUserByLogin()).getFirst();
 		
 		UnknownSerializable value = new UnknownSerializable().withText("a string");
 		first.associatedData = value;
-		first = postService.update(first);
+		first = getPostService().update(first);
 		
-		first = postService.find().matching(new FindFirstPostByNote()).getFirst();;
+		first = getPostService().find().matching(new FindFirstPostByNote()).getFirst();;
 		
 		assertThat(first.associatedData, Is.is((Serializable) value));
 	}
@@ -308,23 +290,23 @@ public class IndexablePostFinderServiceTest extends AbstractIndexableGraphTest {
 	public void ensurePostIdCanBeGenerated() throws IOException, ClassNotFoundException {
 		Post newOne = new Post().withText("some text");
 		assertThat(newOne.id, Is.is(0l));
-		newOne = postService.create(newOne);
+		newOne = getPostService().create(newOne);
 		assertThat(newOne.id, IsNot.not(0l));
 	}
 
 	@Test
 	public void ensureCreateOnUpdateWorks() throws IOException, ClassNotFoundException {
-		Post first = postService.find().matching(new FindFirstPostByNote()).getFirst();
+		Post first = getPostService().find().matching(new FindFirstPostByNote()).getFirst();
 		if(first.tags.size()>0) {
 			first.tags.clear();
-			first = postService.update(first);
+			first = getPostService().update(first);
 		}
 		assertThat(first.tags.size(), Is.is(0));
 		Tag t = new Tag();
 		t.setText(TEST_TAG_FOR_CREATE_ON_UPDATE);
 		first.tags.add(t);
-		first = postService.update(first);
-		Tag inDB = tagService.find().matching(new QueryBuilder<TagInformer>() {
+		first = getPostService().update(first);
+		Tag inDB = getTagService().find().matching(new QueryBuilder<TagInformer>() {
 
 			@Override
 			public QueryExpression createMatchingExpression(TagInformer informer) {
@@ -341,9 +323,9 @@ public class IndexablePostFinderServiceTest extends AbstractIndexableGraphTest {
 		author.setLogin(LOGIN_FOR_UPDATE_ON_CREATE);
 		tag1.setText(TEST_TAG_FOR_CREATE_ON_UPDATE);
 		newxONe.tags.add(tag1);
-		newxONe = postService.create(newxONe);
+		newxONe = getPostService().create(newxONe);
 		try {
-			author = userService.find().matching(new QueryBuilder<UserInformer>() {
+			author = getUserService().find().matching(new QueryBuilder<UserInformer>() {
 	
 				@Override
 				public QueryExpression createMatchingExpression(UserInformer informer) {
@@ -351,7 +333,7 @@ public class IndexablePostFinderServiceTest extends AbstractIndexableGraphTest {
 				}
 			}).getFirst();
 			assertThat(author.getLogin(), Is.is(LOGIN_FOR_UPDATE_ON_CREATE));
-			Tag official = tagService.find().matching(new QueryBuilder<TagInformer>() {
+			Tag official = getTagService().find().matching(new QueryBuilder<TagInformer>() {
 	
 				@Override
 				public QueryExpression createMatchingExpression(TagInformer informer) {
@@ -360,9 +342,9 @@ public class IndexablePostFinderServiceTest extends AbstractIndexableGraphTest {
 			}).getFirst();
 			assertThat(official.getText(), Is.is(TEST_TAG_FOR_CREATE_ON_UPDATE));
 		} finally {
-			postService.delete(newxONe);
+			getPostService().delete(newxONe);
 			tag1.setText(TAG_TEXT);
-			tagService.update(tag1);
+			getTagService().update(tag1);
 		}
 	}
 	
@@ -370,11 +352,11 @@ public class IndexablePostFinderServiceTest extends AbstractIndexableGraphTest {
 	public void ensureMapWorksInAllCases() throws Exception {
 		Post newxONe = new Post().withText(SOME_NEW_TEXT).withAuthor(author);
 		final long id = newxONe.id;
-		newxONe = postService.create(newxONe);
+		newxONe = getPostService().create(newxONe);
 		try {
 			newxONe.annotations.put(A, null);
-			postService.update(newxONe);
-			newxONe = postService.find().matching(new FindPostByText(SOME_NEW_TEXT)).getFirst();
+			getPostService().update(newxONe);
+			newxONe = getPostService().find().matching(new FindPostByText(SOME_NEW_TEXT)).getFirst();
 			assertThat(newxONe.annotations.size(), Is.is(1));
 			assertThat(newxONe.annotations.containsKey(A), Is.is(true));
 		} catch(Exception e) {
@@ -383,7 +365,7 @@ public class IndexablePostFinderServiceTest extends AbstractIndexableGraphTest {
 			}
 			throw e;
 		} finally {
-			postService.delete(newxONe);
+			getPostService().delete(newxONe);
 		}
 	}
 	
@@ -391,16 +373,16 @@ public class IndexablePostFinderServiceTest extends AbstractIndexableGraphTest {
 	public void ensureMapCanBeEmptiedForIssue13() throws Exception {
 		final String text = "#ensureMapCanBeEmptiedForIssue13";
 		Post newxONe = new Post().withText(text).withAuthor(author);
-		newxONe = postService.create(newxONe);
+		newxONe = getPostService().create(newxONe);
 		try {
 			newxONe.annotations.put(A, null);
-			postService.update(newxONe);
-			newxONe = postService.find().matching(new FindPostByText(text)).getFirst();
+			getPostService().update(newxONe);
+			newxONe = getPostService().find().matching(new FindPostByText(text)).getFirst();
 			assertThat(newxONe.annotations.size(), Is.is(1));
 			assertThat(newxONe.annotations.containsKey(A), Is.is(true));
 			newxONe.annotations.clear();
-			postService.update(newxONe);
-			newxONe = postService.find().matching(new FindPostByText(text)).getFirst();
+			getPostService().update(newxONe);
+			newxONe = getPostService().find().matching(new FindPostByText(text)).getFirst();
 			assertThat(newxONe.annotations.size(), Is.is(0));
 		} catch(Exception e) {
 			if (logger.isLoggable(Level.SEVERE)) {
@@ -408,7 +390,7 @@ public class IndexablePostFinderServiceTest extends AbstractIndexableGraphTest {
 			}
 			throw e;
 		} finally {
-			postService.delete(newxONe);
+			getPostService().delete(newxONe);
 		}
 	}
 }

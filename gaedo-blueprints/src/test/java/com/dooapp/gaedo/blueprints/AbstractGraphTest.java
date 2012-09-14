@@ -1,60 +1,80 @@
 package com.dooapp.gaedo.blueprints;
 
-import java.io.File;
-
 import org.junit.After;
+import org.junit.Before;
 
+import com.dooapp.gaedo.AbstractCrudService;
+import com.dooapp.gaedo.blueprints.IndexableGraphBackedFinderService;
+import com.dooapp.gaedo.blueprints.beans.PostSubClass;
+import com.dooapp.gaedo.blueprints.beans.PostSubClassInformer;
 import com.dooapp.gaedo.finders.FinderCrudService;
 import com.dooapp.gaedo.finders.Informer;
-import com.dooapp.gaedo.finders.repository.ServiceBackedFieldLocator;
-import com.dooapp.gaedo.finders.repository.SimpleServiceRepository;
-import com.dooapp.gaedo.finders.root.BasicFieldInformerLocator;
-import com.dooapp.gaedo.finders.root.CumulativeFieldInformerLocator;
-import com.dooapp.gaedo.finders.root.LazyInterfaceInformerLocator;
-import com.dooapp.gaedo.finders.root.ProxyBackedInformerFactory;
-import com.dooapp.gaedo.finders.root.ReflectionBackedInformerFactory;
-import com.dooapp.gaedo.properties.FieldBackedPropertyProvider;
-import com.tinkerpop.blueprints.pgm.Graph;
+import com.dooapp.gaedo.test.beans.Post;
+import com.dooapp.gaedo.test.beans.PostInformer;
+import com.dooapp.gaedo.test.beans.Tag;
+import com.dooapp.gaedo.test.beans.TagInformer;
+import com.dooapp.gaedo.test.beans.User;
+import com.dooapp.gaedo.test.beans.UserInformer;
+import com.tinkerpop.blueprints.pgm.IndexableGraph;
 
-public abstract class AbstractGraphTest<GraphType extends Graph> {
+public class AbstractGraphTest  {
+	
+	private AbstractGraphEnvironment<?> environment;
 
-	protected String name;
-	protected GraphType graph;
-	protected SimpleServiceRepository repository;
-	protected GraphProvider graphProvider;
-	protected FieldBackedPropertyProvider provider;
-	protected CumulativeFieldInformerLocator locator;
-	protected ReflectionBackedInformerFactory reflectiveFactory;
-	protected ProxyBackedInformerFactory proxyInformerFactory;
-
-	public AbstractGraphTest(GraphProvider graph) {
-		this.name = graph.getName();
-		this.graphProvider = graph;
+	public AbstractGraphTest(AbstractGraphEnvironment<?> environment) {
+		this.environment = environment;
 	}
 
+	@Before
+	public void loadService() throws Exception {
+		environment.loadService();
+	}
+
+	/**
+	 * @throws Exception
+	 * @see com.dooapp.gaedo.blueprints.AbstractGraphEnvironment#unload()
+	 * @category delegate
+	 */
 	@After
 	public void unload() throws Exception {
-		graph.shutdown();
-		File f = new File(GraphProvider.GRAPH_DIR);
-		f.delete();
+		environment.unload();
 	}
 
-	public void loadService() throws Exception {
-		repository = new SimpleServiceRepository();
-		provider = new FieldBackedPropertyProvider();
-		locator = new CumulativeFieldInformerLocator();
-		locator.add(new BasicFieldInformerLocator());
-		locator.add(new ServiceBackedFieldLocator(repository));
-		locator.add(new LazyInterfaceInformerLocator());
-		reflectiveFactory = new ReflectionBackedInformerFactory(
-				locator, provider);
-		proxyInformerFactory = new ProxyBackedInformerFactory(
-				reflectiveFactory);
-		
-		graph = createGraph(graphProvider);
+	/**
+	 * @return
+	 * @see com.dooapp.gaedo.blueprints.AbstractGraphEnvironment#getTagService()
+	 * @category delegate
+	 */
+	public FinderCrudService<Tag, TagInformer> getTagService() {
+		return environment.getTagService();
 	}
 
-	protected abstract GraphType createGraph(GraphProvider graphProvider);
+	/**
+	 * @return
+	 * @see com.dooapp.gaedo.blueprints.AbstractGraphEnvironment#getPostService()
+	 * @category delegate
+	 */
+	public FinderCrudService<Post, PostInformer> getPostService() {
+		return environment.getPostService();
+	}
 
-	protected abstract <Type> FinderCrudService<Type, Informer<Type>> createServiceFor(Class<Type> beanClass, Class<? extends Informer<Type>> informerClass);
+	/**
+	 * @return
+	 * @see com.dooapp.gaedo.blueprints.AbstractGraphEnvironment#getPostSubService()
+	 * @category delegate
+	 */
+	public FinderCrudService<PostSubClass, PostSubClassInformer> getPostSubService() {
+		return environment.getPostSubService();
+	}
+
+	/**
+	 * @return
+	 * @see com.dooapp.gaedo.blueprints.AbstractGraphEnvironment#getUserService()
+	 * @category delegate
+	 */
+	public FinderCrudService<User, UserInformer> getUserService() {
+		return environment.getUserService();
+	}
+
+
 }

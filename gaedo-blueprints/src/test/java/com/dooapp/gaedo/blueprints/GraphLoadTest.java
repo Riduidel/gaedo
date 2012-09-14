@@ -1,4 +1,4 @@
-package com.dooapp.gaedo.blueprints.indexable;
+package com.dooapp.gaedo.blueprints;
 
 import java.io.File;
 import java.util.Collection;
@@ -13,8 +13,6 @@ import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 import org.junit.runners.Parameterized.Parameters;
 
-import com.dooapp.gaedo.blueprints.GraphProvider;
-import com.dooapp.gaedo.blueprints.TestUtils;
 import com.dooapp.gaedo.finders.FinderCrudService;
 import com.dooapp.gaedo.finders.QueryBuilder;
 import com.dooapp.gaedo.finders.QueryExpression;
@@ -29,15 +27,10 @@ import static org.junit.Assert.assertThat;
 
 @Ignore
 @RunWith(Parameterized.class)
-public class IndexableLoadTest extends AbstractIndexableGraphTest {
+public class GraphLoadTest extends AbstractGraphTest {
 	
-	private static final Logger logger = Logger.getLogger(IndexableLoadTest.class.getName());
+	private static final Logger logger = Logger.getLogger(GraphLoadTest.class.getName());
 	
-	private FinderCrudService<Tag, TagInformer> tagService;
-	private IndexableGraph graph;
-	private SimpleServiceRepository repository;
-	private String name;
-	private GraphProvider graphProvider;
 	private long instanceCount;
 	
 	@Parameters
@@ -45,25 +38,9 @@ public class IndexableLoadTest extends AbstractIndexableGraphTest {
 		return TestUtils.loadTest();
 	}
 	
-	public IndexableLoadTest(GraphProvider graph, long instanceCount) {
-		super(graph);
+	public GraphLoadTest(AbstractGraphEnvironment<?> environment, long instanceCount) {
+		super(environment);
 		this.instanceCount = instanceCount;
-	}
-
-	@Before
-	public void loadService() throws Exception {
-		super.loadService();
-		// Now add some services
-		repository.add(createServiceFor(Tag.class, TagInformer.class));
-		repository.add(createServiceFor(Post.class, PostInformer.class));
-		tagService = repository.get(Tag.class);
-	}
-	
-	@After
-	public void unload() {
-		graph.shutdown();
-		File f = new File(GraphProvider.GRAPH_DIR);
-		f.delete();
 	}
 
 	@Test
@@ -71,10 +48,10 @@ public class IndexableLoadTest extends AbstractIndexableGraphTest {
 		logger.info("loading DB with "+instanceCount+" tags");
 		for(long index = 1l; index < instanceCount; index++) {
 			final Tag a = new Tag(TestUtils.A+index).withId(128+index);
-			tagService.create(a);
+			getTagService().create(a);
 		}
 		logger.info("now doing some brute-force scanning on "+instanceCount+" tags");
-		Iterable<Tag> values = tagService.find().matching(
+		Iterable<Tag> values = getTagService().find().matching(
 				new QueryBuilder<TagInformer>() {
 
 					public QueryExpression createMatchingExpression(
@@ -90,7 +67,7 @@ public class IndexableLoadTest extends AbstractIndexableGraphTest {
 		logger.info("deleting "+instanceCount+" tags");
 		for(long index = 1l; index < instanceCount; index++) {
 			final Tag a = new Tag(TestUtils.A+index).withId(128+index);
-			tagService.delete(a);
+			getTagService().delete(a);
 		}
 		logger.info("job's done for "+instanceCount+" tags");
 	}

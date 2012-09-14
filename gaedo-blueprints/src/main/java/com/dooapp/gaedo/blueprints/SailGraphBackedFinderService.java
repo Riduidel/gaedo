@@ -19,8 +19,7 @@ public class SailGraphBackedFinderService<DataType, InformerType extends Informe
 
 	@Override
 	protected Vertex loadVertexFor(String objectVertexId) {
-		// TODO Auto-generated method stub
-		throw new UnsupportedOperationException("method "+AbstractBluePrintsBackedFinderService.class+"#loadVertexFor has not yet been implemented AT ALL");
+		return database.getVertex(objectVertexId);
 	}
 
 	@Override

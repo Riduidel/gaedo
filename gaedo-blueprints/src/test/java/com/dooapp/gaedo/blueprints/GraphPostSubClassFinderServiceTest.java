@@ -1,4 +1,4 @@
-package com.dooapp.gaedo.blueprints.indexable;
+package com.dooapp.gaedo.blueprints;
 
 import static org.junit.Assert.assertThat;
 
@@ -19,13 +19,13 @@ import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 import org.junit.runners.Parameterized.Parameters;
 
-import com.dooapp.gaedo.blueprints.GraphProvider;
+import com.dooapp.gaedo.AbstractCrudService;
 import com.dooapp.gaedo.blueprints.IndexableGraphBackedFinderService;
-import com.dooapp.gaedo.blueprints.TestUtils;
+import com.dooapp.gaedo.blueprints.beans.PostSubClass;
+import com.dooapp.gaedo.blueprints.beans.PostSubClassInformer;
 import com.dooapp.gaedo.blueprints.providers.Neo4j;
 import com.dooapp.gaedo.blueprints.providers.Tinker;
 import com.dooapp.gaedo.finders.FinderCrudService;
-import com.dooapp.gaedo.finders.Informer;
 import com.dooapp.gaedo.finders.QueryBuilder;
 import com.dooapp.gaedo.finders.QueryExpression;
 import com.dooapp.gaedo.finders.id.IdBasedService;
@@ -54,66 +54,34 @@ import static com.dooapp.gaedo.blueprints.TestUtils.*;
 
 
 @RunWith(Parameterized.class)
-public class IndexablePostSubClassFinderServiceTest extends AbstractIndexableGraphTest{
-	
-	public static interface PostSubClassInformer extends Informer<PostSubClass> {
-		
-	}
-	public static class PostSubClass extends Post {
-
-		public PostSubClass() {
-			super();
-		}
-
-		public PostSubClass(long id, String text, float note, State state, User author) {
-			super(id, text, note, state, author);
-		}
-
-		public PostSubClass(long i, String string, int j, State public1, User author2, Map<String, String> theseMappings) {
-			super(i, string, j, public1, author2, theseMappings);
-		}
-		
-		
-	}
-	
-	private static final Logger logger = Logger.getLogger(IndexablePostSubClassFinderServiceTest.class.getName());
+public class GraphPostSubClassFinderServiceTest extends AbstractGraphTest{
+	private static final Logger logger = Logger.getLogger(GraphPostSubClassFinderServiceTest.class.getName());
 	
 	@Parameters
 	public static Collection<Object[]> parameters() {
 		return simpleTest();
 	}
-	private FinderCrudService<Tag, TagInformer> tagService;
-	private FinderCrudService<Post, PostInformer> postService;
-	private FinderCrudService<PostSubClass, PostSubClassInformer> postSubService;
-	private FinderCrudService<User, UserInformer> userService;
+
 	private User author;
 	private Post post1;
 	private Post post2;
 	private Post post3;
 	private Tag tag1;
 	
-	public IndexablePostSubClassFinderServiceTest(GraphProvider graph) {
-		super(graph);
+	public GraphPostSubClassFinderServiceTest(AbstractGraphEnvironment<?> environment) {
+		super(environment);
+		// TODO Auto-generated constructor stub
 	}
 
 	@Before
 	public void loadService() throws Exception {
 		super.loadService();
-		// Now add some services
-		repository.add(createServiceFor(Tag.class, TagInformer.class));
-		repository.add(createServiceFor(Post.class, PostInformer.class));
-		repository.add(createServiceFor(PostSubClass.class, PostSubClassInformer.class));
-		repository.add(createServiceFor(User.class, UserInformer.class));
-		repository.add(createServiceFor(Theme.class, ThemeInformer.class));
-		tagService = repository.get(Tag.class);
-		postService = repository.get(Post.class);
-		userService = repository.get(User.class);
 
 		// create some objects
 		author = new User().withId(1).withLogin(USER_LOGIN).withPassword(USER_PASSWORD);
 		author.about = new Post(ABOUT_ID, "a message about that user", 5, State.PUBLIC, author);
-		author = userService.create(author);
-		tag1 = tagService.create(new Tag(1, TAG_TEXT));
+		author = getUserService().create(author);
+		tag1 = getTagService().create(new Tag(1, TAG_TEXT));
 	}
 	
 	private Map<String, String> theseMappings(String...strings) {
@@ -130,9 +98,9 @@ public class IndexablePostSubClassFinderServiceTest extends AbstractIndexableGra
 	public void ensurePostSubClassServiceWorksWell() {
 		final String METHOD_NAME = "ensurePostSubClassServiceWorksWell";
 		PostSubClass newOne = new PostSubClass(1000+ID_POST_1, METHOD_NAME,1.0f, State.PUBLIC, author);
-		Post saved = postService.create(newOne);
+		Post saved = getPostService().create(newOne);
 		assertThat(saved, Is.is(PostSubClass.class));
-		Post loaded = postService.find().matching(new QueryBuilder<PostInformer>() {
+		Post loaded = getPostService().find().matching(new QueryBuilder<PostInformer>() {
 			
 			@Override
 			public QueryExpression createMatchingExpression(PostInformer informer) {
@@ -140,8 +108,8 @@ public class IndexablePostSubClassFinderServiceTest extends AbstractIndexableGra
 			}
 		}).getFirst();
 		assertThat(loaded, Is.is(PostSubClass.class));
-		if(postService instanceof IdBasedService) {
-			Post fromId = ((IdBasedService<Post>) postService).findById(loaded.id);
+		if(getPostService() instanceof IdBasedService) {
+			Post fromId = ((IdBasedService<Post>) getPostService()).findById(loaded.id);
 			assertThat(fromId, Is.is(PostSubClass.class));
 		}
 	}
