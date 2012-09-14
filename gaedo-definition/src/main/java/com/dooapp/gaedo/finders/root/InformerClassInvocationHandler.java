@@ -198,7 +198,6 @@ public class InformerClassInvocationHandler<InformerType extends Informer<Contai
 	 */
 	private MethodResolver createSubInformerResolvers(Method method) {
 		// First thing to check is method startup
-		String methodName = method.getName();
 		FieldInformer returned = methodNameToFieldInformer(method, realInformer);
 		Class<?> returnType = method.getReturnType();
 		if (!returnType.isAssignableFrom(returned.getClass())) {

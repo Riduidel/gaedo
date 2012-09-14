@@ -1,4 +1,4 @@
-package com.dooapp.gaedo.blueprints.indexable;
+package com.dooapp.gaedo.blueprints.sail;
 
 import static org.junit.Assert.assertThat;
 
@@ -25,8 +25,8 @@ import org.junit.runners.Parameterized.Parameters;
 
 import com.dooapp.gaedo.blueprints.GraphProvider;
 import com.dooapp.gaedo.blueprints.IndexableGraphBackedFinderService;
-import com.dooapp.gaedo.blueprints.Neo4j;
 import com.dooapp.gaedo.blueprints.TestUtils;
+import com.dooapp.gaedo.blueprints.providers.Neo4j;
 import com.dooapp.gaedo.finders.FinderCrudService;
 import com.dooapp.gaedo.finders.Informer;
 import com.dooapp.gaedo.finders.QueryBuilder;
@@ -48,10 +48,13 @@ import com.dooapp.gaedo.test.beans.TagInformer;
 import com.dooapp.gaedo.test.beans.User;
 import com.dooapp.gaedo.test.beans.UserInformer;
 import com.tinkerpop.blueprints.pgm.IndexableGraph;
+import com.tinkerpop.blueprints.pgm.impls.sail.SailGraph;
+
+import static com.dooapp.gaedo.blueprints.TestUtils.*;
 
 @Ignore
 @RunWith(Parameterized.class)
-public class MultithreadedGraphBackedTest {
+public class SailMultithreadedTest extends AbstractSailGraphTest {
 	private class Work implements Runnable {
 
 		private long index;
@@ -103,17 +106,8 @@ public class MultithreadedGraphBackedTest {
 		
 	}
 	
-	private static final Logger logger = Logger.getLogger(MultithreadedGraphBackedTest.class.getName());
+	private static final Logger logger = Logger.getLogger(SailMultithreadedTest.class.getName());
 	
-	static final String GRAPH_DIR = System.getProperty("user.dir")+"/target/tests/graph";
-	private static final String A = "A";
-	private static final String B = "B";
-	private static final String C = "C";
-	private FinderCrudService<Tag, TagInformer> tagService;
-	private IndexableGraph graph;
-	private SimpleServiceRepository repository;
-	private String name;
-	private GraphProvider graphProvider;
 	private long instanceCount;
 
 	private ExecutorService executorService;
@@ -121,46 +115,27 @@ public class MultithreadedGraphBackedTest {
 	private FinderCrudService<Post, Informer<Post>> postService;
 
 	private User author;
+
+	private FinderCrudService<Tag, TagInformer> tagService;
 	
 	@Parameters
 	public static Collection<Object[]> parameters() {
-		Collection<Object[]> returned = new LinkedList<Object[]>();
-//		returned.add(new Object[] { new Tinker()});
-//		returned.add(new Object[] {  new OrientDB()});
-		returned.add(new Object[] { new Neo4j(),10l});
-		returned.add(new Object[] { new Neo4j(),1000l});
-//		returned.add(new Object[] { new Neo4j(),10000l});
-//		returned.add(new Object[] { new Neo4j(),100000l});
-//		returned.add(new Object[] { new Neo4j(),1000000l});
-//		returned.add(new Object[] { new Neo4j(),1000000000l});
-//		returned.add(new Object[] { new Neo4j(),1000000000000l});
-		return returned;
+		return loadTest();
 	}
 	
-	public MultithreadedGraphBackedTest(GraphProvider graph, long instanceCount) {
-		this.name = graph.getName();
-		this.graphProvider = graph;
+	public SailMultithreadedTest(GraphProvider graph, long instanceCount) {
+		super(graph);
 		this.instanceCount = instanceCount;
 	}
 
 	@Before
-	public void loadService() throws MalformedURLException {
+	public void loadService() throws Exception {
 		executorService = Executors.newFixedThreadPool(50);
-		repository = new SimpleServiceRepository();
-		PropertyProvider provider = new FieldBackedPropertyProvider();
-		CumulativeFieldInformerLocator locator = new CumulativeFieldInformerLocator();
-		locator.add(new BasicFieldInformerLocator());
-		locator.add(new ServiceBackedFieldLocator(repository));
-		ReflectionBackedInformerFactory reflectiveFactory = new ReflectionBackedInformerFactory(
-				locator, provider);
-		InformerFactory proxyInformerFactory = new ProxyBackedInformerFactory(
-				reflectiveFactory);
-		
-		graph = graphProvider.get(TestUtils.indexable(GraphProvider.GRAPH_DIR));
+		super.loadService();
 		// Now add some services
-		repository.add(new IndexableGraphBackedFinderService(Tag.class, TagInformer.class, proxyInformerFactory, repository, provider, graph));
-		repository.add(new IndexableGraphBackedFinderService(User.class, UserInformer.class, proxyInformerFactory, repository, provider, graph));
-		repository.add(new IndexableGraphBackedFinderService(Post.class, PostInformer.class, proxyInformerFactory, repository, provider, graph));
+		repository.add(createServiceFor(Tag.class, TagInformer.class));
+		repository.add(createServiceFor(User.class, UserInformer.class));
+		repository.add(createServiceFor(Post.class, PostInformer.class));
 		tagService = repository.get(Tag.class);
 		postService = repository.get(Post.class);
 		tagService.create(new Tag(A).withId(1l));
@@ -170,12 +145,10 @@ public class MultithreadedGraphBackedTest {
 	}
 	
 	@After
-	public void unload() throws InterruptedException {
+	public void unload() throws Exception {
 		executorService.shutdown();
 		executorService.awaitTermination(1, TimeUnit.DAYS);
-		graph.shutdown();
-		File f = new File(GRAPH_DIR);
-		f.delete();
+		super.unload();
 	}
 
 	@Test

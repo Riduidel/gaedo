@@ -1,5 +1,7 @@
-package com.dooapp.gaedo.blueprints;
+package com.dooapp.gaedo.blueprints.providers;
 
+import com.dooapp.gaedo.blueprints.AbstractGraphProvider;
+import com.dooapp.gaedo.blueprints.GraphProvider;
 import com.tinkerpop.blueprints.pgm.IndexableGraph;
 import com.tinkerpop.blueprints.pgm.impls.orientdb.OrientGraph;
 

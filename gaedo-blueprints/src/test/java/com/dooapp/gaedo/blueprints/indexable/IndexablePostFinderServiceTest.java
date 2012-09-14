@@ -1,7 +1,6 @@
 package com.dooapp.gaedo.blueprints.indexable;
 
-import static org.junit.Assert.assertThat;
-
+import static com.dooapp.gaedo.blueprints.TestUtils.*;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -10,9 +9,7 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
 import java.lang.reflect.Proxy;
-import java.net.MalformedURLException;
 import java.util.Collection;
-import java.util.LinkedList;
 import java.util.Map;
 import java.util.TreeMap;
 import java.util.logging.Level;
@@ -30,24 +27,14 @@ import org.junit.runners.Parameterized;
 import org.junit.runners.Parameterized.Parameters;
 
 import com.dooapp.gaedo.blueprints.GraphProvider;
-import com.dooapp.gaedo.blueprints.IndexableGraphBackedFinderService;
-import com.dooapp.gaedo.blueprints.Neo4j;
-import com.dooapp.gaedo.blueprints.TestUtils;
-import com.dooapp.gaedo.blueprints.Tinker;
+import com.dooapp.gaedo.blueprints.UnknownSerializable;
+import com.dooapp.gaedo.blueprints.finders.FindFirstPostByNote;
+import com.dooapp.gaedo.blueprints.finders.FindFirstUserByLogin;
+import com.dooapp.gaedo.blueprints.finders.FindPostByText;
 import com.dooapp.gaedo.finders.FinderCrudService;
 import com.dooapp.gaedo.finders.QueryBuilder;
 import com.dooapp.gaedo.finders.QueryExpression;
 import com.dooapp.gaedo.finders.id.IdBasedService;
-import com.dooapp.gaedo.finders.repository.ServiceBackedFieldLocator;
-import com.dooapp.gaedo.finders.repository.SimpleServiceRepository;
-import com.dooapp.gaedo.finders.root.BasicFieldInformerLocator;
-import com.dooapp.gaedo.finders.root.CumulativeFieldInformerLocator;
-import com.dooapp.gaedo.finders.root.InformerFactory;
-import com.dooapp.gaedo.finders.root.LazyInterfaceInformerLocator;
-import com.dooapp.gaedo.finders.root.ProxyBackedInformerFactory;
-import com.dooapp.gaedo.finders.root.ReflectionBackedInformerFactory;
-import com.dooapp.gaedo.properties.FieldBackedPropertyProvider;
-import com.dooapp.gaedo.properties.PropertyProvider;
 import com.dooapp.gaedo.test.beans.Post;
 import com.dooapp.gaedo.test.beans.PostInformer;
 import com.dooapp.gaedo.test.beans.State;
@@ -59,134 +46,28 @@ import com.dooapp.gaedo.test.beans.specific.Theme;
 import com.dooapp.gaedo.test.beans.specific.ThemeInformer;
 import com.tinkerpop.blueprints.pgm.Edge;
 import com.tinkerpop.blueprints.pgm.Index;
-import com.tinkerpop.blueprints.pgm.IndexableGraph;
+
+import static com.dooapp.gaedo.blueprints.TestUtils.A;
+import static com.dooapp.gaedo.blueprints.TestUtils.ABOUT_ID;
+import static com.dooapp.gaedo.blueprints.TestUtils.ID_POST_1;
+import static com.dooapp.gaedo.blueprints.TestUtils.LOGIN_FOR_UPDATE_ON_CREATE;
+import static com.dooapp.gaedo.blueprints.TestUtils.SOME_NEW_TEXT;
+import static com.dooapp.gaedo.blueprints.TestUtils.TAG_TEXT;
+import static com.dooapp.gaedo.blueprints.TestUtils.TEST_TAG_FOR_CREATE_ON_UPDATE;
+import static com.dooapp.gaedo.blueprints.TestUtils.USER_LOGIN;
+import static com.dooapp.gaedo.blueprints.TestUtils.USER_PASSWORD;
+import static com.dooapp.gaedo.blueprints.TestUtils.simpleTest;
+
+import static org.junit.Assert.assertThat;
 
 @RunWith(Parameterized.class)
-public class GraphBackedPostFinderServiceTest {
-	private static final Logger logger = Logger.getLogger(GraphBackedPostFinderServiceTest.class.getName());
-	
-	private static final String SOME_NEW_TEXT = "some new text";
-	private static final String TAG_TEXT = "tag text";
-	private static final String LOGIN_FOR_UPDATE_ON_CREATE = "login for update on create";
-	private static final String TEST_TAG_FOR_CREATE_ON_UPDATE = "test tag for create on update";
+public class IndexablePostFinderServiceTest extends AbstractIndexableGraphTest {
+	private static final Logger logger = Logger.getLogger(IndexablePostFinderServiceTest.class.getName());
 
 	@Parameters
 	public static Collection<Object[]> parameters() {
-		Collection<Object[]> returned = new LinkedList<Object[]>();
-		returned.add(new Object[] { new Tinker()});
-//		returned.add(new Object[] { new OrientDB()});
-		returned.add(new Object[] { new Neo4j()});
-		return returned;
+		return simpleTest();
 	}
-
-	private final class FindPostByText implements QueryBuilder<PostInformer> {
-		private final String text;
-
-		private FindPostByText(String text) {
-			this.text = text;
-		}
-
-		@Override
-		public QueryExpression createMatchingExpression(PostInformer informer) {
-			return informer.getText().equalsTo(text);
-		}
-	}
-
-	public static class UnknownSerializable implements Serializable {
-		private String text;
-		
-		/**
-		 * @param text new value for #text
-		 * @category fluent
-		 * @category setter
-		 * @category text
-		 * @return this object for chaining calls
-		 */
-		public UnknownSerializable withText(String text) {
-			this.setText(text);
-			return this;
-		}
-
-		/**
-		 * @return the text
-		 * @category getter
-		 * @category text
-		 */
-		public String getText() {
-			return text;
-		}
-
-		/**
-		 * @param text the text to set
-		 * @category setter
-		 * @category text
-		 */
-		public void setText(String text) {
-			this.text = text;
-		}
-
-		/**
-		 * @return
-		 * @see java.lang.Object#hashCode()
-		 */
-		@Override
-		public int hashCode() {
-			final int prime = 31;
-			int result = 1;
-			result = prime * result + ((text == null) ? 0 : text.hashCode());
-			return result;
-		}
-
-		/**
-		 * @param obj
-		 * @return
-		 * @see java.lang.Object#equals(java.lang.Object)
-		 */
-		@Override
-		public boolean equals(Object obj) {
-			if (this == obj)
-				return true;
-			if (obj == null)
-				return false;
-			if (getClass() != obj.getClass())
-				return false;
-			UnknownSerializable other = (UnknownSerializable) obj;
-			if (text == null) {
-				if (other.text != null)
-					return false;
-			} else if (!text.equals(other.text))
-				return false;
-			return true;
-		}
-		
-	}
-	private static final long ID_POST_1 = 1;
-	private static final long ABOUT_ID = 10;
-	private static final String USER_PASSWORD = "user password";
-	private static final String USER_LOGIN = "user login";
-
-	private final class FindFirstUserByLogin implements QueryBuilder<UserInformer> {
-		@Override
-		public QueryExpression createMatchingExpression(UserInformer informer) {
-			return informer.getLogin().equalsTo(USER_LOGIN);
-		}
-	}
-
-	private final class FindFirstPostByNote implements QueryBuilder<PostInformer> {
-		@Override
-		public QueryExpression createMatchingExpression(PostInformer informer) {
-			return informer.getNote().equalsTo(1);
-		}
-	}
-	
-	private static final String GRAPH_DIR = System.getProperty("user.dir")+"/target/tests/graph";
-	private static final String A = "A";
-	private static final String B = "B";
-	private static final String C = "C";
-	private IndexableGraph graph;
-	private SimpleServiceRepository repository;
-	private String name;
-	private GraphProvider graphProvider;
 	private FinderCrudService<Tag, TagInformer> tagService;
 	private FinderCrudService<Post, PostInformer> postService;
 	private FinderCrudService<User, UserInformer> userService;
@@ -196,30 +77,18 @@ public class GraphBackedPostFinderServiceTest {
 	private Post post3;
 	private Tag tag1;
 	
-	public GraphBackedPostFinderServiceTest(GraphProvider graph) {
-		this.name = graph.getName();
-		this.graphProvider = graph;
+	public IndexablePostFinderServiceTest(GraphProvider graph) {
+		super(graph);
 	}
 
 	@Before
-	public void loadService() throws MalformedURLException {
-		repository = new SimpleServiceRepository();
-		PropertyProvider provider = new FieldBackedPropertyProvider();
-		CumulativeFieldInformerLocator locator = new CumulativeFieldInformerLocator();
-		locator.add(new BasicFieldInformerLocator());
-		locator.add(new ServiceBackedFieldLocator(repository));
-		locator.add(new LazyInterfaceInformerLocator());
-		ReflectionBackedInformerFactory reflectiveFactory = new ReflectionBackedInformerFactory(
-				locator, provider);
-		InformerFactory proxyInformerFactory = new ProxyBackedInformerFactory(
-				reflectiveFactory);
-		
-		graph = graphProvider.get(TestUtils.indexable(GraphProvider.GRAPH_DIR));
+	public void loadService() throws Exception {
+		super.loadService();
 		// Now add some services
-		repository.add(new IndexableGraphBackedFinderService(Tag.class, TagInformer.class, proxyInformerFactory, repository, provider, graph));
-		repository.add(new IndexableGraphBackedFinderService(Post.class, PostInformer.class, proxyInformerFactory, repository, provider, graph));
-		repository.add(new IndexableGraphBackedFinderService(User.class, UserInformer.class, proxyInformerFactory, repository, provider, graph));
-		repository.add(new IndexableGraphBackedFinderService(Theme.class, ThemeInformer.class, proxyInformerFactory, repository, provider, graph));
+		repository.add(createServiceFor(Tag.class, TagInformer.class));
+		repository.add(createServiceFor(Post.class, PostInformer.class));
+		repository.add(createServiceFor(User.class, UserInformer.class));
+		repository.add(createServiceFor(Theme.class, ThemeInformer.class));
 		tagService = repository.get(Tag.class);
 		postService = repository.get(Post.class);
 		userService = repository.get(User.class);
@@ -246,17 +115,6 @@ public class GraphBackedPostFinderServiceTest {
 			}
 		}
 		return returned;
-	}
-
-	@After
-	public void unload() {
-//		userService.delete(author);
-//		postService.delete(post1);
-//		postService.delete(post2);
-//		postService.delete(post3);
-		graph.shutdown();
-		File f = new File(GraphProvider.GRAPH_DIR);
-		f.delete();
 	}
 
 	/**

@@ -1,5 +1,7 @@
 package com.dooapp.gaedo.blueprints.indexable;
 
+import static com.dooapp.gaedo.blueprints.TestUtils.*;
+
 import static org.junit.Assert.assertThat;
 
 import java.io.File;
@@ -20,9 +22,9 @@ import org.junit.runners.Parameterized.Parameters;
 
 import com.dooapp.gaedo.blueprints.GraphProvider;
 import com.dooapp.gaedo.blueprints.IndexableGraphBackedFinderService;
-import com.dooapp.gaedo.blueprints.Neo4j;
 import com.dooapp.gaedo.blueprints.TestUtils;
-import com.dooapp.gaedo.blueprints.Tinker;
+import com.dooapp.gaedo.blueprints.providers.Neo4j;
+import com.dooapp.gaedo.blueprints.providers.Tinker;
 import com.dooapp.gaedo.finders.FieldInformer;
 import com.dooapp.gaedo.finders.FinderCrudService;
 import com.dooapp.gaedo.finders.QueryBuilder;
@@ -48,54 +50,25 @@ import com.tinkerpop.blueprints.pgm.impls.orientdb.OrientGraph;
 import com.tinkerpop.blueprints.pgm.impls.tg.TinkerGraph;
 
 @RunWith(Parameterized.class)
-public class GraphBackedTagFinderServiceTest {
-	private static final String A = "A";
-	private static final String B = "B";
-	private static final String C = "C";
+public class IndexableTagFinderServiceTest extends AbstractIndexableGraphTest {
 	private FinderCrudService<Tag, TagInformer> tagService;
-	private IndexableGraph graph;
-	private SimpleServiceRepository repository;
-	private String name;
-	private GraphProvider graphProvider;
 	
 	@Parameters
 	public static Collection<Object[]> parameters() {
-		Collection<Object[]> returned = new LinkedList<Object[]>();
-		returned.add(new Object[] { new Tinker()});
-//		returned.add(new Object[] { new OrientDB()});
-		returned.add(new Object[] { new Neo4j()});
-		return returned;
+		return simpleTest();
 	}
 	
-	public GraphBackedTagFinderServiceTest(GraphProvider graph) {
-		this.name = graph.getName();
-		this.graphProvider = graph;
+	public IndexableTagFinderServiceTest(GraphProvider graph) {
+		super(graph);
 	}
 
 	@Before
-	public void loadService() throws MalformedURLException {
-		repository = new SimpleServiceRepository();
-		PropertyProvider provider = new FieldBackedPropertyProvider();
-		CumulativeFieldInformerLocator locator = new CumulativeFieldInformerLocator();
-		locator.add(new BasicFieldInformerLocator());
-		locator.add(new ServiceBackedFieldLocator(repository));
-		ReflectionBackedInformerFactory reflectiveFactory = new ReflectionBackedInformerFactory(
-				locator, provider);
-		InformerFactory proxyInformerFactory = new ProxyBackedInformerFactory(
-				reflectiveFactory);
-		
-		graph = graphProvider.get(TestUtils.indexable(GraphProvider.GRAPH_DIR));
+	public void loadService() throws Exception {
+		super.loadService();
 		// Now add some services
-		repository.add(new IndexableGraphBackedFinderService(Tag.class, TagInformer.class, proxyInformerFactory, repository, provider, graph));
-		repository.add(new IndexableGraphBackedFinderService(Post.class, PostInformer.class, proxyInformerFactory, repository, provider, graph));
+		repository.add(createServiceFor(Tag.class, TagInformer.class));
+		repository.add(createServiceFor(Post.class, PostInformer.class));
 		tagService = repository.get(Tag.class);
-	}
-	
-	@After
-	public void unload() {
-		graph.shutdown();
-		File f = new File(GraphProvider.GRAPH_DIR);
-		f.delete();
 	}
 
 	@Test

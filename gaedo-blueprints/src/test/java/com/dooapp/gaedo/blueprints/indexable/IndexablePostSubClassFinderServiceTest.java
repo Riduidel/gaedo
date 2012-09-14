@@ -21,9 +21,9 @@ import org.junit.runners.Parameterized.Parameters;
 
 import com.dooapp.gaedo.blueprints.GraphProvider;
 import com.dooapp.gaedo.blueprints.IndexableGraphBackedFinderService;
-import com.dooapp.gaedo.blueprints.Neo4j;
 import com.dooapp.gaedo.blueprints.TestUtils;
-import com.dooapp.gaedo.blueprints.Tinker;
+import com.dooapp.gaedo.blueprints.providers.Neo4j;
+import com.dooapp.gaedo.blueprints.providers.Tinker;
 import com.dooapp.gaedo.finders.FinderCrudService;
 import com.dooapp.gaedo.finders.Informer;
 import com.dooapp.gaedo.finders.QueryBuilder;
@@ -50,8 +50,11 @@ import com.dooapp.gaedo.test.beans.specific.Theme;
 import com.dooapp.gaedo.test.beans.specific.ThemeInformer;
 import com.tinkerpop.blueprints.pgm.IndexableGraph;
 
+import static com.dooapp.gaedo.blueprints.TestUtils.*;
+
+
 @RunWith(Parameterized.class)
-public class GraphBackedPostSubClassFinderServiceTest {
+public class IndexablePostSubClassFinderServiceTest extends AbstractIndexableGraphTest{
 	
 	public static interface PostSubClassInformer extends Informer<PostSubClass> {
 		
@@ -73,34 +76,12 @@ public class GraphBackedPostSubClassFinderServiceTest {
 		
 	}
 	
-	private static final Logger logger = Logger.getLogger(GraphBackedPostSubClassFinderServiceTest.class.getName());
+	private static final Logger logger = Logger.getLogger(IndexablePostSubClassFinderServiceTest.class.getName());
 	
-	private static final String SOME_NEW_TEXT = "some new text";
-	private static final String TAG_TEXT = "tag text";
-	private static final String LOGIN_FOR_UPDATE_ON_CREATE = "login for update on create";
-	private static final String TEST_TAG_FOR_CREATE_ON_UPDATE = "test tag for create on update";
-
 	@Parameters
 	public static Collection<Object[]> parameters() {
-		Collection<Object[]> returned = new LinkedList<Object[]>();
-		returned.add(new Object[] {  new Tinker()});
-//		returned.add(new Object[] { new OrientDB()});
-		returned.add(new Object[] { new Neo4j()});
-		return returned;
+		return simpleTest();
 	}
-	private static final long ID_POST_1 = 1001;
-	private static final long ABOUT_ID = 10;
-	private static final String USER_PASSWORD = "user password";
-	private static final String USER_LOGIN = "user login";
-	
-	private static final String GRAPH_DIR = System.getProperty("user.dir")+"/target/tests/graph";
-	private static final String A = "A";
-	private static final String B = "B";
-	private static final String C = "C";
-	private IndexableGraph graph;
-	private SimpleServiceRepository repository;
-	private String name;
-	private GraphProvider graphProvider;
 	private FinderCrudService<Tag, TagInformer> tagService;
 	private FinderCrudService<Post, PostInformer> postService;
 	private FinderCrudService<PostSubClass, PostSubClassInformer> postSubService;
@@ -111,31 +92,19 @@ public class GraphBackedPostSubClassFinderServiceTest {
 	private Post post3;
 	private Tag tag1;
 	
-	public GraphBackedPostSubClassFinderServiceTest(GraphProvider graph) {
-		this.name = graph.getName();
-		this.graphProvider = graph;
+	public IndexablePostSubClassFinderServiceTest(GraphProvider graph) {
+		super(graph);
 	}
 
 	@Before
-	public void loadService() throws MalformedURLException {
-		repository = new SimpleServiceRepository();
-		PropertyProvider provider = new FieldBackedPropertyProvider();
-		CumulativeFieldInformerLocator locator = new CumulativeFieldInformerLocator();
-		locator.add(new BasicFieldInformerLocator());
-		locator.add(new ServiceBackedFieldLocator(repository));
-		locator.add(new LazyInterfaceInformerLocator());
-		ReflectionBackedInformerFactory reflectiveFactory = new ReflectionBackedInformerFactory(
-				locator, provider);
-		InformerFactory proxyInformerFactory = new ProxyBackedInformerFactory(
-				reflectiveFactory);
-		
-		graph = graphProvider.get(TestUtils.indexable(GraphProvider.GRAPH_DIR));
+	public void loadService() throws Exception {
+		super.loadService();
 		// Now add some services
-		repository.add(new IndexableGraphBackedFinderService(Tag.class, TagInformer.class, proxyInformerFactory, repository, provider, graph));
-		repository.add(new IndexableGraphBackedFinderService(Post.class, PostInformer.class, proxyInformerFactory, repository, provider, graph));
-		repository.add(new IndexableGraphBackedFinderService(PostSubClass.class, PostSubClassInformer.class, proxyInformerFactory, repository, provider, graph));
-		repository.add(new IndexableGraphBackedFinderService(User.class, UserInformer.class, proxyInformerFactory, repository, provider, graph));
-		repository.add(new IndexableGraphBackedFinderService(Theme.class, ThemeInformer.class, proxyInformerFactory, repository, provider, graph));
+		repository.add(createServiceFor(Tag.class, TagInformer.class));
+		repository.add(createServiceFor(Post.class, PostInformer.class));
+		repository.add(createServiceFor(PostSubClass.class, PostSubClassInformer.class));
+		repository.add(createServiceFor(User.class, UserInformer.class));
+		repository.add(createServiceFor(Theme.class, ThemeInformer.class));
 		tagService = repository.get(Tag.class);
 		postService = repository.get(Post.class);
 		userService = repository.get(User.class);
@@ -157,21 +126,10 @@ public class GraphBackedPostSubClassFinderServiceTest {
 		return returned;
 	}
 
-	@After
-	public void unload() {
-//		userService.delete(author);
-//		postService.delete(post1);
-//		postService.delete(post2);
-//		postService.delete(post3);
-		graph.shutdown();
-		File f = new File(GraphProvider.GRAPH_DIR);
-		f.delete();
-	}
-
 	@Test 
 	public void ensurePostSubClassServiceWorksWell() {
 		final String METHOD_NAME = "ensurePostSubClassServiceWorksWell";
-		PostSubClass newOne = new PostSubClass(ID_POST_1, METHOD_NAME,1.0f, State.PUBLIC, author);
+		PostSubClass newOne = new PostSubClass(1000+ID_POST_1, METHOD_NAME,1.0f, State.PUBLIC, author);
 		Post saved = postService.create(newOne);
 		assertThat(saved, Is.is(PostSubClass.class));
 		Post loaded = postService.find().matching(new QueryBuilder<PostInformer>() {

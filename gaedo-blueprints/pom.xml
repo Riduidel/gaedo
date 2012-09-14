@@ -58,9 +58,15 @@
 				</exclusion>
 			</exclusions>
 		</dependency>
+		<!-- users of IndexableGraphFinderService can freely ignore this dependency, as their code is guaranteed not to use it -->
 		<dependency>
 			<groupId>com.tinkerpop.blueprints</groupId>
 			<artifactId>blueprints-sail-graph</artifactId>
+			<version>${blueprints.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>com.tinkerpop.blueprints</groupId>
+			<artifactId>blueprints-graph-sail</artifactId>
 			<version>${blueprints.version}</version>
 		</dependency>
 	</dependencies>
