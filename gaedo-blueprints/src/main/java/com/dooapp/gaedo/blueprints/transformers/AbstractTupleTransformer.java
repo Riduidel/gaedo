@@ -25,9 +25,11 @@ public abstract class AbstractTupleTransformer<TupleType> {
 		String entryVertexId = getIdOfTuple(service.getDatabase(), service.getRepository(), cast);
 		Graph g = service.getDatabase();
 		// No need to memorize updated version
-		Vertex objectVertex = GraphUtils.locateVertex(g, Properties.vertexId, entryVertexId);
+		Vertex objectVertex = service.loadVertexFor(entryVertexId);
 		persister.performUpdate(service, entryVertexId, objectVertex, getContainedClass(), getContainedProperties(), cast, CascadeType.PERSIST, objectsBeingUpdated);
-		return GraphUtils.locateVertex(g, Properties.vertexId, entryVertexId);
+		if(objectVertex==null)
+			objectVertex = service.loadVertexFor(entryVertexId);
+		return objectVertex;
 	}
 
 	/**

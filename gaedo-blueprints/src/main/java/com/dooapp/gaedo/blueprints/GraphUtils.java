@@ -12,6 +12,7 @@ import javax.persistence.CascadeType;
 import javax.persistence.Column;
 
 import com.dooapp.gaedo.blueprints.annotations.GraphProperty;
+import com.dooapp.gaedo.blueprints.indexable.IndexableGraphBackedFinderService;
 import com.dooapp.gaedo.blueprints.transformers.LiteralTransformer;
 import com.dooapp.gaedo.blueprints.transformers.Literals;
 import com.dooapp.gaedo.blueprints.transformers.TupleTransformer;
@@ -276,8 +277,23 @@ public class GraphUtils {
 
 	public static void saveVertexValues(Vertex returned, Object vertexId, Kind kind, Class<? extends Object> type) {
 		returned.setProperty(Properties.vertexId.name(), vertexId);
-		returned.setProperty(Properties.kind.name(), kind.name());
 		returned.setProperty(Properties.type.name(), type.getName());
+	}
+
+
+	/**
+	 * Converts a vertex to a string by outputing all its properties values
+	 * @param objectVertex
+	 * @return
+	 */
+	public static String toString(Vertex objectVertex) {
+		StringBuilder sOut = new StringBuilder("{");
+		for(String s : objectVertex.getPropertyKeys()) {
+			if(sOut.length()>1)
+				sOut.append("; ");
+			sOut.append(s).append("=").append(objectVertex.getProperty(s));
+		}
+		return sOut.append("}").toString();
 	}
 
 }

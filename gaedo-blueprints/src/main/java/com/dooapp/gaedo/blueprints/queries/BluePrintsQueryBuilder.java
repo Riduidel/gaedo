@@ -2,7 +2,7 @@ package com.dooapp.gaedo.blueprints.queries;
 
 import java.util.Stack;
 
-import com.dooapp.gaedo.blueprints.IndexableGraphBackedFinderService;
+import com.dooapp.gaedo.blueprints.indexable.IndexableGraphBackedFinderService;
 import com.dooapp.gaedo.blueprints.queries.executable.BasicGraphExecutableQuery;
 import com.dooapp.gaedo.blueprints.queries.executable.GraphExecutableQuery;
 import com.dooapp.gaedo.blueprints.queries.executable.OptimizedGraphExecutableQuery;

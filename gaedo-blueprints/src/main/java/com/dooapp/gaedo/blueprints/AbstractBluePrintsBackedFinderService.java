@@ -16,6 +16,7 @@ import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
 
+import com.dooapp.gaedo.blueprints.indexable.IndexableGraphBackedFinderService;
 import com.dooapp.gaedo.blueprints.transformers.Literals;
 import com.dooapp.gaedo.blueprints.transformers.Tuples;
 import com.dooapp.gaedo.extensions.id.IdGenerator;
@@ -214,7 +215,7 @@ public abstract class AbstractBluePrintsBackedFinderService<GraphClass extends G
 	 */
 	private void doDelete(DataType toDelete, Map<String, Object> objectsBeingAccessed) {
 		String vertexId = getIdVertexId(toDelete, idProperty, false /* no id generation on delete */);
-		Vertex objectVertex = GraphUtils.locateVertex(database, Properties.vertexId.name(), vertexId);
+		Vertex objectVertex = loadVertexFor(vertexId);
 		if(objectVertex!=null) {
 			Map<Property, Collection<CascadeType>> containedProperties = getContainedProperties(toDelete);
 			for(Property p : containedProperties.keySet()) {
@@ -245,7 +246,7 @@ public abstract class AbstractBluePrintsBackedFinderService<GraphClass extends G
 		String edgeNameFor = GraphUtils.getEdgeNameFor(p);
 		Iterable<Edge> edges = objectVertex.getOutEdges(edgeNameFor);
 		if (logger.isLoggable(Level.FINEST)) {
-			logger.log(Level.FINEST, "deleting edge "+edgeNameFor+" of "+objectVertex.getProperty(Properties.vertexId.name()));
+			logger.log(Level.FINEST, "deleting edge "+edgeNameFor+" of "+GraphUtils.toString(objectVertex));
 		}
 		for(Edge e : edges) {
 			Vertex valueVertex = e.getInVertex();
@@ -330,8 +331,8 @@ public abstract class AbstractBluePrintsBackedFinderService<GraphClass extends G
 			if(valueVertex.getInEdges().iterator().hasNext()) {
 				// There are incoming edges to that vertex. Do nothing but log it
 				if (logger.isLoggable(Level.FINE)) {
-					logger.log(Level.FINE, "while deleting "+objectVertex.getProperty(Properties.vertexId.name())+"" +
-							" we tried to delete "+knownValueVertex.getProperty(Properties.vertexId.name())+"" +
+					logger.log(Level.FINE, "while deleting "+GraphUtils.toString(objectVertex)+"" +
+							" we tried to delete "+GraphUtils.toString(knownValueVertex)+"" +
 									" which has other incoming edges, so we didn't deleted it");
 				}
 			} else {
@@ -346,8 +347,8 @@ public abstract class AbstractBluePrintsBackedFinderService<GraphClass extends G
 			}
 		} else {
 			if (logger.isLoggable(Level.WARNING)) {
-				logger.log(Level.WARNING, "that's strange : value "+value+" is associated to "+knownValueVertex.getProperty(Properties.vertexId.name())+"" +
-						" which blueprints says is different from "+valueVertex.getProperty(Properties.vertexId.name())+"." +
+				logger.log(Level.WARNING, "that's strange : value "+value+" is associated to "+GraphUtils.toString(knownValueVertex)+"" +
+						" which blueprints says is different from "+GraphUtils.toString(valueVertex)+"." +
 								" Under those circumstances, we can delete neither of them");
 			}
 		}
@@ -372,7 +373,7 @@ public abstract class AbstractBluePrintsBackedFinderService<GraphClass extends G
 	 * @return first matching node if found, and null if not
 	 */
 	private Vertex getIdVertexFor(DataType object, boolean allowIdGeneration) {
-		return GraphUtils.locateVertex(database, Properties.vertexId.name(), getIdVertexId(object, idProperty, allowIdGeneration));
+		return loadVertexFor(getIdVertexId(object, idProperty, allowIdGeneration));
 	}
 
 	/**
@@ -522,11 +523,12 @@ public abstract class AbstractBluePrintsBackedFinderService<GraphClass extends G
 	}
 
 	/**
-	 * Load veretx associated to given object id
-	 * @param objectVertexId
-	 * @return
+	 * Load veretx associated to given object id. This method is designed to replace the (to be deprecated) {@link GraphUtils#locateVertex(Graph, Properties, Object)}
+	 * method when used with the (to be deleted) {@link Properties#vertexId} enum value
+	 * @param objectVertexId vertex id for which we want a vertex
+	 * @return loaded vertex if found, or an exception (I guess ?) if none found
 	 */
-	protected abstract Vertex loadVertexFor(String objectVertexId);
+	public abstract Vertex loadVertexFor(String objectVertexId);
 
 	/**
 	 * Load object from a vertex
@@ -550,7 +552,7 @@ public abstract class AbstractBluePrintsBackedFinderService<GraphClass extends G
 		// make sure entered type is a valid one
 		if(Utils.maybeObjectify(idProperty.getType()).isAssignableFrom(Utils.maybeObjectify(id[0].getClass()))) {
 			String vertexIdValue = GraphUtils.getIdOfLiteral(database, containedClass, idProperty, id[0]).toString();
-			Vertex rootVertex = GraphUtils.locateVertex(database, Properties.vertexId.name(), vertexIdValue);
+			Vertex rootVertex = loadVertexFor(vertexIdValue);
 			if(rootVertex==null) {
 				try {
 					// root vertex couldn't be found directly, mostly due to https://github.com/Riduidel/gaedo/issues/11

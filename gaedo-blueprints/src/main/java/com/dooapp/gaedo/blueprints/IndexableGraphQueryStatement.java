@@ -3,6 +3,7 @@ package com.dooapp.gaedo.blueprints;
 import java.beans.PropertyChangeEvent;
 import java.util.TreeMap;
 
+import com.dooapp.gaedo.blueprints.indexable.IndexableGraphBackedFinderService;
 import com.dooapp.gaedo.blueprints.queries.BluePrintsQueryBuilder;
 import com.dooapp.gaedo.blueprints.queries.DataTypeIterable;
 import com.dooapp.gaedo.blueprints.queries.executable.GraphExecutableQuery;

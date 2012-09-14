@@ -1,6 +1,7 @@
 package com.dooapp.gaedo.blueprints;
 
 import com.dooapp.gaedo.CrudServiceException;
+import com.dooapp.gaedo.blueprints.indexable.IndexableGraphBackedFinderService;
 import com.dooapp.gaedo.finders.FinderCrudService;
 
 /**

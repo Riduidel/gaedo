@@ -11,9 +11,9 @@ import java.util.Map.Entry;
 import javax.persistence.CascadeType;
 
 import com.dooapp.gaedo.blueprints.AbstractBluePrintsBackedFinderService;
-import com.dooapp.gaedo.blueprints.IndexableGraphBackedFinderService;
 import com.dooapp.gaedo.blueprints.BluePrintsCrudServiceException;
 import com.dooapp.gaedo.blueprints.GraphUtils;
+import com.dooapp.gaedo.blueprints.indexable.IndexableGraphBackedFinderService;
 import com.dooapp.gaedo.finders.repository.ServiceRepository;
 import com.dooapp.gaedo.properties.DescribedProperty;
 import com.dooapp.gaedo.properties.Property;
@@ -70,7 +70,7 @@ public class MapEntryTransformer extends AbstractTupleTransformer<Map.Entry> imp
 	 * @param cast
 	 * @param objectsBeingUpdated
 	 * @return
-	 * @see com.dooapp.gaedo.blueprints.transformers.AbstractTupleTransformer#getVertexFor(com.dooapp.gaedo.blueprints.IndexableGraphBackedFinderService, java.lang.Object, java.util.Map)
+	 * @see com.dooapp.gaedo.blueprints.transformers.AbstractTupleTransformer#getVertexFor(com.dooapp.gaedo.blueprints.indexable.IndexableGraphBackedFinderService, java.lang.Object, java.util.Map)
 	 */
 	@Override
 	public <DataType> Vertex getVertexFor(AbstractBluePrintsBackedFinderService<? extends Graph, DataType, ?> service, Entry cast, Map<String, Object> objectsBeingUpdated) {

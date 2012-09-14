@@ -1,6 +1,10 @@
-package com.dooapp.gaedo.blueprints;
+package com.dooapp.gaedo.blueprints.indexable;
 
 
+import com.dooapp.gaedo.blueprints.AbstractBluePrintsBackedFinderService;
+import com.dooapp.gaedo.blueprints.GraphUtils;
+import com.dooapp.gaedo.blueprints.IndexableGraphQueryStatement;
+import com.dooapp.gaedo.blueprints.Properties;
 import com.dooapp.gaedo.finders.Informer;
 import com.dooapp.gaedo.finders.QueryBuilder;
 import com.dooapp.gaedo.finders.QueryStatement;
@@ -32,7 +36,7 @@ public class IndexableGraphBackedFinderService <DataType, InformerType extends I
 	}
 
 	@Override
-	protected Vertex loadVertexFor(String objectVertexId) {
+	public Vertex loadVertexFor(String objectVertexId) {
 		return GraphUtils.locateVertex(database, Properties.vertexId, objectVertexId);
 	}
 

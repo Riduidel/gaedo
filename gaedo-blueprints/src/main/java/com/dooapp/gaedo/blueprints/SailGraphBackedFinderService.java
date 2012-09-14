@@ -18,7 +18,7 @@ public class SailGraphBackedFinderService<DataType, InformerType extends Informe
 	}
 
 	@Override
-	protected Vertex loadVertexFor(String objectVertexId) {
+	public Vertex loadVertexFor(String objectVertexId) {
 		return database.getVertex(objectVertexId);
 	}
 

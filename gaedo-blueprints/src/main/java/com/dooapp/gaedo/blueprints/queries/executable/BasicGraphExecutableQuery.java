@@ -6,9 +6,9 @@ import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import com.dooapp.gaedo.blueprints.IndexableGraphBackedFinderService;
 import com.dooapp.gaedo.blueprints.GraphUtils;
 import com.dooapp.gaedo.blueprints.Properties;
+import com.dooapp.gaedo.blueprints.indexable.IndexableGraphBackedFinderService;
 import com.dooapp.gaedo.blueprints.queries.tests.CompoundVertexTest;
 import com.dooapp.gaedo.blueprints.transformers.LiteralTransformer;
 import com.dooapp.gaedo.blueprints.transformers.Literals;
@@ -56,6 +56,6 @@ public class BasicGraphExecutableQuery extends AbstractGraphExecutableQuery impl
 
 	protected Vertex getClassVertex() {
 		LiteralTransformer<Class> transformer = Literals.classes.getTransformer();
-		return GraphUtils.locateVertex(getDatabase(), Properties.vertexId, transformer.getVertexId(getDatabase(), getSearchedClass()));
+		return service.loadVertexFor(transformer.getVertexId(getDatabase(), getSearchedClass()));
 	}
 }
