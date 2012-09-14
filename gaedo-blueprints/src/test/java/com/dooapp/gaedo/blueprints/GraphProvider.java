@@ -11,4 +11,10 @@ public interface GraphProvider {
 	 * @return a working graph
 	 */
 	IndexableGraph get(String path);
+
+	/**
+	 * Provides a common name for all instances of that graph provider
+	 * @return
+	 */
+	String getName();
 }

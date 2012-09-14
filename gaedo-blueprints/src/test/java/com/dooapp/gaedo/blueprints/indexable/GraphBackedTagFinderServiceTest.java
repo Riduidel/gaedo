@@ -21,6 +21,7 @@ import org.junit.runners.Parameterized.Parameters;
 import com.dooapp.gaedo.blueprints.GraphProvider;
 import com.dooapp.gaedo.blueprints.IndexableGraphBackedFinderService;
 import com.dooapp.gaedo.blueprints.Neo4j;
+import com.dooapp.gaedo.blueprints.TestUtils;
 import com.dooapp.gaedo.blueprints.Tinker;
 import com.dooapp.gaedo.finders.FieldInformer;
 import com.dooapp.gaedo.finders.FinderCrudService;
@@ -60,14 +61,14 @@ public class GraphBackedTagFinderServiceTest {
 	@Parameters
 	public static Collection<Object[]> parameters() {
 		Collection<Object[]> returned = new LinkedList<Object[]>();
-		returned.add(new Object[] { "tinkergraph", new Tinker()});
-//		returned.add(new Object[] { "orientgraph", new OrientDB()});
-		returned.add(new Object[] { "neo4jgraph", new Neo4j()});
+		returned.add(new Object[] { new Tinker()});
+//		returned.add(new Object[] { new OrientDB()});
+		returned.add(new Object[] { new Neo4j()});
 		return returned;
 	}
 	
-	public GraphBackedTagFinderServiceTest(String name, GraphProvider graph) {
-		this.name = name;
+	public GraphBackedTagFinderServiceTest(GraphProvider graph) {
+		this.name = graph.getName();
 		this.graphProvider = graph;
 	}
 
@@ -83,7 +84,7 @@ public class GraphBackedTagFinderServiceTest {
 		InformerFactory proxyInformerFactory = new ProxyBackedInformerFactory(
 				reflectiveFactory);
 		
-		graph = graphProvider.get(GraphProvider.GRAPH_DIR+"/indexable");
+		graph = graphProvider.get(TestUtils.indexable(GraphProvider.GRAPH_DIR));
 		// Now add some services
 		repository.add(new IndexableGraphBackedFinderService(Tag.class, TagInformer.class, proxyInformerFactory, repository, provider, graph));
 		repository.add(new IndexableGraphBackedFinderService(Post.class, PostInformer.class, proxyInformerFactory, repository, provider, graph));

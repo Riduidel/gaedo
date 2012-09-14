@@ -20,6 +20,7 @@ import org.junit.runners.Parameterized.Parameters;
 import com.dooapp.gaedo.blueprints.GraphProvider;
 import com.dooapp.gaedo.blueprints.IndexableGraphBackedFinderService;
 import com.dooapp.gaedo.blueprints.Neo4j;
+import com.dooapp.gaedo.blueprints.TestUtils;
 import com.dooapp.gaedo.finders.FinderCrudService;
 import com.dooapp.gaedo.finders.QueryBuilder;
 import com.dooapp.gaedo.finders.QueryExpression;
@@ -59,19 +60,19 @@ public class GraphBackedLoadTest {
 		Collection<Object[]> returned = new LinkedList<Object[]>();
 //		returned.add(new Object[] { "tinkergraph", new Tinker()});
 //		returned.add(new Object[] { "orientgraph", new OrientDB()});
-		returned.add(new Object[] { "neo4jgraph", new Neo4j(),10l});
-		returned.add(new Object[] { "neo4jgraph", new Neo4j(),1000l});
-		returned.add(new Object[] { "neo4jgraph", new Neo4j(),10000l});
-		returned.add(new Object[] { "neo4jgraph", new Neo4j(),100000l});
+		returned.add(new Object[] { new Neo4j(),10l});
+		returned.add(new Object[] { new Neo4j(),1000l});
+		returned.add(new Object[] { new Neo4j(),10000l});
+		returned.add(new Object[] { new Neo4j(),100000l});
 //		returned.add(new Object[] { "neo4jgraph", new Neo4j(),1000000l});
 //		returned.add(new Object[] { "neo4jgraph", new Neo4j(),1000000000l});
 //		returned.add(new Object[] { "neo4jgraph", new Neo4j(),1000000000000l});
 		return returned;
 	}
 	
-	public GraphBackedLoadTest(String name, GraphProvider graph, long instanceCount) {
-		this.name = name;
+	public GraphBackedLoadTest(GraphProvider graph, long instanceCount) {
 		this.graphProvider = graph;
+		this.name = graphProvider.getName();
 		this.instanceCount = instanceCount;
 	}
 
@@ -87,7 +88,7 @@ public class GraphBackedLoadTest {
 		InformerFactory proxyInformerFactory = new ProxyBackedInformerFactory(
 				reflectiveFactory);
 		
-		graph = graphProvider.get(GraphProvider.GRAPH_DIR+"/indexable");
+		graph = graphProvider.get(TestUtils.indexable(GraphProvider.GRAPH_DIR));
 		// Now add some services
 		repository.add(new IndexableGraphBackedFinderService(Tag.class, TagInformer.class, proxyInformerFactory, repository, provider, graph));
 		repository.add(new IndexableGraphBackedFinderService(Post.class, PostInformer.class, proxyInformerFactory, repository, provider, graph));
