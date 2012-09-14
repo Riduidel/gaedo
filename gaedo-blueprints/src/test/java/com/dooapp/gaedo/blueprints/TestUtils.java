@@ -90,13 +90,13 @@ public class TestUtils {
 					return new IndexableGraphEnvironment(o);
 				}
 			}).toArray());
-			returned.add(covnertProviderToEnvironment(p, new EnvironmentCreator() {
-
-				@Override
-				public Object environmentFor(GraphProvider o) {
-					return new SailGraphEnvironment(o);
-				}
-			}).toArray());
+//			returned.add(covnertProviderToEnvironment(p, new EnvironmentCreator() {
+//
+//				@Override
+//				public Object environmentFor(GraphProvider o) {
+//					return new SailGraphEnvironment(o);
+//				}
+//			}).toArray());
 		}
 		return returned;
 	}
