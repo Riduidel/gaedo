@@ -218,101 +218,7 @@ public abstract class AbstractBluePrintsBackedFinderService<GraphClass extends G
 		Vertex objectVertex = loadVertexFor(vertexId);
 		if(objectVertex!=null) {
 			Map<Property, Collection<CascadeType>> containedProperties = getContainedProperties(toDelete);
-			for(Property p : containedProperties.keySet()) {
-				Class<?> rawPropertyType = p.getType();
-				Collection<CascadeType> toCascade = containedProperties.get(p);
-				if(Collection.class.isAssignableFrom(rawPropertyType)) {
-					if (logger.isLoggable(Level.FINEST)) {
-						logger.log(Level.FINEST, "property "+p.getName()+" is considered a collection one");
-					}
-					deleteCollection(p, toDelete, objectVertex, toCascade, objectsBeingAccessed);
-					// each value should be written as an independant value
-				} else if(Map.class.isAssignableFrom(rawPropertyType)) {
-					if (logger.isLoggable(Level.FINEST)) {
-						logger.log(Level.FINEST, "property "+p.getName()+" is considered a map one");
-					}
-					deleteMap(p, toDelete, objectVertex, toCascade, objectsBeingAccessed);
-				} else {
-					deleteSingle(p, toDelete, objectVertex, toCascade, objectsBeingAccessed);
-				}
-			}
-			// What to do with incoming edges ?
-			database.removeVertex(objectVertex);
-		}
-	}
-
-	private void deleteSingle(Property p, DataType toDelete, Vertex objectVertex, Collection<CascadeType> toCascade, Map<String, Object> objectsBeingAccessed) {
-		// there should be only one vertex to delete
-		String edgeNameFor = GraphUtils.getEdgeNameFor(p);
-		Iterable<Edge> edges = objectVertex.getOutEdges(edgeNameFor);
-		if (logger.isLoggable(Level.FINEST)) {
-			logger.log(Level.FINEST, "deleting edge "+edgeNameFor+" of "+GraphUtils.toString(objectVertex));
-		}
-		for(Edge e : edges) {
-			Vertex valueVertex = e.getInVertex();
-			database.removeEdge(e);
-			// Now what to do with vertex ? Delete it ?
-			if(toCascade.contains(CascadeType.REMOVE)) {
-				// yes, delete it forever (but before, see if there aren't more datas to delete
-				deleteOutEdgeVertex(objectVertex, valueVertex, p.get(toDelete), objectsBeingAccessed);
-				
-			}
-		}
-	}
-
-	private void deleteMap(Property p, DataType toDelete, Vertex objectVertex, Collection<CascadeType> toCascade, Map<String, Object> objectsBeingAccessed) {
-		String edgeNameFor = GraphUtils.getEdgeNameFor(p);
-		Iterable<Edge> edges = objectVertex.getOutEdges(edgeNameFor);
-		Map values = (Map) p.get(toDelete);
-		Map<Vertex, Edge> oldVertices = new HashMap<Vertex, Edge>();
-		for(Edge e : edges) {
-			Vertex inVertex = e.getInVertex();
-			oldVertices.put(inVertex, e);
-		}
-		for(Object v : values.entrySet()) {
-			Vertex valueVertex = getVertexFor(v, CascadeType.REFRESH, objectsBeingAccessed);
-			if(oldVertices.containsKey(valueVertex)) {
-				Edge oldEdge = oldVertices.remove(valueVertex);
-				database.removeEdge(oldEdge);
-				if(toCascade.contains(CascadeType.REMOVE)) {
-					deleteOutEdgeVertex(objectVertex, valueVertex, v, objectsBeingAccessed);
-				}
-			}
-		}
-		if(oldVertices.size()>0) {
-			// force deletion of remaining edges
-			// BUT assocaited vertices may not be deleted
-			for(Edge e : oldVertices.values()) {
-				database.removeEdge(e);
-			}
-		}
-	}
-
-	private void deleteCollection(Property p, DataType toDelete, Vertex objectVertex, Collection<CascadeType> toCascade, Map<String, Object> objectsBeingAccessed) {
-		String edgeNameFor = GraphUtils.getEdgeNameFor(p);
-		Iterable<Edge> edges = objectVertex.getOutEdges(edgeNameFor);
-		Collection values = (Collection) p.get(toDelete);
-		Map<Vertex, Edge> oldVertices = new HashMap<Vertex, Edge>();
-		for(Edge e : edges) {
-			Vertex inVertex = e.getInVertex();
-			oldVertices.put(inVertex, e);
-		}
-		for(Object v : values) {
-			Vertex valueVertex = getVertexFor(v, CascadeType.REFRESH, objectsBeingAccessed);
-			if(oldVertices.containsKey(valueVertex)) {
-				Edge oldEdge = oldVertices.remove(valueVertex);
-				database.removeEdge(oldEdge);
-				if(toCascade.contains(CascadeType.REMOVE)) {
-					deleteOutEdgeVertex(objectVertex, valueVertex, v, objectsBeingAccessed);
-				}
-			}
-		}
-		if(oldVertices.size()>0) {
-			// force deletion of remaining edges
-			// BUT assocaited vertices may not be deleted
-			for(Edge e : oldVertices.values()) {
-				database.removeEdge(e);
-			}
+			persister.performDelete(this, vertexId, objectVertex, containedClass, containedProperties, toDelete, CascadeType.REMOVE, objectsBeingAccessed);
 		}
 	}
 
@@ -322,7 +228,7 @@ public abstract class AbstractBluePrintsBackedFinderService<GraphClass extends G
 	 * @param valueVertex value vertex to remove
 	 * @param value object value
 	 */
-	private <Type> void deleteOutEdgeVertex(Vertex objectVertex, Vertex valueVertex, Type value, Map<String, Object> objectsBeingUpdated) {
+	<Type> void deleteOutEdgeVertex(Vertex objectVertex, Vertex valueVertex, Type value, Map<String, Object> objectsBeingUpdated) {
 		// Locate vertex
 		Vertex knownValueVertex = getVertexFor(value, CascadeType.REFRESH, objectsBeingUpdated);
 		// Ensure vertex is our out one

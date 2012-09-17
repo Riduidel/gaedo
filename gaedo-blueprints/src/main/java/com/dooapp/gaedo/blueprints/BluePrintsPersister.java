@@ -79,6 +79,116 @@ public class BluePrintsPersister {
 		}
 	}
 
+	/**
+	 * Delete given object
+	 * @param service source of modification
+	 * @param objectVertexId object expected vertex id
+	 * @param objectVertex vertex corresponding to object to delete
+	 * @param valueClass class contained by service
+	 * @param containedProperties list of contained properties
+	 * @param toDelete object to delete
+	 * @param cascade kind of cascade used for dependent properties
+	 * @param objectsBeingAccessed map containing subgraph of objects currently being delete, this is used to avoid loops, and NOT as a cache
+	 */
+	public <DataType> void performDelete(AbstractBluePrintsBackedFinderService<? extends Graph, DataType, ?> service, String objectVertexId, Vertex objectVertex, Class<?> valueClass, Map<Property, Collection<CascadeType>> containedProperties, DataType toDelete, CascadeType cascade, Map<String, Object> objectsBeingAccessed) {
+		Graph database = service.getDatabase();
+		for(Property p : containedProperties.keySet()) {
+			Class<?> rawPropertyType = p.getType();
+			Collection<CascadeType> toCascade = containedProperties.get(p);
+			if(Collection.class.isAssignableFrom(rawPropertyType)) {
+				if (logger.isLoggable(Level.FINEST)) {
+					logger.log(Level.FINEST, "property "+p.getName()+" is considered a collection one");
+				}
+				deleteCollection(service, p, toDelete, objectVertex, toCascade, objectsBeingAccessed);
+				// each value should be written as an independant value
+			} else if(Map.class.isAssignableFrom(rawPropertyType)) {
+				if (logger.isLoggable(Level.FINEST)) {
+					logger.log(Level.FINEST, "property "+p.getName()+" is considered a map one");
+				}
+				deleteMap(service, p, toDelete, objectVertex, toCascade, objectsBeingAccessed);
+			} else {
+				deleteSingle(service, p, toDelete, objectVertex, toCascade, objectsBeingAccessed);
+			}
+		}
+		// What to do with incoming edges ?
+		database.removeVertex(objectVertex);
+	}
+
+
+	private void deleteSingle(AbstractBluePrintsBackedFinderService<? extends Graph, ?, ?> service, Property p, Object toDelete, Vertex objectVertex, Collection<CascadeType> toCascade, Map<String, Object> objectsBeingAccessed) {
+		// there should be only one vertex to delete
+		String edgeNameFor = GraphUtils.getEdgeNameFor(p);
+		Iterable<Edge> edges = objectVertex.getOutEdges(edgeNameFor);
+		if (logger.isLoggable(Level.FINEST)) {
+			logger.log(Level.FINEST, "deleting edge "+edgeNameFor+" of "+GraphUtils.toString(objectVertex));
+		}
+		for(Edge e : edges) {
+			Vertex valueVertex = e.getInVertex();
+			service.getDatabase().removeEdge(e);
+			// Now what to do with vertex ? Delete it ?
+			if(toCascade.contains(CascadeType.REMOVE)) {
+				// yes, delete it forever (but before, see if there aren't more datas to delete
+				service.deleteOutEdgeVertex(objectVertex, valueVertex, p.get(toDelete), objectsBeingAccessed);
+				
+			}
+		}
+	}
+
+	private void deleteMap(AbstractBluePrintsBackedFinderService<? extends Graph, ?, ?> service, Property p, Object toDelete, Vertex objectVertex, Collection<CascadeType> toCascade, Map<String, Object> objectsBeingAccessed) {
+		String edgeNameFor = GraphUtils.getEdgeNameFor(p);
+		Iterable<Edge> edges = objectVertex.getOutEdges(edgeNameFor);
+		Map values = (Map) p.get(toDelete);
+		Map<Vertex, Edge> oldVertices = new HashMap<Vertex, Edge>();
+		for(Edge e : edges) {
+			Vertex inVertex = e.getInVertex();
+			oldVertices.put(inVertex, e);
+		}
+		for(Object v : values.entrySet()) {
+			Vertex valueVertex = service.getVertexFor(v, CascadeType.REFRESH, objectsBeingAccessed);
+			if(oldVertices.containsKey(valueVertex)) {
+				Edge oldEdge = oldVertices.remove(valueVertex);
+				service.getDatabase().removeEdge(oldEdge);
+				if(toCascade.contains(CascadeType.REMOVE)) {
+					service.deleteOutEdgeVertex(objectVertex, valueVertex, v, objectsBeingAccessed);
+				}
+			}
+		}
+		if(oldVertices.size()>0) {
+			// force deletion of remaining edges
+			// BUT assocaited vertices may not be deleted
+			for(Edge e : oldVertices.values()) {
+				service.getDatabase().removeEdge(e);
+			}
+		}
+	}
+
+	private void deleteCollection(AbstractBluePrintsBackedFinderService<? extends Graph, ?, ?> service, Property p, Object toDelete, Vertex objectVertex, Collection<CascadeType> toCascade, Map<String, Object> objectsBeingAccessed) {
+		String edgeNameFor = GraphUtils.getEdgeNameFor(p);
+		Iterable<Edge> edges = objectVertex.getOutEdges(edgeNameFor);
+		Collection values = (Collection) p.get(toDelete);
+		Map<Vertex, Edge> oldVertices = new HashMap<Vertex, Edge>();
+		for(Edge e : edges) {
+			Vertex inVertex = e.getInVertex();
+			oldVertices.put(inVertex, e);
+		}
+		for(Object v : values) {
+			Vertex valueVertex = service.getVertexFor(v, CascadeType.REFRESH, objectsBeingAccessed);
+			if(oldVertices.containsKey(valueVertex)) {
+				Edge oldEdge = oldVertices.remove(valueVertex);
+				service.getDatabase().removeEdge(oldEdge);
+				if(toCascade.contains(CascadeType.REMOVE)) {
+					service.deleteOutEdgeVertex(objectVertex, valueVertex, v, objectsBeingAccessed);
+				}
+			}
+		}
+		if(oldVertices.size()>0) {
+			// force deletion of remaining edges
+			// BUT assocaited vertices may not be deleted
+			for(Edge e : oldVertices.values()) {
+				service.getDatabase().removeEdge(e);
+			}
+		}
+	}
 
 	/**
 	 * Creates the given id vertex
