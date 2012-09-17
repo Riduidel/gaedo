@@ -19,14 +19,16 @@ public abstract class AbstractLazyLoader {
 	 * Edge name is eagerly determined from known elements to fasten lazy loading (and avoid some service unavailability issues
 	 */
 	protected String edgeName;
+	protected GraphDatabaseDriver driver;
 	
 	public AbstractLazyLoader() {
 		
 	}
 
-	public AbstractLazyLoader(Property property, Vertex rootVertex, ServiceRepository repository, ClassLoader classLoader,
+	public AbstractLazyLoader(GraphDatabaseDriver driver, Property property, Vertex rootVertex, ServiceRepository repository, ClassLoader classLoader,
 					Map<String, Object> objectsBeingAccessed) {
 		super();
+		this.driver = driver;
 		this.property = property;
 		this.rootVertex = rootVertex;
 		this.repository = repository;

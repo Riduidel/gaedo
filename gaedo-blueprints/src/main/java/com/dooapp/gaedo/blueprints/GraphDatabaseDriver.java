@@ -32,4 +32,11 @@ public interface GraphDatabaseDriver {
 	 * @return
 	 */
 	public String getIdOf(Vertex objectVertex);
+
+	/**
+	 * Get effective type of given vertex
+	 * @param vertex key for which we want a vertex
+	 * @return type of data contained by this vertex. An exception should be thrown when vertex can't provide that info.
+	 */
+	public String getEffectiveType(Vertex vertex);
 }

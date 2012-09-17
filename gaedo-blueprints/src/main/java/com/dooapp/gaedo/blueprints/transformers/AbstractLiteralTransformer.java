@@ -26,24 +26,14 @@ public abstract class AbstractLiteralTransformer<Type> {
 		return returned;
 	}
 
-	public Type loadObject(Vertex key) {
-		String effectiveType = getEffectiveType(key);
+	public Type loadObject(GraphDatabaseDriver driver, Vertex key) {
+		String effectiveType = driver.getEffectiveType(key);
 		try {
 			Class valueClass = Class.forName(effectiveType);
 			return loadObject(valueClass, key);
 		} catch (ClassNotFoundException e) {
 			throw new UnableToCreateException(effectiveType, e);
 		}
-	}
-
-	/**
-	 * Get effective type used for that vertex
-	 * @param key vertex to find type
-	 * @return name of the class of that object
-	 */
-	private String getEffectiveType(Vertex key) {
-		String effectiveType = key.getProperty(Properties.type.name()).toString();
-		return effectiveType;
 	}
 
 	public Object loadObject(ClassLoader classLoader, String effectiveType, Vertex key) {

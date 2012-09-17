@@ -26,8 +26,8 @@ public class CollectionLazyLoader extends AbstractLazyLoader implements Invocati
 		
 	}
 
-	public CollectionLazyLoader(ClassLoader classLoader, ServiceRepository repository, Property p, Vertex objectVertex, Collection<Object> targetCollection, Map<String, Object> objectsBeingAccessed) {
-		super(p, objectVertex, repository, classLoader, objectsBeingAccessed);
+	public CollectionLazyLoader(GraphDatabaseDriver driver, ClassLoader classLoader, ServiceRepository repository, Property p, Vertex objectVertex, Collection<Object> targetCollection, Map<String, Object> objectsBeingAccessed) {
+		super(driver, p, objectVertex, repository, classLoader, objectsBeingAccessed);
 		this.collection = targetCollection;
 	}
 
@@ -47,7 +47,7 @@ public class CollectionLazyLoader extends AbstractLazyLoader implements Invocati
 		try {
 			for(Edge e : rootVertex.getOutEdges(edgeName)) {
 				Vertex value = e.getInVertex();
-				Object temporaryValue = GraphUtils.createInstance(classLoader, value, repository, objectsBeingAccessed);
+				Object temporaryValue = GraphUtils.createInstance(driver, classLoader, value, repository, objectsBeingAccessed);
 				if(repository.containsKey(temporaryValue.getClass())) {
 					FinderCrudService service = repository.get(temporaryValue.getClass());
 					if (service instanceof AbstractBluePrintsBackedFinderService) {

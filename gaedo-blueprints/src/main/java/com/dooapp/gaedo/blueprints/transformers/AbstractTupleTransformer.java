@@ -7,13 +7,12 @@ import javax.persistence.CascadeType;
 
 import com.dooapp.gaedo.blueprints.AbstractBluePrintsBackedFinderService;
 import com.dooapp.gaedo.blueprints.BluePrintsPersister;
+import com.dooapp.gaedo.blueprints.GraphDatabaseDriver;
 import com.dooapp.gaedo.blueprints.GraphUtils;
 import com.dooapp.gaedo.blueprints.Kind;
-import com.dooapp.gaedo.blueprints.Properties;
 import com.dooapp.gaedo.finders.repository.ServiceRepository;
 import com.dooapp.gaedo.properties.Property;
 import com.tinkerpop.blueprints.pgm.Graph;
-import com.tinkerpop.blueprints.pgm.IndexableGraph;
 import com.tinkerpop.blueprints.pgm.Vertex;
 
 public abstract class AbstractTupleTransformer<TupleType> {
@@ -55,15 +54,15 @@ public abstract class AbstractTupleTransformer<TupleType> {
 		return sOut.toString();
 	}
 
-	public Object loadObject(ClassLoader classLoader, String effectiveType, Vertex key, ServiceRepository repository, Map<String, Object> objectsBeingAccessed) {
+	public Object loadObject(GraphDatabaseDriver driver, ClassLoader classLoader, String effectiveType, Vertex key, ServiceRepository repository, Map<String, Object> objectsBeingAccessed) {
 		TupleType tuple = instanciateTupleFor(classLoader, key);
-		persister.loadObjectProperties(classLoader, repository, key, tuple, getContainedProperties(), objectsBeingAccessed);
+		persister.loadObjectProperties(driver, classLoader, repository, key, tuple, getContainedProperties(), objectsBeingAccessed);
 		return tuple;
 	}
 
-	public TupleType loadObject(ClassLoader classLoader, Class effectiveClass, Vertex key, ServiceRepository repository, Map<String, Object> objectsBeingAccessed) {
+	public TupleType loadObject(GraphDatabaseDriver driver, ClassLoader classLoader, Class effectiveClass, Vertex key, ServiceRepository repository, Map<String, Object> objectsBeingAccessed) {
 		TupleType tuple = instanciateTupleFor(classLoader, key);
-		persister.loadObjectProperties(classLoader, repository, key, tuple, getContainedProperties(), objectsBeingAccessed);
+		persister.loadObjectProperties(driver, classLoader, repository, key, tuple, getContainedProperties(), objectsBeingAccessed);
 		return tuple;
 	}
 

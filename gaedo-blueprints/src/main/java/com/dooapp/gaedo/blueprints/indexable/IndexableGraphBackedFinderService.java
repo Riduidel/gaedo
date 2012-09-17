@@ -5,13 +5,17 @@ import com.dooapp.gaedo.blueprints.AbstractBluePrintsBackedFinderService;
 import com.dooapp.gaedo.blueprints.GraphUtils;
 import com.dooapp.gaedo.blueprints.IndexableGraphQueryStatement;
 import com.dooapp.gaedo.blueprints.Properties;
+import com.dooapp.gaedo.blueprints.transformers.LiteralTransformer;
+import com.dooapp.gaedo.blueprints.transformers.Literals;
 import com.dooapp.gaedo.finders.Informer;
 import com.dooapp.gaedo.finders.QueryBuilder;
 import com.dooapp.gaedo.finders.QueryStatement;
 import com.dooapp.gaedo.finders.repository.ServiceRepository;
 import com.dooapp.gaedo.finders.root.InformerFactory;
 import com.dooapp.gaedo.properties.PropertyProvider;
+import com.dooapp.gaedo.properties.TypeProperty;
 import com.tinkerpop.blueprints.pgm.CloseableSequence;
+import com.tinkerpop.blueprints.pgm.Edge;
 import com.tinkerpop.blueprints.pgm.Index;
 import com.tinkerpop.blueprints.pgm.IndexableGraph;
 import com.tinkerpop.blueprints.pgm.Vertex;
@@ -26,11 +30,14 @@ import com.tinkerpop.blueprints.pgm.Vertex;
 public class IndexableGraphBackedFinderService <DataType, InformerType extends Informer<DataType>> 
 	extends AbstractBluePrintsBackedFinderService<IndexableGraph, DataType, InformerType> {
 	
+	private static final String TYPE = "type";
 	/**
 	 * property identifiying in an unique way a vertex. Its goal is to make sure vertex is the one we search.
 	 * @deprecated should be replaced by a "tagged" edge linking object to its identifying property
 	 */
 	private static final String VERTEX_ID = "vertexId";
+	
+	private LiteralTransformer classTransformer = Literals.get(Class.class);
 
 	public IndexableGraphBackedFinderService(Class<DataType> containedClass, Class<InformerType> informerClass, InformerFactory factory, ServiceRepository repository,
 					PropertyProvider provider, IndexableGraph graph) {
@@ -58,12 +65,32 @@ public class IndexableGraphBackedFinderService <DataType, InformerType extends I
 		return objectVertex.getProperty(VERTEX_ID).toString();
 	}
 
+	/**
+	 * When creating an empty vertex, we immediatly link it to its associated type vertex : a long will as a consequence be linked to the Long class
+	 * @param vertexId
+	 * @param valueClass
+	 * @return
+	 * @see com.dooapp.gaedo.blueprints.AbstractBluePrintsBackedFinderService#createEmptyVertex(java.lang.String, java.lang.Class)
+	 */
 	@Override
 	protected Vertex createEmptyVertex(String vertexId, Class<? extends Object> valueClass) {
 		Vertex returned = database.addVertex(vertexId);
 		returned.setProperty(VERTEX_ID, vertexId);
-		returned.setProperty(Properties.type.name(), valueClass.getName());
+		// obtain vertex for type
+		Vertex classVertex = classTransformer.getVertexFor(getDriver(), valueClass);
+		TypeProperty fakeType = new TypeProperty(valueClass);
+		String edgeName = GraphUtils.getEdgeNameFor(fakeType);
+		database.addEdge("automatic edge linking "+returned.getId().toString()+" to its class "+valueClass.getName(), /* from */ returned, /* to */ classVertex, edgeName);
 		return returned;
+	}
+
+	@Override
+	protected String getEffectiveType(Vertex vertex) {
+		TypeProperty fakeType = new TypeProperty(null);
+		String edgeName = GraphUtils.getEdgeNameFor(fakeType);
+		Edge toType = vertex.getOutEdges(edgeName).iterator().next();
+		Vertex type = toType.getInVertex();
+		return type.getProperty(Properties.value.name()).toString();
 	}
 
 }

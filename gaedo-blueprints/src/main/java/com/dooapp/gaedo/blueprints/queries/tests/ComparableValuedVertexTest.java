@@ -32,7 +32,7 @@ public abstract class ComparableValuedVertexTest<ComparableType extends Comparab
 
 	@Override
 	protected boolean callMatchLiteral(Vertex currentVertex, Property finalProperty) {
-		ComparableType value = (ComparableType) Literals.get(finalProperty.getType()).loadObject(currentVertex);
+		ComparableType value = (ComparableType) Literals.get(finalProperty.getType()).loadObject(getService().getDriver(), currentVertex);
 		return doCompare(value);
 	}
 }

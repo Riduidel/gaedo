@@ -10,7 +10,7 @@ import java.util.Collections;
 import com.dooapp.gaedo.utils.Utils;
 
 public class TypeProperty implements Property {
-	public static final String CLASSES = "type";
+	public static final String TYPE = "type";
 
 	private Class declaring;
 	
@@ -25,7 +25,7 @@ public class TypeProperty implements Property {
 	
 	@Override
 	public String getName() {
-		return CLASSES;
+		return TYPE;
 	}
 	
 	@Override
@@ -45,7 +45,7 @@ public class TypeProperty implements Property {
 
 	@Override
 	public String toGenericString() {
-		return Object.class.getCanonicalName()+"."+CLASSES+" "+getGenericType().toString();
+		return Object.class.getCanonicalName()+"."+TYPE+" "+getGenericType().toString();
 	}
 
 	@Override

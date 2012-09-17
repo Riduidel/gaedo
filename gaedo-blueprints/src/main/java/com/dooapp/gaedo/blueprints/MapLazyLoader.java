@@ -26,9 +26,9 @@ public class MapLazyLoader extends AbstractLazyLoader implements InvocationHandl
 
 	}
 
-	public MapLazyLoader(ClassLoader classLoader, ServiceRepository repository, Property p, Vertex objectVertex, Map<Object, Object> targetMap,
+	public MapLazyLoader(GraphDatabaseDriver driver, ClassLoader classLoader, ServiceRepository repository, Property p, Vertex objectVertex, Map<Object, Object> targetMap,
 					Map<String, Object> objectsBeingAccessed) {
-		super(p, objectVertex, repository, classLoader, objectsBeingAccessed);
+		super(driver, p, objectVertex, repository, classLoader, objectsBeingAccessed);
 		this.map = targetMap;
 	}
 
@@ -51,7 +51,7 @@ public class MapLazyLoader extends AbstractLazyLoader implements InvocationHandl
 				Vertex value = e.getInVertex();
 				// Value is always a serialized map entry, so deserialize it
 				// with magic !
-				Map.Entry temporaryValue = (Entry) GraphUtils.createInstance(classLoader, value, repository, objectsBeingAccessed);
+				Map.Entry temporaryValue = (Entry) GraphUtils.createInstance(driver, classLoader, value, repository, objectsBeingAccessed);
 				map.put(temporaryValue.getKey(), temporaryValue.getValue());
 			}
 		} finally {

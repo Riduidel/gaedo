@@ -363,7 +363,7 @@ public class BluePrintsPersister {
 	 * @param cascade used cascade type, can be either {@link CascadeType#PERSIST} or {@link CascadeType#MERGE}
 	 * @category update
 	 */
-	private <DataType> void updateSingle(AbstractBluePrintsBackedFinderService<? extends Graph, DataType, ?> service, Graph database, Property p, Object toUpdate, Vertex rootVertex, CascadeType cascade, Map<String, Object> objectsBeingAccessed) {
+	public <DataType> void updateSingle(AbstractBluePrintsBackedFinderService<? extends Graph, DataType, ?> service, Graph database, Property p, Object toUpdate, Vertex rootVertex, CascadeType cascade, Map<String, Object> objectsBeingAccessed) {
 		Object value = p.get(toUpdate);
 		// As a convention, null values are never stored
 		if(value!=null) {
@@ -426,11 +426,11 @@ public class BluePrintsPersister {
 		} else {
 			ClassLoader classLoader = service.getContainedClass().getClassLoader();
 			ServiceRepository repository = service.getRepository();
-			DataType returned = (DataType) GraphUtils.createInstance(classLoader, objectVertex, repository, objectsBeingAccessed);
+			DataType returned = (DataType) GraphUtils.createInstance(service.getDriver(), classLoader, objectVertex, repository, objectsBeingAccessed);
 			Map<Property, Collection<CascadeType>> containedProperties = service.getContainedProperties(returned);
 			try {
 				objectsBeingAccessed.put(objectVertexId, returned);
-				loadObjectProperties(classLoader, repository, objectVertex, returned, containedProperties, objectsBeingAccessed);
+				loadObjectProperties(service.getDriver(), classLoader, repository, objectVertex, returned, containedProperties, objectsBeingAccessed);
 				return returned;
 			} finally {
 //				objectsBeingAccessed.remove(objectVertexId);
@@ -439,18 +439,18 @@ public class BluePrintsPersister {
 	}
 
 
-	public <DataType> void loadObjectProperties(ClassLoader classLoader, ServiceRepository repository, Vertex objectVertex, DataType returned,
+	public <DataType> void loadObjectProperties(GraphDatabaseDriver driver, ClassLoader classLoader, ServiceRepository repository, Vertex objectVertex, DataType returned,
 					Map<Property, Collection<CascadeType>> containedProperties, Map<String, Object> objectsBeingAccessed) {
 		for(Property p : containedProperties.keySet()) {
 			if(!p.hasModifier(Modifier.STATIC) && !Annotations.TRANSIENT.is(p)) {
 				Class<?> rawPropertyType = p.getType();
 				if(Collection.class.isAssignableFrom(rawPropertyType)) {
-					loadCollection(classLoader, repository, p, returned, objectVertex, objectsBeingAccessed);
+					loadCollection(driver, classLoader, repository, p, returned, objectVertex, objectsBeingAccessed);
 					// each value should be written as an independant value
 				} else if(Map.class.isAssignableFrom(rawPropertyType)) {
-					loadMap(classLoader, repository, p, returned, objectVertex, objectsBeingAccessed);
+					loadMap(driver, classLoader, repository, p, returned, objectVertex, objectsBeingAccessed);
 				} else {
-					loadSingle(classLoader, repository, p, returned, objectVertex, objectsBeingAccessed);
+					loadSingle(driver, classLoader, repository, p, returned, objectVertex, objectsBeingAccessed);
 				}
 			}
 		}
@@ -461,7 +461,7 @@ public class BluePrintsPersister {
 	 * @param returned
 	 * @param objectVertex
 	 */
-	private <DataType> void loadMap(ClassLoader classLoader, ServiceRepository repository, Property p, DataType returned, Vertex objectVertex, Map<String, Object> objectsBeingAccessed) {
+	private <DataType> void loadMap(GraphDatabaseDriver driver, ClassLoader classLoader, ServiceRepository repository, Property p, DataType returned, Vertex objectVertex, Map<String, Object> objectsBeingAccessed) {
 		boolean eagerLoad = false;
 		// property may be associated to a onetomany or manytomany mapping. in such a case, check if there is an eager loading info
 		OneToMany oneToMany = p.getAnnotation(OneToMany.class);
@@ -475,7 +475,7 @@ public class BluePrintsPersister {
 			}
 		}
 		Map<Object, Object> generatedCollection = (Map<Object, Object>) Utils.generateMap((Class<?>) p.getType(), null);
-		MapLazyLoader handler = new MapLazyLoader(classLoader, repository, p, objectVertex, generatedCollection, objectsBeingAccessed);
+		MapLazyLoader handler = new MapLazyLoader(driver, classLoader, repository, p, objectVertex, generatedCollection, objectsBeingAccessed);
 		if(eagerLoad) {
 			handler.loadMap(generatedCollection, objectsBeingAccessed);
 			p.set(returned, generatedCollection);
@@ -495,12 +495,12 @@ public class BluePrintsPersister {
 	 * @param objectVertex
 	 * @param objectsBeingAccessed
 	 */
-	private <DataType> void loadSingle(ClassLoader classloader, ServiceRepository repository, Property p, DataType returned, Vertex objectVertex, Map<String, Object> objectsBeingAccessed) {
+	private <DataType> void loadSingle(GraphDatabaseDriver driver, ClassLoader classloader, ServiceRepository repository, Property p, DataType returned, Vertex objectVertex, Map<String, Object> objectsBeingAccessed) {
 		Iterator<Edge> iterator = objectVertex.getOutEdges(GraphUtils.getEdgeNameFor(p)).iterator();
 		if(iterator.hasNext()) {
 			// yeah, there is a value !
 			Vertex firstVertex = iterator.next().getInVertex();
-			Object value = GraphUtils.createInstance(classloader, firstVertex, repository, objectsBeingAccessed);
+			Object value = GraphUtils.createInstance(driver, classloader, firstVertex, repository, objectsBeingAccessed);
 			if(repository.containsKey(value.getClass())) {
 				// value requires fields loading
 				IndexableGraphBackedFinderService blueprints= (IndexableGraphBackedFinderService) repository.get(value.getClass());
@@ -520,7 +520,7 @@ public class BluePrintsPersister {
 	 * @param returned
 	 * @param objectVertex
 	 */
-	private <DataType> void loadCollection(ClassLoader classLoader, ServiceRepository repository, Property p, DataType returned, Vertex objectVertex, Map<String, Object> objectsBeingAccessed) {
+	private <DataType> void loadCollection(GraphDatabaseDriver driver, ClassLoader classLoader, ServiceRepository repository, Property p, DataType returned, Vertex objectVertex, Map<String, Object> objectsBeingAccessed) {
 		boolean eagerLoad = false;
 		// property may be associated to a onetomany or manytomany mapping. in such a case, check if there is an eager loading info
 		OneToMany oneToMany = p.getAnnotation(OneToMany.class);
@@ -534,7 +534,7 @@ public class BluePrintsPersister {
 			}
 		}
 		Collection<Object> generatedCollection = Utils.generateCollection((Class<?>) p.getType(), null);
-		CollectionLazyLoader handler = new CollectionLazyLoader(classLoader, repository, p, objectVertex, generatedCollection, objectsBeingAccessed);
+		CollectionLazyLoader handler = new CollectionLazyLoader(driver, classLoader, repository, p, objectVertex, generatedCollection, objectsBeingAccessed);
 		if(eagerLoad) {
 			handler.loadCollection(generatedCollection, objectsBeingAccessed);
 			p.set(returned, generatedCollection);

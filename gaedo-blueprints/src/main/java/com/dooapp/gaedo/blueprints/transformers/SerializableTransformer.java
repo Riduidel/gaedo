@@ -107,12 +107,12 @@ public class SerializableTransformer implements TupleTransformer<Serializable> {
 	 * @see com.dooapp.gaedo.blueprints.transformers.TupleTransformer#loadObject(java.lang.ClassLoader, java.lang.Class, com.tinkerpop.blueprints.pgm.Vertex, com.dooapp.gaedo.finders.repository.ServiceRepository, java.util.Map)
 	 */
 	@Override
-	public Object loadObject(ClassLoader classLoader, Class effectiveClass, Vertex key, ServiceRepository repository, Map<String, Object> objectsBeingAccessed) {
+	public Object loadObject(GraphDatabaseDriver driver, ClassLoader classLoader, Class effectiveClass, Vertex key, ServiceRepository repository, Map<String, Object> objectsBeingAccessed) {
 		return readSerializable(key.getProperty(Properties.value.name()).toString());
 	}
 
 	@Override
-	public Object loadObject(ClassLoader classLoader, String effectiveType, Vertex key, ServiceRepository repository, Map<String, Object> objectsBeingAccessed) {
+	public Object loadObject(GraphDatabaseDriver driver, ClassLoader classLoader, String effectiveType, Vertex key, ServiceRepository repository, Map<String, Object> objectsBeingAccessed) {
 		return readSerializable(key.getProperty(Properties.value.name()).toString());
 	}
 

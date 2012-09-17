@@ -23,7 +23,7 @@ public class StartsWith extends MonovaluedValuedVertexTest<String> implements Ve
 
 	@Override
 	protected boolean callMatchLiteral(Vertex currentVertex, Property finalProperty) {
-		String value = (String) Literals.get(String.class).loadObject(currentVertex);
+		String value = (String) Literals.get(String.class).loadObject(getService().getDriver(), currentVertex);
 		return value.startsWith(getExpected());
 	}
 }

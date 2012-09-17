@@ -74,6 +74,11 @@ public abstract class AbstractBluePrintsBackedFinderService<GraphClass extends G
 			return getIdOfVertex(objectVertex);
 		}
 
+		@Override
+		public String getEffectiveType(Vertex vertex) {
+			return AbstractBluePrintsBackedFinderService.this.getEffectiveType(vertex);
+		}
+
 	}
 
 	private static final Logger logger = Logger.getLogger(IndexableGraphBackedFinderService.class.getName());
@@ -111,7 +116,7 @@ public abstract class AbstractBluePrintsBackedFinderService<GraphClass extends G
 	/**
 	 * Adaptation layer
 	 */
-	private BluePrintsPersister persister;
+	protected BluePrintsPersister persister;
 	private boolean requiresIdGeneration;
 
 	public AbstractBluePrintsBackedFinderService(GraphClass graph, Class<DataType> containedClass, Class<InformerType> informerClass, InformerFactory factory,
@@ -136,6 +141,8 @@ public abstract class AbstractBluePrintsBackedFinderService<GraphClass extends G
 							+ "supporting migration ? " + (migrator != null) + "\n");
 		}
 	}
+
+	protected abstract String getEffectiveType(Vertex vertex);
 
 	/**
 	 * Get id of a given vertex, using any meanys required by implementation

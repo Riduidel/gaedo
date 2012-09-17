@@ -29,7 +29,7 @@ public interface LiteralTransformer<Type> extends Transformer {
 	 * @param key
 	 * @return
 	 */
-	public Type loadObject(Vertex key);
+	public Type loadObject(GraphDatabaseDriver driver, Vertex key);
 	/**
 	 * Load given key into an object, with added bonus of known type
 	 * @param effectiveClass

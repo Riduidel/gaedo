@@ -75,8 +75,8 @@ public class GraphUtils {
 	 * @param objectsBeingAccessed 
 	 * @return a fresh instance, with only id set
 	 */
-	public static Object createInstance(ClassLoader classLoader, Vertex key, ServiceRepository repository, Map<String, Object> objectsBeingAccessed) {
-		String effectiveType = key.getProperty(Properties.type.name()).toString();
+	public static Object createInstance(GraphDatabaseDriver driver, ClassLoader classLoader, Vertex key, ServiceRepository repository, Map<String, Object> objectsBeingAccessed) {
+		String effectiveType = driver.getEffectiveType(key);
 		if(classLoader==null) {
 			throw new UnspecifiedClassLoader();
 		}
@@ -89,7 +89,7 @@ public class GraphUtils {
 				if(Tuples.containsKey(type) && !repository.containsKey(type)) {
 					// Tuples are handled the object way (easier, but more dangerous
 					TupleTransformer transformer = Tuples.get(type);
-					return transformer.loadObject(classLoader, type, key, repository, objectsBeingAccessed);
+					return transformer.loadObject(driver, classLoader, type, key, repository, objectsBeingAccessed);
 				} else {
 					return  type.newInstance();
 				}

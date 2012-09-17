@@ -3,6 +3,7 @@ package com.dooapp.gaedo.blueprints.transformers;
 import java.util.Map;
 
 import com.dooapp.gaedo.blueprints.AbstractBluePrintsBackedFinderService;
+import com.dooapp.gaedo.blueprints.GraphDatabaseDriver;
 import com.dooapp.gaedo.finders.repository.ServiceRepository;
 import com.tinkerpop.blueprints.pgm.Graph;
 import com.tinkerpop.blueprints.pgm.Vertex;
@@ -32,7 +33,7 @@ public interface TupleTransformer<Type> extends Transformer {
 	 * @param objectsBeingAccessed
 	 * @return
 	 */
-	public Object loadObject(ClassLoader classLoader, Class effectiveClass, Vertex key, ServiceRepository repository, Map<String, Object> objectsBeingAccessed);
+	public Object loadObject(GraphDatabaseDriver driver, ClassLoader classLoader, Class effectiveClass, Vertex key, ServiceRepository repository, Map<String, Object> objectsBeingAccessed);
 
 
 	/**
@@ -44,6 +45,6 @@ public interface TupleTransformer<Type> extends Transformer {
 	 * @param objectsBeingAccessed
 	 * @return
 	 */
-	public Object loadObject(ClassLoader classLoader, String effectiveType, Vertex key, ServiceRepository repository, Map<String, Object> objectsBeingAccessed);
+	public Object loadObject(GraphDatabaseDriver driver, ClassLoader classLoader, String effectiveType, Vertex key, ServiceRepository repository, Map<String, Object> objectsBeingAccessed);
 
 }

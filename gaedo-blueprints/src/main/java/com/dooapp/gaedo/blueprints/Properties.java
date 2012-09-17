@@ -8,7 +8,7 @@ package com.dooapp.gaedo.blueprints;
  */
 public enum Properties {
 	/** Contains the class name of data */
-	type,
+//	type,
 	/** contains the effective value */
 	value,
 }
