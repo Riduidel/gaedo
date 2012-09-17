@@ -26,6 +26,12 @@ import com.tinkerpop.blueprints.pgm.Vertex;
 public class IndexableGraphBackedFinderService <DataType, InformerType extends Informer<DataType>> 
 	extends AbstractBluePrintsBackedFinderService<IndexableGraph, DataType, InformerType> {
 	
+	/**
+	 * property identifiying in an unique way a vertex. Its goal is to make sure vertex is the one we search.
+	 * @deprecated should be replaced by a "tagged" edge linking object to its identifying property
+	 */
+	private static final String VERTEX_ID = "vertexId";
+
 	public IndexableGraphBackedFinderService(Class<DataType> containedClass, Class<InformerType> informerClass, InformerFactory factory, ServiceRepository repository,
 					PropertyProvider provider, IndexableGraph graph) {
 		super(graph, containedClass, informerClass, factory, repository, provider);
@@ -39,7 +45,7 @@ public class IndexableGraphBackedFinderService <DataType, InformerType extends I
 
 	@Override
 	public Vertex loadVertexFor(String objectVertexId) {
-		CloseableSequence<Vertex> matching = database.getIndex(Index.VERTICES, Vertex.class).get(Properties.vertexId.name(), objectVertexId);
+		CloseableSequence<Vertex> matching = database.getIndex(Index.VERTICES, Vertex.class).get(VERTEX_ID, objectVertexId);
 		if(matching.hasNext()) {
 			return matching.next();
 		} else {
@@ -49,13 +55,13 @@ public class IndexableGraphBackedFinderService <DataType, InformerType extends I
 
 	@Override
 	public String getIdOfVertex(Vertex objectVertex) {
-		return objectVertex.getProperty(Properties.vertexId.name()).toString();
+		return objectVertex.getProperty(VERTEX_ID).toString();
 	}
 
 	@Override
 	protected Vertex createEmptyVertex(String vertexId, Class<? extends Object> valueClass) {
 		Vertex returned = database.addVertex(vertexId);
-		returned.setProperty(Properties.vertexId.name(), vertexId);
+		returned.setProperty(VERTEX_ID, vertexId);
 		returned.setProperty(Properties.type.name(), valueClass.getName());
 		return returned;
 	}

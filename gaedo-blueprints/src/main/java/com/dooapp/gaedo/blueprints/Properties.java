@@ -11,6 +11,4 @@ public enum Properties {
 	type,
 	/** contains the effective value */
 	value,
-	/** Contains object id, as Neo4J doesn't seem to care about the id we write */
-	vertexId;
 }

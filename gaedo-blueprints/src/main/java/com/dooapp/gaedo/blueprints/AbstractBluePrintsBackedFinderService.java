@@ -29,7 +29,6 @@ import com.dooapp.gaedo.finders.FinderCrudService;
 import com.dooapp.gaedo.finders.Informer;
 import com.dooapp.gaedo.finders.QueryBuilder;
 import com.dooapp.gaedo.finders.QueryExpression;
-import com.dooapp.gaedo.finders.QueryStatement;
 import com.dooapp.gaedo.finders.expressions.Expressions;
 import com.dooapp.gaedo.finders.id.AnnotationUtils;
 import com.dooapp.gaedo.finders.id.IdBasedService;
@@ -40,8 +39,8 @@ import com.dooapp.gaedo.properties.ClassCollectionProperty;
 import com.dooapp.gaedo.properties.Property;
 import com.dooapp.gaedo.properties.PropertyProvider;
 import com.dooapp.gaedo.properties.PropertyProviderUtils;
+import com.dooapp.gaedo.properties.TypeProperty;
 import com.dooapp.gaedo.utils.Utils;
-import com.tinkerpop.blueprints.pgm.Edge;
 import com.tinkerpop.blueprints.pgm.Graph;
 import com.tinkerpop.blueprints.pgm.IndexableGraph;
 import com.tinkerpop.blueprints.pgm.TransactionalGraph;
@@ -188,6 +187,7 @@ public abstract class AbstractBluePrintsBackedFinderService<GraphClass extends G
 		// property
 		try {
 			returned.put(new ClassCollectionProperty(containedClass), new LinkedList<CascadeType>());
+			returned.put(new TypeProperty(containedClass), new LinkedList<CascadeType>());
 		} catch (Exception e) {
 			logger.log(Level.SEVERE, "what ? a class without a \"class\" field ? WTF", e);
 		}
