@@ -28,5 +28,17 @@ public class SailGraphBackedFinderService<DataType, InformerType extends Informe
 		throw new UnsupportedOperationException("method "+AbstractFinderService.class.getName()+"#createQueryStatement has not yet been implemented AT ALL");
 	}
 
+	@Override
+	public String getIdOfVertex(Vertex objectVertex) {
+		// TODO Auto-generated method stub
+		throw new UnsupportedOperationException("method "+AbstractBluePrintsBackedFinderService.class.getName()+"#getIdOfVertex has not yet been implemented AT ALL");
+	}
+
+	@Override
+	protected Vertex createEmptyVertex(String vertexId, Class<? extends Object> valueClass) {
+		// TODO Auto-generated method stub
+		throw new UnsupportedOperationException("method "+AbstractBluePrintsBackedFinderService.class.getName()+"#createEmptyVertex has not yet been implemented AT ALL");
+	}
+
 
 }

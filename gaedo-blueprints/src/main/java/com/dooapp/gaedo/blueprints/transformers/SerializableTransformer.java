@@ -9,6 +9,7 @@ import java.io.Serializable;
 import java.util.Map;
 
 import com.dooapp.gaedo.blueprints.AbstractBluePrintsBackedFinderService;
+import com.dooapp.gaedo.blueprints.GraphDatabaseDriver;
 import com.dooapp.gaedo.blueprints.GraphUtils;
 import com.dooapp.gaedo.blueprints.Kind;
 import com.dooapp.gaedo.blueprints.Properties;
@@ -54,13 +55,12 @@ public class SerializableTransformer implements TupleTransformer<Serializable> {
 	 */
 	@Override
 	public <DataType> Vertex getVertexFor(AbstractBluePrintsBackedFinderService<? extends Graph, DataType, ?> service, Serializable cast, Map<String, Object> objectsBeingUpdated) {
-		Graph database = service.getDatabase();
 		ServiceRepository repository = service.getRepository();
 		// some first-level check to see if someone else than this transformer has any knowledge of value (because, well, this id will be longer than hell)
 		Class<? extends Serializable> valueClass = cast.getClass();
 		if(Tuples.containsKey(valueClass)) {
 			if(Tuples.get(valueClass).equals(this)) {
-				return getVertextForUnknownSerializable(database, repository, cast);
+				return getVertextForUnknownSerializable(service.getDriver(), repository, cast);
 			}
 		}
 		// Gently ask service for effective access to value
@@ -68,25 +68,21 @@ public class SerializableTransformer implements TupleTransformer<Serializable> {
 	}
 
 	
-	private Vertex getVertextForUnknownSerializable(Graph database, ServiceRepository repository, Serializable value) {
+	private Vertex getVertextForUnknownSerializable(GraphDatabaseDriver database, ServiceRepository repository, Serializable value) {
 		String serialized = writeSerializable(value);
 		Object vertexId = serialized;
-		// First try direct vertexId access
-		if(database.getVertex(vertexId)!=null) {
-			return database.getVertex(vertexId);
-		}
 		// Then indexed vertex id (for neo4j, typically)
-		Vertex returned = GraphUtils.locateVertex(database, Properties.vertexId.name(), vertexId);
+		Vertex returned = database.loadVertexFor(serialized);
 		// Finally create vertex
 		if(returned==null) {
-			returned = GraphUtils.createVertexWithoutValue(database, vertexId, Kind.tuple, Serializable.class);
+			returned = database.createEmptyVertex(serialized, Serializable.class);
 			returned.setProperty(Properties.value.name(), serialized);
 		}
 		return returned;
 	}
 
 	@Override
-	public String getIdOfTuple(Graph graph, ServiceRepository repository, Serializable value) {
+	public String getIdOfTuple(ServiceRepository repository, Serializable value) {
 		// some first-level check to see if someone else than this transformer has any knowledge of value (because, well, this id will be longer than hell)
 		Class<? extends Serializable> valueClass = value.getClass();
 		if(Tuples.containsKey(valueClass)) {
@@ -95,7 +91,7 @@ public class SerializableTransformer implements TupleTransformer<Serializable> {
 			}
 		}
 		// Delegate to the rest of the world
-		return GraphUtils.getIdOf(graph, repository, value);
+		return GraphUtils.getIdOf(repository, value);
 	}
 
 	/**

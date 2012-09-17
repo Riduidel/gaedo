@@ -21,7 +21,7 @@ public interface TupleTransformer<Type> extends Transformer {
 	/**
 	 * Create an identifier for tuple value, which can be done in any fashion
 	 */
-	public String getIdOfTuple(Graph graph, ServiceRepository repository, Type value);
+	public String getIdOfTuple(ServiceRepository repository, Type value);
 
 	/**
 	 * Load object from vertice, using all provided informations

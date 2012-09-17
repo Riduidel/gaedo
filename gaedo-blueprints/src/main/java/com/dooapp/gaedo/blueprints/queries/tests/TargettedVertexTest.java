@@ -26,7 +26,7 @@ public class TargettedVertexTest {
 	 */
 	protected static boolean isVertexEqualsTo(Vertex currentVertex, IndexableGraphBackedFinderService service, Object expected, boolean deepInspect) {
 		Object expectedId = service.getIdOf(expected);
-		if (expectedId.equals(currentVertex.getProperty(Properties.vertexId.name()))) {
+		if (expectedId.equals(service.getDriver().getIdOf(currentVertex))) {
 			return true;
 		} else if(deepInspect) {
 			Object value = service.loadObject(currentVertex, new TreeMap<String, Object>());

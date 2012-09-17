@@ -45,13 +45,13 @@ public class CollectionLazyLoader extends AbstractLazyLoader implements Invocati
 
 	public void loadCollection(Collection collection, Map<String, Object> objectsBeingAccessed) {
 		try {
-			for(Edge e : rootVertex.getOutEdges(GraphUtils.getEdgeNameFor(property))) {
+			for(Edge e : rootVertex.getOutEdges(edgeName)) {
 				Vertex value = e.getInVertex();
 				Object temporaryValue = GraphUtils.createInstance(classLoader, value, repository, objectsBeingAccessed);
 				if(repository.containsKey(temporaryValue.getClass())) {
 					FinderCrudService service = repository.get(temporaryValue.getClass());
-					if (service instanceof IndexableGraphBackedFinderService) {
-						IndexableGraphBackedFinderService blueprints= (IndexableGraphBackedFinderService) service;
+					if (service instanceof AbstractBluePrintsBackedFinderService) {
+						AbstractBluePrintsBackedFinderService<?, ?, ?> blueprints= (AbstractBluePrintsBackedFinderService<?, ?, ?>) service;
 						collection.add(blueprints.loadObject(value, objectsBeingAccessed));
 					}
 				} else {

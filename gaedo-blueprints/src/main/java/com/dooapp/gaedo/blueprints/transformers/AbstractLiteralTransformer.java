@@ -1,11 +1,10 @@
 package com.dooapp.gaedo.blueprints.transformers;
 
+import com.dooapp.gaedo.blueprints.GraphDatabaseDriver;
 import com.dooapp.gaedo.blueprints.GraphUtils;
-import com.dooapp.gaedo.blueprints.Kind;
 import com.dooapp.gaedo.blueprints.Properties;
 import com.dooapp.gaedo.blueprints.UnableToCreateException;
 import com.dooapp.gaedo.utils.Utils;
-import com.tinkerpop.blueprints.pgm.Graph;
 import com.tinkerpop.blueprints.pgm.Vertex;
 
 /**
@@ -15,17 +14,13 @@ import com.tinkerpop.blueprints.pgm.Vertex;
  */
 public abstract class AbstractLiteralTransformer<Type> {
 
-	public Vertex getVertexFor(Graph database, Type value) {
-		Object vertexId = getVertexId(database, value);
-		// First try direct vertexId access
-		if(database.getVertex(vertexId)!=null) {
-			return database.getVertex(vertexId);
-		}
+	public Vertex getVertexFor(GraphDatabaseDriver driver, Type value) {
+		String vertexId = getVertexId(value);
 		// Then indexed vertex id (for neo4j, typically)
-		Vertex returned = GraphUtils.locateVertex(database, Properties.vertexId.name(), vertexId);
+		Vertex returned = driver.loadVertexFor(vertexId);
 		// Finally create vertex
 		if(returned==null) {
-			returned = GraphUtils.createVertexWithoutValue(database, vertexId, Kind.literal, value.getClass());
+			returned = driver.createEmptyVertex(vertexId, value.getClass());
 			returned.setProperty(Properties.value.name(), getVertexValue(value));
 		}
 		return returned;
@@ -79,7 +74,7 @@ public abstract class AbstractLiteralTransformer<Type> {
 	 * @param value
 	 * @return
 	 */
-	public String getVertexId(Graph database, Type value) {
+	public String getVertexId(Type value) {
 		String idString = getValueClass(value).getCanonicalName()+":"+getVertexValue(value).toString();
 		return idString;
 	}

@@ -62,7 +62,7 @@ public class BluePrintsPersister {
 			if (logger.isLoggable(Level.FINER)) {
 				logger.log(Level.FINER, "object "+objectVertexId.toString()+" has never before been seen in graph, so create central node for it");
 			}
-			objectVertex = createIdVertex(database, valueClass, objectVertexId);
+			objectVertex = service.getDriver().createEmptyVertex(objectVertexId, valueClass);
 		}
 		// Here come the caching !
 		DataType updated = (DataType) objectsBeingUpdated.get(objectVertexId); 
@@ -99,15 +99,15 @@ public class BluePrintsPersister {
 				if (logger.isLoggable(Level.FINEST)) {
 					logger.log(Level.FINEST, "property "+p.getName()+" is considered a collection one");
 				}
-				deleteCollection(service, p, toDelete, objectVertex, toCascade, objectsBeingAccessed);
+				deleteCollection(service, database, p, toDelete, objectVertex, toCascade, objectsBeingAccessed);
 				// each value should be written as an independant value
 			} else if(Map.class.isAssignableFrom(rawPropertyType)) {
 				if (logger.isLoggable(Level.FINEST)) {
 					logger.log(Level.FINEST, "property "+p.getName()+" is considered a map one");
 				}
-				deleteMap(service, p, toDelete, objectVertex, toCascade, objectsBeingAccessed);
+				deleteMap(service, database, p, toDelete, objectVertex, toCascade, objectsBeingAccessed);
 			} else {
-				deleteSingle(service, p, toDelete, objectVertex, toCascade, objectsBeingAccessed);
+				deleteSingle(service, database, p, toDelete, objectVertex, toCascade, objectsBeingAccessed);
 			}
 		}
 		// What to do with incoming edges ?
@@ -115,7 +115,7 @@ public class BluePrintsPersister {
 	}
 
 
-	private void deleteSingle(AbstractBluePrintsBackedFinderService<? extends Graph, ?, ?> service, Property p, Object toDelete, Vertex objectVertex, Collection<CascadeType> toCascade, Map<String, Object> objectsBeingAccessed) {
+	private void deleteSingle(AbstractBluePrintsBackedFinderService<? extends Graph, ?, ?> service, Graph database, Property p, Object toDelete, Vertex objectVertex, Collection<CascadeType> toCascade, Map<String, Object> objectsBeingAccessed) {
 		// there should be only one vertex to delete
 		String edgeNameFor = GraphUtils.getEdgeNameFor(p);
 		Iterable<Edge> edges = objectVertex.getOutEdges(edgeNameFor);
@@ -124,7 +124,7 @@ public class BluePrintsPersister {
 		}
 		for(Edge e : edges) {
 			Vertex valueVertex = e.getInVertex();
-			service.getDatabase().removeEdge(e);
+			database.removeEdge(e);
 			// Now what to do with vertex ? Delete it ?
 			if(toCascade.contains(CascadeType.REMOVE)) {
 				// yes, delete it forever (but before, see if there aren't more datas to delete
@@ -134,7 +134,7 @@ public class BluePrintsPersister {
 		}
 	}
 
-	private void deleteMap(AbstractBluePrintsBackedFinderService<? extends Graph, ?, ?> service, Property p, Object toDelete, Vertex objectVertex, Collection<CascadeType> toCascade, Map<String, Object> objectsBeingAccessed) {
+	private void deleteMap(AbstractBluePrintsBackedFinderService<? extends Graph, ?, ?> service, Graph database, Property p, Object toDelete, Vertex objectVertex, Collection<CascadeType> toCascade, Map<String, Object> objectsBeingAccessed) {
 		String edgeNameFor = GraphUtils.getEdgeNameFor(p);
 		Iterable<Edge> edges = objectVertex.getOutEdges(edgeNameFor);
 		Map values = (Map) p.get(toDelete);
@@ -147,7 +147,7 @@ public class BluePrintsPersister {
 			Vertex valueVertex = service.getVertexFor(v, CascadeType.REFRESH, objectsBeingAccessed);
 			if(oldVertices.containsKey(valueVertex)) {
 				Edge oldEdge = oldVertices.remove(valueVertex);
-				service.getDatabase().removeEdge(oldEdge);
+				database.removeEdge(oldEdge);
 				if(toCascade.contains(CascadeType.REMOVE)) {
 					service.deleteOutEdgeVertex(objectVertex, valueVertex, v, objectsBeingAccessed);
 				}
@@ -157,12 +157,12 @@ public class BluePrintsPersister {
 			// force deletion of remaining edges
 			// BUT assocaited vertices may not be deleted
 			for(Edge e : oldVertices.values()) {
-				service.getDatabase().removeEdge(e);
+				database.removeEdge(e);
 			}
 		}
 	}
 
-	private void deleteCollection(AbstractBluePrintsBackedFinderService<? extends Graph, ?, ?> service, Property p, Object toDelete, Vertex objectVertex, Collection<CascadeType> toCascade, Map<String, Object> objectsBeingAccessed) {
+	private void deleteCollection(AbstractBluePrintsBackedFinderService<? extends Graph, ?, ?> service, Graph database, Property p, Object toDelete, Vertex objectVertex, Collection<CascadeType> toCascade, Map<String, Object> objectsBeingAccessed) {
 		String edgeNameFor = GraphUtils.getEdgeNameFor(p);
 		Iterable<Edge> edges = objectVertex.getOutEdges(edgeNameFor);
 		Collection values = (Collection) p.get(toDelete);
@@ -175,7 +175,7 @@ public class BluePrintsPersister {
 			Vertex valueVertex = service.getVertexFor(v, CascadeType.REFRESH, objectsBeingAccessed);
 			if(oldVertices.containsKey(valueVertex)) {
 				Edge oldEdge = oldVertices.remove(valueVertex);
-				service.getDatabase().removeEdge(oldEdge);
+				database.removeEdge(oldEdge);
 				if(toCascade.contains(CascadeType.REMOVE)) {
 					service.deleteOutEdgeVertex(objectVertex, valueVertex, v, objectsBeingAccessed);
 				}
@@ -185,21 +185,9 @@ public class BluePrintsPersister {
 			// force deletion of remaining edges
 			// BUT assocaited vertices may not be deleted
 			for(Edge e : oldVertices.values()) {
-				service.getDatabase().removeEdge(e);
+				database.removeEdge(e);
 			}
 		}
-	}
-
-	/**
-	 * Creates the given id vertex
-	 * @param database
-	 * @param valueClass
-	 * @param objectVertexId
-	 * @return
-	 * @see GraphUtils#createVertexWithoutValue(IndexableGraph, Object, Kind, Class)
-	 */
-	public Vertex createIdVertex(Graph database, Class<?> valueClass, String objectVertexId) {
-		return GraphUtils.createVertexWithoutValue(database, objectVertexId, nodeKind, valueClass);
 	}
 
 	/**
@@ -417,7 +405,7 @@ public class BluePrintsPersister {
 	}
 
 	public <DataType> DataType loadObject(AbstractBluePrintsBackedFinderService<? extends Graph, DataType, ?> service, Vertex objectVertex, Map<String, Object> objectsBeingAccessed) {
-		String objectVertexId = objectVertex.getProperty(Properties.vertexId.name()).toString();
+		String objectVertexId = service.getDriver().getIdOf(objectVertex);
 		return loadObject(service, objectVertexId, objectVertex, objectsBeingAccessed);
 	}
 

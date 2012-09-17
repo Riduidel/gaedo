@@ -49,15 +49,33 @@ import com.tinkerpop.blueprints.pgm.Vertex;
 
 /**
  * Base class for all finder service using blueprints graphs as storage
+ * 
  * @author ndx
- *
+ * 
  * @param <GraphClass>
  * @param <DataType>
  * @param <InformerType>
  */
-public abstract class AbstractBluePrintsBackedFinderService<GraphClass extends Graph, DataType, InformerType extends Informer<DataType>> 
-	extends AbstractFinderService<DataType, InformerType> 
-	implements FinderCrudService<DataType, InformerType>, IdBasedService<DataType>{
+public abstract class AbstractBluePrintsBackedFinderService<GraphClass extends Graph, DataType, InformerType extends Informer<DataType>> extends
+				AbstractFinderService<DataType, InformerType> implements FinderCrudService<DataType, InformerType>, IdBasedService<DataType> {
+
+	private class DelegatingDriver implements GraphDatabaseDriver {
+		@Override
+		public Vertex loadVertexFor(String objectVertexId) {
+			return AbstractBluePrintsBackedFinderService.this.loadVertexFor(objectVertexId);
+		}
+
+		@Override
+		public Vertex createEmptyVertex(String vertexId, Class<? extends Object> valueClass) {
+			return AbstractBluePrintsBackedFinderService.this.createEmptyVertex(vertexId, valueClass);
+		}
+
+		@Override
+		public String getIdOf(Vertex objectVertex) {
+			return getIdOfVertex(objectVertex);
+		}
+
+	}
 
 	private static final Logger logger = Logger.getLogger(IndexableGraphBackedFinderService.class.getName());
 	/**
@@ -65,8 +83,9 @@ public abstract class AbstractBluePrintsBackedFinderService<GraphClass extends G
 	 */
 	protected final GraphClass database;
 	/**
-	 * Graph casted as transactional one if possible. It is used to offer support of transactionnal read operations (if graph is indeed a transactional one).
-	 * This field may be NULL. 
+	 * Graph casted as transactional one if possible. It is used to offer
+	 * support of transactionnal read operations (if graph is indeed a
+	 * transactional one). This field may be NULL.
 	 */
 	protected final TransactionalGraph transactionSupport;
 	/**
@@ -74,8 +93,8 @@ public abstract class AbstractBluePrintsBackedFinderService<GraphClass extends G
 	 */
 	private Property idProperty;
 	/**
-	 * Accelerator cache linking classes objects to the collection of properties and cascade informations associated to
-	 * persist those fields.
+	 * Accelerator cache linking classes objects to the collection of properties
+	 * and cascade informations associated to persist those fields.
 	 */
 	protected Map<Class<?>, Map<Property, Collection<CascadeType>>> classes = new HashMap<Class<?>, Map<Property, Collection<CascadeType>>>();
 	/**
@@ -96,8 +115,8 @@ public abstract class AbstractBluePrintsBackedFinderService<GraphClass extends G
 	private BluePrintsPersister persister;
 	private boolean requiresIdGeneration;
 
-	public AbstractBluePrintsBackedFinderService(GraphClass graph, Class<DataType> containedClass, Class<InformerType> informerClass,
-					InformerFactory factory, ServiceRepository repository, PropertyProvider provider) {
+	public AbstractBluePrintsBackedFinderService(GraphClass graph, Class<DataType> containedClass, Class<InformerType> informerClass, InformerFactory factory,
+					ServiceRepository repository, PropertyProvider provider) {
 		super(containedClass, informerClass, factory);
 		this.repository = repository;
 		this.propertyProvider = provider;
@@ -108,46 +127,65 @@ public abstract class AbstractBluePrintsBackedFinderService<GraphClass extends G
 			transactionSupport = null;
 		}
 		this.idProperty = AnnotationUtils.locateIdField(provider, containedClass, Long.TYPE, Long.class, String.class);
-		this.requiresIdGeneration = idProperty.getAnnotation(GeneratedValue.class)!=null;
+		this.requiresIdGeneration = idProperty.getAnnotation(GeneratedValue.class) != null;
 		this.migrator = VersionMigratorFactory.create(containedClass);
 		// Updater builds managed nodes here
 		this.persister = new BluePrintsPersister(Kind.managed);
 		// if there is a migrator, generate property from it
 		if (logger.isLoggable(Level.FINE)) {
-			logger.log(Level.FINE, "created graph service handling "+containedClass.getCanonicalName()+"\n" +
-					"using as id "+idProperty+"\n" +
-					"supporting migration ? "+(migrator!=null)+"\n");
+			logger.log(Level.FINE, "created graph service handling " + containedClass.getCanonicalName() + "\n" + "using as id " + idProperty + "\n"
+							+ "supporting migration ? " + (migrator != null) + "\n");
 		}
 	}
 
 	/**
+	 * Get id of a given vertex, using any meanys required by implementation
+	 * @param objectVertex
+	 * @return
+	 */
+	protected abstract String getIdOfVertex(Vertex objectVertex);
+	
+	/**
+	 * Creates an empty vertex with given vertex id and vertex contained value class
+	 * @param vertexId vertex id
+	 * @param valueClass value class
+	 * @return a vertex storing those informations
+	 */
+	protected abstract Vertex createEmptyVertex(String vertexId, Class<? extends Object> valueClass);
+
+	/**
 	 * Get map linking properties to their respective cascading informations
-	 * @param provider used provider
-	 * @param searchedClass searched class
+	 * 
+	 * @param provider
+	 *            used provider
+	 * @param searchedClass
+	 *            searched class
 	 * @return a map linking each property to all its cascading informations
 	 */
 	public Map<Property, Collection<CascadeType>> getPropertiesFor(PropertyProvider provider, Class<?> searchedClass) {
 		Map<Property, Collection<CascadeType>> returned = new HashMap<Property, Collection<CascadeType>>();
 		Property[] properties = PropertyProviderUtils.getAllProperties(provider, searchedClass);
-		for(Property p : properties) {
-			if(p.getAnnotation(OneToOne.class)!=null) {
+		for (Property p : properties) {
+			if (p.getAnnotation(OneToOne.class) != null) {
 				returned.put(p, GraphUtils.extractCascadeOf(p.getAnnotation(OneToOne.class).cascade()));
-			} else if(p.getAnnotation(OneToMany.class)!=null) {
+			} else if (p.getAnnotation(OneToMany.class) != null) {
 				returned.put(p, GraphUtils.extractCascadeOf(p.getAnnotation(OneToMany.class).cascade()));
-			} else if(p.getAnnotation(ManyToMany.class)!=null) {
+			} else if (p.getAnnotation(ManyToMany.class) != null) {
 				returned.put(p, GraphUtils.extractCascadeOf(p.getAnnotation(ManyToMany.class).cascade()));
-			} else if(p.getAnnotation(ManyToOne.class)!=null) {
+			} else if (p.getAnnotation(ManyToOne.class) != null) {
 				returned.put(p, GraphUtils.extractCascadeOf(p.getAnnotation(ManyToOne.class).cascade()));
 			} else {
 				returned.put(p, new LinkedList<CascadeType>());
 			}
 		}
-		// And, if class is the contained one, add the (potential) Migrator property
-		if(this.migrator!=null) {
+		// And, if class is the contained one, add the (potential) Migrator
+		// property
+		if (this.migrator != null) {
 			// Migrator has no cascade to be done on
 			returned.put(migrator.getMigratorProperty(returned.keySet()), new LinkedList<CascadeType>());
 		}
-		// Finally, create a fake "classesCollection" property and add it to property 
+		// Finally, create a fake "classesCollection" property and add it to
+		// property
 		try {
 			returned.put(new ClassCollectionProperty(containedClass), new LinkedList<CascadeType>());
 		} catch (Exception e) {
@@ -157,9 +195,12 @@ public abstract class AbstractBluePrintsBackedFinderService<GraphClass extends G
 	}
 
 	/**
-	 * To put object in graph, we have to find all its fields, then put them in graph elements.
-	 * Notice this method directly calls {@link #doUpdate(Object, CascadeType, Map)}, just checking before that if an id must be generated.
-	 * If an id must be generated, then it is (and so is associated vertex, to make sure no problem will arise later).
+	 * To put object in graph, we have to find all its fields, then put them in
+	 * graph elements. Notice this method directly calls
+	 * {@link #doUpdate(Object, CascadeType, Map)}, just checking before that if
+	 * an id must be generated. If an id must be generated, then it is (and so
+	 * is associated vertex, to make sure no problem will arise later).
+	 * 
 	 * @param toCreate
 	 * @return
 	 * @see com.dooapp.gaedo.AbstractCrudService#create(java.lang.Object)
@@ -167,7 +208,7 @@ public abstract class AbstractBluePrintsBackedFinderService<GraphClass extends G
 	@Override
 	public DataType create(final DataType toCreate) {
 		return new TransactionalOperation<DataType, DataType, InformerType>(this) {
-	
+
 			@Override
 			protected DataType doPerform() {
 				return doUpdate(toCreate, CascadeType.PERSIST, new TreeMap<String, Object>());
@@ -178,28 +219,29 @@ public abstract class AbstractBluePrintsBackedFinderService<GraphClass extends G
 	private void generateIdFor(DataType toCreate) {
 		IdGenerator generator = null;
 		Class<?> objectType = Utils.maybeObjectify(idProperty.getType());
-		if(Long.class.isAssignableFrom(objectType)) {
+		if (Long.class.isAssignableFrom(objectType)) {
 			generator = new LongGenerator(this, idProperty);
-		} else if(Integer.class.isAssignableFrom(objectType)) {
+		} else if (Integer.class.isAssignableFrom(objectType)) {
 			generator = new IntegerGenerator(this, idProperty);
-		} else if(String.class.isAssignableFrom(objectType)) {
+		} else if (String.class.isAssignableFrom(objectType)) {
 			generator = new StringGenerator(this, idProperty);
 		} else {
-			throw new UnsupportedIdTypeException(objectType+" can't be used as id : we don't know how to generate its values !");
+			throw new UnsupportedIdTypeException(objectType + " can't be used as id : we don't know how to generate its values !");
 		}
 		generator.generateIdFor(toCreate);
 	}
 
 	/**
 	 * Delete id and all edges
+	 * 
 	 * @param toDelete
 	 * @see com.dooapp.gaedo.AbstractCrudService#delete(java.lang.Object)
 	 */
 	@Override
 	public void delete(final DataType toDelete) {
-		if(toDelete!=null) {
+		if (toDelete != null) {
 			new TransactionalOperation<Void, DataType, InformerType>(this) {
-	
+
 				@Override
 				protected Void doPerform() {
 					doDelete(toDelete, new TreeMap<String, Object>());
@@ -211,12 +253,17 @@ public abstract class AbstractBluePrintsBackedFinderService<GraphClass extends G
 
 	/**
 	 * Local delete implementation
+	 * 
 	 * @param toDelete
 	 */
 	private void doDelete(DataType toDelete, Map<String, Object> objectsBeingAccessed) {
-		String vertexId = getIdVertexId(toDelete, idProperty, false /* no id generation on delete */);
+		String vertexId = getIdVertexId(toDelete, idProperty, false /*
+																	 * no id
+																	 * generation
+																	 * on delete
+																	 */);
 		Vertex objectVertex = loadVertexFor(vertexId);
-		if(objectVertex!=null) {
+		if (objectVertex != null) {
 			Map<Property, Collection<CascadeType>> containedProperties = getContainedProperties(toDelete);
 			persister.performDelete(this, vertexId, objectVertex, containedClass, containedProperties, toDelete, CascadeType.REMOVE, objectsBeingAccessed);
 		}
@@ -224,26 +271,32 @@ public abstract class AbstractBluePrintsBackedFinderService<GraphClass extends G
 
 	/**
 	 * Delete an out edge vertex. Those are vertex corresponding to properties.
-	 * @param objectVertex source object vertex, used for debugging purpose only
-	 * @param valueVertex value vertex to remove
-	 * @param value object value
+	 * 
+	 * @param objectVertex
+	 *            source object vertex, used for debugging purpose only
+	 * @param valueVertex
+	 *            value vertex to remove
+	 * @param value
+	 *            object value
 	 */
 	<Type> void deleteOutEdgeVertex(Vertex objectVertex, Vertex valueVertex, Type value, Map<String, Object> objectsBeingUpdated) {
 		// Locate vertex
 		Vertex knownValueVertex = getVertexFor(value, CascadeType.REFRESH, objectsBeingUpdated);
 		// Ensure vertex is our out one
-		if(valueVertex.equals(knownValueVertex)) {
-			// Delete vertex and other associated ones, only if they have no other input links (elsewhere delete is silently ignored)
-			if(valueVertex.getInEdges().iterator().hasNext()) {
-				// There are incoming edges to that vertex. Do nothing but log it
+		if (valueVertex.equals(knownValueVertex)) {
+			// Delete vertex and other associated ones, only if they have no
+			// other input links (elsewhere delete is silently ignored)
+			if (valueVertex.getInEdges().iterator().hasNext()) {
+				// There are incoming edges to that vertex. Do nothing but log
+				// it
 				if (logger.isLoggable(Level.FINE)) {
-					logger.log(Level.FINE, "while deleting "+GraphUtils.toString(objectVertex)+"" +
-							" we tried to delete "+GraphUtils.toString(knownValueVertex)+"" +
-									" which has other incoming edges, so we didn't deleted it");
+					logger.log(Level.FINE,
+									"while deleting " + GraphUtils.toString(objectVertex) + "" + " we tried to delete " + GraphUtils.toString(knownValueVertex)
+													+ "" + " which has other incoming edges, so we didn't deleted it");
 				}
 			} else {
 				// OK, time to delete value vertex. Is it a managed node ?
-				if(repository.containsKey(value.getClass())) {
+				if (repository.containsKey(value.getClass())) {
 					FinderCrudService<Type, ?> finderCrudService = (FinderCrudService<Type, ?>) repository.get(value.getClass());
 					finderCrudService.delete(value);
 				} else {
@@ -253,9 +306,9 @@ public abstract class AbstractBluePrintsBackedFinderService<GraphClass extends G
 			}
 		} else {
 			if (logger.isLoggable(Level.WARNING)) {
-				logger.log(Level.WARNING, "that's strange : value "+value+" is associated to "+GraphUtils.toString(knownValueVertex)+"" +
-						" which blueprints says is different from "+GraphUtils.toString(valueVertex)+"." +
-								" Under those circumstances, we can delete neither of them");
+				logger.log(Level.WARNING, "that's strange : value " + value + " is associated to " + GraphUtils.toString(knownValueVertex) + ""
+								+ " which blueprints says is different from " + GraphUtils.toString(valueVertex) + "."
+								+ " Under those circumstances, we can delete neither of them");
 			}
 		}
 	}
@@ -266,7 +319,7 @@ public abstract class AbstractBluePrintsBackedFinderService<GraphClass extends G
 	}
 
 	public Map<Property, Collection<CascadeType>> getContainedProperties(Class<? extends Object> objectClass) {
-		if(!classes.containsKey(objectClass)) {
+		if (!classes.containsKey(objectClass)) {
 			classes.put(objectClass, getPropertiesFor(propertyProvider, objectClass));
 		}
 		return classes.get(objectClass);
@@ -274,8 +327,11 @@ public abstract class AbstractBluePrintsBackedFinderService<GraphClass extends G
 
 	/**
 	 * Gets the id vertex for the given object (if that object exists)
-	 * @param object object to get id vertex for
-	 * @param allowIdGeneration when set to true, an id may be created for that object
+	 * 
+	 * @param object
+	 *            object to get id vertex for
+	 * @param allowIdGeneration
+	 *            when set to true, an id may be created for that object
 	 * @return first matching node if found, and null if not
 	 */
 	private Vertex getIdVertexFor(DataType object, boolean allowIdGeneration) {
@@ -284,21 +340,27 @@ public abstract class AbstractBluePrintsBackedFinderService<GraphClass extends G
 
 	/**
 	 * Notice it only works if id is a literal type
-	 * @param object object for which we want the id vertex id property
-	 * @param idProperty property used to extract id from object
-	 * @param requiresIdGeneration set to true when effective id generation is required. Allow to generate id only on create operations
-	 * @return a composite id containing the service class, the data class and the the instance value
+	 * 
+	 * @param object
+	 *            object for which we want the id vertex id property
+	 * @param idProperty
+	 *            property used to extract id from object
+	 * @param requiresIdGeneration
+	 *            set to true when effective id generation is required. Allow to
+	 *            generate id only on create operations
+	 * @return a composite id containing the service class, the data class and
+	 *         the the instance value
 	 * @see GraphUtils#getIdVertexId(IndexableGraph, Class, Object, Property)
 	 */
 	private String getIdVertexId(DataType object, Property idProperty, boolean requiresIdGeneration) {
-		if(requiresIdGeneration) {
+		if (requiresIdGeneration) {
 			// Check value of idProperty
 			Object value = idProperty.get(object);
-			if(value==null) {
+			if (value == null) {
 				generateIdFor(object);
-			} else if(Number.class.isAssignableFrom(Utils.maybeObjectify(idProperty.getType()))) {
+			} else if (Number.class.isAssignableFrom(Utils.maybeObjectify(idProperty.getType()))) {
 				Number n = (Number) value;
-				if(n.equals(0) || n.equals(0l)) {
+				if (n.equals(0) || n.equals(0l)) {
 					generateIdFor(object);
 				}
 			}
@@ -308,7 +370,9 @@ public abstract class AbstractBluePrintsBackedFinderService<GraphClass extends G
 
 	/**
 	 * Get id of given object, provided of course it's an instance of this class
-	 * @param data object to extract an id for
+	 * 
+	 * @param data
+	 *            object to extract an id for
 	 * @return id of that object
 	 */
 	public Object getIdOf(DataType data) {
@@ -318,7 +382,7 @@ public abstract class AbstractBluePrintsBackedFinderService<GraphClass extends G
 	@Override
 	public DataType update(final DataType toUpdate) {
 		return new TransactionalOperation<DataType, DataType, InformerType>(this) {
-	
+
 			@Override
 			protected DataType doPerform() {
 				return doUpdate(toUpdate, CascadeType.MERGE, new TreeMap<String, Object>());
@@ -327,81 +391,104 @@ public abstract class AbstractBluePrintsBackedFinderService<GraphClass extends G
 	}
 
 	/**
-	 * here is a trick : we want id generation to happen only on first persist (that's to say on call to #create), but not on subsequent ones.
-	 * So, as first call uses CascadeType.PERSIST and others uses CascadeType.MERGE, we can use that indication to separate them.
-	 * It has the unfortunate inconvenient to force us to use only PERSIST during #create
-	 * @param toUpdate object to update
-	 * @param cascade type. As mentionned upper, beware to value used !
-	 * @param treeMap map of objects already used
+	 * here is a trick : we want id generation to happen only on first persist
+	 * (that's to say on call to #create), but not on subsequent ones. So, as
+	 * first call uses CascadeType.PERSIST and others uses CascadeType.MERGE, we
+	 * can use that indication to separate them. It has the unfortunate
+	 * inconvenient to force us to use only PERSIST during #create
+	 * 
+	 * @param toUpdate
+	 *            object to update
+	 * @param cascade
+	 *            type. As mentionned upper, beware to value used !
+	 * @param treeMap
+	 *            map of objects already used
 	 */
 	private DataType doUpdate(DataType toUpdate, CascadeType cascade, Map<String, Object> treeMap) {
-		boolean generatesId = requiresIdGeneration ? (CascadeType.PERSIST==cascade) : false;
+		boolean generatesId = requiresIdGeneration ? (CascadeType.PERSIST == cascade) : false;
 		String objectVertexId = getIdVertexId(toUpdate, idProperty, generatesId);
 		Vertex objectVertex = loadVertexFor(objectVertexId);
-		return (DataType) persister.performUpdate(this, objectVertexId, objectVertex, 
-						toUpdate.getClass(), getContainedProperties(toUpdate), toUpdate, cascade, treeMap);
+		return (DataType) persister.performUpdate(this, objectVertexId, objectVertex, toUpdate.getClass(), getContainedProperties(toUpdate), toUpdate, cascade,
+						treeMap);
 	}
 
 	/**
-	 * Get vertex associated to value. If object is managed by a service, we ask this service the value
-	 * @param value value we want the vertex for
-	 * @param cascade used cascade type, can be either {@link CascadeType#PERSIST} or {@link CascadeType#MERGE}
-	 * @param objectsBeingUpdated map of objects currently being updated, it avoid some loops during update, but is absolutely NOT a persistent cache
+	 * Get vertex associated to value. If object is managed by a service, we ask
+	 * this service the value
+	 * 
+	 * @param value
+	 *            value we want the vertex for
+	 * @param cascade
+	 *            used cascade type, can be either {@link CascadeType#PERSIST}
+	 *            or {@link CascadeType#MERGE}
+	 * @param objectsBeingUpdated
+	 *            map of objects currently being updated, it avoid some loops
+	 *            during update, but is absolutely NOT a persistent cache
 	 * @return
 	 */
 	public Vertex getVertexFor(Object value, CascadeType cascade, Map<String, Object> objectsBeingUpdated) {
-			boolean allowIdGeneration = CascadeType.PERSIST.equals(cascade) || CascadeType.MERGE.equals(cascade);
-			// Here we suppose the service is the right one for the job (which may not be the case)
-			if(containedClass.isInstance(value)) {
-				Vertex returned = getIdVertexFor(containedClass.cast(value), allowIdGeneration);
-				if(returned==null) {
-					doUpdate(containedClass.cast(value), cascade, objectsBeingUpdated);
-					returned = getIdVertexFor(containedClass.cast(value), allowIdGeneration);
-				} else {
-					// vertex already exist, but maybe object needs an update
-					if(CascadeType.PERSIST==cascade || CascadeType.MERGE==cascade) {
-						doUpdate(containedClass.cast(value), cascade, objectsBeingUpdated);
-					}
-				}
-				return returned;
-			}
-			Class<? extends Object> valueClass = value.getClass();
-			if(repository.containsKey(valueClass)) {
-				FinderCrudService service = repository.get(valueClass);
-				if(service instanceof IndexableGraphBackedFinderService) {
-					return ((IndexableGraphBackedFinderService) service).getVertexFor(value, cascade, objectsBeingUpdated);
-				} else {
-					throw new IncompatibleServiceException(service, valueClass);
-				}
-			} else if(Literals.containsKey(valueClass)){
-				return GraphUtils.getVertexForLiteral(database, value);
-			} else if(Tuples.containsKey(valueClass)){
-				return GraphUtils.getVertexForTuple(this, repository, value, objectsBeingUpdated);
+		boolean allowIdGeneration = CascadeType.PERSIST.equals(cascade) || CascadeType.MERGE.equals(cascade);
+		// Here we suppose the service is the right one for the job (which may
+		// not be the case)
+		if (containedClass.isInstance(value)) {
+			Vertex returned = getIdVertexFor(containedClass.cast(value), allowIdGeneration);
+			if (returned == null) {
+				doUpdate(containedClass.cast(value), cascade, objectsBeingUpdated);
+				returned = getIdVertexFor(containedClass.cast(value), allowIdGeneration);
 			} else {
-	/*			// OK, we will persist this object by ourselves, which is really error-prone, but we do we have any other solution ?
-				// But notice object is by design consderie
-				Vertex objectVertex = 
-				objectVertex.setProperty(Properties.vertexId.name(), getIdVertexId(toUpdate));
-				objectVertex.setProperty(Properties.kind.name(), Kind.managed.name());
-				objectVertex.setProperty(Properties.type.name(), toUpdate.getClass().getName());
-	*/
-				throw new ObjectIsNotARealLiteralException(value, valueClass);
-				
+				// vertex already exist, but maybe object needs an update
+				if (CascadeType.PERSIST == cascade || CascadeType.MERGE == cascade) {
+					doUpdate(containedClass.cast(value), cascade, objectsBeingUpdated);
+				}
 			}
+			return returned;
 		}
+		Class<? extends Object> valueClass = value.getClass();
+		if (repository.containsKey(valueClass)) {
+			FinderCrudService service = repository.get(valueClass);
+			if (service instanceof IndexableGraphBackedFinderService) {
+				return ((IndexableGraphBackedFinderService) service).getVertexFor(value, cascade, objectsBeingUpdated);
+			} else {
+				throw new IncompatibleServiceException(service, valueClass);
+			}
+		} else if (Literals.containsKey(valueClass)) {
+			return GraphUtils.getVertexForLiteral(getDriver(), value);
+		} else if (Tuples.containsKey(valueClass)) {
+			return GraphUtils.getVertexForTuple(this, repository, value, objectsBeingUpdated);
+		} else {
+			/*
+			 * // OK, we will persist this object by ourselves, which is really
+			 * error-prone, but we do we have any other solution ? // But notice
+			 * object is by design consderie Vertex objectVertex =
+			 * objectVertex.setProperty(Properties.vertexId.name(),
+			 * getIdVertexId(toUpdate));
+			 * objectVertex.setProperty(Properties.kind.name(),
+			 * Kind.managed.name());
+			 * objectVertex.setProperty(Properties.type.name(),
+			 * toUpdate.getClass().getName());
+			 */
+			throw new ObjectIsNotARealLiteralException(value, valueClass);
+
+		}
+	}
 
 	/**
-	 * Object query is done by simply looking up all objects of that class using a standard query
+	 * Object query is done by simply looking up all objects of that class using
+	 * a standard query
+	 * 
 	 * @return an iterable over all objects of that class
 	 * @see com.dooapp.gaedo.finders.FinderCrudService#findAll()
 	 */
 	@Override
 	public Iterable<DataType> findAll() {
 		return find().matching(new QueryBuilder<InformerType>() {
-	
+
 			/**
-			 * An empty and starts with an initial match of true, but degrades it for each failure.
-			 * So creating an empty and() is like creating a "true" statement, which in turn results into searching all objects of that class.
+			 * An empty and starts with an initial match of true, but degrades
+			 * it for each failure. So creating an empty and() is like creating
+			 * a "true" statement, which in turn results into searching all
+			 * objects of that class.
+			 * 
 			 * @param informer
 			 * @return an empty or matching all objects
 			 * @see com.dooapp.gaedo.finders.QueryBuilder#createMatchingExpression(com.dooapp.gaedo.finders.Informer)
@@ -414,32 +501,40 @@ public abstract class AbstractBluePrintsBackedFinderService<GraphClass extends G
 	}
 
 	/**
-	 * Load object starting with the given vertex root.
-	 * Notice object is added to the accessed set with a weak key, this way, it should be faster to load it and to maintain instance unicity
+	 * Load object starting with the given vertex root. Notice object is added
+	 * to the accessed set with a weak key, this way, it should be faster to
+	 * load it and to maintain instance unicity
+	 * 
 	 * @param objectVertex
 	 * 
 	 * @return loaded object
-	 * @param objectsBeingAccessed map of objects currently being accessed, it avoid some loops during loading, but is absolutely NOT a persistent cache
+	 * @param objectsBeingAccessed
+	 *            map of objects currently being accessed, it avoid some loops
+	 *            during loading, but is absolutely NOT a persistent cache
 	 * @see #loadObject(String, Vertex, Map)
 	 */
 	public DataType loadObject(String objectVertexId, Map<String, Object> objectsBeingAccessed) {
-		// If cast fails, well, that's some fuckin mess, no ? 
+		// If cast fails, well, that's some fuckin mess, no ?
 		Vertex objectVertex = loadVertexFor(objectVertexId);
 		return persister.loadObject(this, objectVertexId, objectVertex, objectsBeingAccessed);
 	}
 
 	/**
-	 * Load veretx associated to given object id. This method is designed to replace the (to be deprecated) {@link GraphUtils#locateVertex(Graph, Properties, Object)}
-	 * method when used with the (to be deleted) {@link Properties#vertexId} enum value
-	 * @param objectVertexId vertex id for which we want a vertex
+	 * Load veretx associated to given object id.
+	 * 
+	 * @param objectVertexId
+	 *            vertex id for which we want a vertex
 	 * @return loaded vertex if found, or an exception (I guess ?) if none found
 	 */
 	public abstract Vertex loadVertexFor(String objectVertexId);
 
 	/**
 	 * Load object from a vertex
+	 * 
 	 * @param objectVertex
-	 * @param objectsBeingAccessed map of objects currently being accessed, it avoid some loops during loading, but is absolutely NOT a persistent cache
+	 * @param objectsBeingAccessed
+	 *            map of objects currently being accessed, it avoid some loops
+	 *            during loading, but is absolutely NOT a persistent cache
 	 * @return loaded object
 	 * @see #loadObject(String, Vertex, Map)
 	 */
@@ -449,29 +544,34 @@ public abstract class AbstractBluePrintsBackedFinderService<GraphClass extends G
 
 	/**
 	 * we only consider first id element
-	 * @param id collection of id
+	 * 
+	 * @param id
+	 *            collection of id
 	 * @return object which has as vertexId the given property
 	 * @see com.dooapp.gaedo.finders.id.IdBasedService#findById(java.lang.Object[])
 	 */
 	@Override
 	public DataType findById(final Object... id) {
 		// make sure entered type is a valid one
-		if(Utils.maybeObjectify(idProperty.getType()).isAssignableFrom(Utils.maybeObjectify(id[0].getClass()))) {
-			String vertexIdValue = GraphUtils.getIdOfLiteral(database, containedClass, idProperty, id[0]).toString();
+		if (Utils.maybeObjectify(idProperty.getType()).isAssignableFrom(Utils.maybeObjectify(id[0].getClass()))) {
+			String vertexIdValue = GraphUtils.getIdOfLiteral(containedClass, idProperty, id[0]).toString();
 			Vertex rootVertex = loadVertexFor(vertexIdValue);
-			if(rootVertex==null) {
+			if (rootVertex == null) {
 				try {
-					// root vertex couldn't be found directly, mostly due to https://github.com/Riduidel/gaedo/issues/11
+					// root vertex couldn't be found directly, mostly due to
+					// https://github.com/Riduidel/gaedo/issues/11
 					// So perform the longer (but always working) query
 					return find().matching(new QueryBuilder<InformerType>() {
-	
+
 						@Override
 						public QueryExpression createMatchingExpression(InformerType informer) {
 							return informer.get(idProperty.getName()).equalsTo(id[0]);
 						}
 					}).getFirst();
-				} catch(NoReturnableVertexException e) {
-					// due to getFirst semantics, an exception has to be thrown when no entry is found, which is off lesser interest here, that why we catch it to return null instead
+				} catch (NoReturnableVertexException e) {
+					// due to getFirst semantics, an exception has to be thrown
+					// when no entry is found, which is off lesser interest
+					// here, that why we catch it to return null instead
 					return null;
 				}
 			} else {
@@ -520,30 +620,36 @@ public abstract class AbstractBluePrintsBackedFinderService<GraphClass extends G
 
 	/**
 	 * Set id of object, and try to assign that object a vertex.
+	 * 
 	 * @param value
 	 * @param id
 	 * @return
-	 * @see com.dooapp.gaedo.finders.id.IdBasedService#assignId(java.lang.Object, java.lang.Object[])
+	 * @see com.dooapp.gaedo.finders.id.IdBasedService#assignId(java.lang.Object,
+	 *      java.lang.Object[])
 	 */
 	@Override
 	public boolean assignId(final DataType value, Object... id) {
-		/* We first make sure object is an instance of containedClass.
-		 * This way, we can then use value class to create id vertex
+		/*
+		 * We first make sure object is an instance of containedClass. This way,
+		 * we can then use value class to create id vertex
 		 */
-		if(containedClass.isInstance(value)) {
+		if (containedClass.isInstance(value)) {
 			idProperty.set(value, id[0]);
-			if(getIdVertexFor(value, false /* no id generation when assigning an id ! */)==null) {
+			if (getIdVertexFor(value, false /*
+											 * no id generation when assigning
+											 * an id !
+											 */) == null) {
 				try {
 					TransactionalOperation<Boolean, DataType, InformerType> operation = new TransactionalOperation<Boolean, DataType, InformerType>(this) {
-	
+
 						@Override
 						protected Boolean doPerform() {
-							persister.createIdVertex(database, value.getClass(), getIdVertexId(value, idProperty, requiresIdGeneration));
+							getDriver().createEmptyVertex(getIdVertexId(value, idProperty, requiresIdGeneration), value.getClass());
 							return true;
 						}
 					};
 					return operation.perform();
-				} catch(Exception e) {
+				} catch (Exception e) {
 					return false;
 				}
 			} else {
@@ -555,7 +661,8 @@ public abstract class AbstractBluePrintsBackedFinderService<GraphClass extends G
 	}
 
 	/**
-	 * @param requiresIdGeneration the requiresIdGeneration to set
+	 * @param requiresIdGeneration
+	 *            the requiresIdGeneration to set
 	 * @category setter
 	 * @category requiresIdGeneration
 	 */
@@ -570,6 +677,17 @@ public abstract class AbstractBluePrintsBackedFinderService<GraphClass extends G
 	 */
 	public boolean isRequiresIdGeneration() {
 		return requiresIdGeneration;
+	}
+
+	/**
+	 * Provides driver view to database. This driver is a way for us to expose
+	 * low-level infos to graph without breaking huigh-level abstraction of a
+	 * FinderService.
+	 * 
+	 * @return
+	 */
+	public GraphDatabaseDriver getDriver() {
+		return new DelegatingDriver();
 	}
 
 }

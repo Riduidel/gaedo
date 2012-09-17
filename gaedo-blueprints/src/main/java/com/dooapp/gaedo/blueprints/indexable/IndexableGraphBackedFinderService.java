@@ -11,6 +11,8 @@ import com.dooapp.gaedo.finders.QueryStatement;
 import com.dooapp.gaedo.finders.repository.ServiceRepository;
 import com.dooapp.gaedo.finders.root.InformerFactory;
 import com.dooapp.gaedo.properties.PropertyProvider;
+import com.tinkerpop.blueprints.pgm.CloseableSequence;
+import com.tinkerpop.blueprints.pgm.Index;
 import com.tinkerpop.blueprints.pgm.IndexableGraph;
 import com.tinkerpop.blueprints.pgm.Vertex;
 
@@ -37,7 +39,25 @@ public class IndexableGraphBackedFinderService <DataType, InformerType extends I
 
 	@Override
 	public Vertex loadVertexFor(String objectVertexId) {
-		return GraphUtils.locateVertex(database, Properties.vertexId, objectVertexId);
+		CloseableSequence<Vertex> matching = database.getIndex(Index.VERTICES, Vertex.class).get(Properties.vertexId.name(), objectVertexId);
+		if(matching.hasNext()) {
+			return matching.next();
+		} else {
+			return null;
+		}
+	}
+
+	@Override
+	public String getIdOfVertex(Vertex objectVertex) {
+		return objectVertex.getProperty(Properties.vertexId.name()).toString();
+	}
+
+	@Override
+	protected Vertex createEmptyVertex(String vertexId, Class<? extends Object> valueClass) {
+		Vertex returned = database.addVertex(vertexId);
+		returned.setProperty(Properties.vertexId.name(), vertexId);
+		returned.setProperty(Properties.type.name(), valueClass.getName());
+		return returned;
 	}
 
 }

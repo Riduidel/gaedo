@@ -22,8 +22,7 @@ public abstract class AbstractTupleTransformer<TupleType> {
 
 	public <DataType> Vertex getVertexFor(AbstractBluePrintsBackedFinderService<? extends Graph, DataType, ?> service, TupleType cast, Map<String, Object> objectsBeingUpdated) {
 		// First step is to build an id for given tuple by concatenating key and value id (which is hopefully done separately)
-		String entryVertexId = getIdOfTuple(service.getDatabase(), service.getRepository(), cast);
-		Graph g = service.getDatabase();
+		String entryVertexId = getIdOfTuple(service.getRepository(), cast);
 		// No need to memorize updated version
 		Vertex objectVertex = service.loadVertexFor(entryVertexId);
 		persister.performUpdate(service, entryVertexId, objectVertex, getContainedClass(), getContainedProperties(), cast, CascadeType.PERSIST, objectsBeingUpdated);
@@ -44,12 +43,12 @@ public abstract class AbstractTupleTransformer<TupleType> {
 	/**
 	 * Create a long string id by concatenating all contained properties ones
 	 */
-	public String getIdOfTuple(Graph graph, ServiceRepository repository, TupleType value) {
+	public String getIdOfTuple(ServiceRepository repository, TupleType value) {
 		StringBuilder sOut = new StringBuilder();
 		for(Property p : getContainedProperties().keySet()) {
 			Object propertyValue = p.get(value);
 			if(propertyValue!=null) {
-				String id = GraphUtils.getIdOf(graph, repository, propertyValue);
+				String id = GraphUtils.getIdOf(repository, propertyValue);
 				sOut.append(p.getName()).append(":").append(id).append("-");
 			}
 		}

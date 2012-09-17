@@ -1,6 +1,6 @@
 package com.dooapp.gaedo.blueprints.transformers;
 
-import com.tinkerpop.blueprints.pgm.Graph;
+import com.dooapp.gaedo.blueprints.GraphDatabaseDriver;
 import com.tinkerpop.blueprints.pgm.Vertex;
 
 /**
@@ -15,14 +15,14 @@ public interface LiteralTransformer<Type> extends Transformer {
 	 * @param value input value
 	 * @return the id used for the vertex representing this value
 	 */
-	public String getVertexId(Graph database, Type value);
+	public String getVertexId(Type value);
 	/**
 	 * Get vertex for given object. This vertex may be simple or the root of a sub-graph
 	 * @param database
 	 * @param value
 	 * @return
 	 */
-	Vertex getVertexFor(Graph database, Type value);
+	Vertex getVertexFor(GraphDatabaseDriver database, Type value);
 	
 	/**
 	 * Load given vertex into an object

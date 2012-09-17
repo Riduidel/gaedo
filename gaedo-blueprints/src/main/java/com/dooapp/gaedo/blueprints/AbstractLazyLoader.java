@@ -15,6 +15,10 @@ public abstract class AbstractLazyLoader {
 	protected boolean loaded = false;
 	protected ClassLoader classLoader;
 	protected Map<String, Object> objectsBeingAccessed;
+	/**
+	 * Edge name is eagerly determined from known elements to fasten lazy loading (and avoid some service unavailability issues
+	 */
+	protected String edgeName;
 	
 	public AbstractLazyLoader() {
 		
@@ -28,6 +32,7 @@ public abstract class AbstractLazyLoader {
 		this.repository = repository;
 		this.classLoader = classLoader;
 		this.objectsBeingAccessed = objectsBeingAccessed;
+		this.edgeName = GraphUtils.getEdgeNameFor(property);
 	}
 
 	private Object writeReplace() throws ObjectStreamException {

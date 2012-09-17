@@ -56,6 +56,6 @@ public class BasicGraphExecutableQuery extends AbstractGraphExecutableQuery impl
 
 	protected Vertex getClassVertex() {
 		LiteralTransformer<Class> transformer = Literals.classes.getTransformer();
-		return service.loadVertexFor(transformer.getVertexId(getDatabase(), getSearchedClass()));
+		return service.loadVertexFor(transformer.getVertexId(getSearchedClass()));
 	}
 }
