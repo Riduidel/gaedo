@@ -2,9 +2,10 @@ package com.dooapp.gaedo.blueprints.queries.tests;
 
 import java.util.TreeMap;
 
+import com.dooapp.gaedo.blueprints.AbstractBluePrintsBackedFinderService;
+import com.dooapp.gaedo.blueprints.GraphDatabaseDriver;
 import com.dooapp.gaedo.blueprints.indexable.IndexableGraphBackedFinderService;
 import com.dooapp.gaedo.blueprints.transformers.Literals;
-import com.dooapp.gaedo.finders.repository.ServiceRepository;
 import com.dooapp.gaedo.properties.Property;
 import com.tinkerpop.blueprints.pgm.Vertex;
 
@@ -15,8 +16,8 @@ public abstract class ComparableValuedVertexTest<ComparableType extends Comparab
 	 */
 	protected final boolean strictly;
 
-	public ComparableValuedVertexTest(ServiceRepository repository, Iterable<Property> p, ComparableType value, boolean strictly) {
-		super(repository, p, value);
+	public ComparableValuedVertexTest(GraphDatabaseDriver driver, Iterable<Property> p, ComparableType value, boolean strictly) {
+		super(driver, p, value);
 		this.strictly = strictly;
 	}
 
@@ -24,7 +25,7 @@ public abstract class ComparableValuedVertexTest<ComparableType extends Comparab
 
 	@Override
 	protected boolean callMatchManaged(Vertex currentVertex, Property finalProperty) {
-		IndexableGraphBackedFinderService service = getService();
+		AbstractBluePrintsBackedFinderService service = getService();
 		Object value = service.loadObject(currentVertex, new TreeMap<String, Object>());
 		return doCompare((ComparableType) value);
 	}
@@ -32,7 +33,7 @@ public abstract class ComparableValuedVertexTest<ComparableType extends Comparab
 
 	@Override
 	protected boolean callMatchLiteral(Vertex currentVertex, Property finalProperty) {
-		ComparableType value = (ComparableType) Literals.get(finalProperty.getType()).loadObject(getService().getDriver(), currentVertex);
+		ComparableType value = (ComparableType) Literals.get(finalProperty.getType()).loadObject(getDriver(), currentVertex);
 		return doCompare(value);
 	}
 }

@@ -6,6 +6,7 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
+import com.dooapp.gaedo.blueprints.GraphDatabaseDriver;
 import com.dooapp.gaedo.blueprints.Properties;
 import com.tinkerpop.blueprints.pgm.Vertex;
 
@@ -48,8 +49,8 @@ public class DateLiteralTransformer extends AbstractSimpleLiteralTransformer<Dat
 		return getDateFormat().format(value);
 	}
 
-	public Date loadObject(Class valueClass, Vertex key) {
-		String property = key.getProperty(Properties.value.name()).toString();
+	public Date loadObject(GraphDatabaseDriver driver, Class valueClass, Vertex key) {
+		String property = driver.getValue(key).toString();
 		try {
 			return getDateFormat().parse(property.toString());
 		} catch (ParseException e) {

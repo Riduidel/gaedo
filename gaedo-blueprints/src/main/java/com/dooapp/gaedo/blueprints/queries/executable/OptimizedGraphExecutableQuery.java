@@ -62,14 +62,14 @@ public class OptimizedGraphExecutableQuery extends AbstractGraphExecutableQuery 
 	 */
 	private static CompoundVertexTest addClassSearchTo(CompoundVertexTest vertexTest, Class searchedClass) {
 		if (vertexTest instanceof AndVertexTest) {
-			CollectionContains objectClassContains = new CollectionContains(vertexTest.getRepository(),
+			CollectionContains objectClassContains = new CollectionContains(vertexTest.getDriver(),
 							Arrays.asList(new Property[] { new ClassCollectionProperty(searchedClass) }), searchedClass);
 			vertexTest.add(objectClassContains);
 			return vertexTest;
 		} else {
 			// Create a new Andtest, add to it current vertex test and test on
 			// class
-			AndVertexTest used = new AndVertexTest(vertexTest.getRepository(), vertexTest.getPath());
+			AndVertexTest used = new AndVertexTest(vertexTest.getDriver(), vertexTest.getPath());
 			used.add(vertexTest);
 			return addClassSearchTo(used, searchedClass);
 		}

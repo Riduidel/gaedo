@@ -2,6 +2,7 @@ package com.dooapp.gaedo.blueprints.queries.tests;
 
 import java.util.Iterator;
 
+import com.dooapp.gaedo.blueprints.GraphDatabaseDriver;
 import com.dooapp.gaedo.blueprints.GraphUtils;
 import com.dooapp.gaedo.finders.repository.ServiceRepository;
 import com.dooapp.gaedo.properties.Property;
@@ -10,8 +11,8 @@ import com.tinkerpop.blueprints.pgm.Vertex;
 
 public class Anything extends TargettedVertexTest implements VertexTest {
 
-	public Anything(ServiceRepository repository, Iterable<Property> p) {
-		super(repository, p);
+	public Anything(GraphDatabaseDriver driver, Iterable<Property> p) {
+		super(driver, p);
 	}
 
 	/**

@@ -10,6 +10,11 @@ import java.util.Collections;
 import com.dooapp.gaedo.utils.Utils;
 
 public class TypeProperty implements Property {
+	/**
+	 * Constant instance used to generate some links
+	 */
+	public static final TypeProperty INSTANCE = new TypeProperty(TypeProperty.class);
+	
 	public static final String TYPE = "type";
 
 	private Class declaring;

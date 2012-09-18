@@ -32,28 +32,31 @@ public interface LiteralTransformer<Type> extends Transformer {
 	public Type loadObject(GraphDatabaseDriver driver, Vertex key);
 	/**
 	 * Load given key into an object, with added bonus of known type
+	 * @param driver TODO
 	 * @param effectiveClass
 	 * @param key
 	 * @return
 	 */
-	public Type loadObject(Class effectiveClass, Vertex key);
+	public Type loadObject(GraphDatabaseDriver driver, Class effectiveClass, Vertex key);
 	
 	/**
 	 * Method loading class in given classloader and the loading given object
+	 * @param driver TODO
 	 * @param classLoader used classloader
 	 * @param effectiveType type name
 	 * @param key vertex associated to value
 	 * @return loaded object
-	 * @see #loadObject(Class, Vertex)
+	 * @see #loadObject(GraphDatabaseDriver, Class, Vertex)
 	 */
-	public Object loadObject(ClassLoader classLoader, String effectiveType, Vertex key);
+	public Object loadObject(GraphDatabaseDriver driver, ClassLoader classLoader, String effectiveType, Vertex key);
 	
 	/**
 	 * Check if vertex content is equals to provided object
+	 * @param driver TODO
 	 * @param currentVertex currently analyzed vertex
 	 * @param expected expected value
 	 * @return true if vertex is supposed ton contain value, false otherwise
 	 */
-	public boolean isVertexEqualsTo(Vertex currentVertex, Type expected);
+	public boolean isVertexEqualsTo(GraphDatabaseDriver driver, Vertex currentVertex, Type expected);
 
 }

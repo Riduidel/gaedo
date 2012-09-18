@@ -1,12 +1,12 @@
 package com.dooapp.gaedo.blueprints.queries.tests;
 
-import com.dooapp.gaedo.finders.repository.ServiceRepository;
+import com.dooapp.gaedo.blueprints.GraphDatabaseDriver;
 import com.dooapp.gaedo.properties.Property;
 
 public class GreaterThan<ComparableType extends Comparable<ComparableType>> extends ComparableValuedVertexTest<ComparableType> implements VertexTest {
 
-	public GreaterThan(ServiceRepository repository, Iterable<Property> p, ComparableType expected, boolean strictly) {
-		super(repository, p, expected, strictly);
+	public GreaterThan(GraphDatabaseDriver driver, Iterable<Property> p, ComparableType expected, boolean strictly) {
+		super(driver, p, expected, strictly);
 	}
 
 	@Override

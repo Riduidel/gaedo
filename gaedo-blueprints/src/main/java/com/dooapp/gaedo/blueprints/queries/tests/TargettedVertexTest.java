@@ -3,8 +3,8 @@ package com.dooapp.gaedo.blueprints.queries.tests;
 import java.util.Iterator;
 import java.util.TreeMap;
 
-import com.dooapp.gaedo.blueprints.Properties;
-import com.dooapp.gaedo.blueprints.indexable.IndexableGraphBackedFinderService;
+import com.dooapp.gaedo.blueprints.AbstractBluePrintsBackedFinderService;
+import com.dooapp.gaedo.blueprints.GraphDatabaseDriver;
 import com.dooapp.gaedo.finders.repository.ServiceRepository;
 import com.dooapp.gaedo.properties.Property;
 import com.tinkerpop.blueprints.pgm.Vertex;
@@ -24,9 +24,10 @@ public class TargettedVertexTest {
 	 * @param deepInspect should we perform deep object inspection to check equaality ? This requires object loading and is as a consequence by far slower
 	 * @return true if object is equals to vertex associated object
 	 */
-	protected static boolean isVertexEqualsTo(Vertex currentVertex, IndexableGraphBackedFinderService service, Object expected, boolean deepInspect) {
+	protected static boolean isVertexEqualsTo(Vertex currentVertex, AbstractBluePrintsBackedFinderService service, Object expected, boolean deepInspect) {
+		GraphDatabaseDriver driver = service.getDriver();
 		Object expectedId = service.getIdOf(expected);
-		if (expectedId.equals(service.getDriver().getIdOf(currentVertex))) {
+		if (expectedId.equals(driver.getIdOf(currentVertex))) {
 			return true;
 		} else if(deepInspect) {
 			Object value = service.loadObject(currentVertex, new TreeMap<String, Object>());
@@ -41,10 +42,6 @@ public class TargettedVertexTest {
 	 */
 	protected final Iterable<Property> path;
 	/**
-	 * Current service repository
-	 */
-	protected final ServiceRepository repository;
-	/**
 	 * Used path length, useful for checking that a null value can be found
 	 */
 	protected final int pathLength;
@@ -52,16 +49,20 @@ public class TargettedVertexTest {
 	 * Lazy loaded end of path property
 	 */
 	private transient Property endProperty;
+	/**
+	 * Driver used to start this query
+	 */
+	private final GraphDatabaseDriver driver;
 
 	/**
 	 * Builds the vertex test
-	 * @param repository repository allowing re-creation of objects and id evaluation
+	 * @param driver TODO
 	 * @param path
 	 */
-	public TargettedVertexTest(ServiceRepository repository, Iterable<Property> path) {
-		this.repository = repository;
+	public TargettedVertexTest(GraphDatabaseDriver driver, Iterable<Property> path) {
 		this.path = path;
 		this.pathLength = computeLengthOf(path);
+		this.driver = driver;
 	}
 
 	private int computeLengthOf(Iterable<Property> path) {
@@ -89,7 +90,15 @@ public class TargettedVertexTest {
 	 * @category repository
 	 */
 	public ServiceRepository getRepository() {
-		return repository;
+		return driver.getRepository();
+	}
+
+	/**
+	 * Source driver of this query
+	 * @return a driver
+	 */
+	public GraphDatabaseDriver getDriver() {
+		return driver;
 	}
 	
 	protected StringBuilder toString(int deepness, StringBuilder builder) {

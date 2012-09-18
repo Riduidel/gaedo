@@ -29,15 +29,17 @@ import com.tinkerpop.blueprints.pgm.Vertex;
  */
 public class IndexableGraphBackedFinderService <DataType, InformerType extends Informer<DataType>> 
 	extends AbstractBluePrintsBackedFinderService<IndexableGraph, DataType, InformerType> {
-	
-	private static final String TYPE = "type";
+	private static final String VALUE = "value";
+
 	/**
 	 * property identifiying in an unique way a vertex. Its goal is to make sure vertex is the one we search.
 	 * @deprecated should be replaced by a "tagged" edge linking object to its identifying property
 	 */
 	private static final String VERTEX_ID = "vertexId";
 	
-	private LiteralTransformer classTransformer = Literals.get(Class.class);
+	public static final String TYPE_EDGE_NAME = GraphUtils.getEdgeNameFor(TypeProperty.INSTANCE);
+
+	private LiteralTransformer<Class> classTransformer = Literals.get(Class.class);
 
 	public IndexableGraphBackedFinderService(Class<DataType> containedClass, Class<InformerType> informerClass, InformerFactory factory, ServiceRepository repository,
 					PropertyProvider provider, IndexableGraph graph) {
@@ -78,19 +80,26 @@ public class IndexableGraphBackedFinderService <DataType, InformerType extends I
 		returned.setProperty(VERTEX_ID, vertexId);
 		// obtain vertex for type
 		Vertex classVertex = classTransformer.getVertexFor(getDriver(), valueClass);
-		TypeProperty fakeType = new TypeProperty(valueClass);
-		String edgeName = GraphUtils.getEdgeNameFor(fakeType);
-		database.addEdge("automatic edge linking "+returned.getId().toString()+" to its class "+valueClass.getName(), /* from */ returned, /* to */ classVertex, edgeName);
+		database.addEdge("automatic edge linking "+returned.getId().toString()+" to its class "+valueClass.getName(), /* from */ returned, /* to */ classVertex, TYPE_EDGE_NAME);
 		return returned;
 	}
 
 	@Override
 	protected String getEffectiveType(Vertex vertex) {
-		TypeProperty fakeType = new TypeProperty(null);
-		String edgeName = GraphUtils.getEdgeNameFor(fakeType);
-		Edge toType = vertex.getOutEdges(edgeName).iterator().next();
+		Edge toType = vertex.getOutEdges(TYPE_EDGE_NAME).iterator().next();
 		Vertex type = toType.getInVertex();
-		return type.getProperty(Properties.value.name()).toString();
+		// Do not use ClassLiteral here as this method must be blazing fast
+		return getValue(type).toString();
+	}
+
+	@Override
+	protected void setValue(Vertex vertex, Object value) {
+		vertex.setProperty(VALUE, value);
+	}
+
+	@Override
+	protected Object getValue(Vertex vertex) {
+		return vertex.getProperty(VALUE);
 	}
 
 }

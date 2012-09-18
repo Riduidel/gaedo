@@ -2,8 +2,8 @@ package com.dooapp.gaedo.blueprints.queries.tests;
 
 import java.util.Iterator;
 
+import com.dooapp.gaedo.blueprints.GraphDatabaseDriver;
 import com.dooapp.gaedo.blueprints.GraphUtils;
-import com.dooapp.gaedo.finders.repository.ServiceRepository;
 import com.dooapp.gaedo.properties.Property;
 import com.tinkerpop.blueprints.pgm.Edge;
 import com.tinkerpop.blueprints.pgm.Vertex;
@@ -12,8 +12,8 @@ public class CollectionContains extends CollectionTargettedVertexTest implements
 
 	private final Object expected;
 
-	public CollectionContains(ServiceRepository repository, Iterable<Property> p, Object value) {
-		super(repository, p);
+	public CollectionContains(GraphDatabaseDriver driver, Iterable<Property> p, Object value) {
+		super(driver, p);
 		this.expected = value;
 	}
 
@@ -29,7 +29,7 @@ public class CollectionContains extends CollectionTargettedVertexTest implements
 
 	@Override
 	protected boolean matchesVertex(Vertex examined, Property property) {
-		EqualsTo used = new EqualsTo(repository, path, expected);
+		EqualsTo used = new EqualsTo(getDriver(), path, expected);
 		return used.matchesVertex(examined, property);
 	}
 

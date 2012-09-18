@@ -79,6 +79,21 @@ public abstract class AbstractBluePrintsBackedFinderService<GraphClass extends G
 			return AbstractBluePrintsBackedFinderService.this.getEffectiveType(vertex);
 		}
 
+		@Override
+		public void setValue(Vertex vertex, Object value) {
+			AbstractBluePrintsBackedFinderService.this.setValue(vertex, value);
+		}
+
+		@Override
+		public Object getValue(Vertex vertex) {
+			return AbstractBluePrintsBackedFinderService.this.getValue(vertex);
+		}
+
+		@Override
+		public ServiceRepository getRepository() {
+			return AbstractBluePrintsBackedFinderService.this.getRepository();
+		}
+
 	}
 
 	private static final Logger logger = Logger.getLogger(IndexableGraphBackedFinderService.class.getName());
@@ -141,6 +156,10 @@ public abstract class AbstractBluePrintsBackedFinderService<GraphClass extends G
 							+ "supporting migration ? " + (migrator != null) + "\n");
 		}
 	}
+
+	protected abstract Object getValue(Vertex vertex);
+
+	protected abstract void setValue(Vertex vertex, Object value);
 
 	protected abstract String getEffectiveType(Vertex vertex);
 

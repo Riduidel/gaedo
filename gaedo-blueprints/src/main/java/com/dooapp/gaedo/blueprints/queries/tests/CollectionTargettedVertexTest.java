@@ -6,8 +6,8 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 
+import com.dooapp.gaedo.blueprints.GraphDatabaseDriver;
 import com.dooapp.gaedo.blueprints.GraphUtils;
-import com.dooapp.gaedo.finders.repository.ServiceRepository;
 import com.dooapp.gaedo.properties.Property;
 import com.dooapp.gaedo.utils.CollectionUtils;
 import com.tinkerpop.blueprints.pgm.Edge;
@@ -20,8 +20,8 @@ import com.tinkerpop.blueprints.pgm.Vertex;
  */
 public abstract class CollectionTargettedVertexTest extends TargettedVertexTest implements VertexTest {
 
-	public CollectionTargettedVertexTest(ServiceRepository repository, Iterable<Property> path) {
-		super(repository, path);
+	public CollectionTargettedVertexTest(GraphDatabaseDriver driver, Iterable<Property> path) {
+		super(driver, path);
 	}
 
 

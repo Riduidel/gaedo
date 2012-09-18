@@ -83,7 +83,7 @@ public class GraphUtils {
 		try {
 			if(Literals.containsKey(classLoader, effectiveType) && !repository.containsKey(effectiveType)) {
 				LiteralTransformer transformer = Literals.get(classLoader, effectiveType);
-				return transformer.loadObject(classLoader, effectiveType, key);
+				return transformer.loadObject(driver, classLoader, effectiveType, key);
 			} else {
 				Class<?> type = classLoader.loadClass(effectiveType);
 				if(Tuples.containsKey(type) && !repository.containsKey(type)) {

@@ -76,7 +76,7 @@ public class SerializableTransformer implements TupleTransformer<Serializable> {
 		// Finally create vertex
 		if(returned==null) {
 			returned = database.createEmptyVertex(serialized, Serializable.class);
-			returned.setProperty(Properties.value.name(), serialized);
+			database.setValue(returned, serialized);
 		}
 		return returned;
 	}
@@ -108,12 +108,12 @@ public class SerializableTransformer implements TupleTransformer<Serializable> {
 	 */
 	@Override
 	public Object loadObject(GraphDatabaseDriver driver, ClassLoader classLoader, Class effectiveClass, Vertex key, ServiceRepository repository, Map<String, Object> objectsBeingAccessed) {
-		return readSerializable(key.getProperty(Properties.value.name()).toString());
+		return readSerializable(driver.getValue(key).toString());
 	}
 
 	@Override
 	public Object loadObject(GraphDatabaseDriver driver, ClassLoader classLoader, String effectiveType, Vertex key, ServiceRepository repository, Map<String, Object> objectsBeingAccessed) {
-		return readSerializable(key.getProperty(Properties.value.name()).toString());
+		return readSerializable(driver.getValue(key).toString());
 	}
 
 	@Override

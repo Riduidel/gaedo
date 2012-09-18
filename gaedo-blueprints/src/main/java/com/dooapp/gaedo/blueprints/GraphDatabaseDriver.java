@@ -1,5 +1,6 @@
 package com.dooapp.gaedo.blueprints;
 
+import com.dooapp.gaedo.finders.repository.ServiceRepository;
 import com.tinkerpop.blueprints.pgm.Graph;
 import com.tinkerpop.blueprints.pgm.Vertex;
 
@@ -39,4 +40,24 @@ public interface GraphDatabaseDriver {
 	 * @return type of data contained by this vertex. An exception should be thrown when vertex can't provide that info.
 	 */
 	public String getEffectiveType(Vertex vertex);
+
+	/**
+	 * Set value of give node to be the given ... value
+	 * @param vertex
+	 * @param value
+	 */
+	public void setValue(Vertex vertex, Object value);
+
+	/**
+	 * Get value of given node
+	 * @param key
+	 * @return
+	 */
+	public Object getValue(Vertex key);
+	
+	/**
+	 * Grant access to service repository
+	 * @return
+	 */
+	public ServiceRepository getRepository();
 }

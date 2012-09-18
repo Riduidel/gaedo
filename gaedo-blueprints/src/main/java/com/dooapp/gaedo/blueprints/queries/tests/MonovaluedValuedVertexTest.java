@@ -2,12 +2,13 @@ package com.dooapp.gaedo.blueprints.queries.tests;
 
 import java.util.Iterator;
 
+import com.dooapp.gaedo.blueprints.AbstractBluePrintsBackedFinderService;
+import com.dooapp.gaedo.blueprints.GraphDatabaseDriver;
 import com.dooapp.gaedo.blueprints.GraphUtils;
 import com.dooapp.gaedo.blueprints.Properties;
 import com.dooapp.gaedo.blueprints.indexable.IndexableGraphBackedFinderService;
 import com.dooapp.gaedo.blueprints.transformers.LiteralTransformer;
 import com.dooapp.gaedo.blueprints.transformers.Literals;
-import com.dooapp.gaedo.finders.repository.ServiceRepository;
 import com.dooapp.gaedo.properties.Property;
 import com.dooapp.gaedo.utils.PrimitiveUtils;
 import com.dooapp.gaedo.utils.Utils;
@@ -30,8 +31,8 @@ public abstract class MonovaluedValuedVertexTest<ValueType extends Object> exten
 	 */
 	protected final ValueType expected;
 
-	public MonovaluedValuedVertexTest(ServiceRepository repository, Iterable<Property> p, ValueType value) {
-		super(repository, p);
+	public MonovaluedValuedVertexTest(GraphDatabaseDriver driver, Iterable<Property> p, ValueType value) {
+		super(driver, p);
 		if(value==null) {
 			throw new NullExpectedValueException("impossible to build a "+getClass().getSimpleName()+" search condition on path "+p+" using null search value.");
 		}
@@ -75,7 +76,7 @@ public abstract class MonovaluedValuedVertexTest<ValueType extends Object> exten
 	 * @return
 	 */
 	public boolean matchesVertex(Vertex currentVertex, Property finalProperty) {
-		if(repository.containsKey(expected.getClass())) {
+		if(getRepository().containsKey(expected.getClass())) {
 			return callMatchManaged(currentVertex, finalProperty);
 		} else {
 			return callMatchLiteral(currentVertex, finalProperty);
@@ -100,11 +101,12 @@ public abstract class MonovaluedValuedVertexTest<ValueType extends Object> exten
 	protected abstract boolean callMatchLiteral(Vertex currentVertex, Property finalProperty);
 
 	/**
-	 * Obtain service associated to expected value
+	 * Obtain service associated to expected value. BEWARE ! This service corresponds to {@link #expected}, which may be a literal (in which case obtained service will only be an exception).
+	 * Usage iof this method should be restricted to cases where user is sure value is a serviceable one.
 	 * @return 
 	 */
-	protected IndexableGraphBackedFinderService getService() {
-		return (IndexableGraphBackedFinderService) repository.get(expected.getClass());
+	protected AbstractBluePrintsBackedFinderService getService() {
+		return (AbstractBluePrintsBackedFinderService) getRepository().get(expected.getClass());
 	}
 
 	/**

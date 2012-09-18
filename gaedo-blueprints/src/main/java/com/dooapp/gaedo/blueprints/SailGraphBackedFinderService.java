@@ -46,5 +46,17 @@ public class SailGraphBackedFinderService<DataType, InformerType extends Informe
 		throw new UnsupportedOperationException("method "+AbstractBluePrintsBackedFinderService.class.getName()+"#getEffectiveType has not yet been implemented AT ALL");
 	}
 
+	@Override
+	protected void setValue(Vertex vertex, Object value) {
+		// TODO Auto-generated method stub
+		throw new UnsupportedOperationException("method "+AbstractBluePrintsBackedFinderService.class.getName()+"#setValue has not yet been implemented AT ALL");
+	}
+
+	@Override
+	protected Object getValue(Vertex vertex) {
+		// TODO Auto-generated method stub
+		throw new UnsupportedOperationException("method "+AbstractBluePrintsBackedFinderService.class.getName()+"#getValue has not yet been implemented AT ALL");
+	}
+
 
 }

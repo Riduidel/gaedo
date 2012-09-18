@@ -21,7 +21,7 @@ public abstract class AbstractLiteralTransformer<Type> {
 		// Finally create vertex
 		if(returned==null) {
 			returned = driver.createEmptyVertex(vertexId, value.getClass());
-			returned.setProperty(Properties.value.name(), getVertexValue(value));
+			driver.setValue(returned, getVertexValue(value));
 		}
 		return returned;
 	}
@@ -30,17 +30,17 @@ public abstract class AbstractLiteralTransformer<Type> {
 		String effectiveType = driver.getEffectiveType(key);
 		try {
 			Class valueClass = Class.forName(effectiveType);
-			return loadObject(valueClass, key);
+			return loadObject(driver, valueClass, key);
 		} catch (ClassNotFoundException e) {
 			throw new UnableToCreateException(effectiveType, e);
 		}
 	}
 
-	public Object loadObject(ClassLoader classLoader, String effectiveType, Vertex key) {
+	public Object loadObject(GraphDatabaseDriver driver, ClassLoader classLoader, String effectiveType, Vertex key) {
 		try {
 			Class<?> loadedClass;
 			loadedClass = classLoader.loadClass(resolveType(effectiveType));
-			return loadObject(loadedClass, key);
+			return loadObject(driver, loadedClass, key);
 		} catch (ClassNotFoundException e) {
 			throw new UnableToCreateException(effectiveType, e);
 		}
@@ -53,8 +53,8 @@ public abstract class AbstractLiteralTransformer<Type> {
 	 */
 	protected abstract String resolveType(String effectiveType);
 
-	public Type loadObject(Class valueClass, Vertex key) {
-		String valueString = key.getProperty(Properties.value.name()).toString();
+	public Type loadObject(GraphDatabaseDriver driver, Class valueClass, Vertex key) {
+		String valueString = driver.getValue(key).toString();
 		return loadObject(valueClass, key, valueString);
 	}
 
@@ -86,8 +86,8 @@ public abstract class AbstractLiteralTransformer<Type> {
 	 */
 	protected abstract Class getValueClass(Type value);
 
-	public boolean isVertexEqualsTo(Vertex currentVertex, Type expected) {
+	public boolean isVertexEqualsTo(GraphDatabaseDriver driver, Vertex currentVertex, Type expected) {
 		return ((expected==null && currentVertex==null) || 
-						(expected!=null && getVertexValue(expected).equals(currentVertex.getProperty(Properties.value.name())))); 
+						(expected!=null && getVertexValue(expected).equals(driver.getValue(currentVertex)))); 
 	}
 }
