@@ -62,7 +62,7 @@ public class BluePrintsPersister {
 			if (logger.isLoggable(Level.FINER)) {
 				logger.log(Level.FINER, "object "+objectVertexId.toString()+" has never before been seen in graph, so create central node for it");
 			}
-			objectVertex = service.getDriver().createEmptyVertex(objectVertexId, valueClass);
+			objectVertex = service.getDriver().createEmptyVertex(valueClass, objectVertexId);
 		}
 		// Here come the caching !
 		DataType updated = (DataType) objectsBeingUpdated.get(objectVertexId); 

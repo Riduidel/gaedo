@@ -65,7 +65,7 @@ public abstract class AbstractBluePrintsBackedFinderService<GraphClass extends G
 		}
 
 		@Override
-		public Vertex createEmptyVertex(String vertexId, Class<? extends Object> valueClass) {
+		public Vertex createEmptyVertex(Class<? extends Object> valueClass, String vertexId) {
 			return AbstractBluePrintsBackedFinderService.this.createEmptyVertex(vertexId, valueClass);
 		}
 
@@ -670,7 +670,7 @@ public abstract class AbstractBluePrintsBackedFinderService<GraphClass extends G
 
 						@Override
 						protected Boolean doPerform() {
-							getDriver().createEmptyVertex(getIdVertexId(value, idProperty, requiresIdGeneration), value.getClass());
+							getDriver().createEmptyVertex(value.getClass(), getIdVertexId(value, idProperty, requiresIdGeneration));
 							return true;
 						}
 					};

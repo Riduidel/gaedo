@@ -14,13 +14,19 @@ import com.tinkerpop.blueprints.pgm.Vertex;
  */
 public abstract class AbstractLiteralTransformer<Type> {
 
+	/**
+	 * Get vertex for the given value.
+	 * Vertex is first searched using its id (an id which really looks like vertex value - disambiguated by its type
+	 * @param driver
+	 * @param value
+	 * @return
+	 */
 	public Vertex getVertexFor(GraphDatabaseDriver driver, Type value) {
 		String vertexId = getVertexId(value);
-		// Then indexed vertex id (for neo4j, typically)
 		Vertex returned = driver.loadVertexFor(vertexId);
-		// Finally create vertex
+		// If vertex doesn't exist ... load it !
 		if(returned==null) {
-			returned = driver.createEmptyVertex(vertexId, value.getClass());
+			returned = driver.createEmptyVertex(value.getClass(), vertexId);
 			driver.setValue(returned, getVertexValue(value));
 		}
 		return returned;
