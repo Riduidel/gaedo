@@ -149,7 +149,7 @@ public abstract class AbstractBluePrintsBackedFinderService<GraphClass extends G
 		this.requiresIdGeneration = idProperty.getAnnotation(GeneratedValue.class) != null;
 		this.migrator = VersionMigratorFactory.create(containedClass);
 		// Updater builds managed nodes here
-		this.persister = new BluePrintsPersister(Kind.managed);
+		this.persister = new BluePrintsPersister(Kind.uri);
 		// if there is a migrator, generate property from it
 		if (logger.isLoggable(Level.FINE)) {
 			logger.log(Level.FINE, "created graph service handling " + containedClass.getCanonicalName() + "\n" + "using as id " + idProperty + "\n"
@@ -670,7 +670,9 @@ public abstract class AbstractBluePrintsBackedFinderService<GraphClass extends G
 
 						@Override
 						protected Boolean doPerform() {
-							getDriver().createEmptyVertex(value.getClass(), getIdVertexId(value, idProperty, requiresIdGeneration));
+							String idVertexId = getIdVertexId(value, idProperty, requiresIdGeneration);
+							Vertex returned = getDriver().createEmptyVertex(value.getClass(), idVertexId);
+							getDriver().setValue(returned, idVertexId);
 							return true;
 						}
 					};

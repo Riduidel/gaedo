@@ -1,6 +1,7 @@
 package com.dooapp.gaedo.blueprints.transformers;
 
 import com.dooapp.gaedo.blueprints.GraphDatabaseDriver;
+import com.dooapp.gaedo.blueprints.Kind;
 import com.tinkerpop.blueprints.pgm.Vertex;
 
 /**
@@ -58,5 +59,9 @@ public interface LiteralTransformer<Type> extends Transformer {
 	 * @return true if vertex is supposed ton contain value, false otherwise
 	 */
 	public boolean isVertexEqualsTo(GraphDatabaseDriver driver, Vertex currentVertex, Type expected);
+	/**
+	 * @return Kind of object to associate to the literals managed by this transformer. Used to separate Classes (which are fake literals) from others
+	 */
+	public Kind getKind();
 
 }

@@ -17,7 +17,7 @@ import com.tinkerpop.blueprints.pgm.Vertex;
 
 public abstract class AbstractTupleTransformer<TupleType> {
 
-	protected final BluePrintsPersister persister = new BluePrintsPersister(Kind.tuple);
+	protected final BluePrintsPersister persister = new BluePrintsPersister(Kind.uri);
 
 	public <DataType> Vertex getVertexFor(AbstractBluePrintsBackedFinderService<? extends Graph, DataType, ?> service, TupleType cast, Map<String, Object> objectsBeingUpdated) {
 		// First step is to build an id for given tuple by concatenating key and value id (which is hopefully done separately)
@@ -73,4 +73,7 @@ public abstract class AbstractTupleTransformer<TupleType> {
 		throw new UnsupportedOperationException("method "+Transformer.class.getName()+"#canHandle has not yet been implemented AT ALL");
 	}
 
+	public Kind getKind() { 
+		return Kind.bnode;
+	}
 }

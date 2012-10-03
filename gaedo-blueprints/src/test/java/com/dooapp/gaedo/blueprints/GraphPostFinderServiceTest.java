@@ -2,16 +2,23 @@ package com.dooapp.gaedo.blueprints;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.io.OutputStreamWriter;
 import java.io.Serializable;
 import java.lang.reflect.Proxy;
+import java.nio.charset.Charset;
 import java.util.Collection;
 import java.util.Map;
 import java.util.TreeMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+
+import net.fortytwo.sesametools.nquads.NQuadsWriter;
 
 import org.hamcrest.core.Is;
 import org.hamcrest.core.IsNot;
@@ -22,6 +29,12 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 import org.junit.runners.Parameterized.Parameters;
+import org.openrdf.model.Resource;
+import org.openrdf.model.impl.URIImpl;
+import org.openrdf.repository.RepositoryException;
+import org.openrdf.repository.sail.SailRepository;
+import org.openrdf.rio.RDFHandler;
+import org.openrdf.rio.RDFHandlerException;
 
 import com.dooapp.gaedo.blueprints.finders.FindFirstPostByNote;
 import com.dooapp.gaedo.blueprints.finders.FindFirstUserByLogin;
@@ -36,8 +49,6 @@ import com.dooapp.gaedo.test.beans.Tag;
 import com.dooapp.gaedo.test.beans.TagInformer;
 import com.dooapp.gaedo.test.beans.User;
 import com.dooapp.gaedo.test.beans.UserInformer;
-import com.tinkerpop.blueprints.pgm.Edge;
-import com.tinkerpop.blueprints.pgm.Index;
 
 import static com.dooapp.gaedo.blueprints.TestUtils.A;
 import static com.dooapp.gaedo.blueprints.TestUtils.ABOUT_ID;
@@ -392,5 +403,18 @@ public class GraphPostFinderServiceTest extends AbstractGraphTest {
 		} finally {
 			getPostService().delete(newxONe);
 		}
+	}
+
+
+	@Test
+	public void allowExport() throws FileNotFoundException, RepositoryException, RDFHandlerException {
+		SailRepository repository = getRepository();
+		repository.initialize();
+		
+		File output = new File(environment.graphPath()+"export.rdf");
+		output.getParentFile().mkdirs();
+		RDFHandler handler = new NQuadsWriter(new OutputStreamWriter(new FileOutputStream(output), Charset.forName("UTF-8")));
+
+		repository.getConnection().export(handler, new URIImpl(GraphUtils.GAEDO_CONTEXT));
 	}
 }

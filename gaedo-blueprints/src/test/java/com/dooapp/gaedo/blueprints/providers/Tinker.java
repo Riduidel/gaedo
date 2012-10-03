@@ -8,6 +8,11 @@ import com.tinkerpop.blueprints.pgm.impls.tg.TinkerGraph;
 public class Tinker extends AbstractGraphProvider implements GraphProvider {
 	@Override
 	public IndexableGraph get(String path) {
-		return new TinkerGraph(path+"/tinker");
+		return new TinkerGraph(path(path));
+	}
+
+	@Override
+	public String path(String path) {
+		return path+"/tinker/";
 	}
 }

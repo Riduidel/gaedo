@@ -2,6 +2,7 @@ package com.dooapp.gaedo.blueprints;
 
 import org.junit.After;
 import org.junit.Before;
+import org.openrdf.repository.sail.SailRepository;
 
 import com.dooapp.gaedo.AbstractCrudService;
 import com.dooapp.gaedo.blueprints.beans.PostSubClass;
@@ -19,7 +20,7 @@ import com.tinkerpop.blueprints.pgm.IndexableGraph;
 
 public class AbstractGraphTest  {
 	
-	private AbstractGraphEnvironment<?> environment;
+	protected final AbstractGraphEnvironment<?> environment;
 
 	public AbstractGraphTest(AbstractGraphEnvironment<?> environment) {
 		this.environment = environment;
@@ -76,5 +77,9 @@ public class AbstractGraphTest  {
 		return environment.getUserService();
 	}
 
+
+	protected SailRepository getRepository() {
+		return environment.getRepository();
+	}
 
 }

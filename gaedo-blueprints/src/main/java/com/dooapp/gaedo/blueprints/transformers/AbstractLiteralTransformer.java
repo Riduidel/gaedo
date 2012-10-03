@@ -2,6 +2,7 @@ package com.dooapp.gaedo.blueprints.transformers;
 
 import com.dooapp.gaedo.blueprints.GraphDatabaseDriver;
 import com.dooapp.gaedo.blueprints.GraphUtils;
+import com.dooapp.gaedo.blueprints.Kind;
 import com.dooapp.gaedo.blueprints.Properties;
 import com.dooapp.gaedo.blueprints.UnableToCreateException;
 import com.dooapp.gaedo.utils.Utils;
@@ -32,6 +33,13 @@ public abstract class AbstractLiteralTransformer<Type> {
 		return returned;
 	}
 
+	/**
+	 * Load object from vertex
+	 * @param driver database driver
+	 * @param key vertex in which value is stored
+	 * @return loaded object
+	 * @see #loadObject(GraphDatabaseDriver, Class, Vertex)
+	 */
 	public Type loadObject(GraphDatabaseDriver driver, Vertex key) {
 		String effectiveType = driver.getEffectiveType(key);
 		try {
@@ -59,11 +67,26 @@ public abstract class AbstractLiteralTransformer<Type> {
 	 */
 	protected abstract String resolveType(String effectiveType);
 
+	/**
+	 * Load object of given class
+	 * @param driver database driver
+	 * @param valueClass class this object should be an instance of
+	 * @param key vertex in which value is stored
+	 * @return loaded object
+	 * @see #loadObject(Class, Vertex, String)
+	 */
 	public Type loadObject(GraphDatabaseDriver driver, Class valueClass, Vertex key) {
 		String valueString = driver.getValue(key).toString();
 		return loadObject(valueClass, key, valueString);
 	}
 
+	/**
+	 * Load object from given informations
+	 * @param valueClass class this object should be an instance of
+	 * @param key vertex in which value is stored
+	 * @return loaded object
+	 * @param valueString value representing the object to load
+	 */
 	protected Type loadObject(Class valueClass, Vertex key, String valueString) {
 		return (Type) Utils.fromString(valueString, valueClass);
 	}
@@ -95,5 +118,9 @@ public abstract class AbstractLiteralTransformer<Type> {
 	public boolean isVertexEqualsTo(GraphDatabaseDriver driver, Vertex currentVertex, Type expected) {
 		return ((expected==null && currentVertex==null) || 
 						(expected!=null && getVertexValue(expected).equals(driver.getValue(currentVertex)))); 
+	}
+	
+	public Kind getKind() {
+		return Kind.literal;
 	}
 }

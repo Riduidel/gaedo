@@ -8,5 +8,6 @@ package com.dooapp.gaedo.blueprints;
  */
 public enum Properties {
 	/** contains the effective value */
-//	value,
+	value,
+	kind;
 }

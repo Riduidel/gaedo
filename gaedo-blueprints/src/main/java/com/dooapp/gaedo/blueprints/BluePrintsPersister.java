@@ -63,6 +63,8 @@ public class BluePrintsPersister {
 				logger.log(Level.FINER, "object "+objectVertexId.toString()+" has never before been seen in graph, so create central node for it");
 			}
 			objectVertex = service.getDriver().createEmptyVertex(valueClass, objectVertexId);
+			// Create a value for that node (useful for RDF export)
+			service.getDriver().setValue(objectVertex, objectVertexId);
 		}
 		// Here come the caching !
 		DataType updated = (DataType) objectsBeingUpdated.get(objectVertexId); 
@@ -278,8 +280,7 @@ public class BluePrintsPersister {
 			}
 			// And finally add new vertices
 			for(Vertex newVertex : newVertices) {
-				database.addEdge(rootVertex.getId().toString()+"_to_"+newVertex.getId().toString()+"___"+UUID.randomUUID().toString(), 
-								rootVertex, newVertex, collectionEdgeName);
+				GraphUtils.addEdgeFor(service.getDriver(), database, rootVertex, newVertex, p);
 			}
 		}
 	}
@@ -319,8 +320,7 @@ public class BluePrintsPersister {
 			}
 			// And finally add new vertices
 			for(Vertex newVertex : newVertices) {
-				database.addEdge(rootVertex.getId().toString()+"_to_"+newVertex.getId().toString()+"___"+UUID.randomUUID().toString(), 
-								rootVertex, newVertex, collectionEdgeName);
+				GraphUtils.addEdgeFor(service.getDriver(), database, rootVertex, newVertex, p);
 			}
 		}
 	}
@@ -380,10 +380,10 @@ public class BluePrintsPersister {
 					// Nothing to do
 					link = existing;
 				} else {
-					// delete edge (TODO maybe delete vertex)
+					// delete old edge (TODO maybe delete vertex, if there is no other link (excepted obvious ones, like type, Object.classes, and id)
 					database.removeEdge(existing);
-					link = database.addEdge(rootVertex.getId().toString()+"_to_"+valueVertex.getId().toString(), 
-									rootVertex, valueVertex, edgeNameFor);
+					link = GraphUtils.addEdgeFor(service.getDriver(), database, rootVertex, valueVertex, p);
+
 				}
 			}
 			if(existingIterator.hasNext()) {
@@ -397,9 +397,7 @@ public class BluePrintsPersister {
 				}
 			} else {
 				if(link==null)
-					// Now create edge
-					link = database.addEdge(rootVertex.getId().toString()+"_to_"+valueVertex.getId().toString()+"_for_"+edgeNameFor, 
-									rootVertex, valueVertex, edgeNameFor);
+					link = GraphUtils.addEdgeFor(service.getDriver(), database, rootVertex, valueVertex, p);
 			}
 		}
 	}

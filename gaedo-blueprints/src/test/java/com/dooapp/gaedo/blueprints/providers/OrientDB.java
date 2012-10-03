@@ -14,7 +14,12 @@ import com.tinkerpop.blueprints.pgm.impls.orientdb.OrientGraph;
 public class OrientDB extends AbstractGraphProvider implements GraphProvider {
 	@Override
 	public IndexableGraph get(String path) {
-		OrientGraph returned = new OrientGraph("local:/"+path+"/orient.db");
+		OrientGraph returned = new OrientGraph("local:/" + path(path)+"test.db");
 		return returned;
+	}
+
+	@Override
+	public String path(String path) {
+		return path+"/orient/";
 	}
 }

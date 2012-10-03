@@ -3,6 +3,7 @@ package com.dooapp.gaedo.blueprints;
 import java.io.File;
 
 import org.junit.After;
+import org.openrdf.repository.sail.SailRepository;
 
 import com.dooapp.gaedo.blueprints.beans.PostSubClass;
 import com.dooapp.gaedo.blueprints.beans.PostSubClassInformer;
@@ -55,7 +56,9 @@ public abstract class AbstractGraphEnvironment<GraphType extends Graph> {
 
 	@After
 	public void unload() throws Exception {
-		graph.shutdown();
+		if(graph!=null) {
+			graph.shutdown();
+		}
 		File f = new File(GraphProvider.GRAPH_DIR);
 		f.delete();
 	}
@@ -127,5 +130,20 @@ public abstract class AbstractGraphEnvironment<GraphType extends Graph> {
 	 */
 	public FinderCrudService<User, UserInformer> getUserService() {
 		return userService;
+	}
+
+	/**
+	 * Create a sail repository out of given graph
+	 * @return
+	 */
+	public abstract SailRepository getRepository();
+	
+	/**
+	 * Get a path where test data can be stored
+	 */
+	public abstract String usablePath();
+
+	public String graphPath() {
+		return graphProvider.path(usablePath());
 	}
 }

@@ -4,9 +4,12 @@ package com.dooapp.gaedo.blueprints.indexable;
 import com.dooapp.gaedo.blueprints.AbstractBluePrintsBackedFinderService;
 import com.dooapp.gaedo.blueprints.GraphUtils;
 import com.dooapp.gaedo.blueprints.IndexableGraphQueryStatement;
+import com.dooapp.gaedo.blueprints.Kind;
 import com.dooapp.gaedo.blueprints.Properties;
+import com.dooapp.gaedo.blueprints.transformers.ClassLiteralTransformer;
 import com.dooapp.gaedo.blueprints.transformers.LiteralTransformer;
 import com.dooapp.gaedo.blueprints.transformers.Literals;
+import com.dooapp.gaedo.blueprints.transformers.Tuples;
 import com.dooapp.gaedo.finders.Informer;
 import com.dooapp.gaedo.finders.QueryBuilder;
 import com.dooapp.gaedo.finders.QueryStatement;
@@ -19,6 +22,7 @@ import com.tinkerpop.blueprints.pgm.Edge;
 import com.tinkerpop.blueprints.pgm.Index;
 import com.tinkerpop.blueprints.pgm.IndexableGraph;
 import com.tinkerpop.blueprints.pgm.Vertex;
+import com.tinkerpop.blueprints.pgm.oupls.sail.GraphSail;
 
 /**
  * Indexable graph backed version of finder service.
@@ -39,7 +43,7 @@ public class IndexableGraphBackedFinderService <DataType, InformerType extends I
 	
 	public static final String TYPE_EDGE_NAME = GraphUtils.getEdgeNameFor(TypeProperty.INSTANCE);
 
-	private LiteralTransformer<Class> classTransformer = Literals.get(Class.class);
+	private ClassLiteralTransformer classTransformer = (ClassLiteralTransformer) Literals.get(Class.class);
 
 	public IndexableGraphBackedFinderService(Class<DataType> containedClass, Class<InformerType> informerClass, InformerFactory factory, ServiceRepository repository,
 					PropertyProvider provider, IndexableGraph graph) {
@@ -78,9 +82,20 @@ public class IndexableGraphBackedFinderService <DataType, InformerType extends I
 	protected Vertex createEmptyVertex(String vertexId, Class<? extends Object> valueClass) {
 		Vertex returned = database.addVertex(vertexId);
 		returned.setProperty(VERTEX_ID, vertexId);
+		if(Literals.containsKey(valueClass)) {
+			// some literals aren't so ... literal, as they can accept incoming connections (like classes)
+			returned.setProperty(Properties.kind.name(), Literals.get(valueClass).getKind().name());
+		} else if(Tuples.containsKey(valueClass)){
+			// some literals aren't so ... literal, as they can accept incoming connections (like classes)
+			returned.setProperty(Properties.kind.name(), Tuples.get(valueClass).getKind().name());
+		} else {
+			returned.setProperty(Properties.kind.name(), Kind.uri.name());
+		}
 		// obtain vertex for type
 		Vertex classVertex = classTransformer.getVertexFor(getDriver(), valueClass);
-		database.addEdge("automatic edge linking "+returned.getId().toString()+" to its class "+valueClass.getName(), /* from */ returned, /* to */ classVertex, TYPE_EDGE_NAME);
+		Edge toType = GraphUtils.addEdgeFor(getDriver(), database, returned, classVertex, TypeProperty.INSTANCE);
+		// make sure literals are literals by changing that particular edge context to a null value
+		toType.setProperty(GraphSail.CONTEXT_PROP, GraphUtils.asSailProperty(GraphUtils.GAEDO_HIDDEN_CONTEXT));
 		return returned;
 	}
 
@@ -89,17 +104,17 @@ public class IndexableGraphBackedFinderService <DataType, InformerType extends I
 		Edge toType = vertex.getOutEdges(TYPE_EDGE_NAME).iterator().next();
 		Vertex type = toType.getInVertex();
 		// Do not use ClassLiteral here as this method must be blazing fast
-		return getValue(type).toString();
+		return classTransformer.extractClassIn(getValue(type).toString());
 	}
 
 	@Override
 	protected void setValue(Vertex vertex, Object value) {
-		vertex.setProperty(VALUE, value);
+		vertex.setProperty(Properties.value.name(), value);
 	}
 
 	@Override
 	protected Object getValue(Vertex vertex) {
-		return vertex.getProperty(VALUE);
+		return vertex.getProperty(Properties.value.name());
 	}
 
 }

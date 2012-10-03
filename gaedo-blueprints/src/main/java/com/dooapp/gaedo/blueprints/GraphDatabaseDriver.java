@@ -14,7 +14,7 @@ public interface GraphDatabaseDriver {
 	/**
 	 * Load vertex having the given id.
 	 * Relationship between id and vertex is dependant upon graph implementation : id may be stored as a property, or it can be an URI ...
-	 * @param objectVertexI a string idd
+	 * @param objectVertexI a string id
 	 * @return vertex corresponding to that id ... or an exception if none found
 	 */
 	public Vertex loadVertexFor(String objectVertexId);

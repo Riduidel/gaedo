@@ -70,7 +70,6 @@ public class SerializableTransformer implements TupleTransformer<Serializable> {
 	
 	private Vertex getVertextForUnknownSerializable(GraphDatabaseDriver database, ServiceRepository repository, Serializable value) {
 		String serialized = writeSerializable(value);
-		Object vertexId = serialized;
 		// Then indexed vertex id (for neo4j, typically)
 		Vertex returned = database.loadVertexFor(serialized);
 		// Finally create vertex
@@ -120,5 +119,10 @@ public class SerializableTransformer implements TupleTransformer<Serializable> {
 	public boolean canHandle(ClassLoader classLoader, String effectiveType) {
 		// TODO Auto-generated method stub
 		throw new UnsupportedOperationException("method "+Transformer.class.getName()+"#canHandle has not yet been implemented AT ALL");
+	}
+
+	@Override
+	public Kind getKind() {
+		return Kind.bnode;
 	}
 }

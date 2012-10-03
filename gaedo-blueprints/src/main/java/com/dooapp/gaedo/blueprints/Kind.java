@@ -7,18 +7,16 @@ package com.dooapp.gaedo.blueprints;
  */
 public enum Kind {
 	/**
-	 * Indicates object is managed by a service
+	 * Indicates object is a complex one. it can be either managed by a service or a tuple.
 	 */
-	managed,
+	uri,
 	/**
 	 * Indicates object is a literal value, in other words a sin gle value, independant from any other one
 	 */
 	literal,
 	/**
-	 * Indicates object is a vertex tuple : a vertex with no other meaning than to link other vertices. To a certain extend, 
-	 * managed nodes are an extension of tuple ones (as they also mainly link multiple vertices together). However, the concept of tuple node don't imply the presence of a 
-	 * service managing tuple nodes, as they're quite standard ones.
+	 * Stands for blank node and is of use only by tuple transformers
 	 */
-	tuple;
+	bnode;
 	
 }

@@ -17,4 +17,12 @@ public interface GraphProvider {
 	 * @return
 	 */
 	String getName();
+
+	/**
+	 * Get a path local to graph provider, from a given root.
+	 * Obtained path should be similar to the one used in {@link #get(String)}
+	 * @param usablePath
+	 * @return
+	 */
+	String path(String usablePath);
 }

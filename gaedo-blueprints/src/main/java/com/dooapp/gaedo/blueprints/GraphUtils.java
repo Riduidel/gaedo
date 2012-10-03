@@ -5,7 +5,7 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
-import java.util.logging.Level;
+import java.util.UUID;
 import java.util.logging.Logger;
 
 import javax.persistence.CascadeType;
@@ -19,15 +19,50 @@ import com.dooapp.gaedo.blueprints.transformers.TupleTransformer;
 import com.dooapp.gaedo.blueprints.transformers.Tuples;
 import com.dooapp.gaedo.finders.repository.ServiceRepository;
 import com.dooapp.gaedo.properties.Property;
-import com.tinkerpop.blueprints.pgm.CloseableSequence;
+import com.tinkerpop.blueprints.pgm.Edge;
 import com.tinkerpop.blueprints.pgm.Graph;
-import com.tinkerpop.blueprints.pgm.Index;
-import com.tinkerpop.blueprints.pgm.IndexableGraph;
 import com.tinkerpop.blueprints.pgm.Vertex;
-import com.tinkerpop.blueprints.pgm.impls.sail.SailGraph;
+import com.tinkerpop.blueprints.pgm.oupls.sail.GraphSail;
 
 public class GraphUtils {
+	private static final String GAEDO_PREFIX = "https://github.com/Riduidel/gaedo/";
+
+	/**
+	 * Ontologic context used by all gaedo graph elements.
+	 */
+	public static final String GAEDO_CONTEXT = GAEDO_PREFIX+"visible";
+	
+	/**
+	 * Ontologic context used by gaedo graph elements that we want to keep hidden. Those elements should never be exported.
+	 * To make sure this works well, this context is set to null. Crazy no ?
+	 */
+	public static final String GAEDO_HIDDEN_CONTEXT = GAEDO_PREFIX+"hidden";
+
 	private static final Logger logger = Logger.getLogger(GraphUtils.class.getName());
+	
+	/**
+	 * Create an edge linking both vertex. Given edge corresponds to given property.
+	 * Some edge properties may be set to conform to RDF expectations (namely "p" (for predicate
+	 * @param driver
+	 * @param database
+	 * @param fromVertex
+	 * @param toVertex
+	 * @param property
+	 * @return
+	 */
+	public static Edge addEdgeFor(GraphDatabaseDriver driver, Graph database, Vertex fromVertex, Vertex toVertex, Property property) {
+		String edgeNameFor = getEdgeNameFor(property);
+		Edge edge = database.addEdge(fromVertex.getId().toString()+"_to_"+toVertex.getId().toString()+"___"+UUID.randomUUID().toString(), 
+						fromVertex, toVertex, edgeNameFor);
+		edge.setProperty(GraphSail.PREDICATE_PROP, GraphSail.URI_PREFIX+" "+getDefaultEdgeNameFor(property));
+		// Create a common context for all gaedo relationships
+		edge.setProperty(GraphSail.CONTEXT_PROP, asSailProperty(GAEDO_CONTEXT));
+		return edge;
+	}
+
+	public static Object asSailProperty(String context) {
+		return GraphSail.URI_PREFIX+" "+context;
+	}
 
 	/**
 	 * Generate edge name from property infos. Notice generated edge name will first be searched in property annotations, and only 
@@ -43,8 +78,12 @@ public class GraphUtils {
 			Column column = p.getAnnotation(Column.class);
 			return column.name();
 		} else {
-			return p.getDeclaringClass().getSimpleName()+"."+p.getName();
+			return getDefaultEdgeNameFor(p);
 		}
+	}
+
+	private static String getDefaultEdgeNameFor(Property p) {
+		return p.getDeclaringClass().getName()+":"+p.getName();
 	}
 
 	/**

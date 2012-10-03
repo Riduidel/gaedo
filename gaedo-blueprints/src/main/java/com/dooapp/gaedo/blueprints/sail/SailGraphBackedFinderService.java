@@ -1,5 +1,6 @@
-package com.dooapp.gaedo.blueprints;
+package com.dooapp.gaedo.blueprints.sail;
 
+import com.dooapp.gaedo.blueprints.AbstractBluePrintsBackedFinderService;
 import com.dooapp.gaedo.finders.Informer;
 import com.dooapp.gaedo.finders.QueryBuilder;
 import com.dooapp.gaedo.finders.QueryStatement;

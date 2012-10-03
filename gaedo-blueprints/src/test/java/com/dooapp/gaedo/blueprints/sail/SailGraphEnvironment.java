@@ -1,8 +1,9 @@
 package com.dooapp.gaedo.blueprints.sail;
 
+import org.openrdf.repository.sail.SailRepository;
+
 import com.dooapp.gaedo.blueprints.AbstractGraphEnvironment;
 import com.dooapp.gaedo.blueprints.GraphProvider;
-import com.dooapp.gaedo.blueprints.SailGraphBackedFinderService;
 import com.dooapp.gaedo.blueprints.TestUtils;
 import com.dooapp.gaedo.finders.FinderCrudService;
 import com.dooapp.gaedo.finders.Informer;
@@ -23,6 +24,19 @@ public class SailGraphEnvironment extends AbstractGraphEnvironment<SailGraph> {
 
 	@Override
 	protected SailGraph createGraph(GraphProvider graphProvider) {
-		return new SailGraph(new GraphSail(graphProvider.get(TestUtils.sail(GraphProvider.GRAPH_DIR))));
+		return new SailGraph(new GraphSail(graphProvider.get(usablePath())));
 	}
+
+
+	public String usablePath() {
+		return TestUtils.sail(GraphProvider.GRAPH_DIR);
+	}
+
+
+	@Override
+	public SailRepository getRepository() {
+		SailRepository sailRepository = new SailRepository(graph.getRawGraph());
+		return sailRepository;
+	}
+
 }
