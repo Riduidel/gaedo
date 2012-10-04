@@ -71,7 +71,7 @@ public class SerializableTransformer implements TupleTransformer<Serializable> {
 	private Vertex getVertextForUnknownSerializable(GraphDatabaseDriver database, ServiceRepository repository, Serializable value) {
 		String serialized = writeSerializable(value);
 		// Then indexed vertex id (for neo4j, typically)
-		Vertex returned = database.loadVertexFor(serialized);
+		Vertex returned = database.loadVertexFor(serialized, value.getClass().getName());
 		// Finally create vertex
 		if(returned==null) {
 			returned = database.createEmptyVertex(Serializable.class, serialized);

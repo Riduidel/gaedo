@@ -24,7 +24,7 @@ public abstract class AbstractLiteralTransformer<Type> {
 	 */
 	public Vertex getVertexFor(GraphDatabaseDriver driver, Type value) {
 		String vertexId = getVertexId(value);
-		Vertex returned = driver.loadVertexFor(vertexId);
+		Vertex returned = driver.loadVertexFor(vertexId, value.getClass().getName());
 		// If vertex doesn't exist ... load it !
 		if(returned==null) {
 			returned = driver.createEmptyVertex(value.getClass(), vertexId);

@@ -9,5 +9,12 @@ package com.dooapp.gaedo.blueprints;
 public enum Properties {
 	/** contains the effective value */
 	value,
-	kind;
+	/**
+	 * Contain one of {@link Kind} enum values
+	 */
+	kind, 
+	/**
+	 * Contains the semantic version of property type
+	 */
+	type;
 }

@@ -51,7 +51,7 @@ public class MapLazyLoader extends AbstractLazyLoader implements InvocationHandl
 				Vertex value = e.getInVertex();
 				// Value is always a serialized map entry, so deserialize it
 				// with magic !
-				Map.Entry temporaryValue = (Entry) GraphUtils.createInstance(driver, classLoader, value, repository, objectsBeingAccessed);
+				Map.Entry temporaryValue = (Entry) GraphUtils.createInstance(driver, classLoader, value, property.getType(), repository, objectsBeingAccessed);
 				map.put(temporaryValue.getKey(), temporaryValue.getValue());
 			}
 		} finally {

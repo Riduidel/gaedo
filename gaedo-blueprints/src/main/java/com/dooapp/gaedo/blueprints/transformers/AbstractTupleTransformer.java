@@ -23,10 +23,11 @@ public abstract class AbstractTupleTransformer<TupleType> {
 		// First step is to build an id for given tuple by concatenating key and value id (which is hopefully done separately)
 		String entryVertexId = getIdOfTuple(service.getRepository(), cast);
 		// No need to memorize updated version
-		Vertex objectVertex = service.loadVertexFor(entryVertexId);
+		String className = cast.getClass().getName();
+		Vertex objectVertex = service.loadVertexFor(entryVertexId, className);
 		persister.performUpdate(service, entryVertexId, objectVertex, getContainedClass(), getContainedProperties(), cast, CascadeType.PERSIST, objectsBeingUpdated);
 		if(objectVertex==null)
-			objectVertex = service.loadVertexFor(entryVertexId);
+			objectVertex = service.loadVertexFor(entryVertexId, className);
 		return objectVertex;
 	}
 

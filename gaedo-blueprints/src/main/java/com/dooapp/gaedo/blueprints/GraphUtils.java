@@ -108,14 +108,33 @@ public class GraphUtils {
 
 	/**
 	 * Create an object instance from a literal vertex compatible with this service contained class
+	 * @param driver driver used to load data
 	 * @param classLoader class loader used to find class
 	 * @param key vertex containing object id
+	 * @param property property used to navigate to this value. it allows disambiguation for literal values (which may be linked to more than one type, the typical example being
+	 * a saved float, say "3.0", which may also be refered as the string "3.0").
 	 * @param repository service repository, used to disambiguate subclass of literal and managed class
 	 * @param objectsBeingAccessed 
 	 * @return a fresh instance, with only id set
 	 */
-	public static Object createInstance(GraphDatabaseDriver driver, ClassLoader classLoader, Vertex key, ServiceRepository repository, Map<String, Object> objectsBeingAccessed) {
-		String effectiveType = driver.getEffectiveType(key);
+	public static Object createInstance(GraphDatabaseDriver driver, ClassLoader classLoader, Vertex key, Class<?> defaultType, ServiceRepository repository, Map<String, Object> objectsBeingAccessed) {
+		String effectiveType = null;
+		Kind kind = getKindOf(key);
+		if(Kind.literal==kind) {
+			/* One literal node may be used according to different types. To disambiguate, we check if effective type matches default one. If not (typically 
+			 * type returns string and user wants number), prefer default type.
+			 */
+			effectiveType = driver.getEffectiveType(key);
+			try {
+				if(!defaultType.isAssignableFrom(Class.forName(effectiveType))) {
+					effectiveType = defaultType.getName();
+				}
+			} catch(Exception e) {
+				// nothing to do : we use effective type - or try to
+			}
+		} else {
+			effectiveType = driver.getEffectiveType(key);
+		}
 		if(classLoader==null) {
 			throw new UnspecifiedClassLoader();
 		}
@@ -136,6 +155,12 @@ public class GraphUtils {
 		} catch(Exception e) {
 			throw new UnableToCreateException(effectiveType, e);
 		}
+	}
+
+	public static Kind getKindOf(Vertex key) {
+		String kindName = key.getProperty(Properties.kind.name()).toString();
+		Kind kind = Kind.valueOf(kindName);
+		return kind;
 	}
 
 	/**

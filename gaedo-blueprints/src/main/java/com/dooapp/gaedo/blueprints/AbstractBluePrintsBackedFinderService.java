@@ -60,8 +60,8 @@ public abstract class AbstractBluePrintsBackedFinderService<GraphClass extends G
 
 	private class DelegatingDriver implements GraphDatabaseDriver {
 		@Override
-		public Vertex loadVertexFor(String objectVertexId) {
-			return AbstractBluePrintsBackedFinderService.this.loadVertexFor(objectVertexId);
+		public Vertex loadVertexFor(String objectVertexId, String className) {
+			return AbstractBluePrintsBackedFinderService.this.loadVertexFor(objectVertexId, className);
 		}
 
 		@Override
@@ -288,7 +288,7 @@ public abstract class AbstractBluePrintsBackedFinderService<GraphClass extends G
 																	 * generation
 																	 * on delete
 																	 */);
-		Vertex objectVertex = loadVertexFor(vertexId);
+		Vertex objectVertex = loadVertexFor(vertexId, toDelete.getClass().getName());
 		if (objectVertex != null) {
 			Map<Property, Collection<CascadeType>> containedProperties = getContainedProperties(toDelete);
 			persister.performDelete(this, vertexId, objectVertex, containedClass, containedProperties, toDelete, CascadeType.REMOVE, objectsBeingAccessed);
@@ -361,7 +361,7 @@ public abstract class AbstractBluePrintsBackedFinderService<GraphClass extends G
 	 * @return first matching node if found, and null if not
 	 */
 	private Vertex getIdVertexFor(DataType object, boolean allowIdGeneration) {
-		return loadVertexFor(getIdVertexId(object, idProperty, allowIdGeneration));
+		return loadVertexFor(getIdVertexId(object, idProperty, allowIdGeneration), object.getClass().getName());
 	}
 
 	/**
@@ -433,7 +433,7 @@ public abstract class AbstractBluePrintsBackedFinderService<GraphClass extends G
 	private DataType doUpdate(DataType toUpdate, CascadeType cascade, Map<String, Object> treeMap) {
 		boolean generatesId = requiresIdGeneration ? (CascadeType.PERSIST == cascade) : false;
 		String objectVertexId = getIdVertexId(toUpdate, idProperty, generatesId);
-		Vertex objectVertex = loadVertexFor(objectVertexId);
+		Vertex objectVertex = loadVertexFor(objectVertexId, toUpdate.getClass().getName());
 		return (DataType) persister.performUpdate(this, objectVertexId, objectVertex, toUpdate.getClass(), getContainedProperties(toUpdate), toUpdate, cascade,
 						treeMap);
 	}
@@ -541,7 +541,7 @@ public abstract class AbstractBluePrintsBackedFinderService<GraphClass extends G
 	 */
 	public DataType loadObject(String objectVertexId, Map<String, Object> objectsBeingAccessed) {
 		// If cast fails, well, that's some fuckin mess, no ?
-		Vertex objectVertex = loadVertexFor(objectVertexId);
+		Vertex objectVertex = loadVertexFor(objectVertexId, containedClass.getName());
 		return persister.loadObject(this, objectVertexId, objectVertex, objectsBeingAccessed);
 	}
 
@@ -550,9 +550,10 @@ public abstract class AbstractBluePrintsBackedFinderService<GraphClass extends G
 	 * 
 	 * @param objectVertexId
 	 *            vertex id for which we want a vertex
+	 * @param className class name used for value. This parameter is mainly useful to disambiguate values.
 	 * @return loaded vertex if found, or an exception (I guess ?) if none found
 	 */
-	public abstract Vertex loadVertexFor(String objectVertexId);
+	public abstract Vertex loadVertexFor(String objectVertexId, String className);
 
 	/**
 	 * Load object from a vertex
@@ -581,7 +582,7 @@ public abstract class AbstractBluePrintsBackedFinderService<GraphClass extends G
 		// make sure entered type is a valid one
 		if (Utils.maybeObjectify(idProperty.getType()).isAssignableFrom(Utils.maybeObjectify(id[0].getClass()))) {
 			String vertexIdValue = GraphUtils.getIdOfLiteral(containedClass, idProperty, id[0]).toString();
-			Vertex rootVertex = loadVertexFor(vertexIdValue);
+			Vertex rootVertex = loadVertexFor(vertexIdValue, containedClass.getName());
 			if (rootVertex == null) {
 				try {
 					// root vertex couldn't be found directly, mostly due to

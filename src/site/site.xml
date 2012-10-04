@@ -6,6 +6,44 @@
 	<version position="right"></version>
 	<body>
 		<!-- Put reports at the end -->
-		<menu ref="reports"/>
+		<menu name="about gaedo">
+			<item name="the gaedo case" href="1_the_gaedo_case.html" />
+			<item name="gaedo and collection storage" href="2_gaedo_and_collection_storage.html" />
+			<item name="method missing vs invokeLater" href="3_method_missing_vs_invokeLater.html" />
+			<item name="compilable queries a senseless concept" href="4_compilable_queries_a_senseless_concept.html" />
+			<item name="dynamic finders the reference" href="5_dynamic_finders_the_reference.html" />
+			<item name="how to include gaedo in my application" href="6_how_to_include_gaedo_in_my_application.html" />
+			<item name="graphing queries" href="7_graphing_queries.html" />
+			<item name="kudos to all of you" href="8_kudos_to_all_of_you.html" />
+			<item name="gaedo bug in bouncing queries" href="9_gaedo_bug_in_bouncing_queries.html" />
+			<item name="gaedo does graphs" href="10_gaedo_does_graphs.html" />
+		</menu>
+		<menu name="other infos">
+			<item name="easy release with maven" href="easy_release_with_maven.html" />
+			<item name="gaedo in the wild" href="gaedo_in_the_wild.html" />
+			<item name="gaedo supports migrations" href="gaedo_supports_migrations.html" />
+			<item name="guice integration is ready" href="guice_integration_is_ready.html" />
+			<item name="prevalence in gaedo" href="prevalence_in_gaedo.html" />
+		</menu>
+		<menu ref="reports" />
 	</body>
+	<skin>
+		<groupId>org.apache.maven.skins</groupId>
+		<artifactId>maven-fluido-skin</artifactId>
+		<version>1.3.0</version>
+	</skin>
+	<custom>
+		<fluidoSkin>
+			<sideBarEnabled>true</sideBarEnabled>
+			<topBarEnabled>false</topBarEnabled>
+			<googleSearch>
+				<sitesearch />
+			</googleSearch>
+			<sourceLineNumbersEnabled>true</sourceLineNumbersEnabled>
+			<ohloh>
+				<projectId>gaedo</projectId>
+				<widget>factoids</widget>
+			</ohloh>
+		</fluidoSkin>
+	</custom>
 </project>

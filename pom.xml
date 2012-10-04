@@ -1,13 +1,19 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>com.dooapp</groupId>
 	<artifactId>gaedo</artifactId>
 	<name>Gaedo</name>
 	<version>0.2.29-SNAPSHOT</version>
 	<description>Google App Engine Data Object Library</description>
-	<url>http://gaedo.origo.ethz.ch/</url>
+	<url>https://github.com/Riduidel/gaedo/</url>
 	<packaging>pom</packaging>
+	<parent>
+		<groupId>org.sonatype.oss</groupId>
+		<artifactId>oss-parent</artifactId>
+		<version>5</version>
+	</parent>
 	<licenses>
 		<license>
 			<name>GNU Library or Lesser General Public License (LGPL)</name>
@@ -15,11 +21,10 @@
 			<distribution>repo</distribution>
 		</license>
 	</licenses>
-	<parent>
-		<groupId>org.sonatype.oss</groupId>
-		<artifactId>oss-parent</artifactId>
-		<version>5</version>
-	</parent>
+	<properties>
+		<cobertura.version>2.5.2</cobertura.version>
+		<github.global.server>github</github.global.server>
+	</properties>
 	<modules>
 		<module>gaedo-definition</module>
 		<module>gaedo-collections</module>
@@ -97,6 +102,18 @@
 		<connection>scm:git:ssh://git@github.com/Riduidel/gaedo.git</connection>
 		<developerConnection>scm:git:ssh://git@github.com/Riduidel/gaedo.git</developerConnection>
 	</scm>
+	<ciManagement>
+		<system>Jenkins</system>
+		<url>https://buildhive.cloudbees.com/job/Riduidel/job/gaedo/</url>
+		<notifiers>
+			<notifier>
+				<sendOnFailure>true</sendOnFailure>
+				<sendOnError>true</sendOnError>
+				<sendOnWarning>true</sendOnWarning>
+				<sendOnSuccess>false</sendOnSuccess>
+			</notifier>
+		</notifiers>
+	</ciManagement>
 	<organization>
 		<name>dooApp</name>
 		<url>www.dooapp.com</url>
@@ -153,7 +170,7 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-site-plugin</artifactId>
-				<version>1.7.2</version>
+				<version>3.0</version>
 				<dependencies>
 					<dependency>
 						<groupId>org.apache.maven.doxia</groupId>
@@ -175,6 +192,22 @@
 						<goals>
 							<goal>generate</goal>
 						</goals>
+					</execution>
+				</executions>
+			</plugin>
+			<plugin>
+				<groupId>com.github.github</groupId>
+				<artifactId>site-maven-plugin</artifactId>
+				<version>0.4</version>
+				<configuration>
+					<message>Creating site for ${project.version}</message>
+				</configuration>
+				<executions>
+					<execution>
+						<goals>
+							<goal>site</goal>
+						</goals>
+						<phase>site</phase>
 					</execution>
 				</executions>
 			</plugin>
@@ -214,9 +247,52 @@
 					<artifactId>maven-scm-plugin</artifactId>
 					<version>1.7</version>
 				</plugin>
+				<plugin>
+					<groupId>org.codehaus.mojo</groupId>
+					<artifactId>cobertura-maven-plugin</artifactId>
+					<version>${cobertura.version}</version>
+					<configuration>
+						<check>
+							<branchRate>85</branchRate>
+							<lineRate>85</lineRate>
+							<haltOnFailure>true</haltOnFailure>
+							<totalBranchRate>85</totalBranchRate>
+							<totalLineRate>85</totalLineRate>
+							<packageLineRate>85</packageLineRate>
+							<packageBranchRate>85</packageBranchRate>
+						</check>
+					</configuration>
+					<executions>
+						<execution>
+							<goals>
+								<goal>clean</goal>
+								<goal>check</goal>
+							</goals>
+						</execution>
+					</executions>
+				</plugin>
 			</plugins>
 		</pluginManagement>
 	</build>
+	<reporting>
+		<plugins>
+			<plugin>
+				<groupId>org.codehaus.mojo</groupId>
+				<artifactId>cobertura-maven-plugin</artifactId>
+				<version>${cobertura.version}</version>
+			</plugin>
+		</plugins>
+	</reporting>
+	<repositories>
+		<repository>
+			<snapshots>
+				<enabled>false</enabled>
+			</snapshots>
+			<id>central2</id>
+			<name>Maven Central Repository Switchboard</name>
+			<url>http://repo2.maven.org/maven2</url>
+		</repository>
+	</repositories>
 	<profiles>
 		<profile>
 			<id>release-sign-artifacts</id>
@@ -245,15 +321,5 @@
 			</build>
 		</profile>
 	</profiles>
-	<repositories>
-		<repository>
-			<snapshots>
-				<enabled>false</enabled>
-			</snapshots>
-			<id>central2</id>
-			<name>Maven Central Repository Switchboard</name>
-			<url>http://repo2.maven.org/maven2</url>
-		</repository>
-	</repositories>
 
 </project>

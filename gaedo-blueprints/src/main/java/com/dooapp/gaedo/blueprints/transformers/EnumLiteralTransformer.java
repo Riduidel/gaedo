@@ -3,6 +3,8 @@ package com.dooapp.gaedo.blueprints.transformers;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import com.dooapp.gaedo.blueprints.Kind;
+
 public class EnumLiteralTransformer extends AbstractLiteralTransformer<Enum> implements LiteralTransformer<Enum> {
 	private static final Logger logger = Logger.getLogger(EnumLiteralTransformer.class.getName());
 
@@ -34,4 +36,8 @@ public class EnumLiteralTransformer extends AbstractLiteralTransformer<Enum> imp
 		}
 	}
 
+	@Override
+	public Kind getKind() {
+		return Kind.bnode;
+	}
 }

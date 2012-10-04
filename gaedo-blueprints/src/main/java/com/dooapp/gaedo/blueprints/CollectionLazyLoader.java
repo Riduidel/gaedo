@@ -47,7 +47,7 @@ public class CollectionLazyLoader extends AbstractLazyLoader implements Invocati
 		try {
 			for(Edge e : rootVertex.getOutEdges(edgeName)) {
 				Vertex value = e.getInVertex();
-				Object temporaryValue = GraphUtils.createInstance(driver, classLoader, value, repository, objectsBeingAccessed);
+				Object temporaryValue = GraphUtils.createInstance(driver, classLoader, value, property.getType(), repository, objectsBeingAccessed);
 				if(repository.containsKey(temporaryValue.getClass())) {
 					FinderCrudService service = repository.get(temporaryValue.getClass());
 					if (service instanceof AbstractBluePrintsBackedFinderService) {

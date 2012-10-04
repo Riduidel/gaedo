@@ -424,7 +424,7 @@ public class BluePrintsPersister {
 		} else {
 			ClassLoader classLoader = service.getContainedClass().getClassLoader();
 			ServiceRepository repository = service.getRepository();
-			DataType returned = (DataType) GraphUtils.createInstance(service.getDriver(), classLoader, objectVertex, repository, objectsBeingAccessed);
+			DataType returned = (DataType) GraphUtils.createInstance(service.getDriver(), classLoader, objectVertex, Object.class /* we use object here, as this default type should not be used */, repository, objectsBeingAccessed);
 			Map<Property, Collection<CascadeType>> containedProperties = service.getContainedProperties(returned);
 			try {
 				objectsBeingAccessed.put(objectVertexId, returned);
@@ -497,8 +497,9 @@ public class BluePrintsPersister {
 		Iterator<Edge> iterator = objectVertex.getOutEdges(GraphUtils.getEdgeNameFor(p)).iterator();
 		if(iterator.hasNext()) {
 			// yeah, there is a value !
-			Vertex firstVertex = iterator.next().getInVertex();
-			Object value = GraphUtils.createInstance(driver, classloader, firstVertex, repository, objectsBeingAccessed);
+			Edge edge = iterator.next();
+			Vertex firstVertex = edge.getInVertex();
+			Object value = GraphUtils.createInstance(driver, classloader, firstVertex, p.getType(), repository, objectsBeingAccessed);
 			if(repository.containsKey(value.getClass())) {
 				// value requires fields loading
 				IndexableGraphBackedFinderService blueprints= (IndexableGraphBackedFinderService) repository.get(value.getClass());

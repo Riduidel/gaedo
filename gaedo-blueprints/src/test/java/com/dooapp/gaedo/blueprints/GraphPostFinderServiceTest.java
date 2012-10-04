@@ -36,7 +36,7 @@ import org.openrdf.repository.sail.SailRepository;
 import org.openrdf.rio.RDFHandler;
 import org.openrdf.rio.RDFHandlerException;
 
-import com.dooapp.gaedo.blueprints.finders.FindFirstPostByNote;
+import com.dooapp.gaedo.blueprints.finders.FindPostByNote;
 import com.dooapp.gaedo.blueprints.finders.FindFirstUserByLogin;
 import com.dooapp.gaedo.blueprints.finders.FindPostByText;
 import com.dooapp.gaedo.finders.QueryBuilder;
@@ -228,7 +228,7 @@ public class GraphPostFinderServiceTest extends AbstractGraphTest {
 	
 	@Test
 	public void ensureMapIsWellLoaded() throws IOException, ClassNotFoundException {
-		Post first = getPostService().find().matching(new FindFirstPostByNote()).getFirst();
+		Post first = getPostService().find().matching(new FindPostByNote(1)).getFirst();
 		
 		assertThat(first.id, Is.is(1L));
 		assertThat(first.annotations.size(), IsNot.not(0));
@@ -259,40 +259,40 @@ public class GraphPostFinderServiceTest extends AbstractGraphTest {
 
 	@Test
 	public void ensureSerializableIsWellLoadedWithString() throws IOException, ClassNotFoundException {
-		Post first = getPostService().find().matching(new FindFirstPostByNote()).getFirst();
+		Post first = getPostService().find().matching(new FindPostByNote(1)).getFirst();
 		
 		String string = "a string";
 		first.associatedData = string;
 		first = getPostService().update(first);
 		
-		first = getPostService().find().matching(new FindFirstPostByNote()).getFirst();;
+		first = getPostService().find().matching(new FindPostByNote(1)).getFirst();;
 		
 		assertThat(first.associatedData, Is.is((Serializable) string));
 	}
 
 	@Test
 	public void ensureSerializableIsWellLoadedWithPost() throws IOException, ClassNotFoundException {
-		Post first = getPostService().find().matching(new FindFirstPostByNote()).getFirst();
+		Post first = getPostService().find().matching(new FindPostByNote(1)).getFirst();
 		User user = getUserService().find().matching(new FindFirstUserByLogin()).getFirst();
 		
 		first.associatedData = user;
 		first = getPostService().update(first);
 		
-		first = getPostService().find().matching(new FindFirstPostByNote()).getFirst();;
+		first = getPostService().find().matching(new FindPostByNote(1)).getFirst();;
 		
 		assertThat(first.associatedData, Is.is((Serializable) user));
 	}
 
 	@Test
 	public void ensureSerializableIsWellLoadedWithUnknownSerializable() throws IOException, ClassNotFoundException {
-		Post first = getPostService().find().matching(new FindFirstPostByNote()).getFirst();
+		Post first = getPostService().find().matching(new FindPostByNote(1)).getFirst();
 		User user = getUserService().find().matching(new FindFirstUserByLogin()).getFirst();
 		
 		UnknownSerializable value = new UnknownSerializable().withText("a string");
 		first.associatedData = value;
 		first = getPostService().update(first);
 		
-		first = getPostService().find().matching(new FindFirstPostByNote()).getFirst();;
+		first = getPostService().find().matching(new FindPostByNote(1)).getFirst();;
 		
 		assertThat(first.associatedData, Is.is((Serializable) value));
 	}
@@ -307,7 +307,7 @@ public class GraphPostFinderServiceTest extends AbstractGraphTest {
 
 	@Test
 	public void ensureCreateOnUpdateWorks() throws IOException, ClassNotFoundException {
-		Post first = getPostService().find().matching(new FindFirstPostByNote()).getFirst();
+		Post first = getPostService().find().matching(new FindPostByNote(1)).getFirst();
 		if(first.tags.size()>0) {
 			first.tags.clear();
 			first = getPostService().update(first);
@@ -405,6 +405,24 @@ public class GraphPostFinderServiceTest extends AbstractGraphTest {
 		}
 	}
 
+
+	/**
+	 * According to latest modifications, the both note and text will be linked to literal vertex containing value "3.0". How will it work ?
+	 * @throws IOException
+	 * @throws ClassNotFoundException
+	 */
+	@Test
+	public void ensurePostCanHaveTextIdenticalToNote() throws IOException, ClassNotFoundException {
+		Post third= getPostService().find().matching(new FindPostByNote(3.0f)).getFirst();
+		// set value
+		third.text = "3.0";
+		third = getPostService().update(third);
+		// get modified post
+		third= getPostService().find().matching(new FindPostByNote(3)).getFirst();
+		assertThat(third, IsNull.notNullValue());
+		assertThat(third.note, Is.is(3.0f));
+		assertThat(third.text, Is.is("3.0"));
+	}
 
 	@Test
 	public void allowExport() throws FileNotFoundException, RepositoryException, RDFHandlerException {
