@@ -84,16 +84,21 @@ public class IndexableGraphBackedFinderService <DataType, InformerType extends I
 		if(Literals.containsKey(valueClass)) {
 			// some literals aren't so ... literal, as they can accept incoming connections (like classes)
 			returned.setProperty(Properties.kind.name(), Literals.get(valueClass).getKind().name());
-		} else if(Tuples.containsKey(valueClass)){
+		} else if(repository.containsKey(valueClass)){
+			returned.setProperty(Properties.kind.name(), Kind.uri.name());
+		} else if(Tuples.containsKey(valueClass)) {
 			// some literals aren't so ... literal, as they can accept incoming connections (like classes)
 			returned.setProperty(Properties.kind.name(), Tuples.get(valueClass).getKind().name());
-		} else {
-			returned.setProperty(Properties.kind.name(), Kind.uri.name());
 		}
+		// Yup, this if has no default else statement, and that's normal.
+		
 		// obtain vertex for type
 		Vertex classVertex = classTransformer.getVertexFor(getDriver(), valueClass);
 		Edge toType = GraphUtils.addEdgeFor(getDriver(), database, returned, classVertex, TypeProperty.INSTANCE);
-		// make sure literals are literals by changing that particular edge context to a null value
+		/*
+		 * Make sure literals are literals by changing that particular edge context to a null value.
+		 *  Notice we COULD have stored literal type as a property, instead of using
+		 */
 		toType.setProperty(GraphSail.CONTEXT_PROP, GraphUtils.asSailProperty(GraphUtils.GAEDO_HIDDEN_CONTEXT));
 		return returned;
 	}
