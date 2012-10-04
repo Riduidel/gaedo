@@ -52,6 +52,8 @@
 			<artifactId>blueprints-orient-graph</artifactId>
 			<scope>test</scope>
 			<version>${blueprints.version}</version>
+			<!-- dependency made optional since tests using OrientDB have been disabled -->
+			<optional>true</optional>
 			<exclusions>
 				<exclusion>
 					<artifactId>persistence-api</artifactId>
