@@ -47,13 +47,11 @@
 			<version>${blueprints.version}</version>
 		</dependency>
 		<!-- using orientdb for tests -->
-		<dependency>
+<!-- 		<dependency>
 			<groupId>com.tinkerpop.blueprints</groupId>
 			<artifactId>blueprints-orient-graph</artifactId>
 			<scope>test</scope>
 			<version>${blueprints.version}</version>
-			<!-- dependency made optional since tests using OrientDB have been disabled -->
-			<optional>true</optional>
 			<exclusions>
 				<exclusion>
 					<artifactId>persistence-api</artifactId>
@@ -61,7 +59,7 @@
 				</exclusion>
 			</exclusions>
 		</dependency>
-		<!-- users of IndexableGraphFinderService can freely ignore this dependency, 
+ -->		<!-- users of IndexableGraphFinderService can freely ignore this dependency, 
 			as their code is guaranteed not to use it -->
 		<dependency>
 			<groupId>com.tinkerpop.blueprints</groupId>
