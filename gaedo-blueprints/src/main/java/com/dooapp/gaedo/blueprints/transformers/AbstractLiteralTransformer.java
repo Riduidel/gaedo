@@ -104,8 +104,7 @@ public abstract class AbstractLiteralTransformer<Type> {
 	 * @return
 	 */
 	public String getVertexId(Type value) {
-		String idString = getValueClass(value).getCanonicalName()+":"+getVertexValue(value).toString();
-		return idString;
+		return /* getValueClass(value).getCanonicalName()+":"+*/ getVertexValue(value).toString();
 	}
 
 	/**

@@ -33,13 +33,12 @@ import com.tinkerpop.blueprints.pgm.oupls.sail.GraphSail;
  */
 public class IndexableGraphBackedFinderService <DataType, InformerType extends Informer<DataType>> 
 	extends AbstractBluePrintsBackedFinderService<IndexableGraph, DataType, InformerType> {
-	private static final String VALUE = "value";
 
 	/**
 	 * property identifiying in an unique way a vertex. Its goal is to make sure vertex is the one we search.
 	 * @deprecated should be replaced by a "tagged" edge linking object to its identifying property
 	 */
-	private static final String VERTEX_ID = "vertexId";
+//	private static final String VERTEX_ID = "vertexId";
 	
 	public static final String TYPE_EDGE_NAME = GraphUtils.getEdgeNameFor(TypeProperty.INSTANCE);
 
@@ -58,7 +57,7 @@ public class IndexableGraphBackedFinderService <DataType, InformerType extends I
 
 	@Override
 	public Vertex loadVertexFor(String objectVertexId) {
-		CloseableSequence<Vertex> matching = database.getIndex(Index.VERTICES, Vertex.class).get(VERTEX_ID, objectVertexId);
+		CloseableSequence<Vertex> matching = database.getIndex(Index.VERTICES, Vertex.class).get(Properties.value.name(), objectVertexId);
 		if(matching.hasNext()) {
 			return matching.next();
 		} else {
@@ -68,7 +67,7 @@ public class IndexableGraphBackedFinderService <DataType, InformerType extends I
 
 	@Override
 	public String getIdOfVertex(Vertex objectVertex) {
-		return objectVertex.getProperty(VERTEX_ID).toString();
+		return objectVertex.getProperty(Properties.value.name()).toString();
 	}
 
 	/**
@@ -81,7 +80,7 @@ public class IndexableGraphBackedFinderService <DataType, InformerType extends I
 	@Override
 	protected Vertex createEmptyVertex(String vertexId, Class<? extends Object> valueClass) {
 		Vertex returned = database.addVertex(vertexId);
-		returned.setProperty(VERTEX_ID, vertexId);
+		returned.setProperty(Properties.value.name(), vertexId);
 		if(Literals.containsKey(valueClass)) {
 			// some literals aren't so ... literal, as they can accept incoming connections (like classes)
 			returned.setProperty(Properties.kind.name(), Literals.get(valueClass).getKind().name());
