@@ -213,6 +213,8 @@
 						<configuration>
 							<path>${project.distributionManagement.site.url}</path>
 							<merge>true</merge>
+							<repositoryName>gaedo</repositoryName>
+							<repositoryOwner>${github.global.username}</repositoryOwner>
 						</configuration>
 					</execution>
 				</executions>
