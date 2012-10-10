@@ -200,9 +200,9 @@
 			<plugin>
 				<groupId>com.github.github</groupId>
 				<artifactId>site-maven-plugin</artifactId>
-				<version>0.5</version>
+				<version>0.6</version>
 				<configuration>
-					<message>Creating site for ${project.version}</message>
+					<message>Creating site for ${project.artifactId} in ${project.distributionManagement.site.url}</message>
 				</configuration>
 				<executions>
 					<execution>
@@ -214,7 +214,7 @@
 							<path>${project.distributionManagement.site.url}</path>
 							<merge>true</merge>
 							<repositoryName>gaedo</repositoryName>
-							<repositoryOwner>${github.global.username}</repositoryOwner>
+							<repositoryOwner>${github.global.userName}</repositoryOwner>
 						</configuration>
 					</execution>
 				</executions>
