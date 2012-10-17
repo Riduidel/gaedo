@@ -1,3 +1,5 @@
+[![Build Status](https://buildhive.cloudbees.com/job/Riduidel/job/gaedo/badge/icon)](https://buildhive.cloudbees.com/job/Riduidel/job/gaedo/)
+
 GAEDO
 =====
 
