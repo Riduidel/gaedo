@@ -1,24 +1,21 @@
 package com.dooapp.gaedo.blueprints.queries.executable;
 
-import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
 
-import com.dooapp.gaedo.blueprints.indexable.IndexableGraphBackedFinderService;
+import com.dooapp.gaedo.blueprints.AbstractBluePrintsBackedFinderService;
 import com.dooapp.gaedo.blueprints.queries.tests.CompoundVertexTest;
 import com.dooapp.gaedo.blueprints.queries.tests.VertexTest;
 import com.dooapp.gaedo.finders.SortingExpression;
-import com.dooapp.gaedo.finders.repository.ServiceRepository;
-import com.tinkerpop.blueprints.pgm.IndexableGraph;
 import com.tinkerpop.blueprints.pgm.Vertex;
 
 public abstract class AbstractGraphExecutableQuery implements GraphExecutableQuery {
 
 	protected final VertexTest test;
 	protected final SortingExpression sort;
-	protected final IndexableGraphBackedFinderService<?, ?> service;
+	protected final AbstractBluePrintsBackedFinderService<?, ?, ?> service;
 
-	public AbstractGraphExecutableQuery(IndexableGraphBackedFinderService<?, ?> service, CompoundVertexTest vertexTest, SortingExpression sortingExpression) {
+	public AbstractGraphExecutableQuery(AbstractBluePrintsBackedFinderService<?, ?, ?> service, CompoundVertexTest vertexTest, SortingExpression sortingExpression) {
 		this.service = service;
 		this.test = vertexTest;
 		this.sort = sortingExpression;
@@ -71,10 +68,6 @@ public abstract class AbstractGraphExecutableQuery implements GraphExecutableQue
 		if(getVertices().size()>0)
 			return getVertices().get(0);
 		return null;
-	}
-	
-	protected IndexableGraph getDatabase() {
-		return service.getDatabase();
 	}
 	
 	protected Class getSearchedClass() {

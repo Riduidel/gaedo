@@ -16,40 +16,44 @@ import com.dooapp.gaedo.finders.QueryExpressionContainerVisitor;
 import com.dooapp.gaedo.finders.QueryStatement;
 import com.dooapp.gaedo.finders.SortingBuilder;
 import com.dooapp.gaedo.finders.SortingExpression;
+import com.dooapp.gaedo.finders.QueryStatement.State;
 import com.dooapp.gaedo.finders.repository.ServiceRepository;
 import com.dooapp.gaedo.finders.sort.SortingExpressionImpl;
+import com.tinkerpop.blueprints.pgm.Graph;
 import com.tinkerpop.blueprints.pgm.IndexableGraph;
 import com.tinkerpop.blueprints.pgm.Vertex;
 
-public class IndexableGraphQueryStatement<DataType, InformerType extends Informer<DataType>> implements QueryStatement<DataType, InformerType> {
+public class GraphQueryStatement<
+		DataType, 
+		InformerType extends Informer<DataType>> 
+	implements QueryStatement<DataType, InformerType> {
 
-	private QueryBuilder<InformerType> query;
-	private IndexableGraphBackedFinderService<DataType, InformerType> service;
-	private IndexableGraph database;
-	private ServiceRepository repository;
+	protected QueryBuilder<InformerType> query;
+	protected AbstractBluePrintsBackedFinderService<?, DataType, InformerType> service;
+	protected ServiceRepository repository;
+	
+	public GraphQueryStatement(QueryBuilder<InformerType> query,
+					AbstractBluePrintsBackedFinderService<?, DataType, InformerType> service, 
+					ServiceRepository repository) {
+		this.query = query;
+		this.service = service;
+		this.repository = repository;
+		this.state = State.INITIAL;
+	}
+	
 	/**
 	 * Query id, can be used for debugging
 	 */
 	private String id;
-	
 	/**
 	 * Query execution state
 	 */
-	private State state;
+	protected State state;
 	/**
 	 * Sorting expression used to define sort criterias
 	 */
 	private SortingExpression sortingExpression = new SortingExpressionImpl();
 	private QueryExpression filterExpression;
-
-	public IndexableGraphQueryStatement(QueryBuilder<InformerType> query,
-					IndexableGraphBackedFinderService<DataType, InformerType> service, IndexableGraph database, ServiceRepository repository) {
-		this.query = query;
-		this.service = service;
-		this.database = database;
-		this.repository = repository;
-		this.state = State.INITIAL;
-	}
 
 	private GraphExecutableQuery prepareQuery() {
 		try {
@@ -57,7 +61,7 @@ public class IndexableGraphQueryStatement<DataType, InformerType extends Informe
 			InformerType informer = service.getInformer();
 			filterExpression = query.createMatchingExpression(informer);
 			filterExpression.accept(builder);
-			return builder.getQuery(database, sortingExpression);
+			return builder.getQuery(sortingExpression);
 		} finally {
 			setState(State.MATCHING);
 		}
@@ -112,8 +116,7 @@ public class IndexableGraphQueryStatement<DataType, InformerType extends Informe
 	}
 
 	@Override
-	public QueryStatement<DataType, InformerType> sortBy(
-			SortingBuilder<InformerType> expression) {
+	public QueryStatement<DataType, InformerType> sortBy(SortingBuilder<InformerType> expression) {
 		try {
 			this.sortingExpression = expression.createSortingExpression(service
 					.getInformer());

@@ -29,6 +29,7 @@ import com.dooapp.gaedo.finders.FinderCrudService;
 import com.dooapp.gaedo.finders.Informer;
 import com.dooapp.gaedo.finders.QueryBuilder;
 import com.dooapp.gaedo.finders.QueryExpression;
+import com.dooapp.gaedo.finders.QueryStatement;
 import com.dooapp.gaedo.finders.expressions.Expressions;
 import com.dooapp.gaedo.finders.id.AnnotationUtils;
 import com.dooapp.gaedo.finders.id.IdBasedService;
@@ -719,4 +720,10 @@ public abstract class AbstractBluePrintsBackedFinderService<GraphClass extends G
 		return new DelegatingDriver();
 	}
 
+
+	@Override
+	protected QueryStatement<DataType, InformerType> createQueryStatement(QueryBuilder<InformerType> query) {
+		return new GraphQueryStatement<DataType, InformerType>(query,
+						this, repository);
+	}
 }

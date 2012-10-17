@@ -2,12 +2,11 @@ package com.dooapp.gaedo.blueprints.indexable;
 
 
 import com.dooapp.gaedo.blueprints.AbstractBluePrintsBackedFinderService;
+import com.dooapp.gaedo.blueprints.GraphQueryStatement;
 import com.dooapp.gaedo.blueprints.GraphUtils;
-import com.dooapp.gaedo.blueprints.IndexableGraphQueryStatement;
 import com.dooapp.gaedo.blueprints.Kind;
 import com.dooapp.gaedo.blueprints.Properties;
 import com.dooapp.gaedo.blueprints.transformers.ClassLiteralTransformer;
-import com.dooapp.gaedo.blueprints.transformers.LiteralTransformer;
 import com.dooapp.gaedo.blueprints.transformers.Literals;
 import com.dooapp.gaedo.blueprints.transformers.Tuples;
 import com.dooapp.gaedo.blueprints.transformers.TypeUtils;
@@ -48,12 +47,6 @@ public class IndexableGraphBackedFinderService <DataType, InformerType extends I
 	public IndexableGraphBackedFinderService(Class<DataType> containedClass, Class<InformerType> informerClass, InformerFactory factory, ServiceRepository repository,
 					PropertyProvider provider, IndexableGraph graph) {
 		super(graph, containedClass, informerClass, factory, repository, provider);
-	}
-
-	@Override
-	protected QueryStatement<DataType, InformerType> createQueryStatement(QueryBuilder<InformerType> query) {
-		return new IndexableGraphQueryStatement<DataType, InformerType>(query,
-						this, database, repository);
 	}
 
 	@Override

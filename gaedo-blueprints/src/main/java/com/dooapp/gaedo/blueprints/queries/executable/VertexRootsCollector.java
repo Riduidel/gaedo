@@ -6,6 +6,7 @@ import java.util.TreeMap;
 
 import javax.persistence.CascadeType;
 
+import com.dooapp.gaedo.blueprints.AbstractBluePrintsBackedFinderService;
 import com.dooapp.gaedo.blueprints.indexable.IndexableGraphBackedFinderService;
 import com.dooapp.gaedo.blueprints.queries.tests.CollectionContains;
 import com.dooapp.gaedo.blueprints.queries.tests.EqualsTo;
@@ -19,7 +20,30 @@ import com.dooapp.gaedo.properties.Property;
 import com.tinkerpop.blueprints.pgm.Vertex;
 
 /**
- * Class visiting vertex test to grab possible 
+ * Class visiting vertex test to grab possible query roots. What are query roots ? 
+ * Well, they are the vertices a query can use to navigate the graph and find matching nodes.
+ * Suppose, as a canonical example, we want to find the following objects
+ * <pre>
+ * AND
+ *	  Posts.note ==? 4.0
+ *	  Posts.author.login ==? "user login"
+ *	  Object.classes contains Post.class
+ * </pre>
+ *
+ * It is obvious we can start by navigating the class vertex (the one holding the Post.class value) and scan all objects linked to that 
+ * class through the Object.classes relationship. But, is it the optimal path ? Maybe we have only two or three articles written by that given author ...
+ * and only one having as note 4.0.
+ * As a consequence, this class tries to give some answer elements by visiting the query, and providing a map linking root vertices to 
+ * the properties path used to find them.
+ * 
+ * Fo the given query, and after having visited the object containing that query, this method will as a consequence return, through the {@link #getResult()}
+ * method call, a map linking one vertex to each navigable query predicate.
+ * For now, the usable predicates are
+ * <ul>
+ * <li>CollectionContains</li>
+ * <li>EqualsTo</li>
+ * </ul>
+ * Notice that OR and NOT query combators are NOT navigated
  * @author ndx
  *
  */
@@ -29,14 +53,14 @@ public class VertexRootsCollector extends VertexTestVisitorAdapter implements Ve
 	 */
 	private Map<Vertex, Iterable<Property>> result = new LinkedHashMap<Vertex, Iterable<Property>>();
 	
-	private final IndexableGraphBackedFinderService<?, ?> service;
+	private final AbstractBluePrintsBackedFinderService<?, ?, ?> service;
 
 	/**
 	 * Cache of objects being loaded during roots collection building
 	 */
 	private transient Map<String, Object> objectsBeingAccessed = new TreeMap<String, Object>();
 
-	public VertexRootsCollector(IndexableGraphBackedFinderService<?, ?> service) {
+	public VertexRootsCollector(AbstractBluePrintsBackedFinderService<?, ?, ?> service) {
 		super();
 		this.service = service;
 	}

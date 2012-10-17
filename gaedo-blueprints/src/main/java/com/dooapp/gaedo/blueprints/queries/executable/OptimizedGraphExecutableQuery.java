@@ -6,6 +6,7 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import com.dooapp.gaedo.blueprints.AbstractBluePrintsBackedFinderService;
 import com.dooapp.gaedo.blueprints.indexable.IndexableGraphBackedFinderService;
 import com.dooapp.gaedo.blueprints.queries.tests.AndVertexTest;
 import com.dooapp.gaedo.blueprints.queries.tests.CollectionContains;
@@ -19,14 +20,26 @@ import com.tinkerpop.blueprints.pgm.IndexableGraph;
 import com.tinkerpop.blueprints.pgm.Vertex;
 
 /**
- * Optimized executable query. This one defers from the basic one by trying to
- * optimized the way the graph is searched. Let me make it clearer : Instead of
- * using the Class vertex as first vertex, this one looks in the various vertex
- * roots the one with the less number of connections. Obviously, this requires
- * us to count the number of edges linking those roots to objects, and try to
- * evaluate the number of objects of this class that will match. However, we do
- * consider here this to be optimal when the number of vertices to search is
- * great.
+ * Optimized executable query.
+ * How is it optimized ? Instead of simply searching through all vertices linked to class vertex (which always exist) through
+ * Object.classes edge, this one tries to find the vertex linked to the smallest solution space. How ?
+ * As an example, suppose one want to find, using our test beans, elements matching that query :
+ * <pre> 
+ *  AND
+ *	  Posts.note ==? 4.0
+ *	  Posts.author.login ==? "user login"
+ *	  Object.classes contains Post.class
+ * </pre>
+ * This class will start by extracting query roots (vertices to which solutions of this query MUST be linked) by calling {@link #getPossibleRootsOf(VertexTest)}
+ * In this example, this method call will return
+ * <pre> 
+ * 4.0:long => { Property[note] }
+ * "user login":string => { Property[author], Property[login] }
+ * Post:class => { Property[class] }
+ * </pre>
+ * One question remain : from these three vertices, which one will be linked (through the given property path) to the smallest number of vertices ?
+ * To answer this question, the {@link #findBestRootIn(Map)} method creates a {@link VertexValueRange} object which can back-navigate the edges representing these properties
+ * and directly give us the best query root.
  * 
  * @author ndx
  * 
@@ -47,7 +60,7 @@ public class OptimizedGraphExecutableQuery extends AbstractGraphExecutableQuery 
 	 * @param searchedClass
 	 *            searched value class
 	 */
-	public OptimizedGraphExecutableQuery(IndexableGraphBackedFinderService<?, ?> service, CompoundVertexTest vertexTest, SortingExpression sortingExpression) {
+	public OptimizedGraphExecutableQuery(AbstractBluePrintsBackedFinderService<?, ?, ?> service, CompoundVertexTest vertexTest, SortingExpression sortingExpression) {
 		super(service, addClassSearchTo(vertexTest, service.getContainedClass()), sortingExpression);
 	}
 
@@ -75,6 +88,14 @@ public class OptimizedGraphExecutableQuery extends AbstractGraphExecutableQuery 
 		}
 	}
 
+	/**
+	 * Get a quite reduced set of vertices to examine. This method return an iterable of vertices containing the ones corresponding to query solutions.
+	 * This iterable is not optimal (there are elements in which than may not be query solutions). But it should be, in most cases
+	 * a better solution space than the one given by {@link BasicGraphExecutableQuery} (which, as a reminder, always return all vertices linked 
+	 * to the queried class through an object.classes edge).
+	 * @return
+	 * @see com.dooapp.gaedo.blueprints.queries.executable.AbstractGraphExecutableQuery#getVerticesToExamine()
+	 */
 	@Override
 	protected Iterable<Vertex> getVerticesToExamine() {
 		// First step is to get all possible query root vertices
@@ -84,9 +105,10 @@ public class OptimizedGraphExecutableQuery extends AbstractGraphExecutableQuery 
 	}
 
 	/**
-	 * Get best vertex for performing query. The best vertex is usually the one with the lower number of of edges associated to property path last fragment 
-	 * @param possibleRoots
-	 * @return
+ 	 * Find, from all roots returned by {@link #getPossibleRootsOf(VertexTest)}, the one linked to the smallest iterable of vertices for the given
+ 	 * property path.
+	 * @param possibleRoots a map linking vertices to the property path used to navigate from searched vertices to these vertices.
+	 * @return an object containing informations about the best matching vertex (like a cache of vertices in solution space).
 	 */
 	private VertexValueRange findBestRootIn(Map<Vertex, Iterable<Property>> possibleRoots) {
 		VertexValueRange initial = new VertexValueRange();

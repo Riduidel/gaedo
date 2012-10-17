@@ -2,8 +2,8 @@ package com.dooapp.gaedo.blueprints.queries;
 
 import java.util.Stack;
 
+import com.dooapp.gaedo.blueprints.AbstractBluePrintsBackedFinderService;
 import com.dooapp.gaedo.blueprints.indexable.IndexableGraphBackedFinderService;
-import com.dooapp.gaedo.blueprints.queries.executable.BasicGraphExecutableQuery;
 import com.dooapp.gaedo.blueprints.queries.executable.GraphExecutableQuery;
 import com.dooapp.gaedo.blueprints.queries.executable.OptimizedGraphExecutableQuery;
 import com.dooapp.gaedo.blueprints.queries.tests.AndVertexTest;
@@ -25,17 +25,16 @@ import com.dooapp.gaedo.finders.expressions.OrQueryExpression;
 import com.dooapp.gaedo.finders.expressions.QueryExpressionVisitor;
 import com.dooapp.gaedo.finders.expressions.StartsWithExpression;
 import com.dooapp.gaedo.finders.informers.MapContainingValueExpression;
-import com.tinkerpop.blueprints.pgm.IndexableGraph;
 
 public class BluePrintsQueryBuilder<DataType, InformerType extends Informer<DataType>> implements QueryExpressionVisitor {
 
-	private IndexableGraphBackedFinderService<DataType, InformerType> service;
+	private AbstractBluePrintsBackedFinderService<?, DataType, InformerType> service;
 	/**
 	 * This stack contains only the tests allowing tree building
 	 */
 	private Stack<CompoundVertexTest> tests = new Stack<CompoundVertexTest>();
 
-	public BluePrintsQueryBuilder(IndexableGraphBackedFinderService<DataType, InformerType> service) {
+	public BluePrintsQueryBuilder(AbstractBluePrintsBackedFinderService<?, DataType, InformerType> service) {
 		this.service = service;
 		/* Base test is always a AND one, associated to a test on class (will be used for optimized query building) */
 		this.tests.push(new AndVertexTest(service.getDriver(), null /* null indicates no property is navigated */));
@@ -43,11 +42,10 @@ public class BluePrintsQueryBuilder<DataType, InformerType extends Informer<Data
 
 	/**
 	 * Effectively creates the query object that will be used to browse the graph DB
-	 * @param database
 	 * @param sortingExpression
 	 * @return
 	 */
-	public GraphExecutableQuery getQuery(IndexableGraph database, SortingExpression sortingExpression) {
+	public GraphExecutableQuery getQuery(SortingExpression sortingExpression) {
 		// At the end of the visit, there should be only one item in stack : the root one
 		if(tests.size()!=1) {
 			throw new InvalidTestStructureException(tests);

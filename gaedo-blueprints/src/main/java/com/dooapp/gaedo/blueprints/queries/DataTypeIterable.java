@@ -5,6 +5,7 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.TreeMap;
 
+import com.dooapp.gaedo.blueprints.AbstractBluePrintsBackedFinderService;
 import com.dooapp.gaedo.blueprints.indexable.IndexableGraphBackedFinderService;
 import com.dooapp.gaedo.patterns.WriteReplaceable;
 import com.dooapp.gaedo.utils.CollectionUtils;
@@ -48,10 +49,10 @@ public class DataTypeIterable<DataType> implements Iterable<DataType>, WriteRepl
 		
 	}
 
-	private IndexableGraphBackedFinderService<DataType, ?> service;
+	private AbstractBluePrintsBackedFinderService<?, DataType, ?> service;
 	private Iterable<Vertex> vertices;
 
-	public DataTypeIterable(IndexableGraphBackedFinderService<DataType, ?> service, Iterable<Vertex> asIterable) {
+	public DataTypeIterable(AbstractBluePrintsBackedFinderService<?, DataType, ?> service, Iterable<Vertex> asIterable) {
 		this.service = service;
 		this.vertices = asIterable;
 	}
