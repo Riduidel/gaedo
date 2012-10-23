@@ -1,6 +1,8 @@
 package com.dooapp.gaedo.blueprints.indexable;
 
 
+import java.util.UUID;
+
 import com.dooapp.gaedo.blueprints.AbstractBluePrintsBackedFinderService;
 import com.dooapp.gaedo.blueprints.GraphQueryStatement;
 import com.dooapp.gaedo.blueprints.GraphUtils;
@@ -15,6 +17,7 @@ import com.dooapp.gaedo.finders.QueryBuilder;
 import com.dooapp.gaedo.finders.QueryStatement;
 import com.dooapp.gaedo.finders.repository.ServiceRepository;
 import com.dooapp.gaedo.finders.root.InformerFactory;
+import com.dooapp.gaedo.properties.Property;
 import com.dooapp.gaedo.properties.PropertyProvider;
 import com.dooapp.gaedo.properties.TypeProperty;
 import com.tinkerpop.blueprints.pgm.CloseableSequence;
@@ -98,7 +101,7 @@ public class IndexableGraphBackedFinderService <DataType, InformerType extends I
 			}
 			// obtain vertex for type
 			Vertex classVertex = classTransformer.getVertexFor(getDriver(), valueClass);
-			Edge toType = GraphUtils.addEdgeFor(getDriver(), database, returned, classVertex, TypeProperty.INSTANCE);
+			Edge toType = getDriver().addEdgeFor(returned, classVertex, TypeProperty.INSTANCE);
 			/*
 			 * Make sure literals are literals by changing that particular edge context to a null value.
 			 *  Notice we COULD have stored literal type as a property, instead of using
@@ -130,6 +133,19 @@ public class IndexableGraphBackedFinderService <DataType, InformerType extends I
 	@Override
 	protected Object getValue(Vertex vertex) {
 		return vertex.getProperty(Properties.value.name());
+	}
+
+	public Edge addEdgeFor(Vertex fromVertex, Vertex toVertex, Property property) {
+		String edgeNameFor = GraphUtils.getEdgeNameFor(property);
+		Edge edge = database.addEdge(getEdgeId(fromVertex, toVertex, property), fromVertex, toVertex, edgeNameFor);
+		edge.setProperty(GraphSail.PREDICATE_PROP, GraphSail.URI_PREFIX+" "+GraphUtils.getDefaultEdgeNameFor(property));
+		// Create a common context for all gaedo relationships
+		edge.setProperty(GraphSail.CONTEXT_PROP, GraphUtils.asSailProperty(GraphUtils.GAEDO_CONTEXT));
+		return edge;
+	}
+
+	public String getEdgeId(Vertex fromVertex, Vertex toVertex, Property property) {
+		return fromVertex.getId().toString()+"_to_"+toVertex.getId().toString()+"___"+UUID.randomUUID().toString(); 
 	}
 
 }

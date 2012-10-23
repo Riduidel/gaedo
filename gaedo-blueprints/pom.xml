@@ -1,4 +1,5 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	<parent>
 		<artifactId>gaedo</artifactId>
@@ -46,19 +47,10 @@
 			<version>${blueprints.version}</version>
 		</dependency>
 		<!-- using orientdb for tests -->
-<!-- 		<dependency>
-			<groupId>com.tinkerpop.blueprints</groupId>
-			<artifactId>blueprints-orient-graph</artifactId>
-			<scope>test</scope>
-			<version>${blueprints.version}</version>
-			<exclusions>
-				<exclusion>
-					<artifactId>persistence-api</artifactId>
-					<groupId>javax.persistence</groupId>
-				</exclusion>
-			</exclusions>
-		</dependency>
- -->		<!-- users of IndexableGraphFinderService can freely ignore this dependency, 
+		<!-- <dependency> <groupId>com.tinkerpop.blueprints</groupId> <artifactId>blueprints-orient-graph</artifactId> 
+			<scope>test</scope> <version>${blueprints.version}</version> <exclusions> 
+			<exclusion> <artifactId>persistence-api</artifactId> <groupId>javax.persistence</groupId> 
+			</exclusion> </exclusions> </dependency> -->		<!-- users of IndexableGraphFinderService can freely ignore this dependency, 
 			as their code is guaranteed not to use it -->
 		<dependency>
 			<groupId>com.tinkerpop.blueprints</groupId>
@@ -87,6 +79,34 @@
 			</plugin>
 		</plugins>
 	</build>
+	<reporting>
+		<plugins>
+			<plugin>
+				<artifactId>maven-javadoc-plugin</artifactId>
+				<version>2.9</version>
+				<configuration>
+					<links>
+					</links>
+					<reportSets>
+						<reportSet>
+							<id>non-aggregate</id>
+							<configuration></configuration>
+							<reports>
+								<report>javadoc</report>
+							</reports>
+						</reportSet>
+						<reportSet>
+							<id>aggregate</id>
+							<configuration></configuration>
+							<reports>
+								<report>aggregate</report>
+							</reports>
+						</reportSet>
+					</reportSets>
+				</configuration>
+			</plugin>
+		</plugins>
+	</reporting>
 	<repositories>
 		<repository>
 			<id>tinkerpop-repository</id>

@@ -25,19 +25,19 @@ import org.hamcrest.core.IsNot;
 import org.hamcrest.core.IsNull;
 import org.junit.Assert;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 import org.junit.runners.Parameterized.Parameters;
-import org.openrdf.model.Resource;
 import org.openrdf.model.impl.URIImpl;
 import org.openrdf.repository.RepositoryException;
 import org.openrdf.repository.sail.SailRepository;
 import org.openrdf.rio.RDFHandler;
 import org.openrdf.rio.RDFHandlerException;
 
-import com.dooapp.gaedo.blueprints.finders.FindPostByNote;
 import com.dooapp.gaedo.blueprints.finders.FindFirstUserByLogin;
+import com.dooapp.gaedo.blueprints.finders.FindPostByNote;
 import com.dooapp.gaedo.blueprints.finders.FindPostByText;
 import com.dooapp.gaedo.finders.QueryBuilder;
 import com.dooapp.gaedo.finders.QueryExpression;
@@ -49,6 +49,9 @@ import com.dooapp.gaedo.test.beans.Tag;
 import com.dooapp.gaedo.test.beans.TagInformer;
 import com.dooapp.gaedo.test.beans.User;
 import com.dooapp.gaedo.test.beans.UserInformer;
+import com.tinkerpop.blueprints.pgm.Edge;
+import com.tinkerpop.blueprints.pgm.Index;
+import com.tinkerpop.blueprints.pgm.IndexableGraph;
 
 import static com.dooapp.gaedo.blueprints.TestUtils.A;
 import static com.dooapp.gaedo.blueprints.TestUtils.ABOUT_ID;
@@ -109,18 +112,6 @@ public class GraphPostFinderServiceTest extends AbstractGraphTest {
 		}
 		return returned;
 	}
-
-	/**
-	 * This test makes sure property rewriting works ok (by checking no {@link Post#text} property is written to graph.
-	 * As one may has notice, posts are created during @Before method and as a consequence are available before each test (including this one).
-	 */
-//	@Test 
-//	public void makeSureGraphDoesntContainAnyEdgeNamedText() {
-//		Index<Edge> edgeIndex = graph.getIndex(Index.EDGES, Edge.class);
-//		assertThat(edgeIndex.count("label", "Identified.id"), IsNot.not(Is.is(0l)));
-//		assertThat(edgeIndex.count("label", "post_text"), IsNot.not(Is.is(0l)));
-//		assertThat(edgeIndex.count("label", "Post.text"), Is.is(0l));
-//	}
 
 	@Test 
 	public void searchPostByNote() {
@@ -297,7 +288,7 @@ public class GraphPostFinderServiceTest extends AbstractGraphTest {
 		assertThat(first.associatedData, Is.is((Serializable) value));
 	}
 
-	@Test
+	@Test @Ignore
 	public void ensurePostIdCanBeGenerated() throws IOException, ClassNotFoundException {
 		Post newOne = new Post().withText("some text");
 		assertThat(newOne.id, Is.is(0l));
@@ -328,7 +319,7 @@ public class GraphPostFinderServiceTest extends AbstractGraphTest {
 		assertThat(inDB.getId(), IsNot.not(0l));
 	}
 
-	@Test
+	@Test @Ignore
 	public void ensureUpdateOnCreateWorks() throws IOException, ClassNotFoundException {
 		Post newxONe = new Post().withText(SOME_NEW_TEXT).withAuthor(author);
 		author.setLogin(LOGIN_FOR_UPDATE_ON_CREATE);
@@ -359,7 +350,7 @@ public class GraphPostFinderServiceTest extends AbstractGraphTest {
 		}
 	}
 	
-	@Test
+	@Test @Ignore
 	public void ensureMapWorksInAllCases() throws Exception {
 		Post newxONe = new Post().withText(SOME_NEW_TEXT).withAuthor(author);
 		final long id = newxONe.id;
@@ -380,7 +371,7 @@ public class GraphPostFinderServiceTest extends AbstractGraphTest {
 		}
 	}
 	
-	@Test
+	@Test @Ignore
 	public void ensureMapCanBeEmptiedForIssue13() throws Exception {
 		final String text = "#ensureMapCanBeEmptiedForIssue13";
 		Post newxONe = new Post().withText(text).withAuthor(author);
@@ -434,5 +425,21 @@ public class GraphPostFinderServiceTest extends AbstractGraphTest {
 		RDFHandler handler = new NQuadsWriter(new OutputStreamWriter(new FileOutputStream(output), Charset.forName("UTF-8")));
 
 		repository.getConnection().export(handler, new URIImpl(GraphUtils.GAEDO_CONTEXT));
+	}
+	
+	/**
+	 * This test makes sure property rewriting works ok (by checking no {@link Post#text} property is written to graph.
+	 * As one may has notice, posts are created during @Before method and as a consequence are available before each test (including this one).
+	 */
+	@Test 
+	public void makeSureGraphDoesntContainAnyEdgeNamedText() {
+		if (environment.graph instanceof IndexableGraph) {
+			IndexableGraph indexableGraph = (IndexableGraph) environment.graph;
+			
+			Index<Edge> edgeIndex = indexableGraph.getIndex(Index.EDGES, Edge.class);
+//			assertThat(edgeIndex.count("label", "Identified.id"), IsNot.not(Is.is(0l)));
+			assertThat(edgeIndex.count("label", Post.POST_TEXT_PROPERTY), IsNot.not(Is.is(0l)));
+			assertThat(edgeIndex.count("label", "Post.text"), Is.is(0l));
+		}
 	}
 }

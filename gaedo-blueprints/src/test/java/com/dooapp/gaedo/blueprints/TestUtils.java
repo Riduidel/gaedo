@@ -83,20 +83,20 @@ public class TestUtils {
 	private static Collection<Object[]> environmentsFor(Collection<Object[]> providers) {
 		Collection<Object[]> returned = new LinkedList<Object[]>();
 		for(Object[] p : providers) {
-			returned.add(covnertProviderToEnvironment(p, new EnvironmentCreator() {
-
-				@Override
-				public Object environmentFor(GraphProvider o) {
-					return new IndexableGraphEnvironment(o);
-				}
-			}).toArray());
 //			returned.add(covnertProviderToEnvironment(p, new EnvironmentCreator() {
 //
 //				@Override
 //				public Object environmentFor(GraphProvider o) {
-//					return new SailGraphEnvironment(o);
+//					return new IndexableGraphEnvironment(o);
 //				}
 //			}).toArray());
+			returned.add(covnertProviderToEnvironment(p, new EnvironmentCreator() {
+
+				@Override
+				public Object environmentFor(GraphProvider o) {
+					return new SailGraphEnvironment(o);
+				}
+			}).toArray());
 		}
 		return returned;
 	}

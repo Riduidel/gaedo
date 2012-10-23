@@ -22,10 +22,12 @@ import com.dooapp.gaedo.extensions.hierarchy.Parent;
  */
 public class Post extends Identified implements Serializable, Message {
 
+	public static final String POST_NOTE_PROPERTY = "post:note";
+	public static final String POST_TEXT_PROPERTY = "post:text";
 	private static final Logger logger = Logger.getLogger(Post.class.getName());
-	@Column(name="post_text")
+	@Column(name=POST_TEXT_PROPERTY)
 	public String text;
-	@Column(name="post_note")
+	@Column(name=POST_NOTE_PROPERTY)
 	public float note;
 	public boolean test;
 	public State state = State.PRIVATE;

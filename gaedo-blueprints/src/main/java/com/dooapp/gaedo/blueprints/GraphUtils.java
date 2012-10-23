@@ -40,26 +40,6 @@ public class GraphUtils {
 
 	private static final Logger logger = Logger.getLogger(GraphUtils.class.getName());
 	
-	/**
-	 * Create an edge linking both vertex. Given edge corresponds to given property.
-	 * Some edge properties may be set to conform to RDF expectations (namely "p" (for predicate
-	 * @param driver
-	 * @param database
-	 * @param fromVertex
-	 * @param toVertex
-	 * @param property
-	 * @return
-	 */
-	public static Edge addEdgeFor(GraphDatabaseDriver driver, Graph database, Vertex fromVertex, Vertex toVertex, Property property) {
-		String edgeNameFor = getEdgeNameFor(property);
-		Edge edge = database.addEdge(fromVertex.getId().toString()+"_to_"+toVertex.getId().toString()+"___"+UUID.randomUUID().toString(), 
-						fromVertex, toVertex, edgeNameFor);
-		edge.setProperty(GraphSail.PREDICATE_PROP, GraphSail.URI_PREFIX+" "+getDefaultEdgeNameFor(property));
-		// Create a common context for all gaedo relationships
-		edge.setProperty(GraphSail.CONTEXT_PROP, asSailProperty(GAEDO_CONTEXT));
-		return edge;
-	}
-
 	public static Object asSailProperty(String context) {
 		return GraphSail.URI_PREFIX+" "+context;
 	}
@@ -82,7 +62,7 @@ public class GraphUtils {
 		}
 	}
 
-	private static String getDefaultEdgeNameFor(Property p) {
+	public static String getDefaultEdgeNameFor(Property p) {
 		return p.getDeclaringClass().getName()+":"+p.getName();
 	}
 

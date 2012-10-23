@@ -139,7 +139,7 @@ public class BluePrintsPersister {
 	private void deleteMap(AbstractBluePrintsBackedFinderService<? extends Graph, ?, ?> service, Graph database, Property p, Object toDelete, Vertex objectVertex, Collection<CascadeType> toCascade, Map<String, Object> objectsBeingAccessed) {
 		String edgeNameFor = GraphUtils.getEdgeNameFor(p);
 		Iterable<Edge> edges = objectVertex.getOutEdges(edgeNameFor);
-		Map values = (Map) p.get(toDelete);
+		Map<?, ?> values = (Map<?, ?>) p.get(toDelete);
 		Map<Vertex, Edge> oldVertices = new HashMap<Vertex, Edge>();
 		for(Edge e : edges) {
 			Vertex inVertex = e.getInVertex();
@@ -167,7 +167,7 @@ public class BluePrintsPersister {
 	private void deleteCollection(AbstractBluePrintsBackedFinderService<? extends Graph, ?, ?> service, Graph database, Property p, Object toDelete, Vertex objectVertex, Collection<CascadeType> toCascade, Map<String, Object> objectsBeingAccessed) {
 		String edgeNameFor = GraphUtils.getEdgeNameFor(p);
 		Iterable<Edge> edges = objectVertex.getOutEdges(edgeNameFor);
-		Collection values = (Collection) p.get(toDelete);
+		Collection<?> values = (Collection<?>) p.get(toDelete);
 		Map<Vertex, Edge> oldVertices = new HashMap<Vertex, Edge>();
 		for(Edge e : edges) {
 			Vertex inVertex = e.getInVertex();
@@ -206,12 +206,6 @@ public class BluePrintsPersister {
 			// Static properties are by design not written
 			if(!p.hasModifier(Modifier.STATIC) && !Annotations.TRANSIENT.is(p)) {
 				Class<?> rawPropertyType = p.getType();
-				// Per default, no operation is cascaded
-				CascadeType used = null;
-				// However, if property supports that cascade type, we cascade operation
-				if(entry.getValue().contains(cascade)) {
-					used = cascade;
-				}
 				if(Collection.class.isAssignableFrom(rawPropertyType)) {
 					if (logger.isLoggable(Level.FINEST)) {
 						logger.log(Level.FINEST, "property "+p.getName()+" is considered a collection one");
@@ -231,17 +225,6 @@ public class BluePrintsPersister {
 		// Migrator property has been added to object if needed
 		// it's also the case of classes list
 	}
-
-	/**
-	 * Create collection of entry vertices.
-	 * Those vertices are very specific : they are not managed, but not really literal either
-	 * @param value
-	 * @return
-	 */
-	private Collection<Vertex> createVerticesFor(Map value) {
-		// TODO Auto-generated method stub
-		throw new UnsupportedOperationException("method "+IndexableGraphBackedFinderService.class.getName()+"#createVerticesFor has not yet been implemented AT ALL");
-	}
 	
 	/**
 	 * Persisting a map consist into considering each map entry as an object of the map entries collection, then associating each entry object to its contained key and value.
@@ -254,7 +237,7 @@ public class BluePrintsPersister {
 	 */
 	private <DataType> void updateMap(AbstractBluePrintsBackedFinderService<? extends Graph, DataType, ?> service, Graph database, Property p, Object toUpdate, Vertex rootVertex, CascadeType cascade, Map<String, Object> objectsBeingAccessed) {
 		// Cast should work like a charm
-		Map value = (Map) p.get(toUpdate);
+		Map<?, ?> value = (Map<?, ?>) p.get(toUpdate);
 		// As a convention, null values are never stored
 		if(value!=null /* && value.size()>0 that case precisely created https://github.com/Riduidel/gaedo/issues/13 */) {
 			// Get previously existing vertices
@@ -280,7 +263,7 @@ public class BluePrintsPersister {
 			}
 			// And finally add new vertices
 			for(Vertex newVertex : newVertices) {
-				GraphUtils.addEdgeFor(service.getDriver(), database, rootVertex, newVertex, p);
+				service.getDriver().addEdgeFor(rootVertex, newVertex, p);
 			}
 		}
 	}
@@ -295,7 +278,7 @@ public class BluePrintsPersister {
 	 */
 	private <DataType> void updateCollection(AbstractBluePrintsBackedFinderService<? extends Graph, DataType, ?> service, Graph database, Property p, Object toUpdate, Vertex rootVertex, CascadeType cascade, Map<String, Object> objectsBeingAccessed) {
 		// Cast should work like a charm
-		Collection value = (Collection) p.get(toUpdate);
+		Collection<?> value = (Collection<?>) p.get(toUpdate);
 		// As a convention, null values are never stored
 		if(value!=null /* && value.size()>0 that case precisely created https://github.com/Riduidel/gaedo/issues/13 */) {
 			// Get previously existing vertices
@@ -320,7 +303,7 @@ public class BluePrintsPersister {
 			}
 			// And finally add new vertices
 			for(Vertex newVertex : newVertices) {
-				GraphUtils.addEdgeFor(service.getDriver(), database, rootVertex, newVertex, p);
+				service.getDriver().addEdgeFor(rootVertex, newVertex, p);
 			}
 		}
 	}
@@ -331,7 +314,7 @@ public class BluePrintsPersister {
 	 * @param cascade used cascade type, can be either {@link CascadeType#PERSIST} or {@link CascadeType#MERGE}
 	 * @return collection of vertices created by {@link #getVertexFor(Object)}
 	 */
-	private Collection<Vertex> createCollectionVerticesFor(AbstractBluePrintsBackedFinderService<? extends Graph, ?, ?> service, Collection value, CascadeType cascade, Map<String, Object> objectsBeingAccessed) {
+	private Collection<Vertex> createCollectionVerticesFor(AbstractBluePrintsBackedFinderService<? extends Graph, ?, ?> service, Collection<?> value, CascadeType cascade, Map<String, Object> objectsBeingAccessed) {
 		Collection<Vertex> returned = new HashSet<Vertex>();
 		for(Object o : value) {
 			returned.add(service.getVertexFor(o, cascade, objectsBeingAccessed));
@@ -382,7 +365,7 @@ public class BluePrintsPersister {
 				} else {
 					// delete old edge (TODO maybe delete vertex, if there is no other link (excepted obvious ones, like type, Object.classes, and id)
 					database.removeEdge(existing);
-					link = GraphUtils.addEdgeFor(service.getDriver(), database, rootVertex, valueVertex, p);
+					link = service.getDriver().addEdgeFor(rootVertex, valueVertex, p);
 
 				}
 			}
@@ -397,7 +380,7 @@ public class BluePrintsPersister {
 				}
 			} else {
 				if(link==null)
-					link = GraphUtils.addEdgeFor(service.getDriver(), database, rootVertex, valueVertex, p);
+					link = service.getDriver().addEdgeFor(rootVertex, valueVertex, p);
 			}
 		}
 	}

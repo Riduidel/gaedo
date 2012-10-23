@@ -42,6 +42,7 @@ import com.dooapp.gaedo.properties.PropertyProvider;
 import com.dooapp.gaedo.properties.PropertyProviderUtils;
 import com.dooapp.gaedo.properties.TypeProperty;
 import com.dooapp.gaedo.utils.Utils;
+import com.tinkerpop.blueprints.pgm.Edge;
 import com.tinkerpop.blueprints.pgm.Graph;
 import com.tinkerpop.blueprints.pgm.IndexableGraph;
 import com.tinkerpop.blueprints.pgm.TransactionalGraph;
@@ -93,6 +94,11 @@ public abstract class AbstractBluePrintsBackedFinderService<GraphClass extends G
 		@Override
 		public ServiceRepository getRepository() {
 			return AbstractBluePrintsBackedFinderService.this.getRepository();
+		}
+
+		@Override
+		public Edge addEdgeFor(Vertex fromVertex, Vertex toVertex, Property property) {
+			return AbstractBluePrintsBackedFinderService.this.addEdgeFor(fromVertex, toVertex, property);
 		}
 
 	}
@@ -157,6 +163,8 @@ public abstract class AbstractBluePrintsBackedFinderService<GraphClass extends G
 							+ "supporting migration ? " + (migrator != null) + "\n");
 		}
 	}
+
+	protected abstract Edge addEdgeFor(Vertex fromVertex, Vertex toVertex, Property property);
 
 	protected abstract Object getValue(Vertex vertex);
 
@@ -473,15 +481,15 @@ public abstract class AbstractBluePrintsBackedFinderService<GraphClass extends G
 		Class<? extends Object> valueClass = value.getClass();
 		if (repository.containsKey(valueClass)) {
 			FinderCrudService service = repository.get(valueClass);
-			if (service instanceof IndexableGraphBackedFinderService) {
-				return ((IndexableGraphBackedFinderService) service).getVertexFor(value, cascade, objectsBeingUpdated);
+			if (service instanceof AbstractBluePrintsBackedFinderService) {
+				return ((AbstractBluePrintsBackedFinderService) service).getVertexFor(value, cascade, objectsBeingUpdated);
 			} else {
 				throw new IncompatibleServiceException(service, valueClass);
 			}
 		} else if (Literals.containsKey(valueClass)) {
-			return GraphUtils.getVertexForLiteral(getDriver(), value);
+			return getVertexForLiteral(value);
 		} else if (Tuples.containsKey(valueClass)) {
-			return GraphUtils.getVertexForTuple(this, repository, value, objectsBeingUpdated);
+			return getVertexForTuple(value, objectsBeingUpdated);
 		} else {
 			/*
 			 * // OK, we will persist this object by ourselves, which is really
@@ -497,6 +505,14 @@ public abstract class AbstractBluePrintsBackedFinderService<GraphClass extends G
 			throw new ObjectIsNotARealLiteralException(value, valueClass);
 
 		}
+	}
+
+	protected Vertex getVertexForTuple(Object value, Map<String, Object> objectsBeingUpdated) {
+		return GraphUtils.getVertexForTuple(this, repository, value, objectsBeingUpdated);
+	}
+
+	protected Vertex getVertexForLiteral(Object value) {
+		return GraphUtils.getVertexForLiteral(getDriver(), value);
 	}
 
 	/**
