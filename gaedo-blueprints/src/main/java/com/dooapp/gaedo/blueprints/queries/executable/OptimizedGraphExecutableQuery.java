@@ -52,7 +52,6 @@ public class OptimizedGraphExecutableQuery extends AbstractGraphExecutableQuery 
 	 * 
 	 * @param database
 	 *            queried DB (we will get indexes on that)
-	 * @param repository TODO
 	 * @param vertexTest
 	 *            tree of vertex tests to be executed
 	 * @param sortingExpression
