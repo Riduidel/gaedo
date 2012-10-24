@@ -24,6 +24,13 @@ import com.tinkerpop.blueprints.pgm.impls.sail.SailGraph;
 import com.tinkerpop.blueprints.pgm.impls.sail.SailVertex;
 import com.tinkerpop.blueprints.pgm.oupls.sail.GraphSail;
 
+/**
+ * Do NOT use that fidner service, which should under no circumstance be considered production ready.
+ * @author ndx
+ *
+ * @param <DataType>
+ * @param <InformerType>
+ */
 public class SailGraphBackedFinderService<DataType, InformerType extends Informer<DataType>> extends
 				AbstractBluePrintsBackedFinderService<SailGraph, DataType, Informer<DataType>> {
 

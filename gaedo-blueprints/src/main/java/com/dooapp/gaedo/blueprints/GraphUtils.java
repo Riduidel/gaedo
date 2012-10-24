@@ -144,19 +144,6 @@ public class GraphUtils {
 	}
 
 	/**
-	 * Get an id for any object, provided one property can be used to define an id on it
-	 * @param database source database
-	 * @param declaredClass class which the object is a declared member of. it may not be its effective class, but its anyway the class we manage it with
-	 * @param object used object
-	 * @param idProperty id property
-	 * @return a composite id made of id container class, and the result of {@link LiteralTransformer#getVertexId(Object)}
-	 */
-	public static String getIdVertexId(Graph database, Class<?> declaredClass, Object object, Property idProperty) {
-		Object objectId = idProperty.get(object);
-		return getIdOfLiteral(declaredClass, idProperty, objectId);
-	}
-	
-	/**
 	 * get an id value for the given object whatever the object is
 	 * @param repository
 	 * @param value

@@ -33,6 +33,8 @@ import com.tinkerpop.blueprints.pgm.oupls.sail.GraphSail;
  * Notice we maintain {@link AbstractCooperantFinderService} infos about objects being accessed as String containing, in fact, vertex ids
  * @author ndx
  *
+ * @param <DataType> type of data managed by this service
+ * @param <InformerType> type of informer used to provide infos about managed data
  */
 public class IndexableGraphBackedFinderService <DataType, InformerType extends Informer<DataType>> 
 	extends AbstractBluePrintsBackedFinderService<IndexableGraph, DataType, InformerType> {

@@ -17,6 +17,10 @@ import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
 
 import com.dooapp.gaedo.blueprints.indexable.IndexableGraphBackedFinderService;
+import com.dooapp.gaedo.blueprints.strategies.BeanBasedMappingStrategy;
+import com.dooapp.gaedo.blueprints.strategies.GraphBasedMappingStrategy;
+import com.dooapp.gaedo.blueprints.strategies.GraphMappingStrategy;
+import com.dooapp.gaedo.blueprints.strategies.StrategyType;
 import com.dooapp.gaedo.blueprints.transformers.Literals;
 import com.dooapp.gaedo.blueprints.transformers.Tuples;
 import com.dooapp.gaedo.extensions.id.IdGenerator;
@@ -115,10 +119,6 @@ public abstract class AbstractBluePrintsBackedFinderService<GraphClass extends G
 	 */
 	protected final TransactionalGraph transactionSupport;
 	/**
-	 * Property used to store id
-	 */
-	private Property idProperty;
-	/**
 	 * Accelerator cache linking classes objects to the collection of properties
 	 * and cascade informations associated to persist those fields.
 	 */
@@ -126,11 +126,11 @@ public abstract class AbstractBluePrintsBackedFinderService<GraphClass extends G
 	/**
 	 * Property provider indicating what, and how, saving infos from object
 	 */
-	protected PropertyProvider propertyProvider;
+	protected final PropertyProvider propertyProvider;
 	/**
 	 * Migrator for given contained class
 	 */
-	protected Migrator migrator;
+	protected final Migrator migrator;
 	/**
 	 * Get access to the service repository to handle links between objects
 	 */
@@ -139,10 +139,30 @@ public abstract class AbstractBluePrintsBackedFinderService<GraphClass extends G
 	 * Adaptation layer
 	 */
 	protected BluePrintsPersister persister;
-	private boolean requiresIdGeneration;
+	private GraphMappingStrategy<DataType> strategy;
 
 	public AbstractBluePrintsBackedFinderService(GraphClass graph, Class<DataType> containedClass, Class<InformerType> informerClass, InformerFactory factory,
 					ServiceRepository repository, PropertyProvider provider) {
+		this(graph, containedClass, informerClass, factory, repository, provider, StrategyType.beanBased);
+	}
+
+	/**
+	 * Constructor defining a service using a strategy type
+	 * @param graph
+	 * @param containedClass
+	 * @param informerClass
+	 * @param factory
+	 * @param repository2
+	 * @param provider
+	 * @param beanbased
+	 */
+	public AbstractBluePrintsBackedFinderService(GraphClass graph, Class<DataType> containedClass, Class<InformerType> informerClass, InformerFactory factory,
+					ServiceRepository repository, PropertyProvider provider, StrategyType strategy) {
+		this(graph, containedClass, informerClass, factory, repository, provider, loadStrategyFor(strategy, containedClass, provider, VersionMigratorFactory.create(containedClass)));
+	}
+
+	public AbstractBluePrintsBackedFinderService(GraphClass graph, Class<DataType> containedClass, Class<InformerType> informerClass, InformerFactory factory,
+					ServiceRepository repository, PropertyProvider provider, GraphMappingStrategy strategy) {
 		super(containedClass, informerClass, factory);
 		this.repository = repository;
 		this.propertyProvider = provider;
@@ -152,15 +172,24 @@ public abstract class AbstractBluePrintsBackedFinderService<GraphClass extends G
 		} else {
 			transactionSupport = null;
 		}
-		this.idProperty = AnnotationUtils.locateIdField(provider, containedClass, Long.TYPE, Long.class, String.class);
-		this.requiresIdGeneration = idProperty.getAnnotation(GeneratedValue.class) != null;
 		this.migrator = VersionMigratorFactory.create(containedClass);
 		// Updater builds managed nodes here
 		this.persister = new BluePrintsPersister(Kind.uri);
+		this.strategy = strategy;
 		// if there is a migrator, generate property from it
 		if (logger.isLoggable(Level.FINE)) {
-			logger.log(Level.FINE, "created graph service handling " + containedClass.getCanonicalName() + "\n" + "using as id " + idProperty + "\n"
-							+ "supporting migration ? " + (migrator != null) + "\n");
+			logger.log(Level.FINE, "created graph service handling " + containedClass.getCanonicalName());
+		}
+	}
+
+	private static GraphMappingStrategy loadStrategyFor(StrategyType strategy, Class containedClass, PropertyProvider propertyProvider, Migrator migrator) {
+		switch(strategy) {
+		case beanBased:
+			return new BeanBasedMappingStrategy(containedClass, propertyProvider, migrator);
+		case graphBased:
+			return new GraphBasedMappingStrategy();
+		default:
+			throw new UnsupportedOperationException("the StrategyType "+strategy.name()+" is not yet supported");
 		}
 	}
 
@@ -188,48 +217,6 @@ public abstract class AbstractBluePrintsBackedFinderService<GraphClass extends G
 	protected abstract Vertex createEmptyVertex(String vertexId, Class<? extends Object> valueClass);
 
 	/**
-	 * Get map linking properties to their respective cascading informations
-	 * 
-	 * @param provider
-	 *            used provider
-	 * @param searchedClass
-	 *            searched class
-	 * @return a map linking each property to all its cascading informations
-	 */
-	public Map<Property, Collection<CascadeType>> getPropertiesFor(PropertyProvider provider, Class<?> searchedClass) {
-		Map<Property, Collection<CascadeType>> returned = new HashMap<Property, Collection<CascadeType>>();
-		Property[] properties = PropertyProviderUtils.getAllProperties(provider, searchedClass);
-		for (Property p : properties) {
-			if (p.getAnnotation(OneToOne.class) != null) {
-				returned.put(p, GraphUtils.extractCascadeOf(p.getAnnotation(OneToOne.class).cascade()));
-			} else if (p.getAnnotation(OneToMany.class) != null) {
-				returned.put(p, GraphUtils.extractCascadeOf(p.getAnnotation(OneToMany.class).cascade()));
-			} else if (p.getAnnotation(ManyToMany.class) != null) {
-				returned.put(p, GraphUtils.extractCascadeOf(p.getAnnotation(ManyToMany.class).cascade()));
-			} else if (p.getAnnotation(ManyToOne.class) != null) {
-				returned.put(p, GraphUtils.extractCascadeOf(p.getAnnotation(ManyToOne.class).cascade()));
-			} else {
-				returned.put(p, new LinkedList<CascadeType>());
-			}
-		}
-		// And, if class is the contained one, add the (potential) Migrator
-		// property
-		if (this.migrator != null) {
-			// Migrator has no cascade to be done on
-			returned.put(migrator.getMigratorProperty(returned.keySet()), new LinkedList<CascadeType>());
-		}
-		// Finally, create a fake "classesCollection" property and add it to
-		// property
-		try {
-			returned.put(new ClassCollectionProperty(containedClass), new LinkedList<CascadeType>());
-			returned.put(new TypeProperty(containedClass), new LinkedList<CascadeType>());
-		} catch (Exception e) {
-			logger.log(Level.SEVERE, "what ? a class without a \"class\" field ? WTF", e);
-		}
-		return returned;
-	}
-
-	/**
 	 * To put object in graph, we have to find all its fields, then put them in
 	 * graph elements. Notice this method directly calls
 	 * {@link #doUpdate(Object, CascadeType, Map)}, just checking before that if
@@ -249,21 +236,6 @@ public abstract class AbstractBluePrintsBackedFinderService<GraphClass extends G
 				return doUpdate(toCreate, CascadeType.PERSIST, new TreeMap<String, Object>());
 			}
 		}.perform();
-	}
-
-	private void generateIdFor(DataType toCreate) {
-		IdGenerator generator = null;
-		Class<?> objectType = Utils.maybeObjectify(idProperty.getType());
-		if (Long.class.isAssignableFrom(objectType)) {
-			generator = new LongGenerator(this, idProperty);
-		} else if (Integer.class.isAssignableFrom(objectType)) {
-			generator = new IntegerGenerator(this, idProperty);
-		} else if (String.class.isAssignableFrom(objectType)) {
-			generator = new StringGenerator(this, idProperty);
-		} else {
-			throw new UnsupportedIdTypeException(objectType + " can't be used as id : we don't know how to generate its values !");
-		}
-		generator.generateIdFor(toCreate);
 	}
 
 	/**
@@ -292,7 +264,7 @@ public abstract class AbstractBluePrintsBackedFinderService<GraphClass extends G
 	 * @param toDelete
 	 */
 	private void doDelete(DataType toDelete, Map<String, Object> objectsBeingAccessed) {
-		String vertexId = getIdVertexId(toDelete, idProperty, false /*
+		String vertexId = getIdVertexId(toDelete, false /*
 																	 * no id
 																	 * generation
 																	 * on delete
@@ -349,15 +321,7 @@ public abstract class AbstractBluePrintsBackedFinderService<GraphClass extends G
 	}
 
 	public Map<Property, Collection<CascadeType>> getContainedProperties(DataType object) {
-		Class<? extends Object> objectClass = object.getClass();
-		return getContainedProperties(objectClass);
-	}
-
-	public Map<Property, Collection<CascadeType>> getContainedProperties(Class<? extends Object> objectClass) {
-		if (!classes.containsKey(objectClass)) {
-			classes.put(objectClass, getPropertiesFor(propertyProvider, objectClass));
-		}
-		return classes.get(objectClass);
+		return strategy.getContainedProperties(object);
 	}
 
 	/**
@@ -370,7 +334,7 @@ public abstract class AbstractBluePrintsBackedFinderService<GraphClass extends G
 	 * @return first matching node if found, and null if not
 	 */
 	private Vertex getIdVertexFor(DataType object, boolean allowIdGeneration) {
-		return loadVertexFor(getIdVertexId(object, idProperty, allowIdGeneration), object.getClass().getName());
+		return loadVertexFor(getIdVertexId(object, allowIdGeneration), object.getClass().getName());
 	}
 
 	/**
@@ -378,8 +342,6 @@ public abstract class AbstractBluePrintsBackedFinderService<GraphClass extends G
 	 * 
 	 * @param object
 	 *            object for which we want the id vertex id property
-	 * @param idProperty
-	 *            property used to extract id from object
 	 * @param requiresIdGeneration
 	 *            set to true when effective id generation is required. Allow to
 	 *            generate id only on create operations
@@ -387,20 +349,11 @@ public abstract class AbstractBluePrintsBackedFinderService<GraphClass extends G
 	 *         the the instance value
 	 * @see GraphUtils#getIdVertexId(IndexableGraph, Class, Object, Property)
 	 */
-	private String getIdVertexId(DataType object, Property idProperty, boolean requiresIdGeneration) {
+	private String getIdVertexId(DataType object, boolean requiresIdGeneration) {
 		if (requiresIdGeneration) {
-			// Check value of idProperty
-			Object value = idProperty.get(object);
-			if (value == null) {
-				generateIdFor(object);
-			} else if (Number.class.isAssignableFrom(Utils.maybeObjectify(idProperty.getType()))) {
-				Number n = (Number) value;
-				if (n.equals(0) || n.equals(0l)) {
-					generateIdFor(object);
-				}
-			}
+			strategy.generateValidIdFor(this, object);
 		}
-		return GraphUtils.getIdVertexId(database, object.getClass(), object, idProperty);
+		return strategy.getIdString(object);
 	}
 
 	/**
@@ -411,7 +364,7 @@ public abstract class AbstractBluePrintsBackedFinderService<GraphClass extends G
 	 * @return id of that object
 	 */
 	public Object getIdOf(DataType data) {
-		return getIdVertexId(data, idProperty, false);
+		return getIdVertexId(data, false);
 	}
 
 	@Override
@@ -440,8 +393,8 @@ public abstract class AbstractBluePrintsBackedFinderService<GraphClass extends G
 	 *            map of objects already used
 	 */
 	private DataType doUpdate(DataType toUpdate, CascadeType cascade, Map<String, Object> treeMap) {
-		boolean generatesId = requiresIdGeneration ? (CascadeType.PERSIST == cascade) : false;
-		String objectVertexId = getIdVertexId(toUpdate, idProperty, generatesId);
+		boolean generatesId = strategy.isIdGenerationRequired() ? (CascadeType.PERSIST == cascade) : false;
+		String objectVertexId = getIdVertexId(toUpdate, generatesId);
 		Vertex objectVertex = loadVertexFor(objectVertexId, toUpdate.getClass().getName());
 		return (DataType) persister.performUpdate(this, objectVertexId, objectVertex, toUpdate.getClass(), getContainedProperties(toUpdate), toUpdate, cascade,
 						treeMap);
@@ -597,39 +550,40 @@ public abstract class AbstractBluePrintsBackedFinderService<GraphClass extends G
 	@Override
 	public DataType findById(final Object... id) {
 		// make sure entered type is a valid one
-		if (Utils.maybeObjectify(idProperty.getType()).isAssignableFrom(Utils.maybeObjectify(id[0].getClass()))) {
-			String vertexIdValue = GraphUtils.getIdOfLiteral(containedClass, idProperty, id[0]).toString();
-			Vertex rootVertex = loadVertexFor(vertexIdValue, containedClass.getName());
-			if (rootVertex == null) {
-				try {
-					// root vertex couldn't be found directly, mostly due to
-					// https://github.com/Riduidel/gaedo/issues/11
-					// So perform the longer (but always working) query
-					return find().matching(new QueryBuilder<InformerType>() {
+		String vertexIdValue = strategy.getAsId(id[0]);
+		Vertex rootVertex = loadVertexFor(vertexIdValue, containedClass.getName());
+		if (rootVertex == null) {
+			try {
+				// root vertex couldn't be found directly, mostly due to
+				// https://github.com/Riduidel/gaedo/issues/11
+				// So perform the longer (but always working) query
+				return find().matching(new QueryBuilder<InformerType>() {
 
-						@Override
-						public QueryExpression createMatchingExpression(InformerType informer) {
-							return informer.get(idProperty.getName()).equalsTo(id[0]);
+					@Override
+					public QueryExpression createMatchingExpression(InformerType informer) {
+						Collection<QueryExpression> ands = new LinkedList<QueryExpression>();
+						int index=0;
+						for(Property idProperty : strategy.getIdProperties()) {
+							ands.add(informer.get(idProperty.getName()).equalsTo(id[index++]));
 						}
-					}).getFirst();
-				} catch (NoReturnableVertexException e) {
-					// due to getFirst semantics, an exception has to be thrown
-					// when no entry is found, which is off lesser interest
-					// here, that why we catch it to return null instead
-					return null;
-				}
-			} else {
-				// root vertex can be directly found ! so load it immediatly
-				return loadObject(vertexIdValue, new TreeMap<String, Object>());
+						return Expressions.and(ands.toArray(new QueryExpression[ands.size()]));
+					}
+				}).getFirst();
+			} catch (NoReturnableVertexException e) {
+				// due to getFirst semantics, an exception has to be thrown
+				// when no entry is found, which is off lesser interest
+				// here, that why we catch it to return null instead
+				return null;
 			}
 		} else {
-			throw new UnsupportedIdException(id[0].getClass(), idProperty.getType());
+			// root vertex can be directly found ! so load it immediatly
+			return loadObject(vertexIdValue, new TreeMap<String, Object>());
 		}
 	}
 
 	@Override
 	public Collection<Property> getIdProperties() {
-		return Arrays.asList(idProperty);
+		return strategy.getIdProperties();
 	}
 
 	/**
@@ -678,7 +632,7 @@ public abstract class AbstractBluePrintsBackedFinderService<GraphClass extends G
 		 * we can then use value class to create id vertex
 		 */
 		if (containedClass.isInstance(value)) {
-			idProperty.set(value, id[0]);
+			strategy.assignId(value, id);
 			if (getIdVertexFor(value, false /*
 											 * no id generation when assigning
 											 * an id !
@@ -688,7 +642,7 @@ public abstract class AbstractBluePrintsBackedFinderService<GraphClass extends G
 
 						@Override
 						protected Boolean doPerform() {
-							String idVertexId = getIdVertexId(value, idProperty, requiresIdGeneration);
+							String idVertexId = getIdVertexId(value, strategy.isIdGenerationRequired());
 							Vertex returned = getDriver().createEmptyVertex(value.getClass(), idVertexId);
 							getDriver().setValue(returned, idVertexId);
 							return true;
@@ -707,22 +661,12 @@ public abstract class AbstractBluePrintsBackedFinderService<GraphClass extends G
 	}
 
 	/**
-	 * @param requiresIdGeneration
-	 *            the requiresIdGeneration to set
-	 * @category setter
-	 * @category requiresIdGeneration
-	 */
-	void setRequiresIdGeneration(boolean requiresIdGeneration) {
-		this.requiresIdGeneration = requiresIdGeneration;
-	}
-
-	/**
 	 * @return the requiresIdGeneration
 	 * @category getter
 	 * @category requiresIdGeneration
 	 */
 	public boolean isRequiresIdGeneration() {
-		return requiresIdGeneration;
+		return strategy.isIdGenerationRequired();
 	}
 
 	/**
