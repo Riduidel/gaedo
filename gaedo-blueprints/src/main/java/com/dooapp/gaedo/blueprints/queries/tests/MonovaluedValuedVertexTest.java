@@ -18,7 +18,7 @@ import com.tinkerpop.blueprints.pgm.Vertex;
 /**
  * Base class for all simple tests (like contains, greater than, ...).
  * Notice {@link #expected} is used for both direct value comparison (for literals) and id check (for managed objects).
- * This is done by asking the {@link TargettedVertexTest#repository} if {@link #expected} is a managed value
+ * This is done by asking the {@link TargettedVertexTest#serviceRrepository} if {@link #expected} is a managed value
  * 
  * @author ndx
  *
