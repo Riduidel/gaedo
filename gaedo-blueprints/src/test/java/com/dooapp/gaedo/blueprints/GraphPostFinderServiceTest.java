@@ -288,7 +288,7 @@ public class GraphPostFinderServiceTest extends AbstractGraphTest {
 		assertThat(first.associatedData, Is.is((Serializable) value));
 	}
 
-	@Test @Ignore
+	@Test
 	public void ensurePostIdCanBeGenerated() throws IOException, ClassNotFoundException {
 		Post newOne = new Post().withText("some text");
 		assertThat(newOne.id, Is.is(0l));
@@ -319,7 +319,7 @@ public class GraphPostFinderServiceTest extends AbstractGraphTest {
 		assertThat(inDB.getId(), IsNot.not(0l));
 	}
 
-	@Test @Ignore
+	@Test
 	public void ensureUpdateOnCreateWorks() throws IOException, ClassNotFoundException {
 		Post newxONe = new Post().withText(SOME_NEW_TEXT).withAuthor(author);
 		author.setLogin(LOGIN_FOR_UPDATE_ON_CREATE);
@@ -350,7 +350,7 @@ public class GraphPostFinderServiceTest extends AbstractGraphTest {
 		}
 	}
 	
-	@Test @Ignore
+	@Test
 	public void ensureMapWorksInAllCases() throws Exception {
 		Post newxONe = new Post().withText(SOME_NEW_TEXT).withAuthor(author);
 		final long id = newxONe.id;
@@ -371,7 +371,7 @@ public class GraphPostFinderServiceTest extends AbstractGraphTest {
 		}
 	}
 	
-	@Test @Ignore
+	@Test
 	public void ensureMapCanBeEmptiedForIssue13() throws Exception {
 		final String text = "#ensureMapCanBeEmptiedForIssue13";
 		Post newxONe = new Post().withText(text).withAuthor(author);

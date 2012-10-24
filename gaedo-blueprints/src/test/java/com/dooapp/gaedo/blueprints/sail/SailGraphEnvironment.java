@@ -17,8 +17,8 @@ public class SailGraphEnvironment extends AbstractGraphEnvironment<SailGraph> {
 	}
 
 
-	protected <Type, InformerType extends Informer<Type>> FinderCrudService<Type, InformerType> createServiceFor(Class<Type> beanClass, Class<InformerType> informerClass) {
-		return new SailGraphBackedFinderService(beanClass, informerClass, proxyInformerFactory, repository, provider, graph);
+	public <Type, InformerType extends Informer<Type>> FinderCrudService<Type, InformerType> createServiceFor(Class<Type> beanClass, Class<InformerType> informerClass) {
+		return new SailGraphBackedFinderService(beanClass, informerClass, getInformerFactory(), getServiceRrepository(), getProvider(), graph);
 	}
 
 
@@ -34,7 +34,7 @@ public class SailGraphEnvironment extends AbstractGraphEnvironment<SailGraph> {
 
 
 	@Override
-	public SailRepository getRepository() {
+	public SailRepository getSailRepository() {
 		SailRepository sailRepository = new SailRepository(graph.getRawGraph());
 		return sailRepository;
 	}

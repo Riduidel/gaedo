@@ -22,12 +22,12 @@ public class IndexableGraphEnvironment extends AbstractGraphEnvironment<Indexabl
 	}
 
 	@Override
-	protected <Type, InformerType extends Informer<Type>> FinderCrudService<Type, InformerType> createServiceFor(Class<Type> beanClass, Class<InformerType> informerClass)  {
-		return new IndexableGraphBackedFinderService(beanClass, informerClass, proxyInformerFactory, repository, provider, graph);
+	public <Type, InformerType extends Informer<Type>> FinderCrudService<Type, InformerType> createServiceFor(Class<Type> beanClass, Class<InformerType> informerClass)  {
+		return new IndexableGraphBackedFinderService(beanClass, informerClass, getInformerFactory(), getServiceRrepository(), getProvider(), graph);
 	}
 
 	@Override
-	public SailRepository getRepository() {
+	public SailRepository getSailRepository() {
 		return new SailRepository(new GraphSail(graph));
 	}
 

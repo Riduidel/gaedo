@@ -79,7 +79,7 @@ public class AbstractGraphTest  {
 
 
 	protected SailRepository getRepository() {
-		return environment.getRepository();
+		return environment.getSailRepository();
 	}
 
 }

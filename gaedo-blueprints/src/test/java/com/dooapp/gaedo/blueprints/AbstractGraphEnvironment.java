@@ -3,6 +3,7 @@ package com.dooapp.gaedo.blueprints;
 import java.io.File;
 
 import org.junit.After;
+import org.neo4j.kernel.impl.util.FileUtils;
 import org.openrdf.repository.sail.SailRepository;
 
 import com.dooapp.gaedo.blueprints.beans.PostSubClass;
@@ -13,10 +14,13 @@ import com.dooapp.gaedo.finders.repository.ServiceBackedFieldLocator;
 import com.dooapp.gaedo.finders.repository.SimpleServiceRepository;
 import com.dooapp.gaedo.finders.root.BasicFieldInformerLocator;
 import com.dooapp.gaedo.finders.root.CumulativeFieldInformerLocator;
+import com.dooapp.gaedo.finders.root.FieldInformerLocator;
+import com.dooapp.gaedo.finders.root.InformerFactory;
 import com.dooapp.gaedo.finders.root.LazyInterfaceInformerLocator;
 import com.dooapp.gaedo.finders.root.ProxyBackedInformerFactory;
 import com.dooapp.gaedo.finders.root.ReflectionBackedInformerFactory;
 import com.dooapp.gaedo.properties.FieldBackedPropertyProvider;
+import com.dooapp.gaedo.properties.PropertyProvider;
 import com.dooapp.gaedo.test.beans.Post;
 import com.dooapp.gaedo.test.beans.PostInformer;
 import com.dooapp.gaedo.test.beans.Tag;
@@ -37,9 +41,9 @@ public abstract class AbstractGraphEnvironment<GraphType extends Graph> {
 
 	protected String name;
 	protected GraphType graph;
-	protected SimpleServiceRepository repository;
+	protected SimpleServiceRepository serviceRrepository;
 	protected GraphProvider graphProvider;
-	protected FieldBackedPropertyProvider provider;
+	protected PropertyProvider provider;
 	protected CumulativeFieldInformerLocator locator;
 	protected ReflectionBackedInformerFactory reflectiveFactory;
 	protected ProxyBackedInformerFactory proxyInformerFactory;
@@ -58,17 +62,18 @@ public abstract class AbstractGraphEnvironment<GraphType extends Graph> {
 	public void unload() throws Exception {
 		if(graph!=null) {
 			graph.shutdown();
+			graph = null;
 		}
-		File f = new File(GraphProvider.GRAPH_DIR);
-		f.delete();
+		File f = new File(graphPath());
+		FileUtils.deleteRecursively(f);
 	}
 
 	public void loadService() throws Exception {
-		repository = new SimpleServiceRepository();
+		serviceRrepository = new SimpleServiceRepository();
 		provider = new FieldBackedPropertyProvider();
 		locator = new CumulativeFieldInformerLocator();
 		locator.add(new BasicFieldInformerLocator());
-		locator.add(new ServiceBackedFieldLocator(repository));
+		locator.add(new ServiceBackedFieldLocator(serviceRrepository));
 		locator.add(new LazyInterfaceInformerLocator());
 		reflectiveFactory = new ReflectionBackedInformerFactory(
 				locator, provider);
@@ -78,23 +83,23 @@ public abstract class AbstractGraphEnvironment<GraphType extends Graph> {
 		graph = createGraph(graphProvider);
 		
 		// Now add some services
-		repository.add(createServiceFor(Tag.class, TagInformer.class));
-		repository.add(createServiceFor(Post.class, PostInformer.class));
-		repository.add(createServiceFor(PostSubClass.class, PostSubClassInformer.class));
-		repository.add(createServiceFor(User.class, UserInformer.class));
-		repository.add(createServiceFor(Theme.class, ThemeInformer.class));
+		serviceRrepository.add(createServiceFor(Tag.class, TagInformer.class));
+		serviceRrepository.add(createServiceFor(Post.class, PostInformer.class));
+		serviceRrepository.add(createServiceFor(PostSubClass.class, PostSubClassInformer.class));
+		serviceRrepository.add(createServiceFor(User.class, UserInformer.class));
+		serviceRrepository.add(createServiceFor(Theme.class, ThemeInformer.class));
 		
 		// and reference them
-		tagService = repository.get(Tag.class);
-		postService = repository.get(Post.class);
-		postSubService= repository.get(PostSubClass.class);
-		userService = repository.get(User.class);
-		themeService = repository.get(Theme.class);
+		tagService = serviceRrepository.get(Tag.class);
+		postService = serviceRrepository.get(Post.class);
+		postSubService= serviceRrepository.get(PostSubClass.class);
+		userService = serviceRrepository.get(User.class);
+		themeService = serviceRrepository.get(Theme.class);
 	}
 
 	protected abstract GraphType createGraph(GraphProvider graphProvider);
 
-	protected abstract <Type, InformerType extends Informer<Type>> FinderCrudService<Type, InformerType> createServiceFor(Class<Type> beanClass, Class<InformerType> informerClass);
+	public abstract <Type, InformerType extends Informer<Type>> FinderCrudService<Type, InformerType> createServiceFor(Class<Type> beanClass, Class<InformerType> informerClass);
 
 	/**
 	 * @return the tagService
@@ -136,7 +141,7 @@ public abstract class AbstractGraphEnvironment<GraphType extends Graph> {
 	 * Create a sail repository out of given graph
 	 * @return
 	 */
-	public abstract SailRepository getRepository();
+	public abstract SailRepository getSailRepository();
 	
 	/**
 	 * Get a path where test data can be stored
@@ -145,5 +150,77 @@ public abstract class AbstractGraphEnvironment<GraphType extends Graph> {
 
 	public String graphPath() {
 		return graphProvider.path(usablePath());
+	}
+
+	/**
+	 * @return the provider
+	 * @category getter
+	 * @category provider
+	 */
+	public PropertyProvider getProvider() {
+		return provider;
+	}
+
+	/**
+	 * @param provider the provider to set
+	 * @category setter
+	 * @category provider
+	 */
+	public void setProvider(PropertyProvider provider) {
+		this.provider = provider;
+	}
+
+	/**
+	 * @return the locator
+	 * @category getter
+	 * @category locator
+	 */
+	public CumulativeFieldInformerLocator getLocator() {
+		return locator;
+	}
+
+	/**
+	 * @param locator the locator to set
+	 * @category setter
+	 * @category locator
+	 */
+	public void setLocator(CumulativeFieldInformerLocator locator) {
+		this.locator = locator;
+	}
+
+	/**
+	 * @return the reflectiveFactory
+	 * @category getter
+	 * @category reflectiveFactory
+	 */
+	public ReflectionBackedInformerFactory getReflectiveFactory() {
+		return reflectiveFactory;
+	}
+
+	/**
+	 * @return the proxyInformerFactory
+	 * @category getter
+	 * @category proxyInformerFactory
+	 */
+	public InformerFactory getInformerFactory() {
+		return proxyInformerFactory;
+	}
+
+	/**
+	 * @return the serviceRrepository
+	 * @category getter
+	 * @category serviceRrepository
+	 */
+	public SimpleServiceRepository getServiceRrepository() {
+		return serviceRrepository;
+	}
+
+	/**
+	 * @param serviceRrepository the serviceRrepository to set
+	 * @category setter
+	 * @category serviceRrepository
+	 */
+	public void setServiceRrepository(SimpleServiceRepository serviceRrepository) {
+		this.serviceRrepository = serviceRrepository;
 	}
 }
