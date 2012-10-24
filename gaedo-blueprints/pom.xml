@@ -10,9 +10,6 @@
 	<artifactId>gaedo-blueprints</artifactId>
 	<name>Gaedo blueprints backed services</name>
 	<description>Implementation of gaedo mechanisms backed by blueprints graph layer</description>
-	<properties>
-		<blueprints.version>1.1</blueprints.version>
-	</properties>
 	<dependencies>
 		<dependency>
 			<groupId>org.apache.geronimo.specs</groupId>
@@ -76,6 +73,18 @@
 				<configuration>
 					<argLine>-Xmx800m</argLine>
 				</configuration>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-jar-plugin</artifactId>
+				<executions>
+					<!-- attach test jars to reuse them in gaedo-dynabeans -->
+					<execution>
+						<goals>
+							<goal>test-jar</goal>
+						</goals>
+					</execution>
+				</executions>
 			</plugin>
 		</plugins>
 	</build>
