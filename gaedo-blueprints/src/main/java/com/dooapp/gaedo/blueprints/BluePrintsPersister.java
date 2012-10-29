@@ -8,9 +8,8 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
-import java.util.Set;
-import java.util.UUID;
 import java.util.Map.Entry;
+import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -20,7 +19,6 @@ import javax.persistence.ManyToMany;
 import javax.persistence.OneToMany;
 
 import com.dooapp.gaedo.blueprints.indexable.IndexableGraphBackedFinderService;
-import com.dooapp.gaedo.finders.Informer;
 import com.dooapp.gaedo.finders.id.AnnotationsFinder.Annotations;
 import com.dooapp.gaedo.finders.repository.ServiceRepository;
 import com.dooapp.gaedo.patterns.WriteReplaceable;
@@ -28,7 +26,6 @@ import com.dooapp.gaedo.properties.Property;
 import com.dooapp.gaedo.utils.Utils;
 import com.tinkerpop.blueprints.pgm.Edge;
 import com.tinkerpop.blueprints.pgm.Graph;
-import com.tinkerpop.blueprints.pgm.IndexableGraph;
 import com.tinkerpop.blueprints.pgm.Vertex;
 
 public class BluePrintsPersister {
@@ -408,10 +405,11 @@ public class BluePrintsPersister {
 			ClassLoader classLoader = service.getContainedClass().getClassLoader();
 			ServiceRepository repository = service.getRepository();
 			DataType returned = (DataType) GraphUtils.createInstance(service.getDriver(), classLoader, objectVertex, Object.class /* we use object here, as this default type should not be used */, repository, objectsBeingAccessed);
-			Map<Property, Collection<CascadeType>> containedProperties = service.getContainedProperties(returned);
+			Map<Property, Collection<CascadeType>> containedProperties = service.getStrategy().getContainedProperties(returned, objectVertex, CascadeType.MERGE);
 			try {
 				objectsBeingAccessed.put(objectVertexId, returned);
 				loadObjectProperties(service.getDriver(), classLoader, repository, objectVertex, returned, containedProperties, objectsBeingAccessed);
+				service.getStrategy().loaded(objectVertex, returned);
 				return returned;
 			} finally {
 //				objectsBeingAccessed.remove(objectVertexId);
@@ -486,10 +484,9 @@ public class BluePrintsPersister {
 			if(repository.containsKey(value.getClass())) {
 				// value requires fields loading
 				IndexableGraphBackedFinderService blueprints= (IndexableGraphBackedFinderService) repository.get(value.getClass());
-				p.set(returned, loadObject(blueprints, firstVertex, objectsBeingAccessed));
-			} else {
-				p.set(returned, value);
+				value = loadObject(blueprints, firstVertex, objectsBeingAccessed);
 			}
+			p.set(returned, value);
 		}
 		// TODO test unsupported multi-values
 	}

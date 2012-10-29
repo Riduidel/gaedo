@@ -1,10 +1,4 @@
 package com.dooapp.gaedo.blueprints;
-import static com.dooapp.gaedo.blueprints.TestUtils.*;
-
-import static org.junit.Assert.assertThat;
-
-import java.io.File;
-import java.net.MalformedURLException;
 import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
@@ -15,7 +9,6 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.hamcrest.core.Is;
-import org.hamcrest.core.IsNot;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Ignore;
@@ -24,29 +17,18 @@ import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 import org.junit.runners.Parameterized.Parameters;
 
-import com.dooapp.gaedo.blueprints.indexable.IndexableGraphBackedFinderService;
-import com.dooapp.gaedo.blueprints.providers.Neo4j;
-import com.dooapp.gaedo.finders.FinderCrudService;
-import com.dooapp.gaedo.finders.Informer;
 import com.dooapp.gaedo.finders.QueryBuilder;
 import com.dooapp.gaedo.finders.QueryExpression;
-import com.dooapp.gaedo.finders.repository.ServiceBackedFieldLocator;
-import com.dooapp.gaedo.finders.repository.SimpleServiceRepository;
-import com.dooapp.gaedo.finders.root.BasicFieldInformerLocator;
-import com.dooapp.gaedo.finders.root.CumulativeFieldInformerLocator;
-import com.dooapp.gaedo.finders.root.InformerFactory;
-import com.dooapp.gaedo.finders.root.ProxyBackedInformerFactory;
-import com.dooapp.gaedo.finders.root.ReflectionBackedInformerFactory;
-import com.dooapp.gaedo.properties.FieldBackedPropertyProvider;
-import com.dooapp.gaedo.properties.PropertyProvider;
 import com.dooapp.gaedo.test.beans.Post;
-import com.dooapp.gaedo.test.beans.PostInformer;
 import com.dooapp.gaedo.test.beans.State;
 import com.dooapp.gaedo.test.beans.Tag;
 import com.dooapp.gaedo.test.beans.TagInformer;
 import com.dooapp.gaedo.test.beans.User;
-import com.dooapp.gaedo.test.beans.UserInformer;
-import com.tinkerpop.blueprints.pgm.IndexableGraph;
+
+import static com.dooapp.gaedo.blueprints.TestUtils.A;
+import static com.dooapp.gaedo.blueprints.TestUtils.loadTest;
+
+import static org.junit.Assert.assertThat;
 
 @Ignore
 @RunWith(Parameterized.class)

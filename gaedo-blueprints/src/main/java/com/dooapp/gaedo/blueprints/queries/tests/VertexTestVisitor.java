@@ -73,4 +73,6 @@ public interface VertexTestVisitor extends Visitor {
 
 	void visit(EqualsTo equalsTo);
 
+	void visit(VertexPropertyTest vertexPropertyTest);
+
 }

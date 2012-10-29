@@ -56,8 +56,8 @@ public class TargettedVertexTest {
 
 	/**
 	 * Builds the vertex test
-	 * @param driver TODO
-	 * @param path
+	 * @param driver database driver to perform common rehydration operations
+	 * @param path property path to navigate to that particular test.
 	 */
 	public TargettedVertexTest(GraphDatabaseDriver driver, Iterable<Property> path) {
 		this.path = path;

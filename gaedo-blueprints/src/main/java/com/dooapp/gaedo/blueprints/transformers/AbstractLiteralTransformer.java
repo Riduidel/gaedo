@@ -1,9 +1,7 @@
 package com.dooapp.gaedo.blueprints.transformers;
 
 import com.dooapp.gaedo.blueprints.GraphDatabaseDriver;
-import com.dooapp.gaedo.blueprints.GraphUtils;
 import com.dooapp.gaedo.blueprints.Kind;
-import com.dooapp.gaedo.blueprints.Properties;
 import com.dooapp.gaedo.blueprints.UnableToCreateException;
 import com.dooapp.gaedo.utils.Utils;
 import com.tinkerpop.blueprints.pgm.Vertex;

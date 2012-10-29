@@ -8,13 +8,13 @@ import org.openrdf.repository.sail.SailRepository;
 
 import com.dooapp.gaedo.blueprints.beans.PostSubClass;
 import com.dooapp.gaedo.blueprints.beans.PostSubClassInformer;
+import com.dooapp.gaedo.blueprints.strategies.StrategyType;
 import com.dooapp.gaedo.finders.FinderCrudService;
 import com.dooapp.gaedo.finders.Informer;
 import com.dooapp.gaedo.finders.repository.ServiceBackedFieldLocator;
 import com.dooapp.gaedo.finders.repository.SimpleServiceRepository;
 import com.dooapp.gaedo.finders.root.BasicFieldInformerLocator;
 import com.dooapp.gaedo.finders.root.CumulativeFieldInformerLocator;
-import com.dooapp.gaedo.finders.root.FieldInformerLocator;
 import com.dooapp.gaedo.finders.root.InformerFactory;
 import com.dooapp.gaedo.finders.root.LazyInterfaceInformerLocator;
 import com.dooapp.gaedo.finders.root.ProxyBackedInformerFactory;
@@ -51,7 +51,8 @@ public abstract class AbstractGraphEnvironment<GraphType extends Graph> {
 	private FinderCrudService<Post, PostInformer> postService;
 	private FinderCrudService<PostSubClass, PostSubClassInformer> postSubService;
 	private FinderCrudService<User, UserInformer> userService;
-	private FinderCrudService<Theme, Informer<Theme>> themeService;
+	private FinderCrudService<Theme, ThemeInformer> themeService;
+	private StrategyType strategy = StrategyType.beanBased;
 
 	public AbstractGraphEnvironment(GraphProvider graph) {
 		this.name = getClass().getSimpleName()+" "+graph.getName();
@@ -83,23 +84,24 @@ public abstract class AbstractGraphEnvironment<GraphType extends Graph> {
 		graph = createGraph(graphProvider);
 		
 		// Now add some services
-		serviceRrepository.add(createServiceFor(Tag.class, TagInformer.class));
-		serviceRrepository.add(createServiceFor(Post.class, PostInformer.class));
-		serviceRrepository.add(createServiceFor(PostSubClass.class, PostSubClassInformer.class));
-		serviceRrepository.add(createServiceFor(User.class, UserInformer.class));
-		serviceRrepository.add(createServiceFor(Theme.class, ThemeInformer.class));
-		
-		// and reference them
-		tagService = serviceRrepository.get(Tag.class);
-		postService = serviceRrepository.get(Post.class);
-		postSubService= serviceRrepository.get(PostSubClass.class);
-		userService = serviceRrepository.get(User.class);
-		themeService = serviceRrepository.get(Theme.class);
+		tagService = createServiceFor(Tag.class, TagInformer.class, strategy );
+		postService = createServiceFor(Post.class, PostInformer.class, strategy);
+		postSubService= createServiceFor(PostSubClass.class, PostSubClassInformer.class, strategy);
+		userService = createServiceFor(User.class, UserInformer.class, strategy);
+		themeService = createServiceFor(Theme.class, ThemeInformer.class, strategy);
 	}
 
 	protected abstract GraphType createGraph(GraphProvider graphProvider);
 
-	public abstract <Type, InformerType extends Informer<Type>> FinderCrudService<Type, InformerType> createServiceFor(Class<Type> beanClass, Class<InformerType> informerClass);
+	public final <Type, InformerType extends Informer<Type>> FinderCrudService<Type, InformerType> createServiceFor(Class<Type> beanClass, Class<InformerType> informerClass, StrategyType strategy) {
+		if(!serviceRrepository.containsKey(beanClass)) {
+			FinderCrudService<Type, InformerType> created = doCreateServiceFor(beanClass, informerClass, strategy);
+			serviceRrepository.add(created);
+		}
+		return serviceRrepository.get(beanClass);
+	}
+
+	protected abstract <Type, InformerType extends Informer<Type>> FinderCrudService<Type, InformerType> doCreateServiceFor(Class<Type> beanClass, Class<InformerType> informerClass, StrategyType strategy);
 
 	/**
 	 * @return the tagService

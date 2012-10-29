@@ -1,11 +1,8 @@
 package com.dooapp.gaedo.blueprints;
 
-import java.io.File;
 import java.util.Collection;
 import java.util.logging.Logger;
 
-import org.junit.After;
-import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.internal.matchers.StringContains;
@@ -13,15 +10,10 @@ import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 import org.junit.runners.Parameterized.Parameters;
 
-import com.dooapp.gaedo.finders.FinderCrudService;
 import com.dooapp.gaedo.finders.QueryBuilder;
 import com.dooapp.gaedo.finders.QueryExpression;
-import com.dooapp.gaedo.finders.repository.SimpleServiceRepository;
-import com.dooapp.gaedo.test.beans.Post;
-import com.dooapp.gaedo.test.beans.PostInformer;
 import com.dooapp.gaedo.test.beans.Tag;
 import com.dooapp.gaedo.test.beans.TagInformer;
-import com.tinkerpop.blueprints.pgm.IndexableGraph;
 
 import static org.junit.Assert.assertThat;
 

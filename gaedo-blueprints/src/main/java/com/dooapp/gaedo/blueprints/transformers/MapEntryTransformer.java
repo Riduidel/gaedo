@@ -1,6 +1,5 @@
 package com.dooapp.gaedo.blueprints.transformers;
 
-import java.beans.IntrospectionException;
 import java.beans.PropertyDescriptor;
 import java.util.Collection;
 import java.util.LinkedHashMap;
@@ -13,8 +12,6 @@ import javax.persistence.CascadeType;
 import com.dooapp.gaedo.blueprints.AbstractBluePrintsBackedFinderService;
 import com.dooapp.gaedo.blueprints.BluePrintsCrudServiceException;
 import com.dooapp.gaedo.blueprints.GraphUtils;
-import com.dooapp.gaedo.blueprints.indexable.IndexableGraphBackedFinderService;
-import com.dooapp.gaedo.finders.repository.ServiceRepository;
 import com.dooapp.gaedo.properties.DescribedProperty;
 import com.dooapp.gaedo.properties.Property;
 import com.tinkerpop.blueprints.pgm.Graph;

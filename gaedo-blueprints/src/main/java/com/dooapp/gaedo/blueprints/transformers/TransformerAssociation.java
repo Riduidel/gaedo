@@ -1,5 +1,7 @@
 package com.dooapp.gaedo.blueprints.transformers;
 
+import java.util.Collection;
+
 public interface TransformerAssociation<TransformerKind extends Transformer> {
 
 	Class<?> getDataClass();

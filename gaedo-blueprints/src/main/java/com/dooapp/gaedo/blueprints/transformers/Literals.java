@@ -1,10 +1,7 @@
 package com.dooapp.gaedo.blueprints.transformers;
 
-import java.io.Serializable;
 import java.lang.reflect.Type;
 import java.util.Date;
-
-import com.dooapp.gaedo.utils.Utils;
 
 /**
  * An helper class allowing easy literal transformer lookup

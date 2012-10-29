@@ -1,6 +1,5 @@
 package com.dooapp.gaedo.blueprints.transformers;
 
-import com.tinkerpop.blueprints.pgm.Vertex;
 
 public class BooleanLiteralTransformer extends AbstractSimpleLiteralTransformer<Boolean> implements LiteralTransformer<Boolean> {
 	public BooleanLiteralTransformer() {

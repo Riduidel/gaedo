@@ -1,6 +1,5 @@
 package com.dooapp.gaedo.blueprints;
 
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -10,23 +9,13 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import javax.persistence.CascadeType;
-import javax.persistence.GeneratedValue;
-import javax.persistence.ManyToMany;
-import javax.persistence.ManyToOne;
-import javax.persistence.OneToMany;
-import javax.persistence.OneToOne;
 
 import com.dooapp.gaedo.blueprints.indexable.IndexableGraphBackedFinderService;
-import com.dooapp.gaedo.blueprints.strategies.BeanBasedMappingStrategy;
-import com.dooapp.gaedo.blueprints.strategies.GraphBasedMappingStrategy;
 import com.dooapp.gaedo.blueprints.strategies.GraphMappingStrategy;
 import com.dooapp.gaedo.blueprints.strategies.StrategyType;
+import com.dooapp.gaedo.blueprints.strategies.StrategyUtils;
 import com.dooapp.gaedo.blueprints.transformers.Literals;
 import com.dooapp.gaedo.blueprints.transformers.Tuples;
-import com.dooapp.gaedo.extensions.id.IdGenerator;
-import com.dooapp.gaedo.extensions.id.IntegerGenerator;
-import com.dooapp.gaedo.extensions.id.LongGenerator;
-import com.dooapp.gaedo.extensions.id.StringGenerator;
 import com.dooapp.gaedo.extensions.migrable.Migrator;
 import com.dooapp.gaedo.extensions.migrable.VersionMigratorFactory;
 import com.dooapp.gaedo.finders.FinderCrudService;
@@ -35,17 +24,12 @@ import com.dooapp.gaedo.finders.QueryBuilder;
 import com.dooapp.gaedo.finders.QueryExpression;
 import com.dooapp.gaedo.finders.QueryStatement;
 import com.dooapp.gaedo.finders.expressions.Expressions;
-import com.dooapp.gaedo.finders.id.AnnotationUtils;
 import com.dooapp.gaedo.finders.id.IdBasedService;
 import com.dooapp.gaedo.finders.repository.ServiceRepository;
 import com.dooapp.gaedo.finders.root.AbstractFinderService;
 import com.dooapp.gaedo.finders.root.InformerFactory;
-import com.dooapp.gaedo.properties.ClassCollectionProperty;
 import com.dooapp.gaedo.properties.Property;
 import com.dooapp.gaedo.properties.PropertyProvider;
-import com.dooapp.gaedo.properties.PropertyProviderUtils;
-import com.dooapp.gaedo.properties.TypeProperty;
-import com.dooapp.gaedo.utils.Utils;
 import com.tinkerpop.blueprints.pgm.Edge;
 import com.tinkerpop.blueprints.pgm.Graph;
 import com.tinkerpop.blueprints.pgm.IndexableGraph;
@@ -158,12 +142,13 @@ public abstract class AbstractBluePrintsBackedFinderService<GraphClass extends G
 	 */
 	public AbstractBluePrintsBackedFinderService(GraphClass graph, Class<DataType> containedClass, Class<InformerType> informerClass, InformerFactory factory,
 					ServiceRepository repository, PropertyProvider provider, StrategyType strategy) {
-		this(graph, containedClass, informerClass, factory, repository, provider, loadStrategyFor(strategy, containedClass, provider, VersionMigratorFactory.create(containedClass)));
+		this(graph, containedClass, informerClass, factory, repository, provider, 
+						StrategyUtils.loadStrategyFor(strategy, containedClass, provider, VersionMigratorFactory.create(containedClass)));
 	}
 
-	public AbstractBluePrintsBackedFinderService(GraphClass graph, Class<DataType> containedClass, Class<InformerType> informerClass, InformerFactory factory,
-					ServiceRepository repository, PropertyProvider provider, GraphMappingStrategy strategy) {
-		super(containedClass, informerClass, factory);
+	public AbstractBluePrintsBackedFinderService(GraphClass graph, Class<DataType> containedClass, Class<InformerType> informerClass, InformerFactory informerFactory,
+					ServiceRepository repository, PropertyProvider provider, GraphMappingStrategy<DataType> strategy) {
+		super(containedClass, informerClass, informerFactory);
 		this.repository = repository;
 		this.propertyProvider = provider;
 		this.database = graph;
@@ -172,25 +157,20 @@ public abstract class AbstractBluePrintsBackedFinderService<GraphClass extends G
 		} else {
 			transactionSupport = null;
 		}
+		this.strategy = strategy;
+		strategy.loadWith(this);
 		this.migrator = VersionMigratorFactory.create(containedClass);
 		// Updater builds managed nodes here
 		this.persister = new BluePrintsPersister(Kind.uri);
-		this.strategy = strategy;
 		// if there is a migrator, generate property from it
 		if (logger.isLoggable(Level.FINE)) {
 			logger.log(Level.FINE, "created graph service handling " + containedClass.getCanonicalName());
 		}
 	}
-
-	private static GraphMappingStrategy loadStrategyFor(StrategyType strategy, Class containedClass, PropertyProvider propertyProvider, Migrator migrator) {
-		switch(strategy) {
-		case beanBased:
-			return new BeanBasedMappingStrategy(containedClass, propertyProvider, migrator);
-		case graphBased:
-			return new GraphBasedMappingStrategy();
-		default:
-			throw new UnsupportedOperationException("the StrategyType "+strategy.name()+" is not yet supported");
-		}
+	
+	@Override
+	public InformerFactory getInformerFactory() {
+		return super.getInformerFactory();
 	}
 
 	protected abstract Edge addEdgeFor(Vertex fromVertex, Vertex toVertex, Property property);
@@ -271,7 +251,7 @@ public abstract class AbstractBluePrintsBackedFinderService<GraphClass extends G
 																	 */);
 		Vertex objectVertex = loadVertexFor(vertexId, toDelete.getClass().getName());
 		if (objectVertex != null) {
-			Map<Property, Collection<CascadeType>> containedProperties = getContainedProperties(toDelete);
+			Map<Property, Collection<CascadeType>> containedProperties = strategy.getContainedProperties(toDelete, objectVertex, CascadeType.REMOVE);
 			persister.performDelete(this, vertexId, objectVertex, containedClass, containedProperties, toDelete, CascadeType.REMOVE, objectsBeingAccessed);
 		}
 	}
@@ -320,10 +300,6 @@ public abstract class AbstractBluePrintsBackedFinderService<GraphClass extends G
 		}
 	}
 
-	public Map<Property, Collection<CascadeType>> getContainedProperties(DataType object) {
-		return strategy.getContainedProperties(object);
-	}
-
 	/**
 	 * Gets the id vertex for the given object (if that object exists)
 	 * 
@@ -351,7 +327,7 @@ public abstract class AbstractBluePrintsBackedFinderService<GraphClass extends G
 	 */
 	private String getIdVertexId(DataType object, boolean requiresIdGeneration) {
 		if (requiresIdGeneration) {
-			strategy.generateValidIdFor(this, object);
+			strategy.generateValidIdFor(object);
 		}
 		return strategy.getIdString(object);
 	}
@@ -396,7 +372,7 @@ public abstract class AbstractBluePrintsBackedFinderService<GraphClass extends G
 		boolean generatesId = strategy.isIdGenerationRequired() ? (CascadeType.PERSIST == cascade) : false;
 		String objectVertexId = getIdVertexId(toUpdate, generatesId);
 		Vertex objectVertex = loadVertexFor(objectVertexId, toUpdate.getClass().getName());
-		return (DataType) persister.performUpdate(this, objectVertexId, objectVertex, toUpdate.getClass(), getContainedProperties(toUpdate), toUpdate, cascade,
+		return (DataType) persister.performUpdate(this, objectVertexId, objectVertex, toUpdate.getClass(), strategy.getContainedProperties(toUpdate, objectVertex, cascade), toUpdate, cascade,
 						treeMap);
 	}
 
@@ -685,5 +661,14 @@ public abstract class AbstractBluePrintsBackedFinderService<GraphClass extends G
 	protected QueryStatement<DataType, InformerType> createQueryStatement(QueryBuilder<InformerType> query) {
 		return new GraphQueryStatement<DataType, InformerType>(query,
 						this, repository);
+	}
+
+	/**
+	 * @return the strategy
+	 * @category getter
+	 * @category strategy
+	 */
+	public GraphMappingStrategy<DataType> getStrategy() {
+		return strategy;
 	}
 }

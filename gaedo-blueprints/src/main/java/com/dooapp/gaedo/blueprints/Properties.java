@@ -16,5 +16,9 @@ public enum Properties {
 	/**
 	 * Contains the semantic version of property type
 	 */
-	type;
+	type,
+	/**
+	 * Contains the edge label (not appliable to vertices)
+	 */
+	label;
 }

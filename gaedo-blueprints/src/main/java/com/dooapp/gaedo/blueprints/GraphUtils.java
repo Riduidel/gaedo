@@ -5,7 +5,6 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
-import java.util.UUID;
 import java.util.logging.Logger;
 
 import javax.persistence.CascadeType;
@@ -13,13 +12,13 @@ import javax.persistence.Column;
 
 import com.dooapp.gaedo.blueprints.annotations.GraphProperty;
 import com.dooapp.gaedo.blueprints.indexable.IndexableGraphBackedFinderService;
+import com.dooapp.gaedo.blueprints.strategies.PropertyMappingStrategy;
 import com.dooapp.gaedo.blueprints.transformers.LiteralTransformer;
 import com.dooapp.gaedo.blueprints.transformers.Literals;
 import com.dooapp.gaedo.blueprints.transformers.TupleTransformer;
 import com.dooapp.gaedo.blueprints.transformers.Tuples;
 import com.dooapp.gaedo.finders.repository.ServiceRepository;
 import com.dooapp.gaedo.properties.Property;
-import com.tinkerpop.blueprints.pgm.Edge;
 import com.tinkerpop.blueprints.pgm.Graph;
 import com.tinkerpop.blueprints.pgm.Vertex;
 import com.tinkerpop.blueprints.pgm.oupls.sail.GraphSail;
@@ -53,13 +52,15 @@ public class GraphUtils {
 	public static String getEdgeNameFor(Property p) {
 		if(p.getAnnotation(GraphProperty.class)!=null) {
 			GraphProperty graph = p.getAnnotation(GraphProperty.class);
-			return graph.name();
-		} else  if(p.getAnnotation(Column.class)!=null) {
+			// Test added to avoid default value (which defaults name to "")
+			if(graph.name()!=null && graph.name().length()>0)
+				return graph.name();
+		}
+		if(p.getAnnotation(Column.class)!=null) {
 			Column column = p.getAnnotation(Column.class);
 			return column.name();
-		} else {
-			return getDefaultEdgeNameFor(p);
 		}
+		return getDefaultEdgeNameFor(p);
 	}
 
 	public static String getDefaultEdgeNameFor(Property p) {
@@ -106,7 +107,7 @@ public class GraphUtils {
 			 */
 			effectiveType = driver.getEffectiveType(key);
 			try {
-				if(!defaultType.isAssignableFrom(Class.forName(effectiveType))) {
+				if(!Collection.class.isAssignableFrom(defaultType) && !defaultType.isAssignableFrom(Class.forName(effectiveType))) {
 					effectiveType = defaultType.getName();
 				}
 			} catch(Exception e) {
@@ -174,14 +175,11 @@ public class GraphUtils {
 	 * @return the value used by {@link Properties#vertexId} to identify the vertex associated to that object
 	 */
 	public static String getIdOfLiteral(Class<?> declaredClass, Property idProperty, Object objectId) {
-		StringBuilder sOut = new StringBuilder();
-		sOut.append(declaredClass.getCanonicalName()).append(":");
-		if(idProperty==null) {
-			sOut.append(Literals.get(declaredClass).getVertexId(objectId));
-		} else {
-			sOut.append(Literals.get(idProperty.getType()).getVertexId(objectId));
+		PropertyMappingStrategy strategy = PropertyMappingStrategy.prefixed;
+		if(idProperty.getAnnotation(GraphProperty.class)!=null) {
+			strategy = idProperty.getAnnotation(GraphProperty.class).mapping();
 		}
-		return sOut.toString();
+		return strategy.literalToId(declaredClass, idProperty, objectId);
 	}
 
 	/**
@@ -246,5 +244,4 @@ public class GraphUtils {
 		}
 		return sOut.append("}").toString();
 	}
-
 }

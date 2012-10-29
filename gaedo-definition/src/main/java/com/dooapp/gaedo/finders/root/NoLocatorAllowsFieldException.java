@@ -12,14 +12,18 @@ public class NoLocatorAllowsFieldException extends CrudServiceException {
 	public NoLocatorAllowsFieldException(Property field,
 			Map<FieldInformerLocator, Exception> thrownDuringSearch) {
 		super("field "+field.getDeclaringClass().getName()+"#"+field.getName()+" cannot be informed using any of the available locators :"+getExceptionsAsString(thrownDuringSearch));
-		// TODO Auto-generated constructor stub
+	}
+
+	public NoLocatorAllowsFieldException(Class informedClass, String fieldName, Map<FieldInformerLocator, Exception> thrownDuringSearch) {
+		super("field "+informedClass.getName()+"#"+fieldName+" cannot be informed using any of the available locators :"+getExceptionsAsString(thrownDuringSearch));
 	}
 
 	private static String getExceptionsAsString(
 			Map<FieldInformerLocator, Exception> thrownDuringSearch) {
 		StringBuilder sOut = new StringBuilder();
 		for(Map.Entry<FieldInformerLocator, Exception> mapException : thrownDuringSearch.entrySet()) {
-			sOut.append("\n").append(mapException.getKey().getClass().getName()+" => "+getStack(mapException.getValue()));
+			sOut.append("\n").append(mapException.getKey().getClass().getName()).append(" => ")
+				.append(mapException.getValue().getMessage());
 		}
 		return sOut.toString();
 	}

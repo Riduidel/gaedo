@@ -3,8 +3,6 @@ package com.dooapp.gaedo.blueprints.transformers;
 import java.io.Serializable;
 import java.util.Map;
 
-import com.dooapp.gaedo.utils.Utils;
-
 /**
  * Enum listing the classes considered as tuples, sharing the same mechanism than {@link Literals}
  * @author ndx

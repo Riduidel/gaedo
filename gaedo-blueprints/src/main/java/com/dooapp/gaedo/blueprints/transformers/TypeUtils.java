@@ -17,6 +17,7 @@ public class TypeUtils {
 		constructionMap.put("xsd:boolean", Boolean.class); //Boolean (true or false) 
 		constructionMap.put("xsd:byte", Byte.class); //Signed value of 8 bits 
 		constructionMap.put("xsd:date", Date.class); //Gregorian calendar date 
+		constructionMap.put("http://www.w3.org/2001/XMLSchema#date", Date.class); //Gregorian calendar date 
 		constructionMap.put("xsd:dateTime", Date.class); //Instant of time (Gregorian calendar) 
 //		constructionMap.put("xsd:decimal", ""); //Decimal numbers 
 		constructionMap.put("xsd:double", Double.class); //IEEE 64-bit floating-point 
@@ -60,7 +61,8 @@ public class TypeUtils {
 			String className = entry.getValue().getName();
 			String type = entry.getKey();
 			typesToClasses.put(type, className);
-			classesToTypes.put(className, type);
+			if(!classesToTypes.containsKey(className))
+				classesToTypes.put(className, type);
 		}
 	}
 

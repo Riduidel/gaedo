@@ -6,7 +6,6 @@ import java.util.LinkedList;
 import com.dooapp.gaedo.blueprints.indexable.IndexableGraphEnvironment;
 import com.dooapp.gaedo.blueprints.providers.Neo4j;
 import com.dooapp.gaedo.blueprints.providers.Tinker;
-import com.dooapp.gaedo.blueprints.sail.SailGraphEnvironment;
 
 /**
  * Utilities for indexable tests
@@ -63,7 +62,7 @@ public class TestUtils {
 		Collection<Object[]> returned = new LinkedList<Object[]>();
 		returned.add(new Object[] { new Tinker()});
 //		returned.add(new Object[] { new OrientDB()});
-		returned.add(new Object[] { new Neo4j()});
+//		returned.add(new Object[] { new Neo4j()});
 		return returned;
 	}
 

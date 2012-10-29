@@ -4,19 +4,15 @@ import org.junit.After;
 import org.junit.Before;
 import org.openrdf.repository.sail.SailRepository;
 
-import com.dooapp.gaedo.AbstractCrudService;
 import com.dooapp.gaedo.blueprints.beans.PostSubClass;
 import com.dooapp.gaedo.blueprints.beans.PostSubClassInformer;
-import com.dooapp.gaedo.blueprints.indexable.IndexableGraphBackedFinderService;
 import com.dooapp.gaedo.finders.FinderCrudService;
-import com.dooapp.gaedo.finders.Informer;
 import com.dooapp.gaedo.test.beans.Post;
 import com.dooapp.gaedo.test.beans.PostInformer;
 import com.dooapp.gaedo.test.beans.Tag;
 import com.dooapp.gaedo.test.beans.TagInformer;
 import com.dooapp.gaedo.test.beans.User;
 import com.dooapp.gaedo.test.beans.UserInformer;
-import com.tinkerpop.blueprints.pgm.IndexableGraph;
 
 public class AbstractGraphTest  {
 	

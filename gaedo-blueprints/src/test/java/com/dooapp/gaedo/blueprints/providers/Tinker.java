@@ -1,7 +1,6 @@
 package com.dooapp.gaedo.blueprints.providers;
 
 import java.io.File;
-import java.io.IOException;
 
 import com.dooapp.gaedo.blueprints.AbstractGraphProvider;
 import com.dooapp.gaedo.blueprints.GraphProvider;

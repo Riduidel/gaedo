@@ -75,4 +75,13 @@ public abstract class AbstractInformerFactory {
 			Class<InformerType> informerClass,
 			Class<ContainedType> containedType, 
 			Informer<ContainedType> existingInformer);
+
+	/**
+	 * @return the reflectiveInformerFactory
+	 * @category getter
+	 * @category reflectiveInformerFactory
+	 */
+	public ReflectionBackedInformerFactory getReflectiveInformerFactory() {
+		return reflectiveInformerFactory;
+	}
 }

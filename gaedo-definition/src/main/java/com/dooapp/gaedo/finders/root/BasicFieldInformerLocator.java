@@ -3,6 +3,7 @@ package com.dooapp.gaedo.finders.root;
 import java.beans.PropertyChangeSupport;
 import java.io.Serializable;
 import java.lang.reflect.Constructor;
+import java.lang.reflect.Field;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.util.Collection;
@@ -177,5 +178,17 @@ public class BasicFieldInformerLocator implements FieldInformerLocator {
 		
 		// Return that collection
 		return returned;
+	}
+
+	/**
+	 * Don't dream, there is no fallback method here
+	 * @param informedClass
+	 * @param fieldName
+	 * @return
+	 * @see com.dooapp.gaedo.finders.root.FieldInformerLocator#getInformerFor(java.lang.Class, java.lang.String)
+	 */
+	@Override
+	public FieldInformer getInformerFor(Class informedClass, String fieldName) {
+		return null;
 	}
 }

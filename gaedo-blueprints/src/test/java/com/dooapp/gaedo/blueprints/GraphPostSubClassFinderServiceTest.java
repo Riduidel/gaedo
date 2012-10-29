@@ -1,56 +1,35 @@
 package com.dooapp.gaedo.blueprints;
 
-import static org.junit.Assert.assertThat;
-
-import java.io.File;
-import java.net.MalformedURLException;
 import java.util.Collection;
-import java.util.LinkedList;
 import java.util.Map;
 import java.util.TreeMap;
 import java.util.logging.Logger;
 
 import org.hamcrest.core.Is;
-import org.hamcrest.core.IsNull;
-import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 import org.junit.runners.Parameterized.Parameters;
 
-import com.dooapp.gaedo.AbstractCrudService;
 import com.dooapp.gaedo.blueprints.beans.PostSubClass;
-import com.dooapp.gaedo.blueprints.beans.PostSubClassInformer;
-import com.dooapp.gaedo.blueprints.indexable.IndexableGraphBackedFinderService;
-import com.dooapp.gaedo.blueprints.providers.Neo4j;
-import com.dooapp.gaedo.blueprints.providers.Tinker;
-import com.dooapp.gaedo.finders.FinderCrudService;
 import com.dooapp.gaedo.finders.QueryBuilder;
 import com.dooapp.gaedo.finders.QueryExpression;
 import com.dooapp.gaedo.finders.id.IdBasedService;
-import com.dooapp.gaedo.finders.repository.ServiceBackedFieldLocator;
-import com.dooapp.gaedo.finders.repository.SimpleServiceRepository;
-import com.dooapp.gaedo.finders.root.BasicFieldInformerLocator;
-import com.dooapp.gaedo.finders.root.CumulativeFieldInformerLocator;
-import com.dooapp.gaedo.finders.root.InformerFactory;
-import com.dooapp.gaedo.finders.root.LazyInterfaceInformerLocator;
-import com.dooapp.gaedo.finders.root.ProxyBackedInformerFactory;
-import com.dooapp.gaedo.finders.root.ReflectionBackedInformerFactory;
-import com.dooapp.gaedo.properties.FieldBackedPropertyProvider;
-import com.dooapp.gaedo.properties.PropertyProvider;
 import com.dooapp.gaedo.test.beans.Post;
 import com.dooapp.gaedo.test.beans.PostInformer;
 import com.dooapp.gaedo.test.beans.State;
 import com.dooapp.gaedo.test.beans.Tag;
-import com.dooapp.gaedo.test.beans.TagInformer;
 import com.dooapp.gaedo.test.beans.User;
-import com.dooapp.gaedo.test.beans.UserInformer;
-import com.dooapp.gaedo.test.beans.specific.Theme;
-import com.dooapp.gaedo.test.beans.specific.ThemeInformer;
-import com.tinkerpop.blueprints.pgm.IndexableGraph;
 
-import static com.dooapp.gaedo.blueprints.TestUtils.*;
+import static com.dooapp.gaedo.blueprints.TestUtils.ABOUT_ID;
+import static com.dooapp.gaedo.blueprints.TestUtils.ID_POST_1;
+import static com.dooapp.gaedo.blueprints.TestUtils.TAG_TEXT;
+import static com.dooapp.gaedo.blueprints.TestUtils.USER_LOGIN;
+import static com.dooapp.gaedo.blueprints.TestUtils.USER_PASSWORD;
+import static com.dooapp.gaedo.blueprints.TestUtils.simpleTest;
+
+import static org.junit.Assert.assertThat;
 
 
 @RunWith(Parameterized.class)

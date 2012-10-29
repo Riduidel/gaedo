@@ -1,5 +1,8 @@
 package com.dooapp.gaedo.blueprints.queries.executable;
 
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.TreeMap;
@@ -7,16 +10,19 @@ import java.util.TreeMap;
 import javax.persistence.CascadeType;
 
 import com.dooapp.gaedo.blueprints.AbstractBluePrintsBackedFinderService;
-import com.dooapp.gaedo.blueprints.indexable.IndexableGraphBackedFinderService;
 import com.dooapp.gaedo.blueprints.queries.tests.CollectionContains;
 import com.dooapp.gaedo.blueprints.queries.tests.EqualsTo;
 import com.dooapp.gaedo.blueprints.queries.tests.MapContainsKey;
 import com.dooapp.gaedo.blueprints.queries.tests.MapContainsValue;
 import com.dooapp.gaedo.blueprints.queries.tests.NotVertexTest;
 import com.dooapp.gaedo.blueprints.queries.tests.OrVertexTest;
+import com.dooapp.gaedo.blueprints.queries.tests.VertexPropertyTest;
 import com.dooapp.gaedo.blueprints.queries.tests.VertexTestVisitor;
 import com.dooapp.gaedo.blueprints.queries.tests.VertexTestVisitorAdapter;
 import com.dooapp.gaedo.properties.Property;
+import com.tinkerpop.blueprints.pgm.Graph;
+import com.tinkerpop.blueprints.pgm.Index;
+import com.tinkerpop.blueprints.pgm.IndexableGraph;
 import com.tinkerpop.blueprints.pgm.Vertex;
 
 /**
@@ -51,9 +57,9 @@ public class VertexRootsCollector extends VertexTestVisitorAdapter implements Ve
 	/**
 	 * We use a {@link LinkedHashMap} to keep test ordering, as it allows us to avoid loading all object values (usuall the class test will be set as last one)
 	 */
-	private Map<Vertex, Iterable<Property>> result = new LinkedHashMap<Vertex, Iterable<Property>>();
+	private Map<Iterable<Vertex>, Iterable<Property>> result = new LinkedHashMap<Iterable<Vertex>, Iterable<Property>>();
 	
-	private final AbstractBluePrintsBackedFinderService<?, ?, ?> service;
+	private final AbstractBluePrintsBackedFinderService<? extends Graph, ?, ?> service;
 
 	/**
 	 * Cache of objects being loaded during roots collection building
@@ -65,7 +71,7 @@ public class VertexRootsCollector extends VertexTestVisitorAdapter implements Ve
 		this.service = service;
 	}
 
-	public Map<Vertex, Iterable<Property>> getResult() {
+	public Map<Iterable<Vertex>, Iterable<Property>> getResult() {
 		return result;
 	}
 
@@ -96,8 +102,8 @@ public class VertexRootsCollector extends VertexTestVisitorAdapter implements Ve
 		result.put(load(collectionContains.getExpectedAsValue()), collectionContains.getPath());
 	}
 
-	private Vertex load(Object expected) {
-		return service.getVertexFor(expected, CascadeType.REFRESH, objectsBeingAccessed);
+	private Collection<Vertex> load(Object expected) {
+		return Arrays.asList(service.getVertexFor(expected, CascadeType.REFRESH, objectsBeingAccessed));
 	}
 	
 	@Override
@@ -115,5 +121,30 @@ public class VertexRootsCollector extends VertexTestVisitorAdapter implements Ve
 	public void visit(MapContainsValue mapContainsValue) {
 		// TODO Auto-generated method stub
 		throw new UnsupportedOperationException("method "+VertexRootsCollector.class.getName()+"#visit has not yet been implemented AT ALL");
+	}
+	
+	/**
+	 * Add all vertices with the given path
+	 * @param vertexPropertyTest
+	 * @see com.dooapp.gaedo.blueprints.queries.tests.VertexTestVisitorAdapter#visit(com.dooapp.gaedo.blueprints.queries.tests.VertexPropertyTest)
+	 */
+	@Override
+	public void visit(final VertexPropertyTest vertexPropertyTest) {
+		// TODO improve that code !!!
+		Graph g = service.getDatabase();
+		if (g instanceof IndexableGraph) {
+			final IndexableGraph indexable = (IndexableGraph) g;
+			final Index<Vertex> vertices = indexable.getIndex(Index.VERTICES, Vertex.class);
+			result.put(new Iterable<Vertex>() {
+				
+				@Override
+				public Iterator<Vertex> iterator() {
+					Iterable<Vertex> matching = vertices.get(vertexPropertyTest.getPropertyName(), vertexPropertyTest.getExpected());
+					return matching.iterator();
+				}
+			}, vertexPropertyTest.getPath());
+		} else {
+			throw new UnsupportedOperationException("not yet implemented");
+		}
 	}
 }

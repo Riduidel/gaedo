@@ -19,4 +19,12 @@ public interface FieldInformerLocator {
 	 */
 	FieldInformer getInformerFor(Property field);
 
+	/**
+	 * Fallback method allowing one to check if a field exist for a given class, even if not found using {@link #getInformerFor(Property)}
+	 * @param informedClass class in which this field is looked
+	 * @param fieldName searched field name
+	 * @return an informer for the field, or null if none can be found
+	 */
+	FieldInformer getInformerFor(Class informedClass, String fieldName);
+
 }

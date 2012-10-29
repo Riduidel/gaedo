@@ -1,8 +1,5 @@
 package com.dooapp.gaedo.blueprints.transformers;
 
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.fail;
-
 import java.beans.IntrospectionException;
 import java.beans.PropertyDescriptor;
 import java.lang.reflect.InvocationHandler;
@@ -22,6 +19,9 @@ import org.junit.Test;
 import com.dooapp.gaedo.properties.DescribedProperty;
 import com.dooapp.gaedo.properties.Property;
 import com.dooapp.gaedo.properties.UnableToSetPropertyException;
+
+import static org.junit.Assert.assertThat;
+import static org.junit.Assert.fail;
 
 /**
  * Make sure one can read and write map key and map value

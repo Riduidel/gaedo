@@ -2,7 +2,6 @@ package com.dooapp.gaedo.blueprints.transformers;
 
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
-import java.lang.reflect.WildcardType;
 import java.util.Collection;
 
 import com.dooapp.gaedo.utils.Utils;

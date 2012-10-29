@@ -6,7 +6,9 @@ import java.util.Map;
 import javax.persistence.CascadeType;
 
 import com.dooapp.gaedo.blueprints.AbstractBluePrintsBackedFinderService;
+import com.dooapp.gaedo.blueprints.queries.tests.CompoundVertexTest;
 import com.dooapp.gaedo.properties.Property;
+import com.tinkerpop.blueprints.pgm.Vertex;
 
 /**
  * Interface adapting some specific behaviours of a graph service. This interface should typically allow one to choose bvetween bean based graph mapping and graph based bean mapping (in which case
@@ -17,15 +19,17 @@ import com.dooapp.gaedo.properties.Property;
 public interface GraphMappingStrategy<DataType> {
 	/**
 	 * Delegation method allowing one to get the map linking properties to cascade types
-	 * @param object
+	 * @param object object for which we want the properties
+	 * @param vertex vertex associated to that object
+	 * @param cascadeType type of cascadde we want the properties for
 	 * @return a map associating each property to its cascade type (useful for persistence operation, but will have to be slightly updated for load operations).
 	 */
-	public Map<Property, Collection<CascadeType>> getContainedProperties(DataType object);
+	public Map<Property, Collection<CascadeType>> getContainedProperties(DataType object, Vertex vertex, CascadeType cascadeType);
 	
 	
 	public void assignId(final DataType value, final Object... id);
 
-	public void generateValidIdFor(AbstractBluePrintsBackedFinderService<?, DataType, ?> service, DataType toCreate);
+	public void generateValidIdFor(DataType toCreate);
 	
 	/**
 	 * Get an id string for the given object
@@ -45,4 +49,32 @@ public interface GraphMappingStrategy<DataType> {
 	public Collection<Property> getIdProperties();
 	
 	public boolean isIdGenerationRequired();
+	
+	/**
+	 * Initialization method allowing strategy to load some infos built during service init (like, as an example, the GraphDatabaseDriver or the service itself).
+	 * @param service
+	 */
+	public void loadWith(AbstractBluePrintsBackedFinderService<?, DataType, ?> service);
+
+	/**
+	 * Add default search to the given vertex test. That default search makes sure results are limited to object of this class (and also ensures request will have effective results).
+	 * @param initial initial search
+	 * @return search with class check configured in
+	 */
+	public CompoundVertexTest addDefaultSearchTo(CompoundVertexTest initial);
+
+
+	/**
+	 * Get effective type, as string, of a given vertex.
+	 * @param vertex
+	 * @return
+	 */
+	public String getEffectiveType(Vertex vertex);
+	
+	/**
+	 * Method invoked when vertex has been loaded in object. Allows strategy to perform any customization.
+	 * @param from
+	 * @param into
+	 */
+	public void loaded(Vertex from, DataType into);
 }

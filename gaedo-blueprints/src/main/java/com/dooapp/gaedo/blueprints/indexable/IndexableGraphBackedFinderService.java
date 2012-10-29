@@ -4,17 +4,16 @@ package com.dooapp.gaedo.blueprints.indexable;
 import java.util.UUID;
 
 import com.dooapp.gaedo.blueprints.AbstractBluePrintsBackedFinderService;
-import com.dooapp.gaedo.blueprints.GraphQueryStatement;
 import com.dooapp.gaedo.blueprints.GraphUtils;
 import com.dooapp.gaedo.blueprints.Kind;
 import com.dooapp.gaedo.blueprints.Properties;
+import com.dooapp.gaedo.blueprints.strategies.GraphMappingStrategy;
+import com.dooapp.gaedo.blueprints.strategies.StrategyType;
 import com.dooapp.gaedo.blueprints.transformers.ClassLiteralTransformer;
 import com.dooapp.gaedo.blueprints.transformers.Literals;
 import com.dooapp.gaedo.blueprints.transformers.Tuples;
 import com.dooapp.gaedo.blueprints.transformers.TypeUtils;
 import com.dooapp.gaedo.finders.Informer;
-import com.dooapp.gaedo.finders.QueryBuilder;
-import com.dooapp.gaedo.finders.QueryStatement;
 import com.dooapp.gaedo.finders.repository.ServiceRepository;
 import com.dooapp.gaedo.finders.root.InformerFactory;
 import com.dooapp.gaedo.properties.Property;
@@ -39,20 +38,37 @@ import com.tinkerpop.blueprints.pgm.oupls.sail.GraphSail;
 public class IndexableGraphBackedFinderService <DataType, InformerType extends Informer<DataType>> 
 	extends AbstractBluePrintsBackedFinderService<IndexableGraph, DataType, InformerType> {
 
-	/**
-	 * property identifiying in an unique way a vertex. Its goal is to make sure vertex is the one we search.
-	 * @deprecated should be replaced by a "tagged" edge linking object to its identifying property
-	 */
-//	private static final String VERTEX_ID = "vertexId";
-	
 	public static final String TYPE_EDGE_NAME = GraphUtils.getEdgeNameFor(TypeProperty.INSTANCE);
 
-	private ClassLiteralTransformer classTransformer = (ClassLiteralTransformer) Literals.get(Class.class);
+	public static ClassLiteralTransformer classTransformer = (ClassLiteralTransformer) Literals.get(Class.class);
 
 	public IndexableGraphBackedFinderService(Class<DataType> containedClass, Class<InformerType> informerClass, InformerFactory factory, ServiceRepository repository,
 					PropertyProvider provider, IndexableGraph graph) {
+		this(graph, containedClass, informerClass, factory, repository, provider, StrategyType.beanBased);
+	}
+	
+	
+
+	public IndexableGraphBackedFinderService(IndexableGraph graph, Class<DataType> containedClass, Class<InformerType> informerClass, InformerFactory factory,
+					ServiceRepository repository, PropertyProvider provider, GraphMappingStrategy<DataType> strategy) {
+		super(graph, containedClass, informerClass, factory, repository, provider, strategy);
+	}
+
+
+
+	public IndexableGraphBackedFinderService(IndexableGraph graph, Class<DataType> containedClass, Class<InformerType> informerClass, InformerFactory factory,
+					ServiceRepository repository, PropertyProvider provider, StrategyType strategy) {
+		super(graph, containedClass, informerClass, factory, repository, provider, strategy);
+	}
+
+
+
+	public IndexableGraphBackedFinderService(IndexableGraph graph, Class<DataType> containedClass, Class<InformerType> informerClass, InformerFactory factory,
+					ServiceRepository repository, PropertyProvider provider) {
 		super(graph, containedClass, informerClass, factory, repository, provider);
 	}
+
+
 
 	@Override
 	public Vertex loadVertexFor(String objectVertexId, String className) {
@@ -117,14 +133,7 @@ public class IndexableGraphBackedFinderService <DataType, InformerType extends I
 
 	@Override
 	protected String getEffectiveType(Vertex vertex) {
-		if(vertex.getProperty(Properties.type.name())!=null) {
-			return TypeUtils.getClass(vertex.getProperty(Properties.type.name()).toString());
-		} else {
-			Edge toType = vertex.getOutEdges(TYPE_EDGE_NAME).iterator().next();
-			Vertex type = toType.getInVertex();
-			// Do not use ClassLiteral here as this method must be blazing fast
-			return classTransformer.extractClassIn(getValue(type).toString());
-		}
+		return getStrategy().getEffectiveType(vertex);
 	}
 
 	@Override

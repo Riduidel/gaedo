@@ -142,7 +142,7 @@ public class ReflectionBackedInformer<DataType> implements Informer<DataType> {
 	/**
 	 * Local class, used for getting fields and properties
 	 */
-	private Class<DataType> clazz;
+	private final Class<DataType> informedClass;
 	
 	/**
 	 * Map linking known properties to effective informers. Notice this map is to be lazily loaded by {@link #loadFieldsInformers(ReflectionBackedInformerFactory)}
@@ -164,7 +164,7 @@ public class ReflectionBackedInformer<DataType> implements Informer<DataType> {
 			parent = reflectionBackedInformerFactory.get(clazz.getSuperclass());
 		}
 		// Now, get all fields
-		this.clazz = clazz;
+		this.informedClass = clazz;
 		this.propertyProvider = provider;
 		this.informerFactory = reflectionBackedInformerFactory;
 	}
@@ -175,7 +175,7 @@ public class ReflectionBackedInformer<DataType> implements Informer<DataType> {
 	 */
 	private Map<Property, FieldInformer> loadFieldsInformers(ReflectionBackedInformerFactory reflectionBackedInformerFactory) {
 		Map<Property, FieldInformer> futureFields = new HashMap<Property, FieldInformer>();
-		Class<?> currentClass = clazz;
+		Class<?> currentClass = informedClass;
 		while(!Object.class.equals(currentClass)) {
 			Property[] fieldsArray = propertyProvider.get(currentClass);
 			for(Property f : fieldsArray) {
@@ -239,15 +239,18 @@ public class ReflectionBackedInformer<DataType> implements Informer<DataType> {
 		for(Map.Entry<Property, FieldInformer> f : fields.entrySet()) {
 			if(f.getKey().getName().equals(string)) {
 				return f.getValue();
-			} else if((clazz.getSimpleName()+"."+f.getKey().getName()).equals(string)) {
+			} else if((informedClass.getSimpleName()+"."+f.getKey().getName()).equals(string)) {
 				return f.getValue();
 			}
 		}
 		if(parent!=null) {
-			return parent.get(string);
-		} else {
-			throw new NoSuchFieldInHierarchyException(string);
+			try {
+				return parent.get(string);
+			} catch(NoSuchFieldInHierarchyException e) {
+				/* we do nothing here. I perfeclty know integrating exception in application logic is not optimal, but it's, to my mind, the best way to achieve the right result here. */
+			}
 		}
+		return informerFactory.noSuchFieldInHiearchy(this, string);
 	}
 
 	/**
@@ -321,7 +324,7 @@ public class ReflectionBackedInformer<DataType> implements Informer<DataType> {
 	public int hashCode() {
 		final int prime = 31;
 		int result = 1;
-		result = prime * result + ((clazz == null) ? 0 : clazz.hashCode());
+		result = prime * result + ((informedClass == null) ? 0 : informedClass.hashCode());
 		return result;
 	}
 
@@ -339,11 +342,41 @@ public class ReflectionBackedInformer<DataType> implements Informer<DataType> {
 		if (getClass() != obj.getClass())
 			return false;
 		ReflectionBackedInformer other = (ReflectionBackedInformer) obj;
-		if (clazz == null) {
-			if (other.clazz != null)
+		if (informedClass == null) {
+			if (other.informedClass != null)
 				return false;
-		} else if (!clazz.getCanonicalName().equals(other.clazz.getCanonicalName()))
+		} else if (!informedClass.getCanonicalName().equals(other.informedClass.getCanonicalName()))
 			return false;
 		return true;
+	}
+
+	/**
+	 * @return
+	 * @see java.lang.Object#toString()
+	 */
+	@Override
+	public String toString() {
+		StringBuilder builder = new StringBuilder();
+		builder.append("ReflectionBackedInformer [");
+		if (informedClass != null) {
+			builder.append("clazz=");
+			builder.append(informedClass.getName());
+			builder.append(", ");
+		}
+		if (fields != null) {
+			builder.append("fields=");
+			builder.append(fields.keySet());
+		}
+		builder.append("]");
+		return builder.toString();
+	}
+
+	/**
+	 * @return the informedClass
+	 * @category getter
+	 * @category informedClass
+	 */
+	public Class<DataType> getInformedClass() {
+		return informedClass;
 	}
 }

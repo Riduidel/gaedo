@@ -3,7 +3,6 @@ package com.dooapp.gaedo.blueprints;
 import java.beans.PropertyChangeEvent;
 import java.util.TreeMap;
 
-import com.dooapp.gaedo.blueprints.indexable.IndexableGraphBackedFinderService;
 import com.dooapp.gaedo.blueprints.queries.BluePrintsQueryBuilder;
 import com.dooapp.gaedo.blueprints.queries.DataTypeIterable;
 import com.dooapp.gaedo.blueprints.queries.executable.GraphExecutableQuery;
@@ -16,11 +15,8 @@ import com.dooapp.gaedo.finders.QueryExpressionContainerVisitor;
 import com.dooapp.gaedo.finders.QueryStatement;
 import com.dooapp.gaedo.finders.SortingBuilder;
 import com.dooapp.gaedo.finders.SortingExpression;
-import com.dooapp.gaedo.finders.QueryStatement.State;
 import com.dooapp.gaedo.finders.repository.ServiceRepository;
 import com.dooapp.gaedo.finders.sort.SortingExpressionImpl;
-import com.tinkerpop.blueprints.pgm.Graph;
-import com.tinkerpop.blueprints.pgm.IndexableGraph;
 import com.tinkerpop.blueprints.pgm.Vertex;
 
 public class GraphQueryStatement<

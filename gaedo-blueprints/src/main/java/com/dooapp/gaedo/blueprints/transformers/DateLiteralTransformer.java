@@ -1,13 +1,14 @@
 package com.dooapp.gaedo.blueprints.transformers;
 
-import java.lang.ref.SoftReference;
-import java.text.DateFormat;
 import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.Map;
+import java.util.TreeMap;
+import java.util.WeakHashMap;
 
 import com.dooapp.gaedo.blueprints.GraphDatabaseDriver;
 import com.dooapp.gaedo.blueprints.Properties;
+import com.dooapp.gaedo.utils.date.DateFormatThreadedLoader;
 import com.tinkerpop.blueprints.pgm.Vertex;
 
 /**
@@ -22,22 +23,33 @@ import com.tinkerpop.blueprints.pgm.Vertex;
  * 
  */
 public class DateLiteralTransformer extends AbstractSimpleLiteralTransformer<Date> implements LiteralTransformer<Date> {
-	public static final String FORMAT = "yyyy-MM-dd'T'HH:mm:ssz";
 	
-	private static final ThreadLocal<SoftReference<DateFormat>> format = new ThreadLocal<SoftReference<DateFormat>>();
-
-	private static DateFormat getDateFormat() {
-		SoftReference<DateFormat> softRef = format.get();
-		if (softRef != null) {
-			final DateFormat result = softRef.get();
-			if (result != null) {
-				return result;
-			}
-		}
-		final DateFormat result = new SimpleDateFormat(FORMAT);
-		softRef = new SoftReference<DateFormat>(result);
-		format.set(softRef);
-		return result;
+	/**
+	 * Map linking date format specification (a uri like xsd:date or http://www.w3.org/2001/XMLSchema#date) to the format string used to parse it.
+	 */
+	private static final Map<String, String> FORMATS = new TreeMap<String, String>();
+	
+	static {
+		FORMATS.put("xsd:date", "yyyy-MM-dd'T'HH:mm:ssz");
+		FORMATS.put("http://www.w3.org/2001/XMLSchema#date", "yyy-MM-dd");
+	}
+					
+	
+	/**
+	 * A map allowing lazy loading of those inconvenient threaded loaders.
+	 */
+	private static final Map<String, DateFormatThreadedLoader> loaders = new TreeMap<String, DateFormatThreadedLoader>();
+	
+	/**
+	 * Cache linking dates to toeir associated format definition.
+	 * As the dates are in memory, and the formats are constants, this weak hash map should have very low memory impact.
+	 */
+	private static Map<Date, String> dateCache = new WeakHashMap<Date, String>();
+	
+	public static DateFormatThreadedLoader getLoader(String format) {
+		if(!loaders.containsKey(format))
+			loaders.put(format, new DateFormatThreadedLoader(format));
+		return loaders.get(format);
 	}
 	
 	public DateLiteralTransformer() {
@@ -46,15 +58,23 @@ public class DateLiteralTransformer extends AbstractSimpleLiteralTransformer<Dat
 
 	@Override
 	protected Object getVertexValue(Date value) {
-		return getDateFormat().format(value);
+		// fallback value
+		String format = "xsd:date";
+		if(dateCache.containsKey(value)) {
+			format = dateCache.get(value);
+		}
+		return getLoader(FORMATS.get(format)).format(value);
 	}
 
 	public Date loadObject(GraphDatabaseDriver driver, Class valueClass, Vertex key) {
 		String property = driver.getValue(key).toString();
+		String type = key.getProperty(Properties.type.name()).toString();
 		try {
-			return getDateFormat().parse(property.toString());
+			Date returned = getLoader(FORMATS.get(type)).parse(property);
+			dateCache.put(returned, type);
+			return returned;
 		} catch (ParseException e) {
-			throw new BadLiteralException("\"" + property + "\" can't be efficiently parsed to a date", e);
+			throw new BadLiteralException("\"" + property + "\" can't be efficiently parsed from a \""+type+"\" supposed to contain a date");
 		}
 	}
 }

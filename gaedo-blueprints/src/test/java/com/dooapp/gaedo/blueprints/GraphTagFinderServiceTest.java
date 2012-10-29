@@ -6,7 +6,6 @@ import java.util.LinkedList;
 
 import org.hamcrest.core.Is;
 import org.junit.Assert;
-import org.junit.Before;
 import org.junit.Test;
 import org.junit.internal.matchers.IsCollectionContaining;
 import org.junit.runner.RunWith;
@@ -14,13 +13,10 @@ import org.junit.runners.Parameterized;
 import org.junit.runners.Parameterized.Parameters;
 
 import com.dooapp.gaedo.finders.FieldInformer;
-import com.dooapp.gaedo.finders.FinderCrudService;
 import com.dooapp.gaedo.finders.QueryBuilder;
 import com.dooapp.gaedo.finders.QueryExpression;
 import com.dooapp.gaedo.finders.expressions.Expressions;
 import com.dooapp.gaedo.finders.informers.StringFieldInformer;
-import com.dooapp.gaedo.test.beans.Post;
-import com.dooapp.gaedo.test.beans.PostInformer;
 import com.dooapp.gaedo.test.beans.Tag;
 import com.dooapp.gaedo.test.beans.TagInformer;
 
@@ -180,13 +176,13 @@ public class GraphTagFinderServiceTest extends AbstractGraphTest {
 	public void ensureBooleanClassTypeWorks() {
 		Tag a = new Tag(A).withId(13l);
 		a.rendering = Boolean.class;
-		getTagService().create(a);
+		a = getTagService().create(a);
 		Tag b = getTagService().find().matching(
 						new QueryBuilder<TagInformer>() {
 
 							public QueryExpression createMatchingExpression(
 									TagInformer object) {
-								return object.getId().equalsTo(12l);
+								return object.getId().equalsTo(13l);
 							}
 						}).getFirst();
 		assertThat(b.rendering, Is.is(Class.class));
@@ -199,13 +195,13 @@ public class GraphTagFinderServiceTest extends AbstractGraphTest {
 	public void ensureBooleanTypeTypeWorks() {
 		Tag a = new Tag(A).withId(14l);
 		a.rendering = Boolean.TYPE;
-		getTagService().create(a);
+		a = getTagService().create(a);
 		Tag b = getTagService().find().matching(
 						new QueryBuilder<TagInformer>() {
 
 							public QueryExpression createMatchingExpression(
 									TagInformer object) {
-								return object.getId().equalsTo(12l);
+								return object.getId().equalsTo(14l);
 							}
 						}).getFirst();
 		assertThat(b.rendering, Is.is(Class.class));

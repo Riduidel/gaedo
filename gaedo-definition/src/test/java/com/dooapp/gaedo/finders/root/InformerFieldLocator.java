@@ -33,4 +33,24 @@ public class InformerFieldLocator implements FieldInformerLocator, InformerFacto
 		return returned;
 	}
 
+	/**
+	 * @return the real
+	 * @category getter
+	 * @category real
+	 */
+	public InformerFactory getReal() {
+		return real;
+	}
+
+	/**
+	 * Don't dream, there is no fallback method here
+	 * @param informedClass
+	 * @param fieldName
+	 * @return
+	 * @see com.dooapp.gaedo.finders.root.FieldInformerLocator#getInformerFor(java.lang.Class, java.lang.String)
+	 */
+	@Override
+	public FieldInformer getInformerFor(Class informedClass, String fieldName) {
+		return null;
+	}
 }

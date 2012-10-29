@@ -5,8 +5,9 @@ import com.dooapp.gaedo.finders.informers.ObjectFieldInformer;
 import com.dooapp.gaedo.properties.Property;
 
 /**
- * Informer locator sloving the very special case of fields declared using buisness interface.
- * Most of the time, this case is used to allow implementation of one field using different implementations, for which link resolution should be done at runtime.
+ * Informer locator solving the very special case of fields declared using business interface.
+ * Most of the time, this case is used to allow implementation of one field using different implementations, 
+ * for which link resolution should be done at runtime.
  * @author ndx
  *
  */
@@ -26,6 +27,18 @@ public class LazyInterfaceInformerLocator implements FieldInformerLocator {
 				return new ObjectFieldInformer(field);
 			}
 		}
+		return null;
+	}
+
+	/**
+	 * Don't dream, there is no fallback method here
+	 * @param informedClass
+	 * @param fieldName
+	 * @return
+	 * @see com.dooapp.gaedo.finders.root.FieldInformerLocator#getInformerFor(java.lang.Class, java.lang.String)
+	 */
+	@Override
+	public FieldInformer getInformerFor(Class informedClass, String fieldName) {
 		return null;
 	}
 

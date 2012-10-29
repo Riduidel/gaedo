@@ -41,4 +41,21 @@ public class CumulativeFieldInformerLocator implements FieldInformerLocator {
 		throw new NoLocatorAllowsFieldException(field, thrownDuringSearch);
 	}
 
+	@Override
+	public FieldInformer getInformerFor(Class informedClass, String fieldName) {
+		FieldInformer returned = null;
+		Map<FieldInformerLocator, Exception> thrownDuringSearch = new LinkedHashMap<FieldInformerLocator, Exception>();
+		for (FieldInformerLocator locator : locators) {
+			try {
+				returned = locator.getInformerFor(informedClass, fieldName);
+				if (returned != null) {
+					return returned;
+				}
+			} catch (Exception e) {
+				thrownDuringSearch.put(locator, e);
+			}
+		}
+		throw new NoLocatorAllowsFieldException(informedClass, fieldName, thrownDuringSearch);
+	}
+
 }

@@ -67,7 +67,33 @@ public class ReflectionBackedInformerFactory {
 	 *         way, we will think about handling it later ;-)
 	 */
 	public FieldInformer getInformerFor(Property field) {
-		FieldInformer returned = fieldLocator.getInformerFor(field);
-		return returned;
+		return fieldLocator.getInformerFor(field);
+	}
+
+	/**
+	 * @return the fieldLocator
+	 * @category getter
+	 * @category fieldLocator
+	 */
+	public FieldInformerLocator getFieldLocator() {
+		return fieldLocator;
+	}
+	
+	/**
+	 * Delegation method allowing non-existing fields to have a "virtual" existence and be associated to {@link FieldInformer}.
+	 * Particularly useful for DB-driven-mapping (as an example querying a generic graph using existent links)
+	 * @param informer
+	 * @param fieldName
+	 * @return
+	 */
+	public FieldInformer noSuchFieldInHiearchy(ReflectionBackedInformer informer, String fieldName) {
+		try  {
+			FieldInformer returned = fieldLocator.getInformerFor(informer.getInformedClass(), fieldName);
+			if(returned!=null)
+				return returned;
+		} catch(NoLocatorAllowsFieldException e) {
+			// nothing to do : a different place implies a different exception
+		}
+		throw new NoSuchFieldInHierarchyException(fieldName);
 	}
 }

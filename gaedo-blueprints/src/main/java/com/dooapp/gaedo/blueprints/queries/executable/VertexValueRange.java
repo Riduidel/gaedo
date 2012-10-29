@@ -18,7 +18,7 @@ import com.tinkerpop.blueprints.pgm.Vertex;
  *
  */
 public class VertexValueRange {
-	Entry<Vertex, Iterable<Property>> entry = null;
+	Entry<Iterable<Vertex>, Iterable<Property>> entry = null;
 	private long edgesCount = Long.MAX_VALUE;
 	
 	public VertexValueRange() {
@@ -36,7 +36,7 @@ public class VertexValueRange {
 		return arrayList;
 	}
 	
-	private void getValues(Entry<Vertex, Iterable<Property>> entry, Iterator<Property> pathIterator, List<Vertex> vertexAccumulator) {
+	private void getValues(Entry<Iterable<Vertex>, Iterable<Property>> entry, Iterator<Property> pathIterator, List<Vertex> vertexAccumulator) {
 		if(pathIterator.hasNext()) {
 			Property current = pathIterator.next();
 			getValues(entry, pathIterator, vertexAccumulator);
@@ -50,7 +50,9 @@ public class VertexValueRange {
 				}
 			}
 		} else {
-			vertexAccumulator.add(entry.getKey());
+			for(Vertex v : entry.getKey()) {
+				vertexAccumulator.add(v);
+			}
 		}
 	}
 
@@ -59,7 +61,7 @@ public class VertexValueRange {
 	 * @param entry2
 	 * @return
 	 */
-	public VertexValueRange findBestMatch(Entry<Vertex, Iterable<Property>> entry) {
+	public VertexValueRange findBestMatch(Entry<Iterable<Vertex>, Iterable<Property>> entry) {
 		Iterator<Property> pathIterator = entry.getValue().iterator();
 		return findBestMatch(entry, new AtomicLong(0), new ArrayList<Vertex>(), pathIterator);
 	}
@@ -73,7 +75,7 @@ public class VertexValueRange {
 	 * @param usingProperty property that should be used to find the vertex in the graph (instead of simply relying upon valye type (which is especially useful for numbers). This property can be null
 	 * @return
 	 */
-	private VertexValueRange findBestMatch(Entry<Vertex, Iterable<Property>> entry, AtomicLong edgesCount, ArrayList<Vertex> verticesToCountEdgesIn, Iterator<Property> pathIterator) {
+	private VertexValueRange findBestMatch(Entry<Iterable<Vertex>, Iterable<Property>> entry, AtomicLong edgesCount, ArrayList<Vertex> verticesToCountEdgesIn, Iterator<Property> pathIterator) {
 		if(pathIterator.hasNext()) {
 			Property current = pathIterator.next();
 			VertexValueRange matching = findBestMatch(entry, edgesCount, verticesToCountEdgesIn, pathIterator);
@@ -104,7 +106,10 @@ public class VertexValueRange {
 			}
 		} else {
 			// the vertices to scan consist only in entry key
-			verticesToCountEdgesIn.add(entry.getKey());
+			for(Vertex v : entry.getKey()) {
+				verticesToCountEdgesIn.add(v);
+			}
+			edgesCount.set(verticesToCountEdgesIn.size());
 			// End of the path, no ? then return supposed best match (which is, up to now, a new EntryScore)
 			return new VertexValueRange().withEntry(entry).withEdgesCount(edgesCount.get());
 		}
@@ -115,7 +120,7 @@ public class VertexValueRange {
 	 * @category getter
 	 * @category entry
 	 */
-	public Entry<Vertex, Iterable<Property>> getEntry() {
+	public Entry<Iterable<Vertex>, Iterable<Property>> getEntry() {
 		return entry;
 	}
 
@@ -124,7 +129,7 @@ public class VertexValueRange {
 	 * @category setter
 	 * @category entry
 	 */
-	public void setEntry(Entry<Vertex, Iterable<Property>> entry) {
+	public void setEntry(Entry<Iterable<Vertex>, Iterable<Property>> entry) {
 		this.entry = entry;
 	}
 
@@ -165,7 +170,7 @@ public class VertexValueRange {
 	 * @category entry
 	 * @return this object for chaining calls
 	 */
-	public VertexValueRange withEntry(Entry<Vertex, Iterable<Property>> entry) {
+	public VertexValueRange withEntry(Entry<Iterable<Vertex>, Iterable<Property>> entry) {
 		this.setEntry(entry);
 		return this;
 	}

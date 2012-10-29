@@ -74,4 +74,7 @@ public abstract class VertexTestVisitorAdapter implements VertexTestVisitor {
 	public void visit(EqualsTo equalsTo) {
 	}
 
+	@Override
+	public void visit(VertexPropertyTest vertexPropertyTest) {
+	}
 }

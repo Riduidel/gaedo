@@ -6,6 +6,8 @@ import com.dooapp.gaedo.blueprints.AbstractBluePrintsBackedFinderService;
 import com.dooapp.gaedo.blueprints.GraphUtils;
 import com.dooapp.gaedo.blueprints.Kind;
 import com.dooapp.gaedo.blueprints.Properties;
+import com.dooapp.gaedo.blueprints.strategies.GraphMappingStrategy;
+import com.dooapp.gaedo.blueprints.strategies.StrategyType;
 import com.dooapp.gaedo.blueprints.transformers.ClassLiteralTransformer;
 import com.dooapp.gaedo.blueprints.transformers.LiteralTransformer;
 import com.dooapp.gaedo.blueprints.transformers.Literals;
@@ -21,7 +23,6 @@ import com.dooapp.gaedo.properties.TypeProperty;
 import com.tinkerpop.blueprints.pgm.Edge;
 import com.tinkerpop.blueprints.pgm.Vertex;
 import com.tinkerpop.blueprints.pgm.impls.sail.SailGraph;
-import com.tinkerpop.blueprints.pgm.impls.sail.SailVertex;
 import com.tinkerpop.blueprints.pgm.oupls.sail.GraphSail;
 
 /**
@@ -43,9 +44,31 @@ public class SailGraphBackedFinderService<DataType, InformerType extends Informe
 	public SailGraphBackedFinderService(Class<DataType> containedClass, Class<Informer<DataType>> informerClass, InformerFactory factory,
 					ServiceRepository repository, PropertyProvider provider, SailGraph graph) {
 		super(graph, containedClass, informerClass, factory, repository, provider);
+		initNamespaces(graph);
+	}
+
+	private void initNamespaces(SailGraph graph) {
 		// at creation, make sure graph supports the gaedo prefix
 		graph.addNamespace(GAEDO, GraphUtils.GAEDO_CONTEXT);
 		graph.addDefaultNamespaces();
+	}
+
+	public SailGraphBackedFinderService(SailGraph graph, Class<DataType> containedClass, Class<Informer<DataType>> informerClass, InformerFactory factory,
+					ServiceRepository repository, PropertyProvider provider, GraphMappingStrategy<DataType> strategy) {
+		super(graph, containedClass, informerClass, factory, repository, provider, strategy);
+		initNamespaces(graph);
+	}
+
+	public SailGraphBackedFinderService(SailGraph graph, Class<DataType> containedClass, Class<Informer<DataType>> informerClass, InformerFactory factory,
+					ServiceRepository repository, PropertyProvider provider, StrategyType strategy) {
+		super(graph, containedClass, informerClass, factory, repository, provider, strategy);
+		initNamespaces(graph);
+	}
+
+	public SailGraphBackedFinderService(SailGraph graph, Class<DataType> containedClass, Class<Informer<DataType>> informerClass, InformerFactory factory,
+					ServiceRepository repository, PropertyProvider provider) {
+		super(graph, containedClass, informerClass, factory, repository, provider);
+		initNamespaces(graph);
 	}
 
 	@Override

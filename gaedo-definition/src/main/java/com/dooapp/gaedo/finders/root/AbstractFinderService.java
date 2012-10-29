@@ -72,4 +72,13 @@ public abstract class AbstractFinderService<DataType, InformerType extends Infor
 				getInformer().toString()).append(")");
 		return sOut.toString();
 	}
+
+	/**
+	 * @return the informerFactory
+	 * @category getter
+	 * @category informerFactory
+	 */
+	protected InformerFactory getInformerFactory() {
+		return informerFactory;
+	}
 }
