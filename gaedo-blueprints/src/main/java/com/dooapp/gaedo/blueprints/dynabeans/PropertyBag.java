@@ -36,4 +36,5 @@ public interface PropertyBag  {
 	/**
 	 * @return all available dynamic properties names
 	 */
-	public Set<String> properties();}
+	public Set<String> properties();
+}
