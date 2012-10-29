@@ -10,8 +10,25 @@ import com.dooapp.gaedo.properties.Property;
  */
 public interface PropertyMapPropertyAccess {
 
+	/**
+	 * Get value from the given property
+	 * @param graphProperty
+	 * @return value associated to property
+	 */
 	Object getFrom(Property graphProperty);
 
+	/**
+	 * Set value from the given property
+	 * @param graphProperty
+	 * @param value
+	 */
 	void setFrom(Property graphProperty, Object value);
 
+	/**
+	 * Get available property uris
+	 * @return a collection of loaded property uris
+	 */
+	Iterable<Property> propertyUris();
+
+	void dont_use_this_interface_which_is_gaedo_specific_customers_should_use_property_bag_interface();
 }

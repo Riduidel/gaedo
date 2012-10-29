@@ -15,6 +15,11 @@ public final class OneToOneGraph extends AbstractJPAGraphImplementation implemen
 		super(entity);
 	}
 
+	public OneToOneGraph(Class targetEntity, CascadeType[] cascadeType) {
+		super(targetEntity, cascadeType);
+		// TODO Auto-generated constructor stub
+	}
+
 	@Override
 	public Class<? extends Annotation> annotationType() {
 		return OneToOne.class;
@@ -22,6 +27,6 @@ public final class OneToOneGraph extends AbstractJPAGraphImplementation implemen
 
 	@Override
 	public CascadeType[] cascade() {
-		return new CascadeType[] { CascadeType.PERSIST, CascadeType.MERGE };
+		return cascadeType;
 	}
 }

@@ -19,8 +19,14 @@ public final class OneToManyGraph extends AbstractJPAGraphImplementation impleme
 		return OneToMany.class;
 	}
 
+	public OneToManyGraph(Class targetEntity, CascadeType[] cascadeType) {
+		super(targetEntity, cascadeType);
+		// TODO Auto-generated constructor stub
+	}
+
+
 	@Override
 	public CascadeType[] cascade() {
-		return new CascadeType[] { CascadeType.PERSIST, CascadeType.MERGE };
+		return cascadeType;
 	}
 }
