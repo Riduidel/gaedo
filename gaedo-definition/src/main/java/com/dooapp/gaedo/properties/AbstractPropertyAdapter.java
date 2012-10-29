@@ -1,0 +1,153 @@
+package com.dooapp.gaedo.properties;
+
+import java.lang.annotation.Annotation;
+import java.lang.reflect.Modifier;
+import java.lang.reflect.Type;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
+
+
+/**
+ * Base class for random properties implementations. This class provides some covnenience methods to easily impelment weird properties
+ * @author ndx
+ *
+ */
+public abstract class AbstractPropertyAdapter implements Property {
+	/**
+	 * Property name
+	 */
+	private String name;
+	
+	/**
+	 * Property generic type
+	 */
+	private Type genericType;
+
+	/**
+	 * Property declaring class
+	 */
+	private Class<?> declaringClass;
+
+	/**
+	 * Property class (not to be confused with {@link #genericType}. Notice that this class should be the non-generic version of {@link #genericType}.
+	 * As an example, if genericType is List<String>, this field should contain List.
+	 */
+	private Class<?> type;
+
+	private Map<Class<?>, Annotation> annotations = new HashMap<Class<?>, Annotation>();
+	
+	/**
+	 * Here, for both laziness and compatibility, modifiers are stored like in Java VM (using bit field and '&' tests).
+	 */
+	private int modifiers;
+
+	@Override
+	public String getName() {
+		return name;
+	}
+
+	@Override
+	public Type getGenericType() {
+		return genericType;
+	}
+
+	@Override
+	public Class<?> getDeclaringClass() {
+		return declaringClass;
+	}
+
+	@Override
+	public Class<?> getType() {
+		return type;
+	}
+	
+	public void setAnnotation(Annotation a) {
+		annotations.put(a.annotationType(), a);
+	}
+
+	@Override
+	public <T extends Annotation> T getAnnotation(Class<T> annotationClass) {
+		return (T) annotations .get(annotationClass);
+	}
+	
+	@Override
+	public Collection<? extends Annotation> getAnnotations() {
+		return annotations.values();
+	}
+	
+	public void setModifier(int modifierFlag, boolean enabled) {
+		if(enabled)
+			modifiers |= modifierFlag;
+		else
+			// special construct negating only the bi expressed by the modifierFlag
+			modifiers &= ~modifierFlag;
+	}
+
+	@Override
+	public boolean hasModifier(int modifier) {
+		return (modifiers & modifier) != 0;
+	}
+
+	/**
+	 * @param name the name to set
+	 * @category setter
+	 * @category name
+	 */
+	public void setName(String name) {
+		this.name = name;
+	}
+
+	/**
+	 * @param genericType the genericType to set
+	 * @category setter
+	 * @category genericType
+	 */
+	public void setGenericType(Type genericType) {
+		this.genericType = genericType;
+	}
+
+	/**
+	 * @param declaringClass the declaringClass to set
+	 * @category setter
+	 * @category declaringClass
+	 */
+	public void setDeclaringClass(Class<?> declaringClass) {
+		this.declaringClass = declaringClass;
+	}
+
+	/**
+	 * @param type the type to set
+	 * @category setter
+	 * @category type
+	 */
+	public void setType(Class<?> type) {
+		this.type = type;
+	}
+
+	/**
+	 * @return
+	 * @see java.lang.Object#toString()
+	 */
+	@Override
+	public String toString() {
+		StringBuilder builder = new StringBuilder();
+		builder.append("AbstractPropertyAdapter [");
+		if (getDeclaringClass() != null) {
+			builder.append("getDeclaringClass()=");
+			builder.append(getDeclaringClass());
+			builder.append(", ");
+		}
+		if (getName() != null) {
+			builder.append("getName()=");
+			builder.append(getName());
+			builder.append(", ");
+		}
+		if (getGenericType() != null) {
+			builder.append("getGenericType()=");
+			builder.append(getGenericType());
+		}
+		builder.append("]");
+		return builder.toString();
+	}
+}
