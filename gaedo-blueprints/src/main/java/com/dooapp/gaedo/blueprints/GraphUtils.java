@@ -176,7 +176,7 @@ public class GraphUtils {
 	 */
 	public static String getIdOfLiteral(Class<?> declaredClass, Property idProperty, Object objectId) {
 		PropertyMappingStrategy strategy = PropertyMappingStrategy.prefixed;
-		if(idProperty.getAnnotation(GraphProperty.class)!=null) {
+		if(idProperty!=null && idProperty.getAnnotation(GraphProperty.class)!=null) {
 			strategy = idProperty.getAnnotation(GraphProperty.class).mapping();
 		}
 		return strategy.literalToId(declaredClass, idProperty, objectId);

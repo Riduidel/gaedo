@@ -62,7 +62,7 @@ public class TestUtils {
 		Collection<Object[]> returned = new LinkedList<Object[]>();
 		returned.add(new Object[] { new Tinker()});
 //		returned.add(new Object[] { new OrientDB()});
-//		returned.add(new Object[] { new Neo4j()});
+		returned.add(new Object[] { new Neo4j()});
 		return returned;
 	}
 
