@@ -7,6 +7,7 @@ import com.dooapp.gaedo.blueprints.AbstractBluePrintsBackedFinderService;
 import com.dooapp.gaedo.blueprints.GraphUtils;
 import com.dooapp.gaedo.blueprints.Kind;
 import com.dooapp.gaedo.blueprints.Properties;
+import com.dooapp.gaedo.blueprints.annotations.GraphProperty;
 import com.dooapp.gaedo.blueprints.strategies.GraphMappingStrategy;
 import com.dooapp.gaedo.blueprints.strategies.StrategyType;
 import com.dooapp.gaedo.blueprints.transformers.ClassLiteralTransformer;
@@ -149,9 +150,21 @@ public class IndexableGraphBackedFinderService <DataType, InformerType extends I
 	public Edge addEdgeFor(Vertex fromVertex, Vertex toVertex, Property property) {
 		String edgeNameFor = GraphUtils.getEdgeNameFor(property);
 		Edge edge = database.addEdge(getEdgeId(fromVertex, toVertex, property), fromVertex, toVertex, edgeNameFor);
-		edge.setProperty(GraphSail.PREDICATE_PROP, GraphSail.URI_PREFIX+" "+GraphUtils.getEdgeNameFor(property));
-		// Create a common context for all gaedo relationships
-		edge.setProperty(GraphSail.CONTEXT_PROP, GraphUtils.asSailProperty(GraphUtils.GAEDO_CONTEXT));
+		String predicateProperty = GraphUtils.asSailProperty(GraphUtils.getEdgeNameFor(property));
+		edge.setProperty(GraphSail.PREDICATE_PROP, predicateProperty);
+		String[] contexts = new String[] { GraphUtils.GAEDO_CONTEXT };
+		if(property.getAnnotation(GraphProperty.class)!=null) {
+			GraphProperty graph = property.getAnnotation(GraphProperty.class); 
+			contexts = graph.contexts();
+		}
+		StringBuilder contextPropertyBuilder = new StringBuilder();
+		for(String context : contexts) {
+			contextPropertyBuilder.append(GraphUtils.asSailProperty(context)).append(" ");
+		}
+		String contextProperty = contextPropertyBuilder.toString();
+		edge.setProperty(GraphSail.CONTEXT_PROP, contextProperty);
+		// Finally build the context-predicate property by concatenating both
+		edge.setProperty(GraphSail.CONTEXT_PROP + GraphSail.PREDICATE_PROP, contextProperty+" "+predicateProperty);
 		return edge;
 	}
 

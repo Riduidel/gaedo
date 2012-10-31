@@ -10,11 +10,14 @@ public class GraphPropertyAnnotation implements GraphProperty {
 	private final String name;
 	
 	private final PropertyMappingStrategy strategy;
+	
+	private final String[] contexts;
 
-	public GraphPropertyAnnotation(String name, PropertyMappingStrategy strategy) {
+	public GraphPropertyAnnotation(String name, PropertyMappingStrategy strategy, String[] contexts) {
 		super();
 		this.name = name;
 		this.strategy = strategy;
+		this.contexts = contexts;
 	}
 
 	@Override
@@ -30,6 +33,11 @@ public class GraphPropertyAnnotation implements GraphProperty {
 	@Override
 	public PropertyMappingStrategy mapping() {
 		return strategy;
+	}
+
+	@Override
+	public String[] contexts() {
+		return contexts;
 	}
 
 }

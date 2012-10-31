@@ -14,155 +14,33 @@ import java.util.Map;
  *
  */
 public abstract class AbstractPropertyAdapter implements Property {
-	/**
-	 * Property name
-	 */
-	private String name;
+	private Map<Class<?>, Annotation> annotations = new HashMap<Class<?>, Annotation>();
 	
-	/**
-	 * Property generic type
-	 */
-	private Type genericType;
-
 	/**
 	 * Property declaring class
 	 */
 	private Class<?> declaringClass;
 
 	/**
-	 * Property class (not to be confused with {@link #genericType}. Notice that this class should be the non-generic version of {@link #genericType}.
-	 * As an example, if genericType is List<String>, this field should contain List.
+	 * Property generic type
 	 */
-	private Class<?> type;
+	private Type genericType;
 
-	private Map<Class<?>, Annotation> annotations = new HashMap<Class<?>, Annotation>();
-	
 	/**
 	 * Here, for both laziness and compatibility, modifiers are stored like in Java VM (using bit field and '&' tests).
 	 */
 	private int modifiers;
 
-	@Override
-	public String getName() {
-		return name;
-	}
-
-	@Override
-	public Type getGenericType() {
-		return genericType;
-	}
-
-	@Override
-	public Class<?> getDeclaringClass() {
-		return declaringClass;
-	}
-
-	@Override
-	public Class<?> getType() {
-		return type;
-	}
+	/**
+	 * Property name
+	 */
+	private String name;
 	
-	public void setAnnotation(Annotation a) {
-		annotations.put(a.annotationType(), a);
-	}
-
-	@Override
-	public <T extends Annotation> T getAnnotation(Class<T> annotationClass) {
-		return (T) annotations .get(annotationClass);
-	}
-	
-	@Override
-	public Collection<? extends Annotation> getAnnotations() {
-		return annotations.values();
-	}
-	
-	public void setModifier(int modifierFlag, boolean enabled) {
-		if(enabled)
-			modifiers |= modifierFlag;
-		else
-			// special construct negating only the bi expressed by the modifierFlag
-			modifiers &= ~modifierFlag;
-	}
-
-	@Override
-	public boolean hasModifier(int modifier) {
-		return (modifiers & modifier) != 0;
-	}
-
 	/**
-	 * @param name the name to set
-	 * @category setter
-	 * @category name
+	 * Property class (not to be confused with {@link #genericType}. Notice that this class should be the non-generic version of {@link #genericType}.
+	 * As an example, if genericType is List<String>, this field should contain List.
 	 */
-	public void setName(String name) {
-		this.name = name;
-	}
-
-	/**
-	 * @param genericType the genericType to set
-	 * @category setter
-	 * @category genericType
-	 */
-	public void setGenericType(Type genericType) {
-		this.genericType = genericType;
-	}
-
-	/**
-	 * @param declaringClass the declaringClass to set
-	 * @category setter
-	 * @category declaringClass
-	 */
-	public void setDeclaringClass(Class<?> declaringClass) {
-		this.declaringClass = declaringClass;
-	}
-
-	/**
-	 * @param type the type to set
-	 * @category setter
-	 * @category type
-	 */
-	public void setType(Class<?> type) {
-		this.type = type;
-	}
-
-	/**
-	 * @return
-	 * @see java.lang.Object#toString()
-	 */
-	@Override
-	public String toString() {
-		StringBuilder builder = new StringBuilder();
-		builder.append("AbstractPropertyAdapter [");
-		if (getDeclaringClass() != null) {
-			builder.append("getDeclaringClass()=");
-			builder.append(getDeclaringClass());
-			builder.append(", ");
-		}
-		if (getName() != null) {
-			builder.append("getName()=");
-			builder.append(getName());
-			builder.append(", ");
-		}
-		if (getGenericType() != null) {
-			builder.append("getGenericType()=");
-			builder.append(getGenericType());
-		}
-		builder.append("]");
-		return builder.toString();
-	}
-
-	/**
-	 * @return
-	 * @see java.lang.Object#hashCode()
-	 */
-	@Override
-	public int hashCode() {
-		final int prime = 31;
-		int result = 1;
-		result = prime * result + ((declaringClass == null) ? 0 : declaringClass.hashCode());
-		result = prime * result + ((name == null) ? 0 : name.hashCode());
-		return result;
-	}
+	private Class<?> type;
 
 	/**
 	 * @param obj
@@ -189,5 +67,163 @@ public abstract class AbstractPropertyAdapter implements Property {
 		} else if (!name.equals(other.name))
 			return false;
 		return true;
+	}
+
+	@Override
+	public <T extends Annotation> T getAnnotation(Class<T> annotationClass) {
+		return (T) annotations .get(annotationClass);
+	}
+
+	@Override
+	public Collection<? extends Annotation> getAnnotations() {
+		return annotations.values();
+	}
+
+	@Override
+	public Class<?> getDeclaringClass() {
+		return declaringClass;
+	}
+	
+	@Override
+	public Type getGenericType() {
+		return genericType;
+	}
+
+	@Override
+	public String getName() {
+		return name;
+	}
+	
+	@Override
+	public Class<?> getType() {
+		return type;
+	}
+	
+	/**
+	 * @return
+	 * @see java.lang.Object#hashCode()
+	 */
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + ((declaringClass == null) ? 0 : declaringClass.hashCode());
+		result = prime * result + ((name == null) ? 0 : name.hashCode());
+		return result;
+	}
+
+	@Override
+	public boolean hasModifier(int modifier) {
+		return (modifiers & modifier) != 0;
+	}
+
+	public void setAnnotation(Annotation a) {
+		annotations.put(a.annotationType(), a);
+	}
+
+	/**
+	 * @param declaringClass the declaringClass to set
+	 * @category setter
+	 * @category declaringClass
+	 */
+	public void setDeclaringClass(Class<?> declaringClass) {
+		this.declaringClass = declaringClass;
+	}
+	
+	/**
+	 * @param declaringClass new value for #declaringClass
+	 * @category fluent
+	 * @category setter
+	 * @category declaringClass
+	 * @return this object for chaining calls
+	 */
+	public AbstractPropertyAdapter withDeclaringClass(Class<?> declaringClass) {
+		this.setDeclaringClass(declaringClass);
+		return this;
+	}
+
+	/**
+	 * @param genericType the genericType to set
+	 * @category setter
+	 * @category genericType
+	 */
+	public void setGenericType(Type genericType) {
+		this.genericType = genericType;
+	}
+	
+	/**
+	 * @param genericType new value for #genericType
+	 * @category fluent
+	 * @category setter
+	 * @category genericType
+	 * @return this object for chaining calls
+	 */
+	public AbstractPropertyAdapter withGenericType(Type genericType) {
+		this.setGenericType(genericType);
+		return this;
+	}
+
+	public void setModifier(int modifierFlag, boolean enabled) {
+		if(enabled)
+			modifiers |= modifierFlag;
+		else
+			// special construct negating only the bi expressed by the modifierFlag
+			modifiers &= ~modifierFlag;
+	}
+
+	/**
+	 * @param name the name to set
+	 * @category setter
+	 * @category name
+	 */
+	public void setName(String name) {
+		this.name = name;
+	}
+
+	/**
+	 * @param type the type to set
+	 * @category setter
+	 * @category type
+	 */
+	public void setType(Class<?> type) {
+		this.type = type;
+	}
+	
+	/**
+	 * @param type new value for #type
+	 * @category fluent
+	 * @category setter
+	 * @category type
+	 * @return this object for chaining calls
+	 */
+	public AbstractPropertyAdapter withType(Class<?> type) {
+		this.setType(type);
+		return this;
+	}
+
+	/**
+	 * @return
+	 * @see java.lang.Object#toString()
+	 */
+	@Override
+	public String toString() {
+		StringBuilder builder = new StringBuilder();
+		builder.append("AbstractPropertyAdapter [");
+		if (getDeclaringClass() != null) {
+			builder.append("getDeclaringClass()=");
+			builder.append(getDeclaringClass());
+			builder.append(", ");
+		}
+		if (getName() != null) {
+			builder.append("getName()=");
+			builder.append(getName());
+			builder.append(", ");
+		}
+		if (getGenericType() != null) {
+			builder.append("getGenericType()=");
+			builder.append(getGenericType());
+		}
+		builder.append("]");
+		return builder.toString();
 	}
 }

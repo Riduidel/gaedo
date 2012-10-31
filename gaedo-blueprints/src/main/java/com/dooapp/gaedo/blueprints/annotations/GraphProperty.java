@@ -3,6 +3,7 @@ package com.dooapp.gaedo.blueprints.annotations;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 
+import com.dooapp.gaedo.blueprints.GraphUtils;
 import com.dooapp.gaedo.blueprints.strategies.PropertyMappingStrategy;
 
 /**
@@ -23,4 +24,10 @@ public @interface GraphProperty {
 	 * @return
 	 */
 	PropertyMappingStrategy mapping() default PropertyMappingStrategy.prefixed;
+	
+	/**
+	 * Collection of named graphs this property is to be put in
+	 * @return
+	 */
+	String[] contexts() default {GraphUtils.GAEDO_CONTEXT};
 }

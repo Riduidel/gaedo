@@ -2,6 +2,7 @@ package com.dooapp.gaedo.blueprints.strategies.graph;
 
 import java.util.Collection;
 
+import com.dooapp.gaedo.blueprints.GraphUtils;
 import com.dooapp.gaedo.blueprints.dynabeans.PropertyMapPropertyAccess;
 import com.dooapp.gaedo.blueprints.strategies.BeanIsNotAPropertyBagException;
 import com.dooapp.gaedo.blueprints.strategies.PropertyMappingStrategy;
@@ -15,10 +16,9 @@ public class GraphProperty extends AbstractPropertyAdapter {
 	private Class<?> containedType;
 
 	@Override
-	public String toGenericString() {
-		if(containedType==null)
-			return String.format("%s", getType());
-		return String.format("%s<%s>", getType(), containedType);
+	public Object fromString(String value) {
+		// TODO Auto-generated method stub
+		throw new UnsupportedOperationException("method " + GraphProperty.class.getName() + "#fromString has not yet been implemented AT ALL");
 	}
 
 	@Override
@@ -45,18 +45,59 @@ public class GraphProperty extends AbstractPropertyAdapter {
 		}
 	}
 
-	@Override
-	public Object fromString(String value) {
-		// TODO Auto-generated method stub
-		throw new UnsupportedOperationException("method " + GraphProperty.class.getName() + "#fromString has not yet been implemented AT ALL");
-	}
-
 	public void setContainedTypeName(String containedType) {
 		try {
 			this.containedType = Class.forName(containedType);
 		} catch (ClassNotFoundException e) {
 			throw new UnableToSetTypeException("unable to set containedType "+containedType, e);
 		}
+	}
+	
+	/**
+	 * @param containedTypeName new value for #containedTypeName
+	 * @category fluent
+	 * @category setter
+	 * @category containedTypeName
+	 * @return this object for chaining calls
+	 */
+	public GraphProperty withContainedTypeName(String containedTypeName) {
+		this.setContainedTypeName(containedTypeName);
+		return this;
+	}
+
+	/**
+	 * When setting name, additionaly add a GraphProperty annotation to make sure no name is used instead
+	 * @param name
+	 * @see com.dooapp.gaedo.properties.AbstractPropertyAdapter#setName(java.lang.String)
+	 */
+	@Override
+	public void setName(String name) {
+		super.setName(name);
+		setAnnotation(new GraphPropertyAnnotation(name, PropertyMappingStrategy.asIs, new String[] { GraphUtils.GAEDO_CONTEXT }));
+	}
+	
+	/**
+	 * @param name new value for #name
+	 * @category fluent
+	 * @category setter
+	 * @category name
+	 * @return this object for chaining calls
+	 */
+	public GraphProperty withName(String name) {
+		this.setName(name);
+		return this;
+	}
+	
+	/**
+	 * @param typeName new value for #typeName
+	 * @category fluent
+	 * @category setter
+	 * @category typeName
+	 * @return this object for chaining calls
+	 */
+	public GraphProperty withTypeName(String typeName) {
+		this.setTypeName(typeName);
+		return this;
 	}
 
 	public void setTypeName(String effectiveType) {
@@ -67,15 +108,11 @@ public class GraphProperty extends AbstractPropertyAdapter {
 		}
 	}
 	
-	/**
-	 * When setting name, additionaly add a GraphProperty annotation to make sure no name is used instead
-	 * @param name
-	 * @see com.dooapp.gaedo.properties.AbstractPropertyAdapter#setName(java.lang.String)
-	 */
 	@Override
-	public void setName(String name) {
-		super.setName(name);
-		setAnnotation(new GraphPropertyAnnotation(name, PropertyMappingStrategy.asIs));
+	public String toGenericString() {
+		if(containedType==null)
+			return String.format("%s", getType());
+		return String.format("%s<%s>", getType(), containedType);
 	}
 
 }

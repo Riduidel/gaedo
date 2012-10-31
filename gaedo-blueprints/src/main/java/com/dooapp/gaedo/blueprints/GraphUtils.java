@@ -39,7 +39,9 @@ public class GraphUtils {
 
 	private static final Logger logger = Logger.getLogger(GraphUtils.class.getName());
 	
-	public static Object asSailProperty(String context) {
+	public static String asSailProperty(String context) {
+		if("N".equals(context))
+			return context;
 		return GraphSail.URI_PREFIX+" "+context;
 	}
 

@@ -1,17 +1,14 @@
 package com.dooapp.gaedo.blueprints.dynabeans;
 
-import java.util.Collection;
-import java.util.LinkedList;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
-import java.util.TreeMap;
+import java.util.TreeSet;
 
-import javax.persistence.CascadeType;
 import javax.persistence.Id;
 
 import com.dooapp.gaedo.blueprints.annotations.GraphProperty;
 import com.dooapp.gaedo.blueprints.strategies.PropertyMappingStrategy;
-import com.dooapp.gaedo.blueprints.strategies.graph.OneToManyGraph;
 import com.dooapp.gaedo.properties.Property;
 
 /**
@@ -32,16 +29,16 @@ public class PropertyBagMap implements PropertyBag, PropertyMapPropertyAccess {
 	 * Map storing all data
 	 */
 	@BagProperty
-	private Map<String, Object> data = new TreeMap<String, Object>();
-
+	private Map<Property, Object> data = new HashMap<Property, Object>();
+	
 	@Override
 	public Object getFrom(Property graphProperty) {
-		return data.get(graphProperty.getName());
+		return data.get(graphProperty);
 }
 
 	@Override
 	public void setFrom(Property graphProperty, Object value) {
-		data.put(graphProperty.getName(), value);
+		data.put(graphProperty, value);
 	}
 
 	/**
@@ -73,7 +70,7 @@ public class PropertyBagMap implements PropertyBag, PropertyMapPropertyAccess {
 	 */
 	@Override
 	public Object get(String key) {
-		return data.get(key);
+		return data.get(findProperty(key));
 	}
 
 	/**
@@ -85,7 +82,22 @@ public class PropertyBagMap implements PropertyBag, PropertyMapPropertyAccess {
 	 */
 	@Override
 	public Object set(String key, Object value) {
-		return data.put(key, value);
+		try {
+			return data.put(findProperty(key), value);
+		} catch(NoSuchPropertyException e) {
+			com.dooapp.gaedo.blueprints.strategies.graph.GraphProperty used = new com.dooapp.gaedo.blueprints.strategies.graph.GraphProperty();
+			used.setName(key);
+			used.setType(value.getClass());
+			return data.put(used, value);
+		}
+	}
+
+	private Property findProperty(String key) {
+		for(Property p : data.keySet()) {
+			if(p.getName().equals(key))
+				return p;
+		}
+		throw new NoSuchPropertyException(key, properties());
 	}
 
 	/**
@@ -95,7 +107,11 @@ public class PropertyBagMap implements PropertyBag, PropertyMapPropertyAccess {
 	 */
 	@Override
 	public Set<String> properties() {
-		return data.keySet();
+		Set<String> returned = new TreeSet<String>();
+		for(Property p : data.keySet()) {
+			returned.add(p.getName());
+		}
+		return returned;
 	}
 	
 	/**
@@ -121,19 +137,7 @@ public class PropertyBagMap implements PropertyBag, PropertyMapPropertyAccess {
 
 	@Override
 	public Iterable<Property> propertyUris() {
-		Collection<Property> returned = new LinkedList<Property>();
-		for(Map.Entry<String, Object> entry : data.entrySet()) {
-			com.dooapp.gaedo.blueprints.strategies.graph.GraphProperty toAdd = new com.dooapp.gaedo.blueprints.strategies.graph.GraphProperty();
-			Object value = entry.getValue();
-			toAdd.setType(value.getClass());
-			toAdd.setName(entry.getKey());
-			toAdd.setGenericType(value.getClass());
-			toAdd.setDeclaringClass(getClass());
-			// as default, elements from objects are always cascaded
-			toAdd.setAnnotation(new OneToManyGraph(getClass(), new CascadeType[] { CascadeType.ALL}));
-			returned.add(toAdd);
-		}
-		return returned;
+		return data.keySet();
 	}
 
 	@Override
