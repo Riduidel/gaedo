@@ -73,7 +73,6 @@ public class GraphProperty extends AbstractPropertyAdapter {
 	@Override
 	public void setName(String name) {
 		super.setName(name);
-		setAnnotation(new GraphPropertyAnnotation(name, PropertyMappingStrategy.asIs, new String[] { GraphUtils.GAEDO_CONTEXT }));
 	}
 	
 	/**
@@ -99,6 +98,11 @@ public class GraphProperty extends AbstractPropertyAdapter {
 		this.setTypeName(typeName);
 		return this;
 	}
+	
+	@Override
+	public GraphProperty withType(Class<?> type) {
+		return (GraphProperty) super.withType(type);
+	}
 
 	public void setTypeName(String effectiveType) {
 		try {
@@ -115,4 +119,8 @@ public class GraphProperty extends AbstractPropertyAdapter {
 		return String.format("%s<%s>", getType(), containedType);
 	}
 
+	@Override
+	public GraphProperty withDeclaringClass(Class<?> declaringClass) {
+		return (GraphProperty) super.withDeclaringClass(declaringClass);
+	}
 }

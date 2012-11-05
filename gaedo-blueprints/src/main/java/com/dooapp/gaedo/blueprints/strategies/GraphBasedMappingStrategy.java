@@ -6,6 +6,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
+import java.util.logging.Logger;
 
 import javax.persistence.CascadeType;
 
@@ -19,10 +20,12 @@ import com.dooapp.gaedo.blueprints.queries.tests.CompoundVertexTest;
 import com.dooapp.gaedo.blueprints.queries.tests.VertexPropertyTest;
 import com.dooapp.gaedo.blueprints.strategies.graph.GraphBasedPropertyBuilder;
 import com.dooapp.gaedo.blueprints.strategies.graph.GraphFieldLocator;
+import com.dooapp.gaedo.blueprints.strategies.graph.NoEdgeInNamedGraphsException;
 import com.dooapp.gaedo.blueprints.transformers.Literals;
 import com.dooapp.gaedo.blueprints.transformers.TypeUtils;
 import com.dooapp.gaedo.extensions.migrable.Migrator;
 import com.dooapp.gaedo.finders.root.CumulativeFieldInformerLocator;
+import com.dooapp.gaedo.finders.root.DelegatingInformerLocator;
 import com.dooapp.gaedo.finders.root.FieldInformerLocator;
 import com.dooapp.gaedo.finders.root.InformerFactory;
 import com.dooapp.gaedo.finders.root.ProxyBackedInformerFactory;
@@ -41,6 +44,8 @@ import com.tinkerpop.blueprints.pgm.Vertex;
  * @param <DataType>
  */
 public class GraphBasedMappingStrategy<DataType> extends AbstractMappingStrategy<DataType> implements GraphMappingStrategy<DataType> {
+	private static final Logger logger = Logger.getLogger(GraphBasedMappingStrategy.class.getName());
+	
 	private static final String STRING_CLASS = String.class.getName();
 
 	/**
@@ -100,17 +105,19 @@ public class GraphBasedMappingStrategy<DataType> extends AbstractMappingStrategy
 			for (Edge e : vertex.getOutEdges()) {
 				String edgeLabel = e.getLabel();
 				if (!edgeLabelToProperty.containsKey(edgeLabel)) {
-					edgeLabelToProperty.put(edgeLabel, new GraphBasedPropertyBuilder<DataType>(serviceContainedClass, service.getDriver()));
+					edgeLabelToProperty.put(edgeLabel, new GraphBasedPropertyBuilder<DataType>(serviceContainedClass, service.getDriver(), service.getLens()));
 				}
 				edgeLabelToProperty.get(edgeLabel).add(e);
 			}
 			for (GraphBasedPropertyBuilder<DataType> builder : edgeLabelToProperty.values()) {
-				Property built = builder.build();
-				// we first remove key, to make sure this property will be used instead of previous one (which may come from object - where default cascade mode is ALL
-				if(returned.containsKey(built)) {
-					returned.remove(built);
+				try {
+					Property built = builder.build();
+					// only add property if absent from properties laoded from the bean, as properties loaded from the bean are respectfull to initial data type
+					if(!returned.containsKey(built))
+						returned.put(built, StrategyUtils.extractCascadeOfJPAAnnotations(built));
+				} catch(NoEdgeInNamedGraphsException e) {
+					logger.info(e.getMessage());
 				}
-				returned.put(built, StrategyUtils.extractCascadeOfJPAAnnotations(built));
 			}
 		}
 		return returned;
@@ -121,39 +128,47 @@ public class GraphBasedMappingStrategy<DataType> extends AbstractMappingStrategy
 	 * make sure non-existing properties
 	 * 
 	 * @param service
-	 * @see com.dooapp.gaedo.blueprints.strategies.AbstractMappingStrategy#loadWith(com.dooapp.gaedo.blueprints.AbstractBluePrintsBackedFinderService)
+	 * @see com.dooapp.gaedo.blueprints.strategies.AbstractMappingStrategy#reloadWith(com.dooapp.gaedo.blueprints.AbstractBluePrintsBackedFinderService)
 	 */
 	@Override
-	public void loadWith(AbstractBluePrintsBackedFinderService<?, DataType, ?> service) {
-		super.loadWith(service);
+	public void reloadWith(AbstractBluePrintsBackedFinderService<?, DataType, ?> service) {
+		super.reloadWith(service);
 		InformerFactory informerFactory = service.getInformerFactory();
 		if (informerFactory instanceof ProxyBackedInformerFactory) {
-			ProxyBackedInformerFactory proxied = (ProxyBackedInformerFactory) informerFactory;
-			addGraphLocatorTo(proxied.getReflectiveInformerFactory());
+			ProxyBackedInformerFactory initialProxy = (ProxyBackedInformerFactory) informerFactory;
+			ReflectionBackedInformerFactory initialReflective = initialProxy.getReflectiveInformerFactory();
+			
+			FieldInformerLocator initialLocator = initialReflective.getFieldLocator();
+			// nothing has been loaded yet
+			if(initialLocator instanceof CumulativeFieldInformerLocator) {
+				ReflectionBackedInformerFactory usedReflective = new ReflectionBackedInformerFactory(
+								new DelegatingInformerLocator(initialLocator, createLocator(initialLocator)),
+								initialReflective.getPropertyProvider()
+								);
+				
+				ProxyBackedInformerFactory usedProxy = new ProxyBackedInformerFactory(usedReflective);
+				service.setInformerFactory(usedProxy);
+			} else if(initialLocator instanceof DelegatingInformerLocator) {
+				DelegatingInformerLocator delegating = (DelegatingInformerLocator) initialLocator;
+				delegating.setSecond(createLocator(delegating.getFirst()));
+			}
 		}
 	}
 
-	private void addGraphLocatorTo(ReflectionBackedInformerFactory reflectionInformerFactory) {
+	private GraphFieldLocator<DataType> createLocator(FieldInformerLocator cumulativeLocator) {
+		return new GraphFieldLocator<DataType>(
+						serviceContainedClass, 
+						service.getInformer().getClass(), 
+						service.getDatabase(), service
+						.getDriver(),
 		/*
-		 * To support the multiple case, the field lcoator, which is used by the
-		 * reflection informer factory is a CumulativeFieldInformerLocator. We
-		 * will add one field locator allowing graph search. This field locator
-		 * will be able to provide a basic field informer for all relationships
-		 * visible in graph.
+		 * yup, there is a loop here, but for a good reason :
+		 * graphFieldLocator will generate a Property out of an edge, then
+		 * cumulative locator will create a FieldInformer out of that
+		 * property
 		 */
-		FieldInformerLocator locator = reflectionInformerFactory.getFieldLocator();
-		if (locator instanceof CumulativeFieldInformerLocator) {
-			CumulativeFieldInformerLocator cumulativeLocator = (CumulativeFieldInformerLocator) locator;
-			cumulativeLocator.add(new GraphFieldLocator<DataType>(serviceContainedClass, service.getInformer().getClass(), service.getDatabase(), service
-							.getDriver(),
-			/*
-			 * yup, there is a look here, but for a good reason :
-			 * graphFieldLocator will generate a Property out of an edge, then
-			 * cumulative locator will create a FieldInformer out of that
-			 * property
-			 */
-			cumulativeLocator));
-		}
+		cumulativeLocator,
+		service.getLens());
 	}
 
 	@Override

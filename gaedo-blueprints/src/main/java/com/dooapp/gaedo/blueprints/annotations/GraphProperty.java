@@ -24,10 +24,4 @@ public @interface GraphProperty {
 	 * @return
 	 */
 	PropertyMappingStrategy mapping() default PropertyMappingStrategy.prefixed;
-	
-	/**
-	 * Collection of named graphs this property is to be put in
-	 * @return
-	 */
-	String[] contexts() default {GraphUtils.GAEDO_CONTEXT};
 }

@@ -81,4 +81,13 @@ public abstract class AbstractFinderService<DataType, InformerType extends Infor
 	protected InformerFactory getInformerFactory() {
 		return informerFactory;
 	}
+
+	/**
+	 * @param informerFactory the informerFactory to set
+	 * @category setter
+	 * @category informerFactory
+	 */
+	protected void setInformerFactory(InformerFactory informerFactory) {
+		this.informerFactory = informerFactory;
+	}
 }

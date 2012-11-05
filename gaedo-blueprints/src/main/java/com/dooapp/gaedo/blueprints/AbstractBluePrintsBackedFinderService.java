@@ -1,10 +1,14 @@
 package com.dooapp.gaedo.blueprints;
 
+import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.Map;
+import java.util.SortedSet;
 import java.util.TreeMap;
+import java.util.TreeSet;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -18,6 +22,7 @@ import com.dooapp.gaedo.blueprints.transformers.Literals;
 import com.dooapp.gaedo.blueprints.transformers.Tuples;
 import com.dooapp.gaedo.extensions.migrable.Migrator;
 import com.dooapp.gaedo.extensions.migrable.VersionMigratorFactory;
+import com.dooapp.gaedo.extensions.views.InViewService;
 import com.dooapp.gaedo.finders.FinderCrudService;
 import com.dooapp.gaedo.finders.Informer;
 import com.dooapp.gaedo.finders.QueryBuilder;
@@ -45,8 +50,10 @@ import com.tinkerpop.blueprints.pgm.Vertex;
  * @param <DataType>
  * @param <InformerType>
  */
-public abstract class AbstractBluePrintsBackedFinderService<GraphClass extends Graph, DataType, InformerType extends Informer<DataType>> extends
-				AbstractFinderService<DataType, InformerType> implements FinderCrudService<DataType, InformerType>, IdBasedService<DataType> {
+public abstract class AbstractBluePrintsBackedFinderService<GraphClass extends Graph, DataType, InformerType extends Informer<DataType>> 
+	extends	AbstractFinderService<DataType, InformerType> 
+	implements InViewService<DataType, InformerType, SortedSet<String>>, 
+		IdBasedService<DataType> {
 
 	private class DelegatingDriver implements GraphDatabaseDriver {
 		@Override
@@ -85,8 +92,8 @@ public abstract class AbstractBluePrintsBackedFinderService<GraphClass extends G
 		}
 
 		@Override
-		public Edge addEdgeFor(Vertex fromVertex, Vertex toVertex, Property property) {
-			return AbstractBluePrintsBackedFinderService.this.addEdgeFor(fromVertex, toVertex, property);
+		public Edge createEdgeFor(Vertex fromVertex, Vertex toVertex, Property property) {
+			return AbstractBluePrintsBackedFinderService.this.createEdgeFor(fromVertex, toVertex, property);
 		}
 
 	}
@@ -125,6 +132,11 @@ public abstract class AbstractBluePrintsBackedFinderService<GraphClass extends G
 	protected BluePrintsPersister persister;
 	private GraphMappingStrategy<DataType> strategy;
 
+	/**
+	 * Used lens is a list of named graphs uris
+	 */
+	protected SortedSet<String> lens = new TreeSet<String>(Arrays.asList(GraphUtils.GAEDO_CONTEXT));
+
 	public AbstractBluePrintsBackedFinderService(GraphClass graph, Class<DataType> containedClass, Class<InformerType> informerClass, InformerFactory factory,
 					ServiceRepository repository, PropertyProvider provider) {
 		this(graph, containedClass, informerClass, factory, repository, provider, StrategyType.beanBased);
@@ -158,7 +170,7 @@ public abstract class AbstractBluePrintsBackedFinderService<GraphClass extends G
 			transactionSupport = null;
 		}
 		this.strategy = strategy;
-		strategy.loadWith(this);
+		strategy.reloadWith(this);
 		this.migrator = VersionMigratorFactory.create(containedClass);
 		// Updater builds managed nodes here
 		this.persister = new BluePrintsPersister(Kind.uri);
@@ -173,7 +185,7 @@ public abstract class AbstractBluePrintsBackedFinderService<GraphClass extends G
 		return super.getInformerFactory();
 	}
 
-	protected abstract Edge addEdgeFor(Vertex fromVertex, Vertex toVertex, Property property);
+	protected abstract Edge createEdgeFor(Vertex fromVertex, Vertex toVertex, Property property);
 
 	protected abstract Object getValue(Vertex vertex);
 
@@ -670,5 +682,30 @@ public abstract class AbstractBluePrintsBackedFinderService<GraphClass extends G
 	 */
 	public GraphMappingStrategy<DataType> getStrategy() {
 		return strategy;
+	}
+
+	@Override
+	public SortedSet<String> getLens() {
+		return lens;
+	}
+
+	/**
+	 * Set current lens. Notice when {@link #lens} is changed strategy is updated.
+	 * @param lens
+	 */
+	public void setLens(SortedSet<String> lens) {
+		SortedSet<String> usedLens = new TreeSet<String>(lens);
+		this.lens = Collections.unmodifiableSortedSet(usedLens);
+		this.strategy.reloadWith(this);
+	}
+	
+	/**
+	 * Informer factory has been made public to allow use of lens in finders
+	 * @param informerFactory
+	 * @see com.dooapp.gaedo.finders.root.AbstractFinderService#setInformerFactory(com.dooapp.gaedo.finders.root.InformerFactory)
+	 */
+	@Override
+	public void setInformerFactory(InformerFactory informerFactory) {
+		super.setInformerFactory(informerFactory);
 	}
 }

@@ -1,19 +1,21 @@
 package com.dooapp.gaedo.blueprints.indexable;
 
 
+import java.util.Collection;
+import java.util.SortedSet;
 import java.util.UUID;
 
 import com.dooapp.gaedo.blueprints.AbstractBluePrintsBackedFinderService;
 import com.dooapp.gaedo.blueprints.GraphUtils;
 import com.dooapp.gaedo.blueprints.Kind;
 import com.dooapp.gaedo.blueprints.Properties;
-import com.dooapp.gaedo.blueprints.annotations.GraphProperty;
 import com.dooapp.gaedo.blueprints.strategies.GraphMappingStrategy;
 import com.dooapp.gaedo.blueprints.strategies.StrategyType;
 import com.dooapp.gaedo.blueprints.transformers.ClassLiteralTransformer;
 import com.dooapp.gaedo.blueprints.transformers.Literals;
 import com.dooapp.gaedo.blueprints.transformers.Tuples;
 import com.dooapp.gaedo.blueprints.transformers.TypeUtils;
+import com.dooapp.gaedo.extensions.views.InViewService;
 import com.dooapp.gaedo.finders.Informer;
 import com.dooapp.gaedo.finders.repository.ServiceRepository;
 import com.dooapp.gaedo.finders.root.InformerFactory;
@@ -120,7 +122,7 @@ public class IndexableGraphBackedFinderService <DataType, InformerType extends I
 			}
 			// obtain vertex for type
 			Vertex classVertex = classTransformer.getVertexFor(getDriver(), valueClass);
-			Edge toType = getDriver().addEdgeFor(returned, classVertex, TypeProperty.INSTANCE);
+			Edge toType = getDriver().createEdgeFor(returned, classVertex, TypeProperty.INSTANCE);
 			/*
 			 * Make sure literals are literals by changing that particular edge context to a null value.
 			 *  Notice we COULD have stored literal type as a property, instead of using
@@ -147,19 +149,22 @@ public class IndexableGraphBackedFinderService <DataType, InformerType extends I
 		return vertex.getProperty(Properties.value.name());
 	}
 
-	public Edge addEdgeFor(Vertex fromVertex, Vertex toVertex, Property property) {
+	public Edge createEdgeFor(Vertex fromVertex, Vertex toVertex, Property property) {
 		String edgeNameFor = GraphUtils.getEdgeNameFor(property);
 		Edge edge = database.addEdge(getEdgeId(fromVertex, toVertex, property), fromVertex, toVertex, edgeNameFor);
 		String predicateProperty = GraphUtils.asSailProperty(GraphUtils.getEdgeNameFor(property));
 		edge.setProperty(GraphSail.PREDICATE_PROP, predicateProperty);
-		String[] contexts = new String[] { GraphUtils.GAEDO_CONTEXT };
-		if(property.getAnnotation(GraphProperty.class)!=null) {
-			GraphProperty graph = property.getAnnotation(GraphProperty.class); 
-			contexts = graph.contexts();
-		}
+		Collection<String> contexts = getLens();
 		StringBuilder contextPropertyBuilder = new StringBuilder();
-		for(String context : contexts) {
-			contextPropertyBuilder.append(GraphUtils.asSailProperty(context)).append(" ");
+		if(contexts.size()==0) {
+			contextPropertyBuilder.append(GraphUtils.asSailProperty(GraphSail.NULL_CONTEXT_NATIVE));
+		} else {
+			for(String context : contexts) {
+				if(contextPropertyBuilder.length()>0)
+					contextPropertyBuilder.append(" " );
+				contextPropertyBuilder.append(GraphUtils.asSailProperty(context));
+				
+			}
 		}
 		String contextProperty = contextPropertyBuilder.toString();
 		edge.setProperty(GraphSail.CONTEXT_PROP, contextProperty);
@@ -168,8 +173,27 @@ public class IndexableGraphBackedFinderService <DataType, InformerType extends I
 		return edge;
 	}
 
+
+
 	public String getEdgeId(Vertex fromVertex, Vertex toVertex, Property property) {
 		return fromVertex.getId().toString()+"_to_"+toVertex.getId().toString()+"___"+UUID.randomUUID().toString(); 
+	}
+
+
+
+	@Override
+	public InViewService<DataType, InformerType, SortedSet<String>> focusOn(SortedSet<String> lens) {
+		AbstractBluePrintsBackedFinderService<IndexableGraph, DataType, InformerType> returned = 
+						new IndexableGraphBackedFinderService<DataType, InformerType>(
+										database, 
+										containedClass, 
+										informerClass, 
+										getInformerFactory(), 
+										repository, 
+										propertyProvider, 
+										getStrategy());
+		returned.setLens(lens);
+		return returned;
 	}
 
 }

@@ -18,7 +18,6 @@ import javax.persistence.FetchType;
 import javax.persistence.ManyToMany;
 import javax.persistence.OneToMany;
 
-import com.dooapp.gaedo.blueprints.indexable.IndexableGraphBackedFinderService;
 import com.dooapp.gaedo.finders.id.AnnotationsFinder.Annotations;
 import com.dooapp.gaedo.finders.repository.ServiceRepository;
 import com.dooapp.gaedo.patterns.WriteReplaceable;
@@ -26,6 +25,7 @@ import com.dooapp.gaedo.properties.Property;
 import com.dooapp.gaedo.utils.Utils;
 import com.tinkerpop.blueprints.pgm.Edge;
 import com.tinkerpop.blueprints.pgm.Graph;
+import com.tinkerpop.blueprints.pgm.IndexableGraph;
 import com.tinkerpop.blueprints.pgm.Vertex;
 
 public class BluePrintsPersister {
@@ -260,7 +260,7 @@ public class BluePrintsPersister {
 			}
 			// And finally add new vertices
 			for(Vertex newVertex : newVertices) {
-				service.getDriver().addEdgeFor(rootVertex, newVertex, p);
+				service.getDriver().createEdgeFor(rootVertex, newVertex, p);
 			}
 		}
 	}
@@ -300,7 +300,7 @@ public class BluePrintsPersister {
 			}
 			// And finally add new vertices
 			for(Vertex newVertex : newVertices) {
-				service.getDriver().addEdgeFor(rootVertex, newVertex, p);
+				service.getDriver().createEdgeFor(rootVertex, newVertex, p);
 			}
 		}
 	}
@@ -362,7 +362,7 @@ public class BluePrintsPersister {
 				} else {
 					// delete old edge (TODO maybe delete vertex, if there is no other link (excepted obvious ones, like type, Object.classes, and id)
 					database.removeEdge(existing);
-					link = service.getDriver().addEdgeFor(rootVertex, valueVertex, p);
+					link = service.getDriver().createEdgeFor(rootVertex, valueVertex, p);
 
 				}
 			}
@@ -377,7 +377,7 @@ public class BluePrintsPersister {
 				}
 			} else {
 				if(link==null)
-					link = service.getDriver().addEdgeFor(rootVertex, valueVertex, p);
+					link = service.getDriver().createEdgeFor(rootVertex, valueVertex, p);
 			}
 		}
 	}
@@ -483,7 +483,7 @@ public class BluePrintsPersister {
 			Object value = GraphUtils.createInstance(driver, classloader, firstVertex, p.getType(), repository, objectsBeingAccessed);
 			if(repository.containsKey(value.getClass())) {
 				// value requires fields loading
-				IndexableGraphBackedFinderService blueprints= (IndexableGraphBackedFinderService) repository.get(value.getClass());
+				AbstractBluePrintsBackedFinderService<IndexableGraph, DataType, ?> blueprints= (AbstractBluePrintsBackedFinderService<IndexableGraph, DataType, ?>) repository.get(value.getClass());
 				value = loadObject(blueprints, firstVertex, objectsBeingAccessed);
 			}
 			p.set(returned, value);

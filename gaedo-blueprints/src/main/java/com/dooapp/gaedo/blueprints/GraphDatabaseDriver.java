@@ -63,5 +63,5 @@ public interface GraphDatabaseDriver {
 	 */
 	public ServiceRepository getRepository();
 
-	public Edge addEdgeFor(Vertex fromVertex, Vertex toVertex, Property property);
+	public Edge createEdgeFor(Vertex fromVertex, Vertex toVertex, Property property);
 }

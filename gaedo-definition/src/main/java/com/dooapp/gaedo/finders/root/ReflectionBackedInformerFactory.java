@@ -96,4 +96,13 @@ public class ReflectionBackedInformerFactory {
 		}
 		throw new NoSuchFieldInHierarchyException(fieldName);
 	}
+
+	/**
+	 * @return the propertyProvider
+	 * @category getter
+	 * @category propertyProvider
+	 */
+	public PropertyProvider getPropertyProvider() {
+		return propertyProvider;
+	}
 }

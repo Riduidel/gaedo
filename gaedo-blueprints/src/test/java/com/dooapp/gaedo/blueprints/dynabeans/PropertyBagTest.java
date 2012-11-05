@@ -5,6 +5,8 @@ import java.io.IOException;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
+import java.util.SortedSet;
+import java.util.TreeSet;
 
 import org.hamcrest.core.Is;
 import org.hamcrest.core.IsNot;
@@ -22,18 +24,20 @@ import org.openrdf.rio.RDFParseException;
 
 import com.dooapp.gaedo.blueprints.AbstractGraphEnvironment;
 import com.dooapp.gaedo.blueprints.AbstractGraphTest;
+import com.dooapp.gaedo.blueprints.GraphUtils;
 import com.dooapp.gaedo.blueprints.TestUtils;
-import com.dooapp.gaedo.blueprints.queries.tests.CollectionContains;
+import com.dooapp.gaedo.blueprints.annotations.GraphProperty;
 import com.dooapp.gaedo.blueprints.strategies.StrategyType;
-import com.dooapp.gaedo.finders.FinderCrudService;
+import com.dooapp.gaedo.extensions.views.InViewService;
 import com.dooapp.gaedo.finders.QueryBuilder;
 import com.dooapp.gaedo.finders.QueryExpression;
 import com.dooapp.gaedo.finders.id.IdBasedService;
 import com.dooapp.gaedo.finders.informers.CollectionFieldInformer;
-import com.dooapp.gaedo.properties.PropertyProvider;
+import com.dooapp.gaedo.properties.Property;
 import com.dooapp.gaedo.utils.CollectionUtils;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertThat;
+import static org.junit.Assert.fail;
 
 /**
  * Read the lite.nasa.nt file into a graph that will be read by a gaedo-blueprints finder servcie tied to a DynamicPropertyProvider,
@@ -84,7 +88,7 @@ public class PropertyBagTest extends AbstractGraphTest {
 		
 	}
 
-	private FinderCrudService<PropertyBagMap, PropertyBagInformer> propertyBagService;
+	private InViewService<PropertyBagMap, PropertyBagInformer, SortedSet<String>> propertyBagService;
 
 	public PropertyBagTest(AbstractGraphEnvironment<?> graph) {
 		super(graph);
@@ -96,7 +100,9 @@ public class PropertyBagTest extends AbstractGraphTest {
 		customizeEnvironment();
 		// now data has been added, create a dynamic service
 		propertyBagService = 
-						environment.createServiceFor(PropertyBagMap.class, PropertyBagInformer.class, StrategyType.graphBased);
+						environment.createServiceFor(PropertyBagMap.class, PropertyBagInformer.class, StrategyType.graphBased)
+						// "unfocus" graph (in fact, it's more a "focus on no named graph graph")
+						.focusOn(new TreeSet<String>());
 	}
 	
 	/**
@@ -155,6 +161,20 @@ public class PropertyBagTest extends AbstractGraphTest {
 			assertThat(map, IsNull.notNullValue());
 			assertThat(map.getId(), Is.is(SATURN_SA1));
 			assertThat(map.get(DYNAMIC_DESCRIPTION), Is.is((Object) SATURN_SA_1_WIKIPEDIA_DESCRIPTION));
+		} else {
+			fail("service should be id based \"by design\"");
+		}
+	}
+	
+	@Test
+	public void test_No_Bag_Map_Property_Can_Exist_Without_Annotation() {
+		if (propertyBagService instanceof IdBasedService) {
+			final IdBasedService<PropertyBagMap> idService = (IdBasedService<PropertyBagMap>) propertyBagService;
+			PropertyBagMap ariane1 = ariane1(idService.findById(ENGINEERING));
+			for(Property p : ariane1.propertyUris()) {
+				assertThat(p.getAnnotation(GraphProperty.class), IsNull.notNullValue());
+				assertThat(p.getAnnotation(GraphProperty.class).name(), Is.is(p.getName()));
+			}
 		} else {
 			fail("service should be id based \"by design\"");
 		}

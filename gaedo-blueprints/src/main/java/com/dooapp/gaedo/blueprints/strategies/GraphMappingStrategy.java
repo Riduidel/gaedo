@@ -54,7 +54,7 @@ public interface GraphMappingStrategy<DataType> {
 	 * Initialization method allowing strategy to load some infos built during service init (like, as an example, the GraphDatabaseDriver or the service itself).
 	 * @param service
 	 */
-	public void loadWith(AbstractBluePrintsBackedFinderService<?, DataType, ?> service);
+	public void reloadWith(AbstractBluePrintsBackedFinderService<?, DataType, ?> service);
 
 	/**
 	 * Add default search to the given vertex test. That default search makes sure results are limited to object of this class (and also ensures request will have effective results).

@@ -1,6 +1,7 @@
 package com.dooapp.gaedo.blueprints;
 
 import java.io.File;
+import java.util.SortedSet;
 
 import org.junit.After;
 import org.neo4j.kernel.impl.util.FileUtils;
@@ -9,6 +10,7 @@ import org.openrdf.repository.sail.SailRepository;
 import com.dooapp.gaedo.blueprints.beans.PostSubClass;
 import com.dooapp.gaedo.blueprints.beans.PostSubClassInformer;
 import com.dooapp.gaedo.blueprints.strategies.StrategyType;
+import com.dooapp.gaedo.extensions.views.InViewService;
 import com.dooapp.gaedo.finders.FinderCrudService;
 import com.dooapp.gaedo.finders.Informer;
 import com.dooapp.gaedo.finders.repository.ServiceBackedFieldLocator;
@@ -93,15 +95,15 @@ public abstract class AbstractGraphEnvironment<GraphType extends Graph> {
 
 	protected abstract GraphType createGraph(GraphProvider graphProvider);
 
-	public final <Type, InformerType extends Informer<Type>> FinderCrudService<Type, InformerType> createServiceFor(Class<Type> beanClass, Class<InformerType> informerClass, StrategyType strategy) {
+	public final <Type, InformerType extends Informer<Type>> InViewService<Type, InformerType, SortedSet<String>> createServiceFor(Class<Type> beanClass, Class<InformerType> informerClass, StrategyType strategy) {
 		if(!serviceRrepository.containsKey(beanClass)) {
 			FinderCrudService<Type, InformerType> created = doCreateServiceFor(beanClass, informerClass, strategy);
 			serviceRrepository.add(created);
 		}
-		return serviceRrepository.get(beanClass);
+		return (InViewService<Type, InformerType, SortedSet<String>>) serviceRrepository.get(beanClass);
 	}
 
-	protected abstract <Type, InformerType extends Informer<Type>> FinderCrudService<Type, InformerType> doCreateServiceFor(Class<Type> beanClass, Class<InformerType> informerClass, StrategyType strategy);
+	protected abstract <Type, InformerType extends Informer<Type>> InViewService<Type, InformerType, SortedSet<String>> doCreateServiceFor(Class<Type> beanClass, Class<InformerType> informerClass, StrategyType strategy);
 
 	/**
 	 * @return the tagService

@@ -11,7 +11,6 @@ import javax.persistence.CascadeType;
 import javax.persistence.Column;
 
 import com.dooapp.gaedo.blueprints.annotations.GraphProperty;
-import com.dooapp.gaedo.blueprints.indexable.IndexableGraphBackedFinderService;
 import com.dooapp.gaedo.blueprints.strategies.PropertyMappingStrategy;
 import com.dooapp.gaedo.blueprints.transformers.LiteralTransformer;
 import com.dooapp.gaedo.blueprints.transformers.Literals;
@@ -20,6 +19,7 @@ import com.dooapp.gaedo.blueprints.transformers.Tuples;
 import com.dooapp.gaedo.finders.repository.ServiceRepository;
 import com.dooapp.gaedo.properties.Property;
 import com.tinkerpop.blueprints.pgm.Graph;
+import com.tinkerpop.blueprints.pgm.IndexableGraph;
 import com.tinkerpop.blueprints.pgm.Vertex;
 import com.tinkerpop.blueprints.pgm.oupls.sail.GraphSail;
 
@@ -40,7 +40,7 @@ public class GraphUtils {
 	private static final Logger logger = Logger.getLogger(GraphUtils.class.getName());
 	
 	public static String asSailProperty(String context) {
-		if("N".equals(context))
+		if(GraphSail.NULL_CONTEXT_NATIVE.equals(context))
 			return context;
 		return GraphSail.URI_PREFIX+" "+context;
 	}
@@ -155,7 +155,7 @@ public class GraphUtils {
 	public static <DataType> String getIdOf(ServiceRepository repository, DataType value) {
 		Class<? extends Object> valueClass = value.getClass();
 		if(repository.containsKey(valueClass)) {
-			IndexableGraphBackedFinderService<DataType, ?> service = (IndexableGraphBackedFinderService<DataType, ?>) repository.get(valueClass);
+			AbstractBluePrintsBackedFinderService<IndexableGraph, DataType, ?> service = (AbstractBluePrintsBackedFinderService<IndexableGraph, DataType, ?>) repository.get(valueClass);
 			// All ids are string, don't worry about it
 			return service.getIdOf(value).toString();
 		} else if(Literals.containsKey(valueClass)) {

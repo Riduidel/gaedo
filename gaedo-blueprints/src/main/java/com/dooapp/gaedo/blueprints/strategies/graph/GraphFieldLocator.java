@@ -1,10 +1,10 @@
 package com.dooapp.gaedo.blueprints.strategies.graph;
 
+import java.util.SortedSet;
+
 import com.dooapp.gaedo.blueprints.GraphDatabaseDriver;
 import com.dooapp.gaedo.blueprints.Properties;
 import com.dooapp.gaedo.finders.FieldInformer;
-import com.dooapp.gaedo.finders.Informer;
-import com.dooapp.gaedo.finders.root.BasicFieldInformerLocator;
 import com.dooapp.gaedo.finders.root.FieldInformerLocator;
 import com.dooapp.gaedo.properties.Property;
 import com.tinkerpop.blueprints.pgm.Edge;
@@ -19,13 +19,15 @@ public class GraphFieldLocator<DataType> implements FieldInformerLocator {
 	private Graph graph;
 	private Class<?> informerClass;
 	private FieldInformerLocator delegate;
+	private SortedSet<String> namedGraphs;
 
-	public GraphFieldLocator(Class<DataType> serviceContainedClass, Class<?> serviceInformerClass, Graph graph, GraphDatabaseDriver driver, FieldInformerLocator informerLocator) {
+	public GraphFieldLocator(Class<DataType> serviceContainedClass, Class<?> serviceInformerClass, Graph graph, GraphDatabaseDriver driver, FieldInformerLocator informerLocator, SortedSet<String> namedGraphs) {
 		this.dataClass = serviceContainedClass;
 		this.informerClass = serviceInformerClass;
 		this.delegate = informerLocator;
 		this.graph = graph;
 		this.driver = driver;
+		this.namedGraphs = namedGraphs;
 	}
 
 	/**
@@ -67,7 +69,7 @@ public class GraphFieldLocator<DataType> implements FieldInformerLocator {
 			Index<Edge> edges = indexable.getIndex(Index.EDGES, Edge.class);
 			long count = edges.count(Properties.label.name(), fieldName);
 			if(count>0) {
-				GraphBasedPropertyBuilder<DataType> builder = new GraphBasedPropertyBuilder<DataType>(dataClass, driver);
+				GraphBasedPropertyBuilder<DataType> builder = new GraphBasedPropertyBuilder<DataType>(dataClass, driver, namedGraphs);
 				for(Edge e : edges.get(Properties.label.name(), fieldName)) {
 					builder.add(e);
 				}

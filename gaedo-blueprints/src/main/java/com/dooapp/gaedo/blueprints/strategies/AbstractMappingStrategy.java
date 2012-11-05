@@ -108,7 +108,7 @@ public abstract class AbstractMappingStrategy<DataType> implements GraphMappingS
 	}
 
 	@Override
-	public void loadWith(AbstractBluePrintsBackedFinderService<?, DataType, ?> service) {
+	public void reloadWith(AbstractBluePrintsBackedFinderService<?, DataType, ?> service) {
 		this.service = service;
 	}
 

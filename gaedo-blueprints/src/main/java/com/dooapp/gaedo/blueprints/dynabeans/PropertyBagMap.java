@@ -9,6 +9,7 @@ import javax.persistence.Id;
 
 import com.dooapp.gaedo.blueprints.annotations.GraphProperty;
 import com.dooapp.gaedo.blueprints.strategies.PropertyMappingStrategy;
+import com.dooapp.gaedo.blueprints.strategies.graph.GraphPropertyAnnotation;
 import com.dooapp.gaedo.properties.Property;
 
 /**
@@ -85,9 +86,11 @@ public class PropertyBagMap implements PropertyBag, PropertyMapPropertyAccess {
 		try {
 			return data.put(findProperty(key), value);
 		} catch(NoSuchPropertyException e) {
-			com.dooapp.gaedo.blueprints.strategies.graph.GraphProperty used = new com.dooapp.gaedo.blueprints.strategies.graph.GraphProperty();
-			used.setName(key);
-			used.setType(value.getClass());
+			com.dooapp.gaedo.blueprints.strategies.graph.GraphProperty used = new com.dooapp.gaedo.blueprints.strategies.graph.GraphProperty()
+				.withName(key)
+				.withType(value.getClass())
+				.withDeclaringClass(getClass());
+			used.setAnnotation(new GraphPropertyAnnotation(key, PropertyMappingStrategy.asIs));
 			return data.put(used, value);
 		}
 	}
