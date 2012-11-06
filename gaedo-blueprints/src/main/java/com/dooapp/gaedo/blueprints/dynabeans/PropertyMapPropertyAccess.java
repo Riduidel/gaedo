@@ -1,5 +1,7 @@
 package com.dooapp.gaedo.blueprints.dynabeans;
 
+import java.util.List;
+
 import com.dooapp.gaedo.properties.Property;
 
 /**
@@ -15,7 +17,7 @@ public interface PropertyMapPropertyAccess {
 	 * @param graphProperty
 	 * @return value associated to property
 	 */
-	Object getFrom(Property graphProperty);
+	List<Object> getFrom(Property graphProperty);
 
 	/**
 	 * Set value from the given property

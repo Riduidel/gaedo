@@ -124,9 +124,9 @@ public class PropertyBagTest extends AbstractGraphTest {
 			PropertyBag map = idService.findById(SATURN_SA1);
 			assertThat(map, IsNull.notNullValue());
 			assertThat(map.getId(), Is.is(SATURN_SA1));
-			assertThat(map.get(DYNAMIC_NAME).toString(), Is.is("Saturn SA-1"));
-			assertThat(map.get(DYNAMIC_DISCIPLINE), Is.is(PropertyBag.class));
-			assertThat(((PropertyBag) map.get(DYNAMIC_DISCIPLINE)).getId(), Is.is(PLANETARY_SCIENCE));
+			assertThat(map.get(DYNAMIC_NAME).get(0).toString(), Is.is("Saturn SA-1"));
+			assertThat(map.get(DYNAMIC_DISCIPLINE).get(0), Is.is(PropertyBag.class));
+			assertThat(((PropertyBag) map.get(DYNAMIC_DISCIPLINE).get(0)).getId(), Is.is(PLANETARY_SCIENCE));
 		} else {
 			fail("service should be id based \"by design\"");
 		}
@@ -160,7 +160,8 @@ public class PropertyBagTest extends AbstractGraphTest {
 			map = idService.findById(SATURN_SA1);
 			assertThat(map, IsNull.notNullValue());
 			assertThat(map.getId(), Is.is(SATURN_SA1));
-			assertThat(map.get(DYNAMIC_DESCRIPTION), Is.is((Object) SATURN_SA_1_WIKIPEDIA_DESCRIPTION));
+			assertThat(map.getSize(DYNAMIC_DESCRIPTION), Is.is(1));
+			assertThat(map.get(DYNAMIC_DESCRIPTION).get(0), Is.is((Object) SATURN_SA_1_WIKIPEDIA_DESCRIPTION));
 		} else {
 			fail("service should be id based \"by design\"");
 		}
@@ -189,7 +190,8 @@ public class PropertyBagTest extends AbstractGraphTest {
 			ariane1 = idService.findById(ARIANE_L01);
 			assertThat(ariane1, IsNull.notNullValue());
 			assertThat(ariane1.getId(), Is.is(ARIANE_L01));
-			assertThat(ariane1.get(DYNAMIC_DESCRIPTION), Is.is((Object) ARIANE_L01_WIKIEDIA_DESCRIPTION));
+			assertThat(ariane1.getSize(DYNAMIC_DESCRIPTION), Is.is(1));
+			assertThat(ariane1.get(DYNAMIC_DESCRIPTION).get(0), Is.is((Object) ARIANE_L01_WIKIEDIA_DESCRIPTION));
 			// make sure it is a spaceship studying engineering (I love that test sample dataset)
 			Iterable<PropertyBagMap> engineeringSpaceships = propertyBagService.find().matching(new FindByDiscipline(idService.findById(ENGINEERING))).getAll();
 			List<PropertyBagMap> spaceshipList = CollectionUtils.asList(engineeringSpaceships);

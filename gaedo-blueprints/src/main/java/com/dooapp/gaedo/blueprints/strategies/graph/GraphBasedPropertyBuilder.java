@@ -20,7 +20,9 @@ import com.tinkerpop.blueprints.pgm.Vertex;
 import com.tinkerpop.blueprints.pgm.oupls.sail.GraphSail;
 
 /**
- * Build property from informations given by output edges
+ * Build property from informations given by output edges.
+ * Notice we decide as a standard hypothesis that all graph properties are multivalued. There are NO single-value properties, even when, in fact, they are mono-valued.
+ * It prevents the important risk of value type change during graph life : that one could have happen provided used data set was not clearly defined.
  * @author ndx
  *
  */
@@ -60,12 +62,7 @@ public class GraphBasedPropertyBuilder<DataType> {
 	}
 
 	public Property build() {
-		if(correspondingEdges.size()==1)
-			return buildSingle(correspondingEdges.get(0));
-		else if(correspondingEdges.size()>1)
-			return buildCollection(correspondingEdges);
-		else
-			throw new UnsupportedOperationException();
+		return buildCollection(correspondingEdges);
 	}
 
 	private Property buildCollection(List<Edge> correspondingEdges) {
@@ -99,16 +96,11 @@ public class GraphBasedPropertyBuilder<DataType> {
 		for(AtomicLong v : edgesPerInVertices.values()) {
 			maxCount = Math.max(maxCount, v.get());
 		}
-		if(maxCount>1) {
-			returned.setType(List.class);
-			// would have really loved to use generics, but it's a dead end (remember about generics reification ? fuck)
-			returned.setGenericType(List.class);
-			returned.setContainedTypeName(containedType);
-			returned.setAnnotation(new OneToManyGraph(serviceContainedClass));
-		} else {
-			returned.setTypeName(containedType);
-			returned.setGenericType(returned.getType());
-		}
+		returned.setType(List.class);
+		// would have really loved to use generics, but it's a dead end (remember about generics reification ? fuck)
+		returned.setGenericType(List.class);
+		returned.setContainedTypeName(containedType);
+		returned.setAnnotation(new OneToManyGraph(serviceContainedClass));
 		returned.setAnnotation(new GraphPropertyAnnotation(returned.getName(), PropertyMappingStrategy.asIs));
 		return returned;
 	}
@@ -120,20 +112,20 @@ public class GraphBasedPropertyBuilder<DataType> {
 		return isInNamedGraphs;
 	}
 
-	private Property buildSingle(Edge edge) {
-		GraphProperty returned = new GraphProperty();
-		returned.setName(edge.getLabel());
-		if(!isInNamedGraphs(edge))
-			throw new NoEdgeInNamedGraphsException("no edge named \""+edge.getLabel()+"\" is declared in named graphs "+namedGraphs);
-		returned.setDeclaringClass(serviceContainedClass);
-		returned.setAnnotation(new OneToOneGraph(serviceContainedClass));
-		// named graphs in which this property is to be written are determined by the contextualized graph instance, not by this graph
-		returned.setAnnotation(new GraphPropertyAnnotation(edge.getLabel(), PropertyMappingStrategy.asIs));
-		String effectiveType = driver.getEffectiveType(edge.getInVertex());
-		returned.setTypeName(effectiveType);
-		returned.setGenericType(returned.getType());
-		return returned;
-	}
+//	private Property buildSingle(Edge edge) {
+//		GraphProperty returned = new GraphProperty();
+//		returned.setName(edge.getLabel());
+//		if(!isInNamedGraphs(edge))
+//			throw new NoEdgeInNamedGraphsException("no edge named \""+edge.getLabel()+"\" is declared in named graphs "+namedGraphs);
+//		returned.setDeclaringClass(serviceContainedClass);
+//		returned.setAnnotation(new OneToOneGraph(serviceContainedClass));
+//		// named graphs in which this property is to be written are determined by the contextualized graph instance, not by this graph
+//		returned.setAnnotation(new GraphPropertyAnnotation(edge.getLabel(), PropertyMappingStrategy.asIs));
+//		String effectiveType = driver.getEffectiveType(edge.getInVertex());
+//		returned.setTypeName(effectiveType);
+//		returned.setGenericType(returned.getType());
+//		return returned;
+//	}
 
 	/**
 	 * Find all contexts in given edge by looking, in {@link GraphSail#CONTEXT_PROP} property, what are the contexts. These contexts are extracted by iteratively calling 

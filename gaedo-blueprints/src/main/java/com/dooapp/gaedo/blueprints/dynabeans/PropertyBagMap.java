@@ -1,6 +1,10 @@
 package com.dooapp.gaedo.blueprints.dynabeans;
 
+import java.util.Arrays;
+import java.util.Collection;
 import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
@@ -11,6 +15,7 @@ import com.dooapp.gaedo.blueprints.annotations.GraphProperty;
 import com.dooapp.gaedo.blueprints.strategies.PropertyMappingStrategy;
 import com.dooapp.gaedo.blueprints.strategies.graph.GraphPropertyAnnotation;
 import com.dooapp.gaedo.properties.Property;
+import com.dooapp.gaedo.utils.CollectionUtils;
 
 /**
  * Default implementation of a bean with dynamic properties.
@@ -30,16 +35,16 @@ public class PropertyBagMap implements PropertyBag, PropertyMapPropertyAccess {
 	 * Map storing all data
 	 */
 	@BagProperty
-	private Map<Property, Object> data = new HashMap<Property, Object>();
+	private Map<Property, List<Object>> data = new HashMap<Property, List<Object>>();
 	
 	@Override
-	public Object getFrom(Property graphProperty) {
+	public List<Object> getFrom(Property graphProperty) {
 		return data.get(graphProperty);
 }
 
 	@Override
 	public void setFrom(Property graphProperty, Object value) {
-		data.put(graphProperty, value);
+		data.put(graphProperty, CollectionUtils.asList(value));
 	}
 
 	/**
@@ -70,7 +75,7 @@ public class PropertyBagMap implements PropertyBag, PropertyMapPropertyAccess {
 	 * @category delegate
 	 */
 	@Override
-	public Object get(String key) {
+	public List<Object> get(String key) {
 		return data.get(findProperty(key));
 	}
 
@@ -82,16 +87,17 @@ public class PropertyBagMap implements PropertyBag, PropertyMapPropertyAccess {
 	 * @category delegate
 	 */
 	@Override
-	public Object set(String key, Object value) {
+	public List<Object> set(String key, Object value) {
+		value = CollectionUtils.asList(value);
 		try {
-			return data.put(findProperty(key), value);
+			return data.put(findProperty(key), (List<Object>) value);
 		} catch(NoSuchPropertyException e) {
 			com.dooapp.gaedo.blueprints.strategies.graph.GraphProperty used = new com.dooapp.gaedo.blueprints.strategies.graph.GraphProperty()
 				.withName(key)
 				.withType(value.getClass())
 				.withDeclaringClass(getClass());
 			used.setAnnotation(new GraphPropertyAnnotation(key, PropertyMappingStrategy.asIs));
-			return data.put(used, value);
+			return data.put(used, (List<Object>) value);
 		}
 	}
 
@@ -197,5 +203,14 @@ public class PropertyBagMap implements PropertyBag, PropertyMapPropertyAccess {
 		}
 		builder.append("]");
 		return builder.toString();
+	}
+
+	@Override
+	public int getSize(String property) {
+		try {
+			return get(property).size();
+		} catch(NoSuchPropertyException e) {
+			return 0;
+		}
 	}
 }

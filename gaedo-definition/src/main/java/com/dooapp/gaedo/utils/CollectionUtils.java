@@ -1,6 +1,7 @@
 package com.dooapp.gaedo.utils;
 
 import java.io.Serializable;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -28,6 +29,20 @@ public class CollectionUtils {
 			paramMap.put(parameters[i++].toString(), parameters[i]);
 		}
 		return paramMap;
+	}
+	
+	/**
+	 * Convert any object into a list
+	 * @param source
+	 * @return
+	 */
+	public static List asList(Object source) {
+		if (source instanceof Iterable) {
+			Iterable new_name = (Iterable) source;
+			return asList(new_name);
+		} else {
+			return asList(Arrays.asList(source));
+		}
 	}
 
 	/**

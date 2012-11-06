@@ -10,6 +10,8 @@ import com.dooapp.gaedo.properties.Property;
  * TODO Theorically, generics should be used for model navigation. But for now, i don't have the slighest idea on the way to do it !
  * @author ndx
  *
+ * @param ValueType type of value that the associated collection (the one found at source path) contains
+ * @param InformerType the type of informer used to perform query upon values.
  */
 public class CollectionFieldInformer<ValueType> extends ObjectFieldInformer {
 
