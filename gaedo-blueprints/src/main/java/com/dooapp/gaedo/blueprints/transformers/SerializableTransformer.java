@@ -12,6 +12,7 @@ import com.dooapp.gaedo.blueprints.AbstractBluePrintsBackedFinderService;
 import com.dooapp.gaedo.blueprints.GraphDatabaseDriver;
 import com.dooapp.gaedo.blueprints.GraphUtils;
 import com.dooapp.gaedo.blueprints.Kind;
+import com.dooapp.gaedo.blueprints.strategies.GraphMappingStrategy;
 import com.dooapp.gaedo.finders.repository.ServiceRepository;
 import com.tinkerpop.blueprints.pgm.Graph;
 import com.tinkerpop.blueprints.pgm.Vertex;
@@ -104,12 +105,12 @@ public class SerializableTransformer implements TupleTransformer<Serializable> {
 	 * @see com.dooapp.gaedo.blueprints.transformers.TupleTransformer#loadObject(java.lang.ClassLoader, java.lang.Class, com.tinkerpop.blueprints.pgm.Vertex, com.dooapp.gaedo.finders.repository.ServiceRepository, java.util.Map)
 	 */
 	@Override
-	public Object loadObject(GraphDatabaseDriver driver, ClassLoader classLoader, Class effectiveClass, Vertex key, ServiceRepository repository, Map<String, Object> objectsBeingAccessed) {
+	public Object loadObject(GraphDatabaseDriver driver, GraphMappingStrategy strategy, ClassLoader classLoader, Class effectiveClass, Vertex key, ServiceRepository repository, Map<String, Object> objectsBeingAccessed) {
 		return readSerializable(driver.getValue(key).toString());
 	}
 
 	@Override
-	public Object loadObject(GraphDatabaseDriver driver, ClassLoader classLoader, String effectiveType, Vertex key, ServiceRepository repository, Map<String, Object> objectsBeingAccessed) {
+	public Object loadObject(GraphDatabaseDriver driver, GraphMappingStrategy strategy, ClassLoader classLoader, String effectiveType, Vertex key, ServiceRepository repository, Map<String, Object> objectsBeingAccessed) {
 		return readSerializable(driver.getValue(key).toString());
 	}
 

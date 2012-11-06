@@ -2,6 +2,7 @@ package com.dooapp.gaedo.blueprints.strategies;
 
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.LinkedList;
 
 import javax.persistence.GeneratedValue;
 
@@ -20,6 +21,8 @@ import com.dooapp.gaedo.finders.id.AnnotationUtils;
 import com.dooapp.gaedo.properties.Property;
 import com.dooapp.gaedo.properties.PropertyProvider;
 import com.dooapp.gaedo.utils.Utils;
+import com.tinkerpop.blueprints.pgm.Edge;
+import com.tinkerpop.blueprints.pgm.Vertex;
 
 public abstract class AbstractMappingStrategy<DataType> implements GraphMappingStrategy<DataType>{
 
@@ -137,4 +140,17 @@ public abstract class AbstractMappingStrategy<DataType> implements GraphMappingS
 	 * @return
 	 */
 	protected abstract CompoundVertexTest addDefaultSearchToAndTest(AndVertexTest vertexTest);
+
+	@Override
+	public Iterable<Edge> getOutEdgesFor(Vertex rootVertex, Property p) {
+		String edgeNameFor = GraphUtils.getEdgeNameFor(p);
+		Iterable<Edge> allEdges = rootVertex.getOutEdges(edgeNameFor);
+		Collection<Edge> returned = new LinkedList<Edge>();
+		for(Edge e : allEdges) {
+			if(GraphUtils.isInNamedGraphs(e, service.getLens())) {
+				returned.add(e);
+			}
+		}
+		return returned;
+	}
 }

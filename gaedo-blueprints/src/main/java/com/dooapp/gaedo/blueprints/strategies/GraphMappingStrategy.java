@@ -8,6 +8,7 @@ import javax.persistence.CascadeType;
 import com.dooapp.gaedo.blueprints.AbstractBluePrintsBackedFinderService;
 import com.dooapp.gaedo.blueprints.queries.tests.CompoundVertexTest;
 import com.dooapp.gaedo.properties.Property;
+import com.tinkerpop.blueprints.pgm.Edge;
 import com.tinkerpop.blueprints.pgm.Vertex;
 
 /**
@@ -77,4 +78,13 @@ public interface GraphMappingStrategy<DataType> {
 	 * @param into
 	 */
 	public void loaded(Vertex from, DataType into);
+
+
+	/**
+	 * Get collection of edges going from the given rootVertex and corresponding to the given property
+	 * @param rootVertex
+	 * @param p
+	 * @return
+	 */
+	public Iterable<Edge> getOutEdgesFor(Vertex rootVertex, Property p);
 }

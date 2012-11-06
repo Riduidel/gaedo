@@ -7,6 +7,7 @@ import java.lang.reflect.Method;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import com.dooapp.gaedo.blueprints.strategies.GraphMappingStrategy;
 import com.dooapp.gaedo.finders.repository.ServiceRepository;
 import com.dooapp.gaedo.patterns.WriteReplaceable;
 import com.dooapp.gaedo.properties.Property;
@@ -26,9 +27,9 @@ public class MapLazyLoader extends AbstractLazyLoader implements InvocationHandl
 
 	}
 
-	public MapLazyLoader(GraphDatabaseDriver driver, ClassLoader classLoader, ServiceRepository repository, Property p, Vertex objectVertex, Map<Object, Object> targetMap,
-					Map<String, Object> objectsBeingAccessed) {
-		super(driver, p, objectVertex, repository, classLoader, objectsBeingAccessed);
+	public MapLazyLoader(GraphDatabaseDriver driver, GraphMappingStrategy strategy, ClassLoader classLoader, ServiceRepository repository, Property p, Vertex objectVertex,
+					Map<Object, Object> targetMap, Map<String, Object> objectsBeingAccessed) {
+		super(driver, strategy, p, objectVertex, repository, classLoader, objectsBeingAccessed);
 		this.map = targetMap;
 	}
 
@@ -51,7 +52,7 @@ public class MapLazyLoader extends AbstractLazyLoader implements InvocationHandl
 				Vertex value = e.getInVertex();
 				// Value is always a serialized map entry, so deserialize it
 				// with magic !
-				Map.Entry temporaryValue = (Entry) GraphUtils.createInstance(driver, classLoader, value, property.getType(), repository, objectsBeingAccessed);
+				Map.Entry temporaryValue = (Entry) GraphUtils.createInstance(driver, strategy, classLoader, value, property.getType(), repository, objectsBeingAccessed);
 				map.put(temporaryValue.getKey(), temporaryValue.getValue());
 			}
 		} finally {

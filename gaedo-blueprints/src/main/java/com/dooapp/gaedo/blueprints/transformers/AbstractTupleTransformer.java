@@ -10,6 +10,7 @@ import com.dooapp.gaedo.blueprints.BluePrintsPersister;
 import com.dooapp.gaedo.blueprints.GraphDatabaseDriver;
 import com.dooapp.gaedo.blueprints.GraphUtils;
 import com.dooapp.gaedo.blueprints.Kind;
+import com.dooapp.gaedo.blueprints.strategies.GraphMappingStrategy;
 import com.dooapp.gaedo.finders.repository.ServiceRepository;
 import com.dooapp.gaedo.properties.Property;
 import com.tinkerpop.blueprints.pgm.Graph;
@@ -55,15 +56,15 @@ public abstract class AbstractTupleTransformer<TupleType> {
 		return sOut.toString();
 	}
 
-	public Object loadObject(GraphDatabaseDriver driver, ClassLoader classLoader, String effectiveType, Vertex key, ServiceRepository repository, Map<String, Object> objectsBeingAccessed) {
+	public Object loadObject(GraphDatabaseDriver driver, GraphMappingStrategy strategy, ClassLoader classLoader, String effectiveType, Vertex key, ServiceRepository repository, Map<String, Object> objectsBeingAccessed) {
 		TupleType tuple = instanciateTupleFor(classLoader, key);
-		persister.loadObjectProperties(driver, classLoader, repository, key, tuple, getContainedProperties(), objectsBeingAccessed);
+		persister.loadObjectProperties(driver, strategy, classLoader, repository, key, tuple, getContainedProperties(), objectsBeingAccessed);
 		return tuple;
 	}
 
-	public TupleType loadObject(GraphDatabaseDriver driver, ClassLoader classLoader, Class effectiveClass, Vertex key, ServiceRepository repository, Map<String, Object> objectsBeingAccessed) {
+	public TupleType loadObject(GraphDatabaseDriver driver, GraphMappingStrategy strategy, ClassLoader classLoader, Class effectiveClass, Vertex key, ServiceRepository repository, Map<String, Object> objectsBeingAccessed) {
 		TupleType tuple = instanciateTupleFor(classLoader, key);
-		persister.loadObjectProperties(driver, classLoader, repository, key, tuple, getContainedProperties(), objectsBeingAccessed);
+		persister.loadObjectProperties(driver, strategy, classLoader, repository, key, tuple, getContainedProperties(), objectsBeingAccessed);
 		return tuple;
 	}
 

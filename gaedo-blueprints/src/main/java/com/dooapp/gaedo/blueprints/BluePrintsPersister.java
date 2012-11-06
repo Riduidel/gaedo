@@ -18,6 +18,7 @@ import javax.persistence.FetchType;
 import javax.persistence.ManyToMany;
 import javax.persistence.OneToMany;
 
+import com.dooapp.gaedo.blueprints.strategies.GraphMappingStrategy;
 import com.dooapp.gaedo.finders.id.AnnotationsFinder.Annotations;
 import com.dooapp.gaedo.finders.repository.ServiceRepository;
 import com.dooapp.gaedo.patterns.WriteReplaceable;
@@ -116,11 +117,7 @@ public class BluePrintsPersister {
 
 	private void deleteSingle(AbstractBluePrintsBackedFinderService<? extends Graph, ?, ?> service, Graph database, Property p, Object toDelete, Vertex objectVertex, Collection<CascadeType> toCascade, Map<String, Object> objectsBeingAccessed) {
 		// there should be only one vertex to delete
-		String edgeNameFor = GraphUtils.getEdgeNameFor(p);
-		Iterable<Edge> edges = objectVertex.getOutEdges(edgeNameFor);
-		if (logger.isLoggable(Level.FINEST)) {
-			logger.log(Level.FINEST, "deleting edge "+edgeNameFor+" of "+GraphUtils.toString(objectVertex));
-		}
+		Iterable<Edge> edges = service.getStrategy().getOutEdgesFor(objectVertex, p);
 		for(Edge e : edges) {
 			Vertex valueVertex = e.getInVertex();
 			database.removeEdge(e);
@@ -134,8 +131,7 @@ public class BluePrintsPersister {
 	}
 
 	private void deleteMap(AbstractBluePrintsBackedFinderService<? extends Graph, ?, ?> service, Graph database, Property p, Object toDelete, Vertex objectVertex, Collection<CascadeType> toCascade, Map<String, Object> objectsBeingAccessed) {
-		String edgeNameFor = GraphUtils.getEdgeNameFor(p);
-		Iterable<Edge> edges = objectVertex.getOutEdges(edgeNameFor);
+		Iterable<Edge> edges = service.getStrategy().getOutEdgesFor(objectVertex, p);
 		Map<?, ?> values = (Map<?, ?>) p.get(toDelete);
 		Map<Vertex, Edge> oldVertices = new HashMap<Vertex, Edge>();
 		for(Edge e : edges) {
@@ -162,8 +158,7 @@ public class BluePrintsPersister {
 	}
 
 	private void deleteCollection(AbstractBluePrintsBackedFinderService<? extends Graph, ?, ?> service, Graph database, Property p, Object toDelete, Vertex objectVertex, Collection<CascadeType> toCascade, Map<String, Object> objectsBeingAccessed) {
-		String edgeNameFor = GraphUtils.getEdgeNameFor(p);
-		Iterable<Edge> edges = objectVertex.getOutEdges(edgeNameFor);
+		Iterable<Edge> edges = service.getStrategy().getOutEdgesFor(objectVertex, p);
 		Collection<?> values = (Collection<?>) p.get(toDelete);
 		Map<Vertex, Edge> oldVertices = new HashMap<Vertex, Edge>();
 		for(Edge e : edges) {
@@ -238,8 +233,7 @@ public class BluePrintsPersister {
 		// As a convention, null values are never stored
 		if(value!=null /* && value.size()>0 that case precisely created https://github.com/Riduidel/gaedo/issues/13 */) {
 			// Get previously existing vertices
-			String collectionEdgeName = GraphUtils.getEdgeNameFor(p);
-			Iterable<Edge> existingIterator = rootVertex.getOutEdges(collectionEdgeName);
+			Iterable<Edge> existingIterator = service.getStrategy().getOutEdgesFor(rootVertex, p);
 			// Do not change previously existing vertices if they correspond to new ones
 			// Which is done in that call : as vertex is always looked up before creation, there is little duplication risk
 			// or at last that risk should be covered by selected Blueprints implementation
@@ -279,8 +273,7 @@ public class BluePrintsPersister {
 		// As a convention, null values are never stored
 		if(value!=null /* && value.size()>0 that case precisely created https://github.com/Riduidel/gaedo/issues/13 */) {
 			// Get previously existing vertices
-			String collectionEdgeName = GraphUtils.getEdgeNameFor(p);
-			Iterable<Edge> existingIterator = rootVertex.getOutEdges(collectionEdgeName);
+			Iterable<Edge> existingIterator = service.getStrategy().getOutEdgesFor(rootVertex, p);
 			// Do not change previously existing vertices if they correspond to new ones
 			// Which is done in that call : as vertex is always looked up before creation, there is little duplication risk
 			// or at elast that risk should be covered by selected Blueprints implementation
@@ -345,40 +338,44 @@ public class BluePrintsPersister {
 	 */
 	public <DataType> void updateSingle(AbstractBluePrintsBackedFinderService<? extends Graph, DataType, ?> service, Graph database, Property p, Object toUpdate, Vertex rootVertex, CascadeType cascade, Map<String, Object> objectsBeingAccessed) {
 		Object value = p.get(toUpdate);
-		// As a convention, null values are never stored
+		// As a convention, null values are never stored but they may replace existing ones, in which case previous values must be removed
+		// as a consequenc,v alueVertex is loaded only for non null values
+		Vertex valueVertex = null;
 		if(value!=null) {
-			Vertex valueVertex = service.getVertexFor(value, cascade, objectsBeingAccessed);
-			Edge link = null;
-			// Get previously existing vertex
-			String edgeNameFor = GraphUtils.getEdgeNameFor(p);
-			Iterator<Edge> existingIterator = rootVertex.getOutEdges(edgeNameFor).iterator();
-			// property is single-valued, so iteration can be done at most one
-			if(existingIterator.hasNext()) {
-				// There is an existing edge, change its target and maybe delete previous one
-				Edge existing = existingIterator.next();
-				if(existing.getInVertex().equals(valueVertex)) {
-					// Nothing to do
-					link = existing;
-				} else {
-					// delete old edge (TODO maybe delete vertex, if there is no other link (excepted obvious ones, like type, Object.classes, and id)
-					database.removeEdge(existing);
-					link = service.getDriver().createEdgeFor(rootVertex, valueVertex, p);
-
-				}
-			}
-			if(existingIterator.hasNext()) {
-				if (logger.isLoggable(Level.SEVERE)) {
-					// There is some incoherent data in graph .. log it !
-					StringBuilder sOut = new StringBuilder("An object with the following monovalued property\n").append(p.toGenericString()).append(" is linked to more than one vertex :");
-					while(existingIterator.hasNext()) {
-						sOut.append("\n\t").append(existingIterator.next().getInVertex().toString());
-					}
-					logger.log(Level.SEVERE, "Graph contains some incoherence :"+sOut.toString());
-				}
+			valueVertex = service.getVertexFor(value, cascade, objectsBeingAccessed);
+		}
+		Edge link = null;
+		// Get previously existing vertex
+		Iterator<Edge> existingIterator = service.getStrategy().getOutEdgesFor(rootVertex, p).iterator();
+		// property is single-valued, so iteration can be done at most one
+		if(existingIterator.hasNext()) {
+			// There is an existing edge, change its target and maybe delete previous one
+			Edge existing = existingIterator.next();
+			if(valueVertex!=null && existing.getInVertex().equals(valueVertex)) {
+				// Nothing to do
+				link = existing;
 			} else {
-				if(link==null)
+				// delete old edge (TODO maybe delete vertex, if there is no other link (excepted obvious ones, like type, Object.classes, and id)
+				database.removeEdge(existing);
+				if(value!=null)
 					link = service.getDriver().createEdgeFor(rootVertex, valueVertex, p);
 			}
+		}
+		if(existingIterator.hasNext()) {
+			if (logger.isLoggable(Level.SEVERE)) {
+				// There is some incoherent data in graph .. log it !
+				StringBuilder sOut = new StringBuilder("An object with the following monovalued property\n").append(p.toGenericString()).append(" is linked to more than one vertex :");
+				while(existingIterator.hasNext()) {
+					sOut.append("\n\t").append(existingIterator.next().getInVertex().toString());
+				}
+				logger.log(Level.SEVERE, "Graph contains some incoherence :"+sOut.toString());
+			}
+			while(existingIterator.hasNext()) {
+				database.removeEdge(existingIterator.next());
+			}
+		} else {
+			if(link==null && value!=null)
+				link = service.getDriver().createEdgeFor(rootVertex, valueVertex, p);
 		}
 	}
 
@@ -404,11 +401,11 @@ public class BluePrintsPersister {
 		} else {
 			ClassLoader classLoader = service.getContainedClass().getClassLoader();
 			ServiceRepository repository = service.getRepository();
-			DataType returned = (DataType) GraphUtils.createInstance(service.getDriver(), classLoader, objectVertex, Object.class /* we use object here, as this default type should not be used */, repository, objectsBeingAccessed);
+			DataType returned = (DataType) GraphUtils.createInstance(service.getDriver(), service.getStrategy(), classLoader, objectVertex, Object.class /* we use object here, as this default type should not be used */, repository, objectsBeingAccessed);
 			Map<Property, Collection<CascadeType>> containedProperties = service.getStrategy().getContainedProperties(returned, objectVertex, CascadeType.MERGE);
 			try {
 				objectsBeingAccessed.put(objectVertexId, returned);
-				loadObjectProperties(service.getDriver(), classLoader, repository, objectVertex, returned, containedProperties, objectsBeingAccessed);
+				loadObjectProperties(service.getDriver(), service.getStrategy(), classLoader, repository, objectVertex, returned, containedProperties, objectsBeingAccessed);
 				service.getStrategy().loaded(objectVertex, returned);
 				return returned;
 			} finally {
@@ -418,29 +415,30 @@ public class BluePrintsPersister {
 	}
 
 
-	public <DataType> void loadObjectProperties(GraphDatabaseDriver driver, ClassLoader classLoader, ServiceRepository repository, Vertex objectVertex, DataType returned,
-					Map<Property, Collection<CascadeType>> containedProperties, Map<String, Object> objectsBeingAccessed) {
+	public <DataType> void loadObjectProperties(GraphDatabaseDriver driver, GraphMappingStrategy strategy, ClassLoader classLoader, ServiceRepository repository, Vertex objectVertex,
+					DataType returned, Map<Property, Collection<CascadeType>> containedProperties, Map<String, Object> objectsBeingAccessed) {
 		for(Property p : containedProperties.keySet()) {
 			if(!p.hasModifier(Modifier.STATIC) && !Annotations.TRANSIENT.is(p)) {
 				Class<?> rawPropertyType = p.getType();
 				if(Collection.class.isAssignableFrom(rawPropertyType)) {
-					loadCollection(driver, classLoader, repository, p, returned, objectVertex, objectsBeingAccessed);
+					loadCollection(driver, strategy, classLoader, repository, p, returned, objectVertex, objectsBeingAccessed);
 					// each value should be written as an independant value
 				} else if(Map.class.isAssignableFrom(rawPropertyType)) {
-					loadMap(driver, classLoader, repository, p, returned, objectVertex, objectsBeingAccessed);
+					loadMap(driver, strategy, classLoader, repository, p, returned, objectVertex, objectsBeingAccessed);
 				} else {
-					loadSingle(driver, classLoader, repository, p, returned, objectVertex, objectsBeingAccessed);
+					loadSingle(driver, strategy, classLoader, repository, p, returned, objectVertex, objectsBeingAccessed);
 				}
 			}
 		}
 	}
 	/**
 	 * Implementation tied to the future implementation of {@link #updateMap(Property, Object, Vertex, CascadeType)}
+	 * @param strategy TODO
 	 * @param p
 	 * @param returned
 	 * @param objectVertex
 	 */
-	private <DataType> void loadMap(GraphDatabaseDriver driver, ClassLoader classLoader, ServiceRepository repository, Property p, DataType returned, Vertex objectVertex, Map<String, Object> objectsBeingAccessed) {
+	private <DataType> void loadMap(GraphDatabaseDriver driver, GraphMappingStrategy strategy, ClassLoader classLoader, ServiceRepository repository, Property p, DataType returned, Vertex objectVertex, Map<String, Object> objectsBeingAccessed) {
 		boolean eagerLoad = false;
 		// property may be associated to a onetomany or manytomany mapping. in such a case, check if there is an eager loading info
 		OneToMany oneToMany = p.getAnnotation(OneToMany.class);
@@ -454,7 +452,7 @@ public class BluePrintsPersister {
 			}
 		}
 		Map<Object, Object> generatedCollection = (Map<Object, Object>) Utils.generateMap((Class<?>) p.getType(), null);
-		MapLazyLoader handler = new MapLazyLoader(driver, classLoader, repository, p, objectVertex, generatedCollection, objectsBeingAccessed);
+		MapLazyLoader handler = new MapLazyLoader(driver, strategy, classLoader, repository, p, objectVertex, generatedCollection, objectsBeingAccessed);
 		if(eagerLoad) {
 			handler.loadMap(generatedCollection, objectsBeingAccessed);
 			p.set(returned, generatedCollection);
@@ -469,18 +467,19 @@ public class BluePrintsPersister {
 
 	/**
 	 * Load a single-valued property from graph
+	 * @param strategy TODO
 	 * @param p
 	 * @param returned
 	 * @param objectVertex
 	 * @param objectsBeingAccessed
 	 */
-	private <DataType> void loadSingle(GraphDatabaseDriver driver, ClassLoader classloader, ServiceRepository repository, Property p, DataType returned, Vertex objectVertex, Map<String, Object> objectsBeingAccessed) {
-		Iterator<Edge> iterator = objectVertex.getOutEdges(GraphUtils.getEdgeNameFor(p)).iterator();
+	private <DataType> void loadSingle(GraphDatabaseDriver driver, GraphMappingStrategy strategy, ClassLoader classloader, ServiceRepository repository, Property p, DataType returned, Vertex objectVertex, Map<String, Object> objectsBeingAccessed) {
+		Iterator<Edge> iterator = strategy.getOutEdgesFor(objectVertex, p).iterator();
 		if(iterator.hasNext()) {
 			// yeah, there is a value !
 			Edge edge = iterator.next();
 			Vertex firstVertex = edge.getInVertex();
-			Object value = GraphUtils.createInstance(driver, classloader, firstVertex, p.getType(), repository, objectsBeingAccessed);
+			Object value = GraphUtils.createInstance(driver, strategy, classloader, firstVertex, p.getType(), repository, objectsBeingAccessed);
 			if(repository.containsKey(value.getClass())) {
 				// value requires fields loading
 				AbstractBluePrintsBackedFinderService<IndexableGraph, DataType, ?> blueprints= (AbstractBluePrintsBackedFinderService<IndexableGraph, DataType, ?>) repository.get(value.getClass());
@@ -495,11 +494,12 @@ public class BluePrintsPersister {
 	/**
 	 * Load collection corresponding to the given property for the given vertex.
 	 * BEWARE : here be lazy loading !
+	 * @param strategy TODO
 	 * @param p
 	 * @param returned
 	 * @param objectVertex
 	 */
-	private <DataType> void loadCollection(GraphDatabaseDriver driver, ClassLoader classLoader, ServiceRepository repository, Property p, DataType returned, Vertex objectVertex, Map<String, Object> objectsBeingAccessed) {
+	private <DataType> void loadCollection(GraphDatabaseDriver driver, GraphMappingStrategy strategy, ClassLoader classLoader, ServiceRepository repository, Property p, DataType returned, Vertex objectVertex, Map<String, Object> objectsBeingAccessed) {
 		boolean eagerLoad = false;
 		// property may be associated to a onetomany or manytomany mapping. in such a case, check if there is an eager loading info
 		OneToMany oneToMany = p.getAnnotation(OneToMany.class);
@@ -513,7 +513,7 @@ public class BluePrintsPersister {
 			}
 		}
 		Collection<Object> generatedCollection = Utils.generateCollection((Class<?>) p.getType(), null);
-		CollectionLazyLoader handler = new CollectionLazyLoader(driver, classLoader, repository, p, objectVertex, generatedCollection, objectsBeingAccessed);
+		CollectionLazyLoader handler = new CollectionLazyLoader(driver, strategy, classLoader, repository, p, objectVertex, generatedCollection, objectsBeingAccessed);
 		if(eagerLoad) {
 			handler.loadCollection(generatedCollection, objectsBeingAccessed);
 			p.set(returned, generatedCollection);

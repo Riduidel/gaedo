@@ -5,6 +5,7 @@ import java.util.Map;
 import com.dooapp.gaedo.blueprints.AbstractBluePrintsBackedFinderService;
 import com.dooapp.gaedo.blueprints.GraphDatabaseDriver;
 import com.dooapp.gaedo.blueprints.Kind;
+import com.dooapp.gaedo.blueprints.strategies.GraphMappingStrategy;
 import com.dooapp.gaedo.finders.repository.ServiceRepository;
 import com.tinkerpop.blueprints.pgm.Graph;
 import com.tinkerpop.blueprints.pgm.Vertex;
@@ -27,6 +28,7 @@ public interface TupleTransformer<Type> extends Transformer {
 
 	/**
 	 * Load object from vertice, using all provided informations
+	 * @param strategy TODO
 	 * @param classLoader
 	 * @param effectiveClass
 	 * @param key
@@ -34,19 +36,20 @@ public interface TupleTransformer<Type> extends Transformer {
 	 * @param objectsBeingAccessed
 	 * @return
 	 */
-	public Object loadObject(GraphDatabaseDriver driver, ClassLoader classLoader, Class effectiveClass, Vertex key, ServiceRepository repository, Map<String, Object> objectsBeingAccessed);
+	public Object loadObject(GraphDatabaseDriver driver, GraphMappingStrategy strategy, ClassLoader classLoader, Class effectiveClass, Vertex key, ServiceRepository repository, Map<String, Object> objectsBeingAccessed);
 
 
 	/**
 	 * Load object from vertice, using all provided informations
+	 * @param strategy TODO
 	 * @param classLoader
-	 * @param effectiveClass
 	 * @param key
 	 * @param repository
 	 * @param objectsBeingAccessed
+	 * @param effectiveClass
 	 * @return
 	 */
-	public Object loadObject(GraphDatabaseDriver driver, ClassLoader classLoader, String effectiveType, Vertex key, ServiceRepository repository, Map<String, Object> objectsBeingAccessed);
+	public Object loadObject(GraphDatabaseDriver driver, GraphMappingStrategy strategy, ClassLoader classLoader, String effectiveType, Vertex key, ServiceRepository repository, Map<String, Object> objectsBeingAccessed);
 
 	public Kind getKind();
 

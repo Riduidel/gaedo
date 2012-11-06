@@ -3,14 +3,18 @@ package com.dooapp.gaedo.blueprints;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.Map;
 import java.util.Set;
 import java.util.logging.Logger;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 
 import com.dooapp.gaedo.blueprints.annotations.GraphProperty;
+import com.dooapp.gaedo.blueprints.strategies.GraphMappingStrategy;
 import com.dooapp.gaedo.blueprints.strategies.PropertyMappingStrategy;
 import com.dooapp.gaedo.blueprints.transformers.LiteralTransformer;
 import com.dooapp.gaedo.blueprints.transformers.Literals;
@@ -18,6 +22,7 @@ import com.dooapp.gaedo.blueprints.transformers.TupleTransformer;
 import com.dooapp.gaedo.blueprints.transformers.Tuples;
 import com.dooapp.gaedo.finders.repository.ServiceRepository;
 import com.dooapp.gaedo.properties.Property;
+import com.tinkerpop.blueprints.pgm.Edge;
 import com.tinkerpop.blueprints.pgm.Graph;
 import com.tinkerpop.blueprints.pgm.IndexableGraph;
 import com.tinkerpop.blueprints.pgm.Vertex;
@@ -92,15 +97,16 @@ public class GraphUtils {
 	/**
 	 * Create an object instance from a literal vertex compatible with this service contained class
 	 * @param driver driver used to load data
+	 * @param strategy TODO
 	 * @param classLoader class loader used to find class
 	 * @param key vertex containing object id
-	 * @param property property used to navigate to this value. it allows disambiguation for literal values (which may be linked to more than one type, the typical example being
-	 * a saved float, say "3.0", which may also be refered as the string "3.0").
 	 * @param repository service repository, used to disambiguate subclass of literal and managed class
 	 * @param objectsBeingAccessed 
+	 * @param property property used to navigate to this value. it allows disambiguation for literal values (which may be linked to more than one type, the typical example being
+	 * a saved float, say "3.0", which may also be refered as the string "3.0").
 	 * @return a fresh instance, with only id set
 	 */
-	public static Object createInstance(GraphDatabaseDriver driver, ClassLoader classLoader, Vertex key, Class<?> defaultType, ServiceRepository repository, Map<String, Object> objectsBeingAccessed) {
+	public static Object createInstance(GraphDatabaseDriver driver, GraphMappingStrategy strategy, ClassLoader classLoader, Vertex key, Class<?> defaultType, ServiceRepository repository, Map<String, Object> objectsBeingAccessed) {
 		String effectiveType = null;
 		Kind kind = getKindOf(key);
 		if(Kind.literal==kind) {
@@ -130,7 +136,7 @@ public class GraphUtils {
 				if(Tuples.containsKey(type) && !repository.containsKey(type)) {
 					// Tuples are handled the object way (easier, but more dangerous
 					TupleTransformer transformer = Tuples.get(type);
-					return transformer.loadObject(driver, classLoader, type, key, repository, objectsBeingAccessed);
+					return transformer.loadObject(driver, strategy, classLoader, type, key, repository, objectsBeingAccessed);
 				} else {
 					return  type.newInstance();
 				}
@@ -245,5 +251,54 @@ public class GraphUtils {
 			sOut.append(s).append("=").append(objectVertex.getProperty(s));
 		}
 		return sOut.append("}").toString();
+	}
+
+	/**
+	 * Find all contexts in given edge by looking, in {@link GraphSail#CONTEXT_PROP} property, what are the contexts. These contexts are extracted by iteratively calling 
+	 * {@link #CONTEXTS_MATCHER} and {@link Matcher#find(int)} method.
+	 * @param edge input edge
+	 * @return collection of declared contexts.
+	 */
+	public static Collection<String> getContextsOf(Edge edge) {
+		String contextsString = edge.getProperty(GraphSail.CONTEXT_PROP).toString();
+		Matcher matcher = CONTEXTS_MATCHER.matcher(contextsString);
+		Collection<String> output = new LinkedList<String>();
+		int character = 0;
+		while(matcher.find(character)) {
+			if(GraphSail.NULL_CONTEXT_NATIVE.equals(matcher.group(1))) {
+				// the null context is a low-level view. It should be associated with "no named graph" (that's to say an empty collection).
+				return output;
+			} else if(matcher.group(1).startsWith(GraphSail.URI_PREFIX+"")){
+				output.add(matcher.group(2));
+			}
+			character = matcher.end();
+		}
+		return output;
+	}
+
+	/**
+	 * Compiled pattern used to match strings such as 
+	 * <pre>U https://github.com/Riduidel/gaedo/visible  U http://purl.org/dc/elements/1.1/description</pre>
+	 * or
+	 * <pre>N U http://purl.org/dc/elements/1.1/description</pre>
+	 * or even 
+	 * <pre>N</pre>
+	 * 
+	 * You know why I do such a pattern matching ? Because sail graph named graph definintion goes by concatenaing contexts URI in edges properties.
+	 * This is really douchebag code !
+	 */
+	public static final Pattern CONTEXTS_MATCHER = Pattern.compile("(N|U ([\\S]+))+");
+
+	/**
+	 * Check if edge has the required named graphs list
+	 * @param e edge to test
+	 * @param namedGraphs named graphs the edge must have
+	 * @return true if edge contexts are the given collection of named graphs
+	 */
+	public static boolean isInNamedGraphs(Edge e, Collection<String> namedGraphs) {
+		Collection<String> contexts = getContextsOf(e);
+		// Only analyse edge if it is in named graph, and only in named graphs
+		boolean isInNamedGraphs = contexts.size()==namedGraphs.size() && contexts.containsAll(namedGraphs);
+		return isInNamedGraphs;
 	}
 }

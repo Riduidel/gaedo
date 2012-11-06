@@ -7,6 +7,7 @@ import java.lang.reflect.Method;
 import java.util.Collection;
 import java.util.Map;
 
+import com.dooapp.gaedo.blueprints.strategies.GraphMappingStrategy;
 import com.dooapp.gaedo.finders.FinderCrudService;
 import com.dooapp.gaedo.finders.repository.ServiceRepository;
 import com.dooapp.gaedo.patterns.WriteReplaceable;
@@ -25,8 +26,8 @@ public class CollectionLazyLoader extends AbstractLazyLoader implements Invocati
 		
 	}
 
-	public CollectionLazyLoader(GraphDatabaseDriver driver, ClassLoader classLoader, ServiceRepository repository, Property p, Vertex objectVertex, Collection<Object> targetCollection, Map<String, Object> objectsBeingAccessed) {
-		super(driver, p, objectVertex, repository, classLoader, objectsBeingAccessed);
+	public CollectionLazyLoader(GraphDatabaseDriver driver, GraphMappingStrategy strategy, ClassLoader classLoader, ServiceRepository repository, Property p, Vertex objectVertex, Collection<Object> targetCollection, Map<String, Object> objectsBeingAccessed) {
+		super(driver, strategy, p, objectVertex, repository, classLoader, objectsBeingAccessed);
 		this.collection = targetCollection;
 	}
 
@@ -46,7 +47,7 @@ public class CollectionLazyLoader extends AbstractLazyLoader implements Invocati
 		try {
 			for(Edge e : rootVertex.getOutEdges(edgeName)) {
 				Vertex value = e.getInVertex();
-				Object temporaryValue = GraphUtils.createInstance(driver, classLoader, value, property.getType(), repository, objectsBeingAccessed);
+				Object temporaryValue = GraphUtils.createInstance(driver, strategy, classLoader, value, property.getType(), repository, objectsBeingAccessed);
 				if(repository.containsKey(temporaryValue.getClass())) {
 					FinderCrudService service = repository.get(temporaryValue.getClass());
 					if (service instanceof AbstractBluePrintsBackedFinderService) {
