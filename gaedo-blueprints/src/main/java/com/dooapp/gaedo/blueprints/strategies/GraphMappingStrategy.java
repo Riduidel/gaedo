@@ -74,10 +74,12 @@ public interface GraphMappingStrategy<DataType> {
 	
 	/**
 	 * Method invoked when vertex has been loaded in object. Allows strategy to perform any customization.
+	 * @param fromId TODO
 	 * @param from
 	 * @param into
+	 * @param objectsBeingAccessed TODO
 	 */
-	public void loaded(Vertex from, DataType into);
+	public void loaded(String fromId, Vertex from, DataType into, Map<String, Object> objectsBeingAccessed);
 
 
 	/**
@@ -87,4 +89,13 @@ public interface GraphMappingStrategy<DataType> {
 	 * @return
 	 */
 	public Iterable<Edge> getOutEdgesFor(Vertex rootVertex, Property p);
+
+	/**
+	 * Determine if objectVertex associated properties should be loaded.
+	 * @param objectVertexId object vertex id
+	 * @param objectVertex object vertex to load
+	 * @param objectsBeingAccessed already loaded vertices ids and associated objects
+	 * @return
+	 */
+	public boolean shouldLoadPropertiesOf(String objectVertexId, Vertex objectVertex, Map<String, Object> objectsBeingAccessed);
 }

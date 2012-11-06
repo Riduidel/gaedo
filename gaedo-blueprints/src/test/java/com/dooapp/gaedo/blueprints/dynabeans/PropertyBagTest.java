@@ -48,6 +48,8 @@ import static org.junit.Assert.fail;
 @RunWith(Parameterized.class)
 public class PropertyBagTest extends AbstractGraphTest {
 
+	private static final String EXAMPLE_RESOURCE = "http://rdfs.org/ns/void#exampleResource";
+
 	private final class FindByDiscipline implements QueryBuilder<PropertyBagInformer> {
 		private final PropertyBagMap discipline;
 
@@ -127,6 +129,27 @@ public class PropertyBagTest extends AbstractGraphTest {
 			assertThat(map.get(DYNAMIC_NAME).get(0).toString(), Is.is("Saturn SA-1"));
 			assertThat(map.get(DYNAMIC_DISCIPLINE).get(0), Is.is(PropertyBag.class));
 			assertThat(((PropertyBag) map.get(DYNAMIC_DISCIPLINE).get(0)).getId(), Is.is(PLANETARY_SCIENCE));
+		} else {
+			fail("service should be id based \"by design\"");
+		}
+	}
+
+	/**
+	 * That test has been added to make sure the whole graph isn't loaded for each object being loaded.
+	 * The motivation behind that is to avoid killing memory when loading a big and massively connected graph.
+	 */
+	@Test
+	public void make_sure_only_RootVertex_Is_Totally_Loaded() {
+		if (propertyBagService instanceof IdBasedService) {
+			IdBasedService<PropertyBagMap> idService = (IdBasedService<PropertyBagMap>) propertyBagService;
+			String ID = "http://nasa.dataincubator.org/";
+			PropertyBag map = idService.findById(ID);
+			assertThat(map, IsNull.notNullValue());
+			assertThat(map.getId(), Is.is(ID));
+			PropertyBagMap firstExample;
+			assertThat(firstExample = (PropertyBagMap) map.get(EXAMPLE_RESOURCE).get(0), Is.is(PropertyBag.class));
+			assertThat(firstExample.getId(), IsNull.notNullValue());
+			assertThat(firstExample.properties().size(), Is.is(0));
 		} else {
 			fail("service should be id based \"by design\"");
 		}

@@ -403,12 +403,16 @@ public class BluePrintsPersister {
 			ServiceRepository repository = service.getRepository();
 			DataType returned = (DataType) GraphUtils.createInstance(service.getDriver(), service.getStrategy(), classLoader, objectVertex, Object.class /* we use object here, as this default type should not be used */, repository, objectsBeingAccessed);
 			Map<Property, Collection<CascadeType>> containedProperties = service.getStrategy().getContainedProperties(returned, objectVertex, CascadeType.MERGE);
+			boolean loading = false;
 			try {
 				objectsBeingAccessed.put(objectVertexId, returned);
-				loadObjectProperties(service.getDriver(), service.getStrategy(), classLoader, repository, objectVertex, returned, containedProperties, objectsBeingAccessed);
-				service.getStrategy().loaded(objectVertex, returned);
+				if(loading = service.getStrategy().shouldLoadPropertiesOf(objectVertexId, objectVertex, objectsBeingAccessed)) {
+					loadObjectProperties(service.getDriver(), service.getStrategy(), classLoader, repository, objectVertex, returned, containedProperties, objectsBeingAccessed);
+				}
 				return returned;
 			} finally {
+				// make sure loading call is always called, even if something failed during loading
+				service.getStrategy().loaded(objectVertexId, objectVertex, returned, objectsBeingAccessed);
 //				objectsBeingAccessed.remove(objectVertexId);
 			}
 		}

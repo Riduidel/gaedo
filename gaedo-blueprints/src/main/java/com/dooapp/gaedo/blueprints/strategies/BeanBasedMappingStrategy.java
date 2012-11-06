@@ -120,6 +120,19 @@ public class BeanBasedMappingStrategy<DataType> extends AbstractMappingStrategy<
 	}
 
 	@Override
-	public void loaded(Vertex from, DataType into) {
+	public void loaded(String fromId, Vertex from, DataType into, Map<String, Object> objectsBeingAccessed) {
+	}
+
+	/**
+	 * In bean based strategy, all beans should be loaded, whatever their depth is
+	 * @param objectVertexId
+	 * @param objectVertex
+	 * @param objectsBeingAccessed
+	 * @return
+	 * @see com.dooapp.gaedo.blueprints.strategies.GraphMappingStrategy#shouldLoadPropertiesOf(java.lang.String, com.tinkerpop.blueprints.pgm.Vertex, java.util.Map)
+	 */
+	@Override
+	public boolean shouldLoadPropertiesOf(String objectVertexId, Vertex objectVertex, Map<String, Object> objectsBeingAccessed) {
+		return true;
 	}
 }

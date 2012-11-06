@@ -52,6 +52,12 @@ public class GraphBasedMappingStrategy<DataType> extends AbstractMappingStrategy
 	 * Default mapped properties
 	 */
 	private Map<Property, Collection<CascadeType>> beanPropertiesForServiceClass;
+	
+	/**
+	 * Obejct storing the currently loaded id. Most of this time this value will be null. But when a loading operation starts
+	 * a value will be stored there.
+	 */
+	private ThreadLocal<String> loadedByThisThread = new ThreadLocal<String>();
 
 	public GraphBasedMappingStrategy(Class<DataType> serviceContainedClass, PropertyProvider propertyProvider, Migrator migrator) {
 		super(serviceContainedClass, propertyProvider, migrator);
@@ -202,12 +208,35 @@ public class GraphBasedMappingStrategy<DataType> extends AbstractMappingStrategy
 	}
 
 	@Override
-	public void loaded(Vertex from, DataType into) {
+	public String getAsId(Object object) {
+		return Literals.get(object.getClass()).getVertexId(object);
+	}
+	
+	@Override
+	public void loaded(String fromId, Vertex from, DataType into, Map<String, Object> objectsBeingAccessed) {
+		// when this happens, it means we finally loaded the initial object
+		if(fromId.equals(loadedByThisThread.get()))
+			loadedByThisThread.remove();
 		idProperty.set(into, from.getProperty(Properties.value.name()));
 	}
 
+	/**
+	 * What are the objects requiring loading ? The ones that are directly accessed.
+	 * As a consequence, we use a {@link ThreadLocal} mechanism to store objects ids being loaded.
+	 * In other words, if thread local contains no object id, put current one.
+	 * If there is one (which is not current one, return false).
+	 * Notice the {@link #loaded(String, Vertex, Object, Map)} method, when invoked, will clear that info for queries to run smoothly
+	 * @param objectVertexId
+	 * @param objectVertex
+	 * @param objectsBeingAccessed
+	 * @return
+	 * @see com.dooapp.gaedo.blueprints.strategies.GraphMappingStrategy#shouldLoadPropertiesOf(java.lang.String, com.tinkerpop.blueprints.pgm.Vertex, java.util.Map)
+	 */
 	@Override
-	public String getAsId(Object object) {
-		return Literals.get(object.getClass()).getVertexId(object);
+	public boolean shouldLoadPropertiesOf(String objectVertexId, Vertex objectVertex, Map<String, Object> objectsBeingAccessed) {
+		if(loadedByThisThread.get()==null) {
+			loadedByThisThread.set(objectVertexId);
+		}
+		return loadedByThisThread.get().equals(objectVertexId);
 	}
 }

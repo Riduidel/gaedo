@@ -1,3 +1,4 @@
+<http://nasa.dataincubator.org/> <http://rdfs.org/ns/void#exampleResource> <http://nasa.dataincubator.org/spacecraft/SATURNSA1> .
 <http://nasa.dataincubator.org/spacecraft/SATURNSA1> <http://purl.org/net/schemas/space/internationalDesignator> "SATURNSA1" .
 <http://nasa.dataincubator.org/spacecraft/SATURNSA1> <http://purl.org/net/schemas/space/alternateName> "Apollo SA-1 Test Flight" .
 <http://nasa.dataincubator.org/spacecraft/SATURNSA1> <http://purl.org/net/schemas/space/discipline> <http://nasa.dataincubator.org/discipline/planetaryscience> .
@@ -13,6 +14,7 @@
 <http://nasa.dataincubator.org/spacecraft/SATURNSA1> <http://xmlns.com/foaf/0.1/homepage> <http://nssdc.gsfc.nasa.gov/database/MasterCatalog?sc=SATURNSA1> .
 <http://nasa.dataincubator.org/spacecraft/SATURNSA1> <http://purl.org/net/schemas/space/agency> "United States" .
 <http://nasa.dataincubator.org/launch/SATURNSA1> <http://purl.org/net/schemas/space/launchvehicle> "Saturn 1" .
+<http://nasa.dataincubator.org/> <http://rdfs.org/ns/void#exampleResource> <http://nasa.dataincubator.org/spacecraft/PION-2> .
 <http://nasa.dataincubator.org/spacecraft/PION2> <http://xmlns.com/foaf/0.1/name> "Pioneer 2" .
 <http://nasa.dataincubator.org/spacecraft/PION2> <http://purl.org/dc/elements/1.1/description> "Pioneer 2 was the last of the three project Able space probes designed to probe lunar and cislunar space. Shortly after launch, the third stage of the launch vehicle separated but failed to ignite, and Pioneer 2 did not achieve its intended lunar orbit. The spacecraft attained a maximum altitude of 1550 km (963 miles) before reentering Earth's atmosphere at 28.7 N, 1.9 E over NW Africa. A small amount of data was obtained during the short flight, including evidence that the equatorial region around Earth has higher flux and higher energy radiation than previously considered and that the micrometeorite density is higher around Earth than in space." .
 <http://nasa.dataincubator.org/spacecraft/PION2> <http://xmlns.com/foaf/0.1/depiction> <http://nssdc.gsfc.nasa.gov/image/spacecraft/pioneer_able.gif> .
