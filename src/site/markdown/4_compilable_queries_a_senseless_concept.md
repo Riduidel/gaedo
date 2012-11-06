@@ -95,16 +95,28 @@ A `FieldInformer` describes a Field and memorizes expression generated from this
 
 Notice this is really a base interface. Implementors of this interface are left free (and are greatly encouraged) to add others QueryExpression building methods. Also notice that a QueryExpression is really what is seems : an expression, destined to be added to a query. As of now (february 2010), implementors of FieldInformer are : 
 
-   * ObjectFieldInformer 
-      * StringFieldInformer 
-      * ComparableFieldInformer<ComparableType> 
-         * DateFieldInformer 
-         * DoubleFieldInformer 
-         * LongFieldInformer 
-         * BigDecimalFieldInformer 
-   * The Informer interface 
-      * BigIntegerFieldInformer 
- 
+<ul>
+<li>ObjectFieldInformer
+<ul>
+<li>StringFieldInformer</li>
+<li>ComparableFieldInformer&lt;ComparableType&gt;
+<ul>
+<li>DateFieldInformer</li>
+<li>DoubleFieldInformer</li>
+<li>LongFieldInformer</li>
+<li>BigDecimalFieldInformer</li>
+</ul>
+</li>
+<li>The Informer interface 
+<ul>
+<li>BigIntegerFieldInformer </li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+
 Informer 
 --------
 
