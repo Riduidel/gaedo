@@ -1,16 +1,21 @@
 package com.dooapp.gaedo.blueprints.dynabeans;
 
 import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 import java.util.SortedSet;
+import java.util.TreeMap;
 import java.util.TreeSet;
 
 import org.hamcrest.core.Is;
 import org.hamcrest.core.IsNot;
 import org.hamcrest.core.IsNull;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -24,7 +29,7 @@ import org.openrdf.rio.RDFParseException;
 
 import com.dooapp.gaedo.blueprints.AbstractGraphEnvironment;
 import com.dooapp.gaedo.blueprints.AbstractGraphTest;
-import com.dooapp.gaedo.blueprints.GraphUtils;
+import com.dooapp.gaedo.blueprints.Properties;
 import com.dooapp.gaedo.blueprints.TestUtils;
 import com.dooapp.gaedo.blueprints.annotations.GraphProperty;
 import com.dooapp.gaedo.blueprints.strategies.StrategyType;
@@ -35,6 +40,8 @@ import com.dooapp.gaedo.finders.id.IdBasedService;
 import com.dooapp.gaedo.finders.informers.CollectionFieldInformer;
 import com.dooapp.gaedo.properties.Property;
 import com.dooapp.gaedo.utils.CollectionUtils;
+import com.tinkerpop.blueprints.pgm.util.graphml.GraphMLTokens;
+import com.tinkerpop.blueprints.pgm.util.graphml.GraphMLWriter;
 
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.fail;
@@ -62,7 +69,7 @@ public class PropertyBagTest extends AbstractGraphTest {
 			return ((CollectionFieldInformer) informer.get(DYNAMIC_DISCIPLINE)).containing(discipline);
 		}
 	}
-
+	
 	private static final String ENGINEERING = "http://nasa.dataincubator.org/discipline/engineering";
 	private static final String ARIANE_L01_WIKIEDIA_DESCRIPTION = "Ariane 1 was the first rocket in the Ariane launcher family. Ariane 1 was designed primarily to put two telecommunications satellites at a time into orbit, thus reducing costs. As the size of satellites grew, Ariane 1 gave way to the more powerful Ariane 2 and Ariane 3 launchers.";
 	private static final String ARIANE_L01 = "http://nasa.dataincubator.org/spacecraft/ARIANEL01";
@@ -99,7 +106,6 @@ public class PropertyBagTest extends AbstractGraphTest {
 	@Before
 	public void prepareAll() throws Exception {
 		loadData();
-		customizeEnvironment();
 		// now data has been added, create a dynamic service
 		propertyBagService = 
 						environment.createServiceFor(PropertyBagMap.class, PropertyBagInformer.class, StrategyType.graphBased)
@@ -107,12 +113,6 @@ public class PropertyBagTest extends AbstractGraphTest {
 						.focusOn(new TreeSet<String>());
 	}
 	
-	/**
-	 * Customize gaedo service repository to allow working
-	 */
-	private void customizeEnvironment() {
-	}
-
 	public void loadData() throws RepositoryException, RDFParseException, IOException {
 		SailRepository repository = getRepository();
 		repository.initialize();
