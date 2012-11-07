@@ -8,9 +8,9 @@
 		<!-- Put reports at the end -->
 		<menu name="about gaedo-blueprints">
 			<item name="An introduction to gaedo graph storage" href="1_gaedo_graph_storage.html" />
-<!-- 			<item name="Access to generic nodes" href="2_gaedo_generic_storage.html" />
+ 			<item name="Access to generic nodes" href="2_gaedo_generic_storage.html" />
 			<item name="Querying a graph" href="3_querying_graph.html" />
- -->		</menu>
+		</menu>
 		<menu ref="reports" />
 	</body>
 </project>
