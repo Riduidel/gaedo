@@ -45,6 +45,17 @@ public class IndexableGraphBackedFinderService <DataType, InformerType extends I
 
 	public static ClassLiteralTransformer classTransformer = (ClassLiteralTransformer) Literals.get(Class.class);
 
+	/**
+	 * Construct a default service, for which the mapping strategy is the default one (that's to say {@link StrategyType#beanBased}
+	 * @param containedClass contained data class
+	 * @param informerClass informer calss associated to that data class
+	 * @param factory informer factory used when performing queries
+	 * @param repository service repository used to load other classes
+	 * @param provider property provider
+	 * @param graph graph used as storage
+	 * @see IndexableGraphBackedFinderService#IndexableGraphBackedFinderService(IndexableGraph, Class, Class, InformerFactory, ServiceRepository, PropertyProvider, StrategyType)
+	 * @deprecated replaced by {@link IndexableGraphBackedFinderService#IndexableGraphBackedFinderService(IndexableGraph, Class, Class, InformerFactory, ServiceRepository, PropertyProvider)}
+	 */
 	public IndexableGraphBackedFinderService(Class<DataType> containedClass, Class<InformerType> informerClass, InformerFactory factory, ServiceRepository repository,
 					PropertyProvider provider, IndexableGraph graph) {
 		this(graph, containedClass, informerClass, factory, repository, provider, StrategyType.beanBased);
@@ -58,7 +69,16 @@ public class IndexableGraphBackedFinderService <DataType, InformerType extends I
 	}
 
 
-
+	/**
+	 * Construct a gaedo servcie allowing reading/writing to an indexable graph
+	 * @param graph graph we want to write/read to/from
+	 * @param containedClass class we want to map to that graph
+	 * @param informerClass informer used to allow easy queries on that class
+	 * @param factory informer factory
+	 * @param repository service repository, to load other classes
+	 * @param provider property provider
+	 * @param strategy mapping strategy. If bean based, the bean fields will define which edges are read/written. If graph based, that's the edges that define how the object will be loaded.
+	 */
 	public IndexableGraphBackedFinderService(IndexableGraph graph, Class<DataType> containedClass, Class<InformerType> informerClass, InformerFactory factory,
 					ServiceRepository repository, PropertyProvider provider, StrategyType strategy) {
 		super(graph, containedClass, informerClass, factory, repository, provider, strategy);

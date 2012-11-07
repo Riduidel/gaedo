@@ -10,6 +10,7 @@ import com.dooapp.gaedo.blueprints.queries.tests.AndVertexTest;
 import com.dooapp.gaedo.blueprints.queries.tests.CompoundVertexTest;
 import com.dooapp.gaedo.blueprints.queries.tests.InvalidTestStructureException;
 import com.dooapp.gaedo.finders.Informer;
+import com.dooapp.gaedo.finders.QueryExpression;
 import com.dooapp.gaedo.finders.SortingExpression;
 import com.dooapp.gaedo.finders.expressions.AndQueryExpression;
 import com.dooapp.gaedo.finders.expressions.AnythingExpression;
@@ -26,6 +27,13 @@ import com.dooapp.gaedo.finders.expressions.QueryExpressionVisitor;
 import com.dooapp.gaedo.finders.expressions.StartsWithExpression;
 import com.dooapp.gaedo.finders.informers.MapContainingValueExpression;
 
+/**
+ * Visitor transforming the abstract {@link QueryExpression} into a more concrete and usable {@link GraphExecutableQuery}.
+ * @author ndx
+ *
+ * @param <DataType>
+ * @param <InformerType>
+ */
 public class BluePrintsQueryBuilder<DataType, InformerType extends Informer<DataType>> implements QueryExpressionVisitor {
 
 	private AbstractBluePrintsBackedFinderService<?, DataType, InformerType> service;

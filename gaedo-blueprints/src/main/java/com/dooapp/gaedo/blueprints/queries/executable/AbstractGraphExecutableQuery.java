@@ -73,4 +73,29 @@ public abstract class AbstractGraphExecutableQuery implements GraphExecutableQue
 	protected Class getSearchedClass() {
 		return service.getContainedClass();
 	}
+
+
+
+	/**
+	 * @return
+	 * @see java.lang.Object#toString()
+	 */
+	@Override
+	public String toString() {
+		StringBuilder builder = new StringBuilder();
+		builder.append(getClass().getName()).append(" [");
+		if (test != null) {
+			builder.append("test=");
+			builder.append(test);
+			builder.append(", ");
+		}
+		if (sort != null) {
+			builder.append("sort=");
+			builder.append(sort);
+		}
+		builder.append("]");
+		return builder.toString();
+	}
+	
+	
 }
