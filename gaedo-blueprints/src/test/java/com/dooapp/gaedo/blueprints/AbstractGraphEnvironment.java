@@ -227,4 +227,13 @@ public abstract class AbstractGraphEnvironment<GraphType extends Graph> {
 	public void setServiceRrepository(SimpleServiceRepository serviceRrepository) {
 		this.serviceRrepository = serviceRrepository;
 	}
+
+	/**
+	 * @return the graph
+	 * @category getter
+	 * @category graph
+	 */
+	public GraphType getGraph() {
+		return graph;
+	}
 }
