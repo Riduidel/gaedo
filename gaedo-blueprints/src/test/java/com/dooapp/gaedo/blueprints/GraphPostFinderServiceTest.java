@@ -407,6 +407,18 @@ public class GraphPostFinderServiceTest extends AbstractGraphTest {
 	}
 
 
+	@Test
+	public void ensureAPostCanHaveAValueNulled() throws IOException, ClassNotFoundException {
+		Post tested = new Post().withAuthor(author).withText("ensureAPostCanHaveAValueNulled");
+		tested = getPostService().create(tested);
+		assertThat(tested.text, IsNull.notNullValue());
+		tested.text = null;
+		tested = getPostService().update(tested);
+		// force reload from graph
+		tested = ((IdBasedService<Post>) getPostService()).findById(tested.id);
+		assertThat(tested.text, IsNull.nullValue());
+	}
+
 	/**
 	 * According to latest modifications, the both note and text will be linked to literal vertex containing value "3.0". How will it work ?
 	 * @throws IOException
