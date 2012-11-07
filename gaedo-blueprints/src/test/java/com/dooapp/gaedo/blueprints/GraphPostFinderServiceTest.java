@@ -169,6 +169,17 @@ public class GraphPostFinderServiceTest extends AbstractGraphTest {
 	}
 
 	@Test
+	public void ensureAuthorHasWrittenThosePosts() {
+		assertThat(getPostService().find().matching(new QueryBuilder<PostInformer>() {
+
+			@Override
+			public QueryExpression createMatchingExpression(PostInformer informer) {
+				return informer.getAuthor().equalsTo(author);
+			}
+		}).count(), IsNot.not(0));
+	}
+
+	@Test
 	public void ensureDeletCascadesWell() {
 		User other = new User().withId(2).withLogin("other login").withPassword("other password");
 		long id = 55;
