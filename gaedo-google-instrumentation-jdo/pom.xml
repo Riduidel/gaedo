@@ -2,13 +2,13 @@
   <parent>
     <artifactId>gaedo</artifactId>
     <groupId>com.dooapp</groupId>
-    <version>0.4.2-SNAPSHOT</version>
+    <version>0.3.1-SNAPSHOT</version>
   </parent>
   <modelVersion>4.0.0</modelVersion>
   <groupId>com.dooapp</groupId>
   <artifactId>gaedo-google-instrumentation-jdo</artifactId>
   <name>gaedo google instrumentation jdo</name>
-  <version>0.4.2-SNAPSHOT</version>
+  <version>0.3.1-SNAPSHOT</version>
   <description>Transform source code in soruce code compatible with GAE requirements concerning persistence </description>
   	<scm>
 		<connection>scm:svn:https://svn.origo.ethz.ch/gaedo/gaedo-google-instrumentation-jdo/trunk</connection>
