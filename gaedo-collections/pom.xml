@@ -2,13 +2,13 @@
   <parent>
     <artifactId>gaedo</artifactId>
     <groupId>com.dooapp</groupId>
-    <version>0.3.1-SNAPSHOT</version>
+    <version>0.4.1</version>
   </parent>
   <modelVersion>4.0.0</modelVersion>
   <groupId>com.dooapp</groupId>
   <artifactId>gaedo-collections</artifactId>
   <name>gaedo collections</name>
-  <version>0.3.1-SNAPSHOT</version>
+  <version>0.4.1</version>
   <description>Contains the collections implementation, and only depend upon gaedo-definition </description>
   <dependencies>
   	<dependency>
