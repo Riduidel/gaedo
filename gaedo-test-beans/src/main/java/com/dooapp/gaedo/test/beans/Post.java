@@ -13,6 +13,7 @@ import javax.persistence.Column;
 import javax.persistence.ManyToMany;
 
 import com.dooapp.gaedo.extensions.hierarchy.Parent;
+import com.dooapp.gaedo.test.beans.base.Identified;
 
 /**
  * A post is the standard content of any kind of blog

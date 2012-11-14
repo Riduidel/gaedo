@@ -3,6 +3,8 @@ package com.dooapp.gaedo.test.beans;
 import java.io.Serializable;
 import java.util.logging.Logger;
 
+import com.dooapp.gaedo.test.beans.base.Identified;
+
 public class Tag extends Identified implements Serializable {
 	private static final Logger logger = Logger.getLogger(Tag.class.getName());
 	

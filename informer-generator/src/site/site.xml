@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/DECORATION/1.0.0"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/DECORATION/1.0.0 http://maven.apache.org/xsd/decoration-1.0.0.xsd "
+	name="${project.name}">
+	<version position="right"></version>
+	<body>
+		<!-- Put reports at the end -->
+		<menu name="about gaedo-informer-generator">
+			<item name="An introduction to gaedo informer generator" href="1_gaedo_informers_introduction.html" />
+ 			<item name="Some explanations regarding that mess" href="2_gaedo_informer_architecture.html" />
+		</menu>
+		<menu ref="reports" />
+	</body>
+</project>

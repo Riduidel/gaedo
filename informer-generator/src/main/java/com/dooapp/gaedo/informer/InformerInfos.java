@@ -66,6 +66,6 @@ public class InformerInfos {
 	}
 
 	public static String buildAbstractInformerName(String className) {
-		return "Abstract"+buildInformerName(className);
+		return "InternalGaedo"+buildInformerName(className);
 	}
 }

@@ -218,7 +218,7 @@ public class InformerMojo extends AbstractMojo implements Serializable {
 		File effective = new File(baseOutput+"/"+informerInfos.classPackage.replace('.', '/')+"/"+informerInfos.getInformerName()+".java");
 		effective.getParentFile().mkdirs();
 		FileUtils.fileWrite(effective, cu.toString());
-		cu = InformerTextGenerator.generateAbstractInformer(informerInfos, qualifiedEnums, resolvedInformers);
+		cu = InformerTextGenerator.generateAbstractInformer(informerInfos, qualifiedEnums, resolvedInformers, getLog());
 		effective = new File(baseOutput+"/"+informerInfos.classPackage.replace('.', '/')+"/"+informerInfos.getAbstractInformerName()+".java");
 		effective.getParentFile().mkdirs();
 		FileUtils.fileWrite(effective, cu.toString());

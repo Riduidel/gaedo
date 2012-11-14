@@ -25,6 +25,8 @@ import java.util.Map;
 
 import javax.annotation.Generated;
 
+import org.apache.maven.plugin.logging.Log;
+
 import com.dooapp.gaedo.finders.Informer;
 import com.dooapp.gaedo.finders.informers.ObjectFieldInformer;
 import com.dooapp.gaedo.utils.Utils;
@@ -59,9 +61,6 @@ public class InformerTextGenerator {
 		List<ClassOrInterfaceType> extended = new LinkedList<ClassOrInterfaceType>();
 		extended.add(new ClassOrInterfaceType(Informer.class.getSimpleName() + "<" + informerInfos.className + ">"));
 		extended.add(new ClassOrInterfaceType(informerInfos.getAbstractInformerName()));
-		if(informerInfos.superClassName!=null && !"Object".equals(informerInfos.superClassName)) {
-			extended.add(new ClassOrInterfaceType(InformerInfos.buildAbstractInformerName(informerInfos.superClassName)));
-		}
 		type.setExtends(extended);
 		type.setJavaDoc(new JavadocComment("\n" + 
 						"Informer for {@link " + informerInfos.className + "}\n" +
@@ -95,7 +94,7 @@ public class InformerTextGenerator {
 		return cu;
 	}
 
-	public static CompilationUnit generateAbstractInformer(InformerInfos informerInfos, Collection<String> qualifiedEnums, Map<String, Class> resolvedInformers) {
+	public static CompilationUnit generateAbstractInformer(InformerInfos informerInfos, Collection<String> qualifiedEnums, Map<String, Class> resolvedInformers, Log log) {
 		CompilationUnit cu = new CompilationUnit();
 		// set the package
 		cu.setPackage(new PackageDeclaration(ASTHelper.createNameExpr(informerInfos.classPackage)));
@@ -105,18 +104,39 @@ public class InformerTextGenerator {
 		// Extracting effective imports
 		Collection<String> imports = new LinkedList<String>();
 		
+		// superclasspackage will stay null as long as no import has been found for a class which name ends with ".superClassName"
+		// Obvioulsy, if none is found, a warning is written in log
+		String superClassPackage = null;
+		
 		// Add current package to import for resolution (but do not forget to remove it before writing the effective imports)
 		imports.add(informerInfos.classPackage);
 		imports.add("java.lang");
+		String superClassSuffix = null;
+		if(informerInfos.superClassName!=null)
+			superClassSuffix = "."+informerInfos.superClassName;
 		for (ImportDeclaration d : baseImports) {
-			imports.add(d.getName().toString());
+			String importName = d.getName().toString();
+			imports.add(importName);
+			if(informerInfos.superClassName!=null) {
+				if(importName.endsWith(superClassSuffix)) {
+					if(superClassPackage!=null) {
+						log.warn("more than one imports of "+informerInfos.getQualifiedClassName()+" contains superclass name. Last one found is "+importName+" This confuses gaedo-informer-generator");
+					}
+					superClassPackage = importName.substring(0, importName.lastIndexOf(superClassSuffix));
+				}
+			}
 		}
 
 		// create the type declaration
 		ClassOrInterfaceDeclaration type = new ClassOrInterfaceDeclaration(ModifierSet.PUBLIC, true, informerInfos.getAbstractInformerName());
 		if(informerInfos.superClassName!=null && !"Object".equals(informerInfos.superClassName)) {
 			List<ClassOrInterfaceType> extended = new LinkedList<ClassOrInterfaceType>();
-			extended.add(new ClassOrInterfaceType(InformerInfos.buildAbstractInformerName(informerInfos.superClassName)));
+			String superInformer = InformerInfos.buildAbstractInformerName(informerInfos.superClassName);
+			// do not forget to add import for that class (see https://github.com/Riduidel/gaedo/issues/20)
+			if(superClassPackage!=null) {
+				imports.add(superClassPackage+"."+superInformer);
+			}
+			extended.add(new ClassOrInterfaceType(superInformer));
 			type.setExtends(extended);
 		}
 		type.setJavaDoc(new JavadocComment("\n" + 

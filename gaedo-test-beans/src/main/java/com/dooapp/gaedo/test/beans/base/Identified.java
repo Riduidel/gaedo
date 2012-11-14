@@ -1,4 +1,4 @@
-package com.dooapp.gaedo.test.beans;
+package com.dooapp.gaedo.test.beans.base;
 
 import java.io.Serializable;
 
