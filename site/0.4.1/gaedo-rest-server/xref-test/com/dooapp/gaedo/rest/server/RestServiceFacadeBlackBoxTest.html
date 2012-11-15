@@ -1,0 +1,67 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+<meta http-equiv="content-type" content="text/html; charset=UTF-8" />
+<title>RestServiceFacadeBlackBoxTest xref</title>
+<link type="text/css" rel="stylesheet" href="../../../../../stylesheet.css" />
+</head>
+<body>
+<div id="overview"><a href="../../../../../../testapidocs/com/dooapp/gaedo/rest/server/RestServiceFacadeBlackBoxTest.html">View Javadoc</a></div><pre>
+
+<a class="jxr_linenumber" name="1" href="#1">1</a>   <strong class="jxr_keyword">package</strong> com.dooapp.gaedo.<strong class="jxr_keyword">rest</strong>.server;
+<a class="jxr_linenumber" name="2" href="#2">2</a>   
+<a class="jxr_linenumber" name="3" href="#3">3</a>   <strong class="jxr_keyword">import</strong> java.io.Serializable;
+<a class="jxr_linenumber" name="4" href="#4">4</a>   <strong class="jxr_keyword">import</strong> java.util.Collection;
+<a class="jxr_linenumber" name="5" href="#5">5</a>   <strong class="jxr_keyword">import</strong> java.util.Iterator;
+<a class="jxr_linenumber" name="6" href="#6">6</a>   
+<a class="jxr_linenumber" name="7" href="#7">7</a>   <strong class="jxr_keyword">import</strong> org.hamcrest.core.Is;
+<a class="jxr_linenumber" name="8" href="#8">8</a>   <strong class="jxr_keyword">import</strong> org.junit.Assert;
+<a class="jxr_linenumber" name="9" href="#9">9</a>   <strong class="jxr_keyword">import</strong> org.junit.Test;
+<a class="jxr_linenumber" name="10" href="#10">10</a>  <strong class="jxr_keyword">import</strong> org.restlet.data.MediaType;
+<a class="jxr_linenumber" name="11" href="#11">11</a>  <strong class="jxr_keyword">import</strong> org.restlet.representation.ObjectRepresentation;
+<a class="jxr_linenumber" name="12" href="#12">12</a>  <strong class="jxr_keyword">import</strong> org.restlet.representation.Representation;
+<a class="jxr_linenumber" name="13" href="#13">13</a>  <strong class="jxr_keyword">import</strong> org.restlet.resource.ClientResource;
+<a class="jxr_linenumber" name="14" href="#14">14</a>  
+<a class="jxr_linenumber" name="15" href="#15">15</a>  <strong class="jxr_keyword">import</strong> com.dooapp.gaedo.test.beans.Post;
+<a class="jxr_linenumber" name="16" href="#16">16</a>  <strong class="jxr_keyword">import</strong> com.dooapp.gaedo.test.beans.User;
+<a class="jxr_linenumber" name="17" href="#17">17</a>  
+<a class="jxr_linenumber" name="18" href="#18">18</a>  <em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="19" href="#19">19</a>  <em class="jxr_javadoccomment"> * Black box testing of {@link RestServiceFacade} : it uses REST to get/put/... data and check that all is correct.</em>
+<a class="jxr_linenumber" name="20" href="#20">20</a>  <em class="jxr_javadoccomment"> * @author ndx</em>
+<a class="jxr_linenumber" name="21" href="#21">21</a>  <em class="jxr_javadoccomment"> *</em>
+<a class="jxr_linenumber" name="22" href="#22">22</a>  <em class="jxr_javadoccomment"> */</em>
+<a class="jxr_linenumber" name="23" href="#23">23</a>  <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">class</strong> <a href="../../../../../com/dooapp/gaedo/rest/server/RestServiceFacadeBlackBoxTest.html">RestServiceFacadeBlackBoxTest</a> <strong class="jxr_keyword">extends</strong> <a href="../../../../../com/dooapp/gaedo/rest/server/AbstractGaedoResourceApplicationTest.html">AbstractGaedoResourceApplicationTest</a> {
+<a class="jxr_linenumber" name="24" href="#24">24</a>  	<em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="25" href="#25">25</a>  <em class="jxr_javadoccomment">	 * Test that the all get method is working correctly in most of the well-known cases for the User class</em>
+<a class="jxr_linenumber" name="26" href="#26">26</a>  <em class="jxr_javadoccomment">	 */</em>
+<a class="jxr_linenumber" name="27" href="#27">27</a>  	@Test
+<a class="jxr_linenumber" name="28" href="#28">28</a>  	<strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">void</strong> testGetUsers() <strong class="jxr_keyword">throws</strong> Exception {
+<a class="jxr_linenumber" name="29" href="#29">29</a>  		ClientResource userServiceEndPoint = <strong class="jxr_keyword">new</strong> ClientResource(<span class="jxr_string">"http://localhost:"</span>+TEST_PORT+TEST_DIR+GaedoResourceApplication.SERVICE_LIST_ROUTE+<span class="jxr_string">"/"</span>+User.<strong class="jxr_keyword">class</strong>.getName()+<span class="jxr_string">"/"</span>);
+<a class="jxr_linenumber" name="30" href="#30">30</a>  		Representation representation = userServiceEndPoint.get(MediaType.TEXT_XML);
+<a class="jxr_linenumber" name="31" href="#31">31</a>  		Assert.assertThat(representation.getMediaType(), Is.is(MediaType.APPLICATION_JAVA_OBJECT));
+<a class="jxr_linenumber" name="32" href="#32">32</a>  		ObjectRepresentation&lt;Serializable&gt; client = <strong class="jxr_keyword">new</strong> ObjectRepresentation&lt;Serializable&gt;(representation);
+<a class="jxr_linenumber" name="33" href="#33">33</a>  		Serializable content = client.getObject();
+<a class="jxr_linenumber" name="34" href="#34">34</a>  		Assert.assertThat(content, Is.is(Collection.<strong class="jxr_keyword">class</strong>));
+<a class="jxr_linenumber" name="35" href="#35">35</a>  		Collection contentCollection = (Collection) content;
+<a class="jxr_linenumber" name="36" href="#36">36</a>  		Assert.assertThat(contentCollection.size(), Is.is(2));
+<a class="jxr_linenumber" name="37" href="#37">37</a>  		Iterator iterator = contentCollection.iterator();
+<a class="jxr_linenumber" name="38" href="#38">38</a>  		Object first = iterator.next();
+<a class="jxr_linenumber" name="39" href="#39">39</a>  		Assert.assertThat(first, Is.is(User.<strong class="jxr_keyword">class</strong>));
+<a class="jxr_linenumber" name="40" href="#40">40</a>  		<em class="jxr_comment">// Which is first user</em>
+<a class="jxr_linenumber" name="41" href="#41">41</a>  		User firstUser = (User) first;
+<a class="jxr_linenumber" name="42" href="#42">42</a>  		Assert.assertThat(firstUser.getLogin(), Is.is(<span class="jxr_string">"first"</span>));
+<a class="jxr_linenumber" name="43" href="#43">43</a>  		Object second = iterator.next();
+<a class="jxr_linenumber" name="44" href="#44">44</a>  		Assert.assertThat(second, Is.is(User.<strong class="jxr_keyword">class</strong>));
+<a class="jxr_linenumber" name="45" href="#45">45</a>  		<em class="jxr_comment">// Which is first user</em>
+<a class="jxr_linenumber" name="46" href="#46">46</a>  		User secondUser = (User) second;
+<a class="jxr_linenumber" name="47" href="#47">47</a>  		Assert.assertThat(secondUser.getLogin(), Is.is(<span class="jxr_string">"second"</span>));
+<a class="jxr_linenumber" name="48" href="#48">48</a>  		<em class="jxr_comment">// Happy ? Not yet. Are posts and tags loaded ?</em>
+<a class="jxr_linenumber" name="49" href="#49">49</a>  		Assert.assertThat(firstUser.posts.size(), Is.is(1));
+<a class="jxr_linenumber" name="50" href="#50">50</a>  		Post firstPost = firstUser.posts.iterator().next();
+<a class="jxr_linenumber" name="51" href="#51">51</a>  		Assert.assertThat(firstPost.text, Is.is(<span class="jxr_string">"first post"</span>));
+<a class="jxr_linenumber" name="52" href="#52">52</a>  	}
+<a class="jxr_linenumber" name="53" href="#53">53</a>  }
+</pre>
+<hr/><div id="footer">This page was automatically generated by <a href="http://maven.apache.org/">Maven</a></div></body>
+</html>
+
