@@ -1,0 +1,11 @@
+com.dooapp.gaedo.blueprints
+com.dooapp.gaedo.blueprints.annotations
+com.dooapp.gaedo.blueprints.dynabeans
+com.dooapp.gaedo.blueprints.indexable
+com.dooapp.gaedo.blueprints.queries
+com.dooapp.gaedo.blueprints.queries.executable
+com.dooapp.gaedo.blueprints.queries.tests
+com.dooapp.gaedo.blueprints.sail
+com.dooapp.gaedo.blueprints.strategies
+com.dooapp.gaedo.blueprints.strategies.graph
+com.dooapp.gaedo.blueprints.transformers
