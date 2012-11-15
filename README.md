@@ -11,14 +11,14 @@ Gaedo initially standed for Google App Engine Data Object, but has since evolved
 
 Since version 0.3.0, project documentation is available through [GitHub pages][1]. So, for your informations, here are all versions pages (sorted in reverse numeric order) : 
 
-* [0.4.1-SNAPPSHOT][3]
-* [0.4.0][2]
-* [0.3.1-SNAPPSHOT][4]
+* [0.4.2-SNAPPSHOT][2]
+* [0.4.1][3]
+* [0.4.0][4]
 * [0.3.0][5]
 
 
   [1]: http://pages.github.com/
-  [2]: http://riduidel.github.com/gaedo/site/0.4.0/
-  [3]: http://riduidel.github.com/gaedo/site/0.4.1-SNAPSHOT/
-  [4]: http://riduidel.github.com/gaedo/site/0.3.1-SNAPSHOT/
+  [2]: http://riduidel.github.com/gaedo/site/0.4.-SNAPSHOT/
+  [3]: http://riduidel.github.com/gaedo/site/0.4.1/
+  [4]: http://riduidel.github.com/gaedo/site/0.4.0/
   [5]: http://riduidel.github.com/gaedo/site/0.3.0/
