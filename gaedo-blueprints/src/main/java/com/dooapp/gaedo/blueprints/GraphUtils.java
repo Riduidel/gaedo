@@ -60,12 +60,13 @@ public class GraphUtils {
 		if(p.getAnnotation(GraphProperty.class)!=null) {
 			GraphProperty graph = p.getAnnotation(GraphProperty.class);
 			// Test added to avoid default value (which defaults name to "")
-			if(graph.name()!=null && graph.name().length()>0)
+			if(graph.name()!=null && graph.name().trim().length()>0)
 				return graph.name();
 		}
 		if(p.getAnnotation(Column.class)!=null) {
 			Column column = p.getAnnotation(Column.class);
-			return column.name();
+			if(column.name()!=null && column.name().trim().length()>0)
+				return column.name();
 		}
 		return getDefaultEdgeNameFor(p);
 	}
