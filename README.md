@@ -12,10 +12,10 @@ Gaedo initially standed for Google App Engine Data Object, but has since evolved
 Since version 0.3.0, project documentation is available through [GitHub pages][1]. So, for your informations, here are all versions pages (sorted in reverse numeric order) : 
 
 * [0.4.4-SNAPPSHOT][2]
-* [0.4.3][3] (no 0.4.2 version as git really put my nerves on)
-* [0.4.1][4]
-* [0.4.0][5]
-* [0.3.0][6]
+* [0.4.3][3] (no 0.4.2 version as git really put my nerves on) (released on November 22, 2012) this release is only a bugfix one, and as a consequence really implies no functionnal change.
+* [0.4.1][4] (released on november 14, 2012)
+* [0.4.0][5] (released on november 8, 2012)
+* [0.3.0][6] (released on october 14, 2012)
 
 
   [1]: http://pages.github.com/
