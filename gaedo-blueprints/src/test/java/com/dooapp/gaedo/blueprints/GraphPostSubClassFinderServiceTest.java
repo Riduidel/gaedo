@@ -34,6 +34,7 @@ import static org.junit.Assert.assertThat;
 
 @RunWith(Parameterized.class)
 public class GraphPostSubClassFinderServiceTest extends AbstractGraphTest{
+	private static final long SUB_POST_ID = 1000+ID_POST_1;
 	private static final Logger logger = Logger.getLogger(GraphPostSubClassFinderServiceTest.class.getName());
 	
 	@Parameters
@@ -76,8 +77,8 @@ public class GraphPostSubClassFinderServiceTest extends AbstractGraphTest{
 	@Test 
 	public void ensurePostSubClassServiceWorksWell() {
 		final String METHOD_NAME = "ensurePostSubClassServiceWorksWell";
-		PostSubClass newOne = new PostSubClass(1000+ID_POST_1, METHOD_NAME,1.0f, State.PUBLIC, author);
-		Post saved = getPostService().create(newOne);
+		PostSubClass newOne = new PostSubClass(SUB_POST_ID, METHOD_NAME,1.0f, State.PUBLIC, author);
+		Post saved = getPostSubService().create(newOne);
 		assertThat(saved, Is.is(PostSubClass.class));
 		Post loaded = getPostService().find().matching(new QueryBuilder<PostInformer>() {
 			
@@ -91,6 +92,18 @@ public class GraphPostSubClassFinderServiceTest extends AbstractGraphTest{
 			Post fromId = ((IdBasedService<Post>) getPostService()).findById(loaded.id);
 			assertThat(fromId, Is.is(PostSubClass.class));
 		}
+		// Now make sure post can be updated and obtained
+		loaded.text = "updated text : "+loaded.text;
+		// exposition of https://github.com/Riduidel/gaedo/issues/23 here !
+		// by updating object with basic post service, I create a second vertex in graph i can then retrieve in count.
+		loaded = getPostService().update(loaded);
+		assertThat(getPostService().find().matching(new QueryBuilder<PostInformer>() {
+
+			@Override
+			public QueryExpression createMatchingExpression(PostInformer informer) {
+				return informer.getId().equalsTo(SUB_POST_ID);
+			}
+		}).count(), Is.is(1));
 	}
 
 }
