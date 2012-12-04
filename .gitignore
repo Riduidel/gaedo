@@ -3,5 +3,5 @@
 .settings/
 target/
 /release.properties
-.iml
+*.iml
 .idea/
