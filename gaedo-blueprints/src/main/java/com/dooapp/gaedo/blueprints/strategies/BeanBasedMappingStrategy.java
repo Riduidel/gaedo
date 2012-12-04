@@ -1,11 +1,6 @@
 package com.dooapp.gaedo.blueprints.strategies;
 
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -118,10 +113,15 @@ public class BeanBasedMappingStrategy<DataType> extends AbstractMappingStrategy<
                 // a literal with no type information should always been considered a string literal
                 return STRING_CLASS;
             } else {
-                Edge toType = vertex.getOutEdges(IndexableGraphBackedFinderService.TYPE_EDGE_NAME).iterator().next();
-                Vertex type = toType.getInVertex();
-                // Do not use ClassLiteral here as this method must be blazing fast
-                return IndexableGraphBackedFinderService.classTransformer.extractClassIn(service.getDriver().getValue(type).toString());
+                Iterator<Edge> typeIterator = vertex.getOutEdges(IndexableGraphBackedFinderService.TYPE_EDGE_NAME).iterator();
+                if(typeIterator.hasNext()) {
+                    Edge toType = typeIterator.next();
+                    Vertex type = toType.getInVertex();
+                    // Do not use ClassLiteral here as this method must be blazing fast
+                    return IndexableGraphBackedFinderService.classTransformer.extractClassIn(service.getDriver().getValue(type).toString());
+                } else {
+                    return STRING_CLASS;
+                }
             }
 		}
 	}
