@@ -541,28 +541,21 @@ public abstract class AbstractBluePrintsBackedFinderService<GraphClass extends G
 		String vertexIdValue = strategy.getAsId(id[0]);
 		Vertex rootVertex = loadVertexFor(vertexIdValue, containedClass.getName());
 		if (rootVertex == null) {
-			try {
-				// root vertex couldn't be found directly, mostly due to
-				// https://github.com/Riduidel/gaedo/issues/11
-				// So perform the longer (but always working) query
-				return find().matching(new QueryBuilder<InformerType>() {
+            // root vertex couldn't be found directly, mostly due to
+            // https://github.com/Riduidel/gaedo/issues/11
+            // So perform the longer (but always working) query
+            return find().matching(new QueryBuilder<InformerType>() {
 
-					@Override
-					public QueryExpression createMatchingExpression(InformerType informer) {
-						Collection<QueryExpression> ands = new LinkedList<QueryExpression>();
-						int index=0;
-						for(Property idProperty : strategy.getIdProperties()) {
-							ands.add(informer.get(idProperty.getName()).equalsTo(id[index++]));
-						}
-						return Expressions.and(ands.toArray(new QueryExpression[ands.size()]));
-					}
-				}).getFirst();
-			} catch (NoReturnableVertexException e) {
-				// due to getFirst semantics, an exception has to be thrown
-				// when no entry is found, which is off lesser interest
-				// here, that why we catch it to return null instead
-				return null;
-			}
+                @Override
+                public QueryExpression createMatchingExpression(InformerType informer) {
+                    Collection<QueryExpression> ands = new LinkedList<QueryExpression>();
+                    int index=0;
+                    for(Property idProperty : strategy.getIdProperties()) {
+                        ands.add(informer.get(idProperty.getName()).equalsTo(id[index++]));
+                    }
+                    return Expressions.and(ands.toArray(new QueryExpression[ands.size()]));
+                }
+            }).getFirst();
 		} else {
 			// root vertex can be directly found ! so load it immediatly
 			return loadObject(vertexIdValue, new TreeMap<String, Object>());
