@@ -11,6 +11,8 @@ import java.util.logging.Logger;
 
 import javax.persistence.CascadeType;
 
+import com.dooapp.gaedo.blueprints.GraphUtils;
+import com.dooapp.gaedo.blueprints.Kind;
 import com.dooapp.gaedo.blueprints.Properties;
 import com.dooapp.gaedo.blueprints.indexable.IndexableGraphBackedFinderService;
 import com.dooapp.gaedo.blueprints.queries.tests.AndVertexTest;
@@ -112,10 +114,15 @@ public class BeanBasedMappingStrategy<DataType> extends AbstractMappingStrategy<
 		if(vertex.getProperty(Properties.type.name())!=null) {
 			return TypeUtils.getClass(vertex.getProperty(Properties.type.name()).toString());
 		} else {
-			Edge toType = vertex.getOutEdges(IndexableGraphBackedFinderService.TYPE_EDGE_NAME).iterator().next();
-			Vertex type = toType.getInVertex();
-			// Do not use ClassLiteral here as this method must be blazing fast
-			return IndexableGraphBackedFinderService.classTransformer.extractClassIn(service.getDriver().getValue(type).toString());
+            if(Kind.literal.equals(GraphUtils.getKindOf(vertex))) {
+                // a literal with no type information should always been considered a string literal
+                return STRING_CLASS;
+            } else {
+                Edge toType = vertex.getOutEdges(IndexableGraphBackedFinderService.TYPE_EDGE_NAME).iterator().next();
+                Vertex type = toType.getInVertex();
+                // Do not use ClassLiteral here as this method must be blazing fast
+                return IndexableGraphBackedFinderService.classTransformer.extractClassIn(service.getDriver().getValue(type).toString());
+            }
 		}
 	}
 

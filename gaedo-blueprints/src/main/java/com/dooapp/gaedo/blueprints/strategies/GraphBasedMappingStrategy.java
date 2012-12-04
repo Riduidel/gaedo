@@ -45,10 +45,8 @@ import com.tinkerpop.blueprints.pgm.Vertex;
  */
 public class GraphBasedMappingStrategy<DataType> extends AbstractMappingStrategy<DataType> implements GraphMappingStrategy<DataType> {
 	private static final Logger logger = Logger.getLogger(GraphBasedMappingStrategy.class.getName());
-	
-	private static final String STRING_CLASS = String.class.getName();
 
-	/**
+    /**
 	 * Default mapped properties
 	 */
 	private Map<Property, Collection<CascadeType>> beanPropertiesForServiceClass;
