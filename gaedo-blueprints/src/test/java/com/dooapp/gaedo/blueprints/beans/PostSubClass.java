@@ -7,6 +7,13 @@ import com.dooapp.gaedo.test.beans.State;
 import com.dooapp.gaedo.test.beans.User;
 
 public class PostSubClass extends Post {
+	
+	public static enum AnotherStateForBug26 {
+		PUBLIC
+		
+	}
+
+	public AnotherStateForBug26 anotherState;
 
 	public PostSubClass() {
 		super();

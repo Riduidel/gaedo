@@ -106,4 +106,51 @@ public class GraphPostSubClassFinderServiceTest extends AbstractGraphTest{
 		}).count(), Is.is(1));
 	}
 
+
+	@Test 
+	public void ensureBug23IsSolved() {
+		final String METHOD_NAME = "ensureBug23IsSolved";
+		PostSubClass newOne = new PostSubClass(SUB_POST_ID, METHOD_NAME,1.0f, State.PUBLIC, author);
+		Post saved = getPostSubService().create(newOne);
+		assertThat(saved, Is.is(PostSubClass.class));
+		Post loaded = getPostService().find().matching(new QueryBuilder<PostInformer>() {
+			
+			@Override
+			public QueryExpression createMatchingExpression(PostInformer informer) {
+				return informer.getText().equalsTo(METHOD_NAME);
+			}
+		}).getFirst();
+		// Now make sure post can be updated and obtained
+		loaded.text = "updated text : "+loaded.text;
+		// exposition of https://github.com/Riduidel/gaedo/issues/23 here !
+		// by updating object with basic post service, I create a second vertex in graph i can then retrieve in count.
+		loaded = getPostService().update(loaded);
+		assertThat(getPostService().find().matching(new QueryBuilder<PostInformer>() {
+
+			@Override
+			public QueryExpression createMatchingExpression(PostInformer informer) {
+				return informer.getId().equalsTo(SUB_POST_ID);
+			}
+		}).count(), Is.is(1));
+	}
+
+	@Test 
+	public void ensureBug26IsSolved() {
+		final String METHOD_NAME = "ensureBug26IsSolved";
+		PostSubClass newOne = new PostSubClass(SUB_POST_ID, METHOD_NAME,1.0f, State.PUBLIC, author);
+		newOne.state = State.PUBLIC;
+		newOne.anotherState = PostSubClass.AnotherStateForBug26.PUBLIC;
+		Post saved = getPostSubService().create(newOne);
+		assertThat(saved, Is.is(PostSubClass.class));
+		Post loaded = getPostService().find().matching(new QueryBuilder<PostInformer>() {
+			
+			@Override
+			public QueryExpression createMatchingExpression(PostInformer informer) {
+				return informer.getText().equalsTo(METHOD_NAME);
+			}
+		}).getFirst();
+		// exposition of https://github.com/Riduidel/gaedo/issues/23 here !
+		// by updating object with basic post service, I create a second vertex in graph i can then retrieve in count.
+		loaded = getPostService().update(loaded);
+	}
 }
