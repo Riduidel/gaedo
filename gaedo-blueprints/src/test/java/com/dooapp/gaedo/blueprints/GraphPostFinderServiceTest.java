@@ -188,8 +188,12 @@ public class GraphPostFinderServiceTest extends AbstractGraphTest {
 		Post about = ((IdBasedService<Post>) getPostService()).findById(id);
 		assertThat(about, IsNull.notNullValue());
 		getUserService().delete(other);
-		about = ((IdBasedService<Post>) getPostService()).findById(id);
-		assertThat(about, IsNull.nullValue());
+		try {
+			about = ((IdBasedService<Post>) getPostService()).findById(id);
+			assertThat(about, IsNull.nullValue());
+		} catch(NoReturnableVertexException e) {
+			// that exception is one of possible correct behaviours
+		}
 	}
 
 	@Test
