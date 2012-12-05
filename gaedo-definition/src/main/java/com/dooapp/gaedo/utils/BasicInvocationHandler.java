@@ -1,5 +1,6 @@
 package com.dooapp.gaedo.utils;
 
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.Collection;
 import java.util.Collections;
@@ -7,6 +8,8 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+
+import com.dooapp.gaedo.CrudServiceException;
 
 /**
  * Base class for some of our invocation handlers. This class provides some
@@ -117,7 +120,15 @@ public abstract class BasicInvocationHandler<ImplementedType, VirtualMethodResol
 	 */
 	public Object invoke(Object proxy, Method invokedMethod, Object[] invokedArgs) throws Throwable {
 		MethodResolver resolver = getResolver(invokedMethod);
-		return resolver.call(invokedArgs);
+		try {
+			return resolver.call(invokedArgs);
+		} catch(InvocationTargetException e) {
+			if(e.getCause() instanceof CrudServiceException) {
+				throw ((CrudServiceException)e.getCause());
+			} else {
+				throw e;
+			}
+		}
 	}
 
 }
