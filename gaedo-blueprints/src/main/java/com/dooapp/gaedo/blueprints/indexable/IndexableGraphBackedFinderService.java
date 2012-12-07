@@ -228,7 +228,8 @@ public class IndexableGraphBackedFinderService<DataType, InformerType extends In
 	@Override
 	public InViewService<DataType, InformerType, SortedSet<String>> focusOn(SortedSet<String> lens) {
 		AbstractBluePrintsBackedFinderService<IndexableGraph, DataType, InformerType> returned = new IndexableGraphBackedFinderService<DataType, InformerType>(
-						database, containedClass, informerClass, getInformerFactory(), repository, propertyProvider, getStrategy());
+						database, containedClass, informerClass, getInformerFactory(), repository, propertyProvider, 
+						/* strategy is local to service ! */ getStrategy().derive());
 		returned.setLens(lens);
 		return returned;
 	}

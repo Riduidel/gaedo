@@ -142,4 +142,9 @@ public class BeanBasedMappingStrategy<DataType> extends AbstractMappingStrategy<
 	public boolean shouldLoadPropertiesOf(String objectVertexId, Vertex objectVertex, Map<String, Object> objectsBeingAccessed) {
 		return true;
 	}
+	
+	@Override
+	public BeanBasedMappingStrategy derive() {
+		return new BeanBasedMappingStrategy<DataType>(serviceContainedClass, propertyProvider, migrator);
+	}
 }

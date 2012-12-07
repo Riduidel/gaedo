@@ -262,5 +262,14 @@ public class PropertyBagTest extends AbstractGraphTest {
 		assertThat(allList, IsNull.notNullValue());
 		assertThat(allList.size(), IsNot.not(Is.is(0)));
 	}
+
+	@Test
+	public void twoServcieShouldntShareConfig() {
+		SortedSet<String> focus = new TreeSet<String>();
+		focus.add("#twoServcieShouldntShareConfig()");
+		InViewService<PropertyBagMap, PropertyBagInformer, SortedSet<String>> focused = propertyBagService.focusOn(focus);
+		assertThat(propertyBagService.getLens(), IsNot.not(focus));
+	}
+	
 	
 }

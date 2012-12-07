@@ -98,4 +98,10 @@ public interface GraphMappingStrategy<DataType> {
 	 * @return
 	 */
 	public boolean shouldLoadPropertiesOf(String objectVertexId, Vertex objectVertex, Map<String, Object> objectsBeingAccessed);
+
+	/**
+	 * Clone service for a new service to use a derived version of this one
+	 * @return
+	 */
+	public GraphMappingStrategy<DataType> derive();
 }

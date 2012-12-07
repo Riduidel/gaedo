@@ -237,4 +237,9 @@ public class GraphBasedMappingStrategy<DataType> extends AbstractMappingStrategy
 		}
 		return loadedByThisThread.get().equals(objectVertexId);
 	}
+
+	@Override
+	public GraphMappingStrategy<DataType> derive() {
+		return new GraphBasedMappingStrategy<DataType>(serviceContainedClass, propertyProvider, migrator);
+	}
 }
