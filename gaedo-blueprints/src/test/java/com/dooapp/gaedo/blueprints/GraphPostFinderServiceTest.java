@@ -40,7 +40,11 @@ import com.dooapp.gaedo.blueprints.finders.FindPostByNote;
 import com.dooapp.gaedo.blueprints.finders.FindPostByText;
 import com.dooapp.gaedo.finders.QueryBuilder;
 import com.dooapp.gaedo.finders.QueryExpression;
+import com.dooapp.gaedo.finders.SortingBuilder;
+import com.dooapp.gaedo.finders.SortingExpression;
+import com.dooapp.gaedo.finders.SortingExpression.Direction;
 import com.dooapp.gaedo.finders.id.IdBasedService;
+import com.dooapp.gaedo.finders.sort.SortingExpressionImpl;
 import com.dooapp.gaedo.test.beans.Post;
 import com.dooapp.gaedo.test.beans.PostInformer;
 import com.dooapp.gaedo.test.beans.State;
@@ -48,6 +52,7 @@ import com.dooapp.gaedo.test.beans.Tag;
 import com.dooapp.gaedo.test.beans.TagInformer;
 import com.dooapp.gaedo.test.beans.User;
 import com.dooapp.gaedo.test.beans.UserInformer;
+import com.dooapp.gaedo.utils.CollectionUtils;
 import com.tinkerpop.blueprints.pgm.Edge;
 import com.tinkerpop.blueprints.pgm.Index;
 import com.tinkerpop.blueprints.pgm.IndexableGraph;
@@ -466,6 +471,32 @@ public class GraphPostFinderServiceTest extends AbstractGraphTest {
 //			assertThat(edgeIndex.count("label", "Identified.id"), IsNot.not(Is.is(0l)));
 			assertThat(edgeIndex.count("label", Post.POST_TEXT_PROPERTY), IsNot.not(Is.is(0l)));
 			assertThat(edgeIndex.count("label", "Post.text"), Is.is(0l));
+		}
+	}
+
+	/**
+	 * According to latest modifications, the both note and text will be linked to literal vertex containing value "3.0". How will it work ?
+	 * @throws IOException
+	 * @throws ClassNotFoundException
+	 */
+	public void ensurePostscanBeSortedByNoteDescending() throws IOException, ClassNotFoundException {
+		Collection<Post> postsByAuthor= CollectionUtils.asList(getPostService().find().matching(new QueryBuilder<PostInformer>() {
+
+			@Override
+			public QueryExpression createMatchingExpression(PostInformer informer) {
+				return informer.getAuthor().equalsTo(author);
+			}
+		}).sortBy(new SortingBuilder<PostInformer>() {
+			
+			@Override
+			public SortingExpression createSortingExpression(PostInformer informer) {
+				return SortingExpression.Build.sort().withDescending(informer.getNote());
+			}
+		}).getAll());
+		float note = Float.MAX_VALUE;
+		for(Post p : postsByAuthor) {
+			assertThat(p.note<=note, Is.is(true));
+			note = p.note;
 		}
 	}
 }
