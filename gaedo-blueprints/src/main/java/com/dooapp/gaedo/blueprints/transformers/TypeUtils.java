@@ -11,6 +11,9 @@ public class TypeUtils {
 	private static Map<String, String> classesToTypes = new TreeMap<String, String>();
 	
 	static {
+		Map<String, String> prefixesToUris = new TreeMap<String, String>();
+		prefixesToUris.put("xsd:", "http://www.w3.org/2001/XMLSchema#");
+		
 		Map<String, Class> constructionMap = new HashMap<String, Class>();
 //		constructionMap.put("xsd:anyURI", ""); //URI (Uniform Resource Identifier) 
 //		constructionMap.put("xsd:base64Binary", ""); //Binary content coded as "base64" 
@@ -61,6 +64,11 @@ public class TypeUtils {
 			String className = entry.getValue().getName();
 			String type = entry.getKey();
 			typesToClasses.put(type, className);
+			for(Map.Entry<String, String> prefixToUri : prefixesToUris.entrySet()) {
+				if(type.startsWith(prefixToUri.getKey())) {
+					typesToClasses.put(type.replace(prefixToUri.getKey(), prefixToUri.getValue()), className);
+				}
+			}
 			if(!classesToTypes.containsKey(className))
 				classesToTypes.put(className, type);
 		}

@@ -12,6 +12,7 @@ import java.util.concurrent.atomic.AtomicLong;
 import com.dooapp.gaedo.blueprints.GraphDatabaseDriver;
 import com.dooapp.gaedo.blueprints.GraphUtils;
 import com.dooapp.gaedo.blueprints.strategies.PropertyMappingStrategy;
+import com.dooapp.gaedo.blueprints.transformers.TypeUtils;
 import com.dooapp.gaedo.properties.Property;
 import com.tinkerpop.blueprints.pgm.Edge;
 import com.tinkerpop.blueprints.pgm.Vertex;
@@ -84,7 +85,7 @@ public class GraphBasedPropertyBuilder<DataType> {
 		returned.setType(List.class);
 		// would have really loved to use generics, but it's a dead end (remember about generics reification ? fuck)
 		returned.setGenericType(List.class);
-		returned.setContainedTypeName(containedType);
+		returned.setContainedTypeName(TypeUtils.getClass(containedType));
 		returned.setAnnotation(new OneToManyGraph(serviceContainedClass));
 		returned.setAnnotation(new GraphPropertyAnnotation(returned.getName(), PropertyMappingStrategy.asIs));
 		return returned;
