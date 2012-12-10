@@ -16,6 +16,7 @@ import javax.persistence.Column;
 import com.dooapp.gaedo.blueprints.annotations.GraphProperty;
 import com.dooapp.gaedo.blueprints.strategies.GraphMappingStrategy;
 import com.dooapp.gaedo.blueprints.strategies.PropertyMappingStrategy;
+import com.dooapp.gaedo.blueprints.strategies.UnableToGetVertexTypeException;
 import com.dooapp.gaedo.blueprints.transformers.LiteralTransformer;
 import com.dooapp.gaedo.blueprints.transformers.Literals;
 import com.dooapp.gaedo.blueprints.transformers.TupleTransformer;
@@ -114,13 +115,17 @@ public class GraphUtils {
 			/* One literal node may be used according to different types. To disambiguate, we check if effective type matches default one. If not (typically 
 			 * type returns string and user wants number), prefer default type.
 			 */
-			effectiveType = driver.getEffectiveType(key);
 			try {
-				if(!Collection.class.isAssignableFrom(defaultType) && !defaultType.isAssignableFrom(Class.forName(effectiveType))) {
-					effectiveType = defaultType.getName();
+				effectiveType = driver.getEffectiveType(key);
+				try {
+					if(!Collection.class.isAssignableFrom(defaultType) && !defaultType.isAssignableFrom(Class.forName(effectiveType))) {
+						effectiveType = defaultType.getName();
+					}
+				} catch(Exception e) {
+					// nothing to do : we use effective type - or try to
 				}
-			} catch(Exception e) {
-				// nothing to do : we use effective type - or try to
+			} catch(UnableToGetVertexTypeException e) {
+				effectiveType = GraphMappingStrategy.STRING_TYPE;
 			}
 		} else {
 			effectiveType = driver.getEffectiveType(key);

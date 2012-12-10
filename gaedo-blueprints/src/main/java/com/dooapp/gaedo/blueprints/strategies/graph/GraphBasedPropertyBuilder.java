@@ -11,7 +11,9 @@ import java.util.concurrent.atomic.AtomicLong;
 
 import com.dooapp.gaedo.blueprints.GraphDatabaseDriver;
 import com.dooapp.gaedo.blueprints.GraphUtils;
+import com.dooapp.gaedo.blueprints.strategies.GraphMappingStrategy;
 import com.dooapp.gaedo.blueprints.strategies.PropertyMappingStrategy;
+import com.dooapp.gaedo.blueprints.strategies.UnableToGetVertexTypeException;
 import com.dooapp.gaedo.blueprints.transformers.TypeUtils;
 import com.dooapp.gaedo.properties.Property;
 import com.tinkerpop.blueprints.pgm.Edge;
@@ -65,7 +67,11 @@ public class GraphBasedPropertyBuilder<DataType> {
 				}
 				edgesPerInVertices.get(inVertex).incrementAndGet();
 				Vertex outVertex = e.getInVertex();
-				targetTypes.add(driver.getEffectiveType(outVertex));
+				try {
+					targetTypes.add(driver.getEffectiveType(outVertex));
+				} catch(UnableToGetVertexTypeException noType) {
+					targetTypes.add(GraphMappingStrategy.STRING_TYPE);
+				}
 			}
 		}
 		if(edgesPerInVertices.size()==0)

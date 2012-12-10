@@ -18,6 +18,8 @@ import com.tinkerpop.blueprints.pgm.Vertex;
  *
  */
 public interface GraphMappingStrategy<DataType> {
+
+    public static final String STRING_TYPE = String.class.getName();
 	/**
 	 * Delegation method allowing one to get the map linking properties to cascade types
 	 * @param object object for which we want the properties
@@ -67,8 +69,9 @@ public interface GraphMappingStrategy<DataType> {
 
 	/**
 	 * Get effective type, as string, of a given vertex.
-	 * @param vertex
-	 * @return
+	 * @param vertex vertex for which we want type infos
+	 * @return effective type of vertex.
+	 * @throws UnableToGetVertexTypeException if no vertex type info can be found
 	 */
 	public String getEffectiveType(Vertex vertex);
 	

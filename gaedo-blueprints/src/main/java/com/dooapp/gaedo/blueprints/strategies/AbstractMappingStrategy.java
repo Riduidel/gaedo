@@ -26,7 +26,6 @@ import com.tinkerpop.blueprints.pgm.Vertex;
 
 public abstract class AbstractMappingStrategy<DataType> implements GraphMappingStrategy<DataType>{
 
-    public static final String STRING_CLASS = String.class.getName();
     protected final PropertyProvider propertyProvider;
 	protected final Class<DataType> serviceContainedClass;
 	protected final Migrator migrator;

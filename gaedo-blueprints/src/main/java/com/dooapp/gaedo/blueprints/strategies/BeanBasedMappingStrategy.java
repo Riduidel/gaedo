@@ -111,7 +111,6 @@ public class BeanBasedMappingStrategy<DataType> extends AbstractMappingStrategy<
 		} else {
             if(Kind.literal.equals(GraphUtils.getKindOf(vertex))) {
                 // a literal with no type information should always been considered a string literal
-                return STRING_CLASS;
             } else {
                 Iterator<Edge> typeIterator = vertex.getOutEdges(IndexableGraphBackedFinderService.TYPE_EDGE_NAME).iterator();
                 if(typeIterator.hasNext()) {
@@ -119,11 +118,10 @@ public class BeanBasedMappingStrategy<DataType> extends AbstractMappingStrategy<
                     Vertex type = toType.getInVertex();
                     // Do not use ClassLiteral here as this method must be blazing fast
                     return IndexableGraphBackedFinderService.classTransformer.extractClassIn(service.getDriver().getValue(type).toString());
-                } else {
-                    return STRING_CLASS;
                 }
             }
 		}
+    	throw new UnableToGetVertexTypeException();
 	}
 
 	@Override

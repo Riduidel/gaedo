@@ -10,6 +10,7 @@ import com.dooapp.gaedo.blueprints.Kind;
 import com.dooapp.gaedo.blueprints.Properties;
 import com.dooapp.gaedo.blueprints.strategies.GraphMappingStrategy;
 import com.dooapp.gaedo.blueprints.strategies.StrategyType;
+import com.dooapp.gaedo.blueprints.strategies.UnableToGetVertexTypeException;
 import com.dooapp.gaedo.blueprints.transformers.ClassLiteralTransformer;
 import com.dooapp.gaedo.blueprints.transformers.Literals;
 import com.dooapp.gaedo.blueprints.transformers.Tuples;
@@ -112,25 +113,34 @@ public class IndexableGraphBackedFinderService<DataType, InformerType extends In
 
 	@Override
 	public Vertex loadVertexFor(String objectVertexId, String className) {
+		Vertex defaultVertex = null;
 		CloseableSequence<Vertex> matching = database.getIndex(Index.VERTICES, Vertex.class).get(Properties.value.name(), objectVertexId);
 		if (matching.hasNext()) {
 			while (matching.hasNext()) {
 				Vertex vertex = matching.next();
-				String vertexTypeName = getEffectiveType(vertex);
-				switch (GraphUtils.getKindOf(vertex)) {
-				case literal:
-				case bnode:
-				case uri:
-					if (className.equals(vertexTypeName)) {
+				String vertexTypeName = null;
+				try {
+					vertexTypeName = getEffectiveType(vertex);
+					switch (GraphUtils.getKindOf(vertex)) {
+					case literal:
+					case bnode:
+					case uri:
+						if (className.equals(vertexTypeName)) {
+							return vertex;
+						}
+						break;
+					default:
 						return vertex;
 					}
-					break;
-				default:
-					return vertex;
+				} catch(UnableToGetVertexTypeException e) {
+					if(GraphMappingStrategy.STRING_TYPE.equals(className)) {
+						/* in that very case, we can use a type-less vertex as our result */
+						defaultVertex = vertex;
+					}
 				}
 			}
 		}
-		return null;
+        return defaultVertex;
 	}
 
 	@Override

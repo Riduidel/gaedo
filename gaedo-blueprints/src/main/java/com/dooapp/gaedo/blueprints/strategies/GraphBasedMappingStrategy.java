@@ -195,13 +195,13 @@ public class GraphBasedMappingStrategy<DataType> extends AbstractMappingStrategy
 		case literal:
 			Object typeProperty = vertex.getProperty(Properties.type.name());
 			if (typeProperty == null)
-				return STRING_CLASS;
+				throw new UnableToGetVertexTypeException();
 			return TypeUtils.getClass(typeProperty.toString());
 		case uri:
 			return serviceContainedClass.getName();
 		case bnode:
 		default:
-			return STRING_CLASS;
+			throw new UnableToGetVertexTypeException();
 		}
 	}
 
