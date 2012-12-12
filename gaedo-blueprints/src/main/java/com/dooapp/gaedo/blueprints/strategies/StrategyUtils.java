@@ -58,7 +58,7 @@ public class StrategyUtils {
 			mapping = GraphUtils.extractCascadeOf(p.getAnnotation(ManyToMany.class).cascade());
 		} else if (p.getAnnotation(ManyToOne.class) != null) {
 			mapping = GraphUtils.extractCascadeOf(p.getAnnotation(ManyToOne.class).cascade());
-		} els
+		} else {
 			mapping = new LinkedList<CascadeType>();
 		}
 		return mapping;
