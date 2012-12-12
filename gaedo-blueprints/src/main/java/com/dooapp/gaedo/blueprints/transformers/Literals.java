@@ -1,6 +1,7 @@
 package com.dooapp.gaedo.blueprints.transformers;
 
 import java.lang.reflect.Type;
+import java.net.URI;
 import java.util.Date;
 
 /**
@@ -9,6 +10,7 @@ import java.util.Date;
  *
  */
 public enum Literals implements TransformerAssociation<LiteralTransformer> {
+	uris(URI.class, new URILiteralTransformer()),
 	strings(String.class, new StringLiteralTransformer()),
 	numbers(Number.class, new NumberLiteralTransformer()),
 	booleans(Boolean.class, new BooleanLiteralTransformer()),

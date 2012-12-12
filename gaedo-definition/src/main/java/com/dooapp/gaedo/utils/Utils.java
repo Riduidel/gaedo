@@ -3,6 +3,8 @@ package com.dooapp.gaedo.utils;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -259,6 +261,12 @@ public class Utils {
 			return (Type) value.toString();
 		} else if(type.isPrimitive()) {
 			return (Type) fromString(value, objectify(type));
+		} else if(URI.class.equals(type)) {
+			try {
+				return (Type) new URI(value);
+			} catch(URISyntaxException e) {
+				throw new UnableToBuilddURIException("\""+value+"\" can't be transformed into an URI object", e);
+			}
 		} else if(Class.class.equals(type)) {
 			return classFromString(value);
 		} else {

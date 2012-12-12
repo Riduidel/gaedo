@@ -1,5 +1,6 @@
 package com.dooapp.gaedo.blueprints.transformers;
 
+import java.net.URI;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Locale;
@@ -15,7 +16,7 @@ public class TypeUtils {
 		prefixesToUris.put("xsd:", "http://www.w3.org/2001/XMLSchema#");
 		
 		Map<String, Class> constructionMap = new HashMap<String, Class>();
-//		constructionMap.put("xsd:anyURI", ""); //URI (Uniform Resource Identifier) 
+		constructionMap.put("xsd:anyURI", URI.class); //URI (Uniform Resource Identifier)
 //		constructionMap.put("xsd:base64Binary", ""); //Binary content coded as "base64" 
 		constructionMap.put("xsd:boolean", Boolean.class); //Boolean (true or false) 
 		constructionMap.put("xsd:byte", Byte.class); //Signed value of 8 bits 
