@@ -45,8 +45,8 @@ public class StrategyUtils {
 
 	/**
 	 * Extract cascade mode of available JPA annotations
-	 * @param p
-	 * @return
+	 * @param p property to extract cascade annotations from
+	 * @return the list of cascaded operations
 	 */
 	public static Collection<CascadeType> extractCascadeOfJPAAnnotations(Property p) {
 		Collection<CascadeType> mapping = null;
@@ -58,7 +58,7 @@ public class StrategyUtils {
 			mapping = GraphUtils.extractCascadeOf(p.getAnnotation(ManyToMany.class).cascade());
 		} else if (p.getAnnotation(ManyToOne.class) != null) {
 			mapping = GraphUtils.extractCascadeOf(p.getAnnotation(ManyToOne.class).cascade());
-		} else {
+		} els
 			mapping = new LinkedList<CascadeType>();
 		}
 		return mapping;
