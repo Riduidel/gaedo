@@ -62,8 +62,8 @@ public abstract class AbstractBluePrintsBackedFinderService<GraphClass extends G
 		}
 
 		@Override
-		public Vertex createEmptyVertex(Class<? extends Object> valueClass, String vertexId) {
-			return AbstractBluePrintsBackedFinderService.this.createEmptyVertex(vertexId, valueClass);
+		public Vertex createEmptyVertex(Class<? extends Object> valueClass, String vertexId, Object value) {
+			return AbstractBluePrintsBackedFinderService.this.createEmptyVertex(vertexId, valueClass, value);
 		}
 
 		@Override
@@ -204,9 +204,10 @@ public abstract class AbstractBluePrintsBackedFinderService<GraphClass extends G
 	 * Creates an empty vertex with given vertex id and vertex contained value class
 	 * @param vertexId vertex id
 	 * @param valueClass value class
+	 * @param value TODO
 	 * @return a vertex storing those informations
 	 */
-	protected abstract Vertex createEmptyVertex(String vertexId, Class<? extends Object> valueClass);
+	protected abstract Vertex createEmptyVertex(String vertexId, Class<? extends Object> valueClass, Object value);
 
 	/**
 	 * To put object in graph, we have to find all its fields, then put them in
@@ -280,7 +281,7 @@ public abstract class AbstractBluePrintsBackedFinderService<GraphClass extends G
 	 */
 	<Type> void deleteOutEdgeVertex(Vertex objectVertex, Vertex valueVertex, Type value, Map<String, Object> objectsBeingUpdated) {
 		// Locate vertex
-		Vertex knownValueVertex = getVertexFor(value, CascadeType.REFRESH, objectsBeingUpdated);
+		Vertex knownValueVertex = getVertexFor(value, CascadeType.REMOVE, objectsBeingUpdated);
 		// Ensure vertex is our out one
 		if (valueVertex.equals(knownValueVertex)) {
 			// Delete vertex and other associated ones, only if they have no
@@ -297,7 +298,11 @@ public abstract class AbstractBluePrintsBackedFinderService<GraphClass extends G
 				// OK, time to delete value vertex. Is it a managed node ?
 				if (repository.containsKey(value.getClass())) {
 					FinderCrudService<Type, ?> finderCrudService = (FinderCrudService<Type, ?>) repository.get(value.getClass());
-					finderCrudService.delete(value);
+					if (finderCrudService instanceof AbstractBluePrintsBackedFinderService) {
+						((AbstractBluePrintsBackedFinderService<?, Type, ?>) finderCrudService).doDelete(value, objectsBeingUpdated);
+					} else {
+						throw new IncompatibleServiceException(finderCrudService, value.getClass());
+					}
 				} else {
 					// Literal nodes can be deleted without any trouble
 					database.removeVertex(valueVertex);
@@ -400,7 +405,7 @@ public abstract class AbstractBluePrintsBackedFinderService<GraphClass extends G
 	 * @param objectsBeingUpdated
 	 *            map of objects currently being updated, it avoid some loops
 	 *            during update, but is absolutely NOT a persistent cache
-	 * @return
+	 * @return vertex for given value. May be null in soem rare cases (typically obtaining a vertex that doesn't exist yet for deleting it)
 	 */
 	public Vertex getVertexFor(Object value, CascadeType cascade, Map<String, Object> objectsBeingUpdated) {
 		boolean allowIdGeneration = CascadeType.PERSIST.equals(cascade) || CascadeType.MERGE.equals(cascade);
@@ -624,7 +629,7 @@ public abstract class AbstractBluePrintsBackedFinderService<GraphClass extends G
 						@Override
 						protected Boolean doPerform() {
 							String idVertexId = getIdVertexId(value, strategy.isIdGenerationRequired());
-							Vertex returned = getDriver().createEmptyVertex(value.getClass(), idVertexId);
+							Vertex returned = getDriver().createEmptyVertex(value.getClass(), idVertexId, value);
 							getDriver().setValue(returned, idVertexId);
 							return true;
 						}

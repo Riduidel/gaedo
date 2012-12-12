@@ -25,7 +25,7 @@ public abstract class AbstractLiteralTransformer<Type> {
 		Vertex returned = driver.loadVertexFor(vertexId, value.getClass().getName());
 		// If vertex doesn't exist ... load it !
 		if(returned==null) {
-			returned = driver.createEmptyVertex(value.getClass(), vertexId);
+			returned = driver.createEmptyVertex(value.getClass(), vertexId, value);
 			driver.setValue(returned, getVertexValue(value));
 		}
 		return returned;
@@ -119,5 +119,9 @@ public abstract class AbstractLiteralTransformer<Type> {
 	
 	public Kind getKind() {
 		return Kind.literal;
+	}
+
+	public String getTypeOf(Object value) {
+		return TypeUtils.getType(value.getClass());
 	}
 }

@@ -136,6 +136,9 @@ public class IndexableGraphBackedFinderService<DataType, InformerType extends In
 					if(GraphMappingStrategy.STRING_TYPE.equals(className)) {
 						/* in that very case, we can use a type-less vertex as our result */
 						defaultVertex = vertex;
+					} else {
+						if(Kind.uri==GraphUtils.getKindOf(vertex))
+							defaultVertex = vertex;
 					}
 				}
 			}
@@ -156,10 +159,10 @@ public class IndexableGraphBackedFinderService<DataType, InformerType extends In
 	 * @param valueClass
 	 * @return
 	 * @see com.dooapp.gaedo.blueprints.AbstractBluePrintsBackedFinderService#createEmptyVertex(java.lang.String,
-	 *      java.lang.Class)
+	 *      java.lang.Class, Object)
 	 */
 	@Override
-	protected Vertex createEmptyVertex(String vertexId, Class<? extends Object> valueClass) {
+	protected Vertex createEmptyVertex(String vertexId, Class<? extends Object> valueClass, Object value) {
 		// technical vertex id is no more used by gaedo which only rley upon the
 		// getIdOfVertex method !
 		Vertex returned = database.addVertex(valueClass.getName() + ":" + vertexId);
@@ -168,7 +171,7 @@ public class IndexableGraphBackedFinderService<DataType, InformerType extends In
 			// some literals aren't so ... literal, as they can accept incoming
 			// connections (like classes)
 			returned.setProperty(Properties.kind.name(), Literals.get(valueClass).getKind().name());
-			returned.setProperty(Properties.type.name(), TypeUtils.getType(valueClass));
+			returned.setProperty(Properties.type.name(), Literals.get(valueClass).getTypeOf(value));
 		} else {
 			if (repository.containsKey(valueClass)) {
 				returned.setProperty(Properties.kind.name(), Kind.uri.name());

@@ -59,10 +59,7 @@ public class DateLiteralTransformer extends AbstractSimpleLiteralTransformer<Dat
 	@Override
 	protected Object getVertexValue(Date value) {
 		// fallback value
-		String format = "xsd:date";
-		if(dateCache.containsKey(value)) {
-			format = dateCache.get(value);
-		}
+		String format = getTypeOf(value);
 		return getLoader(FORMATS.get(format)).format(value);
 	}
 
@@ -76,5 +73,21 @@ public class DateLiteralTransformer extends AbstractSimpleLiteralTransformer<Dat
 		} catch (ParseException e) {
 			throw new BadLiteralException("\"" + property + "\" can't be efficiently parsed from a \""+type+"\" supposed to contain a date");
 		}
+	}
+	
+	/**
+	 * Type of date depends upon the date
+	 * @param value
+	 * @return
+	 * @see com.dooapp.gaedo.blueprints.transformers.AbstractLiteralTransformer#getTypeOf(java.lang.Object)
+	 */
+	@Override
+	public String getTypeOf(Object value) {
+		String format = "xsd:date";
+		if(dateCache.containsKey(value)) {
+			format = dateCache.get(value);
+		}
+		dateCache.put((Date) value, format);
+		return format;
 	}
 }

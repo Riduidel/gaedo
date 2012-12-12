@@ -75,7 +75,7 @@ public class TypeUtils {
 		}
 	}
 
-	public static Object getType(Class<? extends Object> valueClass) {
+	public static String getType(Class<? extends Object> valueClass) {
 		String name = valueClass.getName();
 		if(classesToTypes.containsKey(name)) {
 			return classesToTypes.get(name);

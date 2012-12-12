@@ -63,5 +63,12 @@ public interface LiteralTransformer<Type> extends Transformer {
 	 * @return Kind of object to associate to the literals managed by this transformer. Used to separate Classes (which are fake literals) from others
 	 */
 	public Kind getKind();
+	
+	/**
+	 * Get graph type of the vertex associated to that value
+	 * @param value value to get type of
+	 * @return the graph type of that value. Most often a direct call to {@link TypeUtils} will be done
+	 */
+	public String getTypeOf(Object value);
 
 }

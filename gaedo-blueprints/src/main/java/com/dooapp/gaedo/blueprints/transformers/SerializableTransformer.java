@@ -73,7 +73,7 @@ public class SerializableTransformer implements TupleTransformer<Serializable> {
 		Vertex returned = database.loadVertexFor(serialized, value.getClass().getName());
 		// Finally create vertex
 		if(returned==null) {
-			returned = database.createEmptyVertex(Serializable.class, serialized);
+			returned = database.createEmptyVertex(Serializable.class, serialized, value);
 			database.setValue(returned, serialized);
 		}
 		return returned;

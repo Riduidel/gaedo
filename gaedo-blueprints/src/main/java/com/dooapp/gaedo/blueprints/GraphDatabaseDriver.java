@@ -25,9 +25,10 @@ public interface GraphDatabaseDriver {
 	 * Creates an empty vertex having he given properties
 	 * @param valueClass the new value class
 	 * @param vertexId new vertex id
+	 * @param value TODO
 	 * @return a new vertex with no value, but a given id (and a relationship with that value class 
 	 */
-	Vertex createEmptyVertex(Class<? extends Object> valueClass, String vertexId);
+	Vertex createEmptyVertex(Class<? extends Object> valueClass, String vertexId, Object value);
 
 	/**
 	 * Get id of a gioven vertex. Implementation is free to choose how to find that id

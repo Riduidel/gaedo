@@ -55,7 +55,7 @@ public class BluePrintsPersister {
             if (logger.isLoggable(Level.FINER)) {
                 logger.log(Level.FINER, "object " + objectVertexId.toString() + " has never before been seen in graph, so create central node for it");
             }
-            objectVertex = service.getDriver().createEmptyVertex(valueClass, objectVertexId);
+            objectVertex = service.getDriver().createEmptyVertex(valueClass, objectVertexId, toUpdate);
             // Create a value for that node (useful for RDF export)
             service.getDriver().setValue(objectVertex, objectVertexId);
         }
@@ -116,8 +116,10 @@ public class BluePrintsPersister {
                 }
             }
         }
-        // What to do with incoming edges ?
-        database.removeVertex(objectVertex);
+        /* We try to locate vertex in graph before to delete it. Indeed, mainly due cascade delete, this vertex may have already been removed */ 
+        Vertex notYetDeleted = service.getDriver().loadVertexFor(objectVertexId, service.getContainedClass().getName());
+        if(notYetDeleted!=null)
+        	database.removeVertex(notYetDeleted);
     }
 
 

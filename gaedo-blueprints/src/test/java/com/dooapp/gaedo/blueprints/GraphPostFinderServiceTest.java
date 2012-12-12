@@ -56,6 +56,7 @@ import com.dooapp.gaedo.utils.CollectionUtils;
 import com.tinkerpop.blueprints.pgm.Edge;
 import com.tinkerpop.blueprints.pgm.Index;
 import com.tinkerpop.blueprints.pgm.IndexableGraph;
+import com.tinkerpop.blueprints.pgm.TransactionalGraph;
 
 import static com.dooapp.gaedo.blueprints.TestUtils.A;
 import static com.dooapp.gaedo.blueprints.TestUtils.ABOUT_ID;
@@ -194,11 +195,40 @@ public class GraphPostFinderServiceTest extends AbstractGraphTest {
 		assertThat(about, IsNull.notNullValue());
 		getUserService().delete(other);
 		try {
+			if (environment.graph instanceof TransactionalGraph) {
+				TransactionalGraph transactionalGraph = (TransactionalGraph) environment.graph;
+				transactionalGraph.startTransaction();
+			}
 			about = ((IdBasedService<Post>) getPostService()).findById(id);
 			assertThat(about, IsNull.nullValue());
 		} catch(NoReturnableVertexException e) {
 			// that exception is one of possible correct behaviours
 		}
+	}
+
+	@Test
+	public void ensureUpdateCascadesWell() {
+		User other = new User().withId(2).withLogin("other login").withPassword("other password");
+		long id = 55;
+		String POST_TEXT = "a post about another user";
+		other.about = new Post(id, POST_TEXT, 2, State.PUBLIC, other);
+		getUserService().create(other);
+		Post about = ((IdBasedService<Post>) getPostService()).findById(id);
+		assertThat(about, IsNull.notNullValue());
+		assertThat(about.text, Is.is(POST_TEXT));
+		about.text += POST_TEXT;
+		getUserService().update(other);
+		about = ((IdBasedService<Post>) getPostService()).findById(id);
+		assertThat(about, IsNull.notNullValue());
+		// we didn't change author's about Post, but the one we fetched separatly
+		assertThat(about.text, Is.is(POST_TEXT));
+		// Now we update the GOOD about message (yeah these cascade things are a nightmare)
+		((Post) other.about).text += POST_TEXT;
+		getUserService().update(other);
+		about = ((IdBasedService<Post>) getPostService()).findById(id);
+		assertThat(about, IsNull.notNullValue());
+		assertThat(about.text, Is.is(POST_TEXT+POST_TEXT));
+		
 	}
 
 	@Test

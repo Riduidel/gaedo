@@ -93,10 +93,10 @@ public class SailGraphBackedFinderService<DataType, InformerType extends Informe
 	 * @param valueClass
 	 * @return
 	 * @see com.dooapp.gaedo.blueprints.AbstractBluePrintsBackedFinderService#createEmptyVertex(java.lang.String,
-	 *      java.lang.Class)
+	 *      java.lang.Class, Object)
 	 */
 	@Override
-	protected Vertex createEmptyVertex(String vertexId, Class<? extends Object> valueClass) {
+	protected Vertex createEmptyVertex(String vertexId, Class<? extends Object> valueClass, Object value) {
 		// Vertex will be created after having selected which node kind is to be
 		// used, as the id used by SailGraph IS meaningfull :
 		// for a literal, it must be a Literal URI
