@@ -139,18 +139,22 @@ public class GraphUtils {
 		 */
 		try {
 			effectiveType = driver.getEffectiveType(key);
-			if (Kind.literal == kind) {
-				try {
-					if (!Collection.class.isAssignableFrom(defaultType) && !defaultType.isAssignableFrom(Class.forName(effectiveType))) {
-						effectiveType = defaultType.getName();
-					}
-				} catch (Exception e) {
-					// nothing to do : we use effective type - or try to
+		} catch (UnableToGetVertexTypeException untypedVertex) {
+			try {
+				// Don't remember the reason of that mess
+				if (!Collection.class.isAssignableFrom(defaultType) && !defaultType.isAssignableFrom(Class.forName(effectiveType))) {
+					effectiveType = defaultType.getName();
 				}
+			} catch (Exception unableToLoadClass) {
+				// nothing to do : we use effective type - or try to
 			}
-		} catch (UnableToGetVertexTypeException e) {
-			if(String.class.isAssignableFrom(defaultType))
-				effectiveType = GraphMappingStrategy.STRING_TYPE;
+			if (effectiveType == null) {
+				// First alternative is here for untyped strings in uris nodes (like uris themselves when treated as strings)
+				// Second alternative is there for cases when we try to load a collection of untyped thingies
+				if (String.class.isAssignableFrom(defaultType) || Collection.class.isAssignableFrom(defaultType))
+					effectiveType = GraphMappingStrategy.STRING_TYPE;
+
+			}
 		}
 		if (classLoader == null) {
 			throw new UnspecifiedClassLoader();
