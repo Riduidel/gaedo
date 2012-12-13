@@ -35,50 +35,58 @@ public class GraphUtils {
 	/**
 	 * Ontologic context used by all gaedo graph elements.
 	 */
-	public static final String GAEDO_CONTEXT = GAEDO_PREFIX+"visible";
-	
+	public static final String GAEDO_CONTEXT = GAEDO_PREFIX + "visible";
+
 	/**
-	 * Ontologic context used by gaedo graph elements that we want to keep hidden. Those elements should never be exported.
-	 * To make sure this works well, this context is set to null. Crazy no ?
+	 * Ontologic context used by gaedo graph elements that we want to keep
+	 * hidden. Those elements should never be exported. To make sure this works
+	 * well, this context is set to null. Crazy no ?
 	 */
-	public static final String GAEDO_HIDDEN_CONTEXT = GAEDO_PREFIX+"hidden";
+	public static final String GAEDO_HIDDEN_CONTEXT = GAEDO_PREFIX + "hidden";
 
 	private static final Logger logger = Logger.getLogger(GraphUtils.class.getName());
-	
+
 	public static String asSailProperty(String context) {
-		if(GraphSail.NULL_CONTEXT_NATIVE.equals(context))
+		if (GraphSail.NULL_CONTEXT_NATIVE.equals(context))
 			return context;
-		return GraphSail.URI_PREFIX+" "+context;
+		return GraphSail.URI_PREFIX + " " + context;
 	}
 
 	/**
-	 * Generate edge name from property infos. Notice generated edge name will first be searched in property annotations, and only 
-	 * if none compatile found by generating a basic property name
-	 * @param p source property
-	 * @return an edge name (by default property container class name + "." + property name
+	 * Generate edge name from property infos. Notice generated edge name will
+	 * first be searched in property annotations, and only if none compatile
+	 * found by generating a basic property name
+	 * 
+	 * @param p
+	 *            source property
+	 * @return an edge name (by default property container class name + "." +
+	 *         property name
 	 */
 	public static String getEdgeNameFor(Property p) {
-		if(p.getAnnotation(GraphProperty.class)!=null) {
+		if (p.getAnnotation(GraphProperty.class) != null) {
 			GraphProperty graph = p.getAnnotation(GraphProperty.class);
 			// Test added to avoid default value (which defaults name to "")
-			if(graph.name()!=null && graph.name().trim().length()>0)
+			if (graph.name() != null && graph.name().trim().length() > 0)
 				return graph.name();
 		}
-		if(p.getAnnotation(Column.class)!=null) {
+		if (p.getAnnotation(Column.class) != null) {
 			Column column = p.getAnnotation(Column.class);
-			if(column.name()!=null && column.name().trim().length()>0)
+			if (column.name() != null && column.name().trim().length() > 0)
 				return column.name();
 		}
 		return getDefaultEdgeNameFor(p);
 	}
 
 	public static String getDefaultEdgeNameFor(Property p) {
-		return p.getDeclaringClass().getName()+":"+p.getName();
+		return p.getDeclaringClass().getName() + ":" + p.getName();
 	}
 
 	/**
-	 * Create a vertex out of a basic object. if object is of a simple type, we'll use value as id. Elsewhere, we will generate an id for object
-	 * @param database database in which vertex will be stored
+	 * Create a vertex out of a basic object. if object is of a simple type,
+	 * we'll use value as id. Elsewhere, we will generate an id for object
+	 * 
+	 * @param database
+	 *            database in which vertex will be stored
 	 * @param value
 	 * @return
 	 */
@@ -86,7 +94,7 @@ public class GraphUtils {
 		Vertex returned = null;
 		// Now distinct behaviour between known objects and unknown ones
 		Class<? extends Object> valueClass = value.getClass();
-		if(Literals.containsKey(valueClass)) {
+		if (Literals.containsKey(valueClass)) {
 			LiteralTransformer transformer = Literals.get(valueClass);
 			returned = transformer.getVertexFor(database, valueClass.cast(value));
 		} else {
@@ -97,57 +105,71 @@ public class GraphUtils {
 	}
 
 	/**
-	 * Create an object instance from a literal vertex compatible with this service contained class
-	 * @param driver driver used to load data
-	 * @param strategy TODO
-	 * @param classLoader class loader used to find class
-	 * @param key vertex containing object id
-	 * @param repository service repository, used to disambiguate subclass of literal and managed class
-	 * @param objectsBeingAccessed 
-	 * @param property property used to navigate to this value. it allows disambiguation for literal values (which may be linked to more than one type, the typical example being
-	 * a saved float, say "3.0", which may also be refered as the string "3.0").
+	 * Create an object instance from a literal vertex compatible with this
+	 * service contained class
+	 * 
+	 * @param driver
+	 *            driver used to load data
+	 * @param strategy
+	 *            TODO
+	 * @param classLoader
+	 *            class loader used to find class
+	 * @param key
+	 *            vertex containing object id
+	 * @param repository
+	 *            service repository, used to disambiguate subclass of literal
+	 *            and managed class
+	 * @param objectsBeingAccessed
+	 * @param property
+	 *            property used to navigate to this value. it allows
+	 *            disambiguation for literal values (which may be linked to more
+	 *            than one type, the typical example being a saved float, say
+	 *            "3.0", which may also be refered as the string "3.0").
 	 * @return a fresh instance, with only id set
 	 */
-	public static Object createInstance(GraphDatabaseDriver driver, GraphMappingStrategy strategy, ClassLoader classLoader, Vertex key, Class<?> defaultType, ServiceRepository repository, Map<String, Object> objectsBeingAccessed) {
+	public static Object createInstance(GraphDatabaseDriver driver, GraphMappingStrategy strategy, ClassLoader classLoader, Vertex key, Class<?> defaultType,
+					ServiceRepository repository, Map<String, Object> objectsBeingAccessed) {
 		String effectiveType = null;
 		Kind kind = getKindOf(key);
-		if(Kind.literal==kind) {
-			/* One literal node may be used according to different types. To disambiguate, we check if effective type matches default one. If not (typically 
-			 * type returns string and user wants number), prefer default type.
-			 */
-			try {
-				effectiveType = driver.getEffectiveType(key);
+		/*
+		 * One literal node may be used according to different types. To
+		 * disambiguate, we check if effective type matches default one. If not
+		 * (typically type returns string and user wants number), prefer default
+		 * type.
+		 */
+		try {
+			effectiveType = driver.getEffectiveType(key);
+			if (Kind.literal == kind) {
 				try {
-					if(!Collection.class.isAssignableFrom(defaultType) && !defaultType.isAssignableFrom(Class.forName(effectiveType))) {
+					if (!Collection.class.isAssignableFrom(defaultType) && !defaultType.isAssignableFrom(Class.forName(effectiveType))) {
 						effectiveType = defaultType.getName();
 					}
-				} catch(Exception e) {
+				} catch (Exception e) {
 					// nothing to do : we use effective type - or try to
 				}
-			} catch(UnableToGetVertexTypeException e) {
-				effectiveType = GraphMappingStrategy.STRING_TYPE;
 			}
-		} else {
-			effectiveType = driver.getEffectiveType(key);
+		} catch (UnableToGetVertexTypeException e) {
+			effectiveType = GraphMappingStrategy.STRING_TYPE;
 		}
-		if(classLoader==null) {
+		if (classLoader == null) {
 			throw new UnspecifiedClassLoader();
 		}
 		try {
-			if(Literals.containsKey(classLoader, effectiveType) && !repository.containsKey(effectiveType)) {
+			if (Literals.containsKey(classLoader, effectiveType) && !repository.containsKey(effectiveType)) {
 				LiteralTransformer transformer = Literals.get(classLoader, effectiveType);
 				return transformer.loadObject(driver, classLoader, effectiveType, key);
 			} else {
 				Class<?> type = classLoader.loadClass(effectiveType);
-				if(Tuples.containsKey(type) && !repository.containsKey(type)) {
-					// Tuples are handled the object way (easier, but more dangerous
+				if (Tuples.containsKey(type) && !repository.containsKey(type)) {
+					// Tuples are handled the object way (easier, but more
+					// dangerous
 					TupleTransformer transformer = Tuples.get(type);
 					return transformer.loadObject(driver, strategy, classLoader, type, key, repository, objectsBeingAccessed);
 				} else {
-					return  type.newInstance();
+					return type.newInstance();
 				}
 			}
-		} catch(Exception e) {
+		} catch (Exception e) {
 			throw new UnableToCreateException(effectiveType, e);
 		}
 	}
@@ -160,19 +182,21 @@ public class GraphUtils {
 
 	/**
 	 * get an id value for the given object whatever the object is
+	 * 
 	 * @param repository
 	 * @param value
 	 * @return
 	 */
 	public static <DataType> String getIdOf(ServiceRepository repository, DataType value) {
 		Class<? extends Object> valueClass = value.getClass();
-		if(repository.containsKey(valueClass)) {
-			AbstractBluePrintsBackedFinderService<IndexableGraph, DataType, ?> service = (AbstractBluePrintsBackedFinderService<IndexableGraph, DataType, ?>) repository.get(valueClass);
+		if (repository.containsKey(valueClass)) {
+			AbstractBluePrintsBackedFinderService<IndexableGraph, DataType, ?> service = (AbstractBluePrintsBackedFinderService<IndexableGraph, DataType, ?>) repository
+							.get(valueClass);
 			// All ids are string, don't worry about it
 			return service.getIdOf(value).toString();
-		} else if(Literals.containsKey(valueClass)) {
+		} else if (Literals.containsKey(valueClass)) {
 			return getIdOfLiteral(valueClass, null, value);
-		} else if(Tuples.containsKey(valueClass)) {
+		} else if (Tuples.containsKey(valueClass)) {
 			return getIdOfTuple(repository, valueClass, value);
 		} else {
 			throw new ImpossibleToGetIdOfUnknownType(valueClass);
@@ -181,16 +205,24 @@ public class GraphUtils {
 
 	/**
 	 * Get the value of the vertex id for the given literal
-	 * @param database used graph
-	 * @param declaredClass declared object class
-	 * @param idProperty gives the declared type of id (which may differ from primitive types, where user may give an integer instead of a long, as an example). Notice that, 
-	 * contrary to most of gaedo code, this field can be null 
-	 * @param objectId object id value
-	 * @return the value used by {@link Properties#vertexId} to identify the vertex associated to that object
+	 * 
+	 * @param database
+	 *            used graph
+	 * @param declaredClass
+	 *            declared object class
+	 * @param idProperty
+	 *            gives the declared type of id (which may differ from primitive
+	 *            types, where user may give an integer instead of a long, as an
+	 *            example). Notice that, contrary to most of gaedo code, this
+	 *            field can be null
+	 * @param objectId
+	 *            object id value
+	 * @return the value used by {@link Properties#vertexId} to identify the
+	 *         vertex associated to that object
 	 */
 	public static String getIdOfLiteral(Class<?> declaredClass, Property idProperty, Object objectId) {
 		PropertyMappingStrategy strategy = PropertyMappingStrategy.prefixed;
-		if(idProperty!=null && idProperty.getAnnotation(GraphProperty.class)!=null) {
+		if (idProperty != null && idProperty.getAnnotation(GraphProperty.class) != null) {
 			strategy = idProperty.getAnnotation(GraphProperty.class).mapping();
 		}
 		return strategy.literalToId(declaredClass, idProperty, objectId);
@@ -198,12 +230,20 @@ public class GraphUtils {
 
 	/**
 	 * Get the value of the vertex id for the given object
-	 * @param database used graph
-	 * @param declaredClass declared object class
-	 * @param idProperty gives the declared type of id (which may differ from primitive types, where user may give an integer instead of a long, as an example). Notice that, 
-	 * contrary to most of gaedo code, this field can be null 
-	 * @param value object id value
-	 * @return the value used by {@link Properties#vertexId} to identify the vertex associated to that object
+	 * 
+	 * @param database
+	 *            used graph
+	 * @param declaredClass
+	 *            declared object class
+	 * @param idProperty
+	 *            gives the declared type of id (which may differ from primitive
+	 *            types, where user may give an integer instead of a long, as an
+	 *            example). Notice that, contrary to most of gaedo code, this
+	 *            field can be null
+	 * @param value
+	 *            object id value
+	 * @return the value used by {@link Properties#vertexId} to identify the
+	 *         vertex associated to that object
 	 */
 	public static String getIdOfTuple(ServiceRepository repository, Class<?> declaredClass, Object value) {
 		return Tuples.get(declaredClass).getIdOfTuple(repository, value);
@@ -211,17 +251,24 @@ public class GraphUtils {
 
 	/**
 	 * Generates a vertex for the given tuple
-	 * @param bluePrintsBackedFinderService source service, some informations may be extracted from it
-	 * @param repository service repository for non literal values
-	 * @param value tuple to persist
-	 * @param objectsBeingUpdated map of objects already being accessed. Links object id to object
+	 * 
+	 * @param bluePrintsBackedFinderService
+	 *            source service, some informations may be extracted from it
+	 * @param repository
+	 *            service repository for non literal values
+	 * @param value
+	 *            tuple to persist
+	 * @param objectsBeingUpdated
+	 *            map of objects already being accessed. Links object id to
+	 *            object
 	 * @return the
 	 */
-	public static Vertex getVertexForTuple(AbstractBluePrintsBackedFinderService<? extends Graph, ?, ?> service, ServiceRepository repository, Object value, Map<String, Object> objectsBeingUpdated) {
+	public static Vertex getVertexForTuple(AbstractBluePrintsBackedFinderService<? extends Graph, ?, ?> service, ServiceRepository repository, Object value,
+					Map<String, Object> objectsBeingUpdated) {
 		Vertex returned = null;
 		// Now distinct behaviour between known objects and unknown ones
 		Class<? extends Object> valueClass = value.getClass();
-		if(Tuples.containsKey(valueClass)) {
+		if (Tuples.containsKey(valueClass)) {
 			TupleTransformer transformer = Tuples.get(valueClass);
 			returned = transformer.getVertexFor(service, valueClass.cast(value), objectsBeingUpdated);
 		} else {
@@ -234,7 +281,7 @@ public class GraphUtils {
 	public static Collection<CascadeType> extractCascadeOf(CascadeType[] cascade) {
 		Set<CascadeType> returned = new HashSet<CascadeType>();
 		returned.addAll(Arrays.asList(cascade));
-		if(returned.contains(CascadeType.ALL)) {
+		if (returned.contains(CascadeType.ALL)) {
 			returned.remove(CascadeType.ALL);
 			returned.add(CascadeType.MERGE);
 			returned.add(CascadeType.PERSIST);
@@ -246,13 +293,14 @@ public class GraphUtils {
 
 	/**
 	 * Converts a vertex to a string by outputing all its properties values
+	 * 
 	 * @param objectVertex
 	 * @return
 	 */
 	public static String toString(Vertex objectVertex) {
 		StringBuilder sOut = new StringBuilder("{");
-		for(String s : objectVertex.getPropertyKeys()) {
-			if(sOut.length()>1)
+		for (String s : objectVertex.getPropertyKeys()) {
+			if (sOut.length() > 1)
 				sOut.append("; ");
 			sOut.append(s).append("=").append(objectVertex.getProperty(s));
 		}
@@ -260,9 +308,13 @@ public class GraphUtils {
 	}
 
 	/**
-	 * Find all contexts in given edge by looking, in {@link GraphSail#CONTEXT_PROP} property, what are the contexts. These contexts are extracted by iteratively calling 
-	 * {@link #CONTEXTS_MATCHER} and {@link Matcher#find(int)} method.
-	 * @param edge input edge
+	 * Find all contexts in given edge by looking, in
+	 * {@link GraphSail#CONTEXT_PROP} property, what are the contexts. These
+	 * contexts are extracted by iteratively calling {@link #CONTEXTS_MATCHER}
+	 * and {@link Matcher#find(int)} method.
+	 * 
+	 * @param edge
+	 *            input edge
 	 * @return collection of declared contexts.
 	 */
 	public static Collection<String> getContextsOf(Edge edge) {
@@ -270,11 +322,12 @@ public class GraphUtils {
 		Matcher matcher = CONTEXTS_MATCHER.matcher(contextsString);
 		Collection<String> output = new LinkedList<String>();
 		int character = 0;
-		while(matcher.find(character)) {
-			if(GraphSail.NULL_CONTEXT_NATIVE.equals(matcher.group(1))) {
-				// the null context is a low-level view. It should be associated with "no named graph" (that's to say an empty collection).
+		while (matcher.find(character)) {
+			if (GraphSail.NULL_CONTEXT_NATIVE.equals(matcher.group(1))) {
+				// the null context is a low-level view. It should be associated
+				// with "no named graph" (that's to say an empty collection).
 				return output;
-			} else if(matcher.group(1).startsWith(GraphSail.URI_PREFIX+"")){
+			} else if (matcher.group(1).startsWith(GraphSail.URI_PREFIX + "")) {
 				output.add(matcher.group(2));
 			}
 			character = matcher.end();
@@ -283,28 +336,43 @@ public class GraphUtils {
 	}
 
 	/**
-	 * Compiled pattern used to match strings such as 
-	 * <pre>U https://github.com/Riduidel/gaedo/visible  U http://purl.org/dc/elements/1.1/description</pre>
-	 * or
-	 * <pre>N U http://purl.org/dc/elements/1.1/description</pre>
-	 * or even 
-	 * <pre>N</pre>
+	 * Compiled pattern used to match strings such as
 	 * 
-	 * You know why I do such a pattern matching ? Because sail graph named graph definintion goes by concatenaing contexts URI in edges properties.
+	 * <pre>
+	 * U https://github.com/Riduidel/gaedo/visible  U http://purl.org/dc/elements/1.1/description
+	 * </pre>
+	 * 
+	 * or
+	 * 
+	 * <pre>
+	 * N U http://purl.org/dc/elements/1.1/description
+	 * </pre>
+	 * 
+	 * or even
+	 * 
+	 * <pre>
+	 * N
+	 * </pre>
+	 * 
+	 * You know why I do such a pattern matching ? Because sail graph named
+	 * graph definintion goes by concatenaing contexts URI in edges properties.
 	 * This is really douchebag code !
 	 */
 	public static final Pattern CONTEXTS_MATCHER = Pattern.compile("(N|U ([\\S]+))+");
 
 	/**
 	 * Check if edge has the required named graphs list
-	 * @param e edge to test
-	 * @param namedGraphs named graphs the edge must have
+	 * 
+	 * @param e
+	 *            edge to test
+	 * @param namedGraphs
+	 *            named graphs the edge must have
 	 * @return true if edge contexts are the given collection of named graphs
 	 */
 	public static boolean isInNamedGraphs(Edge e, Collection<String> namedGraphs) {
 		Collection<String> contexts = getContextsOf(e);
 		// Only analyse edge if it is in named graph, and only in named graphs
-		boolean isInNamedGraphs = contexts.size()==namedGraphs.size() && contexts.containsAll(namedGraphs);
+		boolean isInNamedGraphs = contexts.size() == namedGraphs.size() && contexts.containsAll(namedGraphs);
 		return isInNamedGraphs;
 	}
 }
