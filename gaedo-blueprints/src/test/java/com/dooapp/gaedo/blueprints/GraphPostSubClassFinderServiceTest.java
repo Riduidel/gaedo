@@ -5,6 +5,8 @@ import java.util.Map;
 import java.util.TreeMap;
 import java.util.logging.Logger;
 
+import javax.persistence.CascadeType;
+
 import org.hamcrest.core.Is;
 import org.junit.Before;
 import org.junit.Test;
@@ -21,6 +23,10 @@ import com.dooapp.gaedo.test.beans.PostInformer;
 import com.dooapp.gaedo.test.beans.State;
 import com.dooapp.gaedo.test.beans.Tag;
 import com.dooapp.gaedo.test.beans.User;
+import com.tinkerpop.blueprints.pgm.Edge;
+import com.tinkerpop.blueprints.pgm.TransactionalGraph;
+import com.tinkerpop.blueprints.pgm.Vertex;
+import com.tinkerpop.blueprints.pgm.oupls.sail.GraphSail;
 
 import static com.dooapp.gaedo.blueprints.TestUtils.ABOUT_ID;
 import static com.dooapp.gaedo.blueprints.TestUtils.ID_POST_1;
@@ -152,5 +158,46 @@ public class GraphPostSubClassFinderServiceTest extends AbstractGraphTest{
 		// exposition of https://github.com/Riduidel/gaedo/issues/23 here !
 		// by updating object with basic post service, I create a second vertex in graph i can then retrieve in count.
 		loaded = getPostService().update(loaded);
+	}
+
+	@Test 
+	public void usingAnUntypedURIValueCouldWork() {
+		final String METHOD_NAME = "usingAnUntypedURIValueCouldWork";
+		PostSubClass newOne = new PostSubClass(SUB_POST_ID, METHOD_NAME,1.0f, State.PUBLIC, author);
+		newOne.state = State.PUBLIC;
+		newOne.anotherState = PostSubClass.AnotherStateForBug26.PUBLIC;
+		Post saved = getPostSubService().create(newOne);
+		assertThat(saved, Is.is(PostSubClass.class));
+		
+		// Directly manipulating vertex to link it to a raw uri node (used as ... text)
+		AbstractBluePrintsBackedFinderService<?, PostSubClass, ?> postSubService = (AbstractBluePrintsBackedFinderService<?, PostSubClass, ?>) getPostSubService();
+		Vertex postVertex = postSubService.getVertexFor(newOne, CascadeType.REFRESH, new TreeMap<String, Object>());
+		
+		if(environment.getGraph() instanceof TransactionalGraph)
+			((TransactionalGraph) environment.getGraph()).startTransaction();
+		Vertex valueVertex = environment.getGraph().addVertex("new-text-vertex");
+		valueVertex.setProperty(Properties.kind.name(), Kind.uri.name());
+		String BUG_31_URI = "https://github.com/Riduidel/gaedo/issues/31";
+		valueVertex.setProperty(Properties.value.name(), BUG_31_URI);
+		
+		// Have you notice this property is annotated ?
+		String textPropertyName = "post:text";
+		Iterable<Edge> previous = postVertex.getOutEdges(textPropertyName);
+		for(Edge e : previous) {
+			environment.getGraph().removeEdge(e);
+		}
+		
+		Edge edgeToURI = environment.getGraph().addEdge(textPropertyName, postVertex, valueVertex, textPropertyName);
+		String predicateProperty = GraphUtils.asSailProperty(textPropertyName);
+		edgeToURI.setProperty(GraphSail.PREDICATE_PROP, predicateProperty);
+		edgeToURI.setProperty(GraphSail.CONTEXT_PROP, "U "+GraphUtils.GAEDO_CONTEXT);
+		edgeToURI.setProperty(GraphSail.CONTEXT_PROP + GraphSail.PREDICATE_PROP, 
+						edgeToURI.getProperty(GraphSail.CONTEXT_PROP).toString()+" "+
+						edgeToURI.getProperty(GraphSail.PREDICATE_PROP).toString());
+
+		
+		Post loaded = postSubService.findById(newOne.id);
+		
+		assertThat(loaded.text, Is.is(BUG_31_URI));
 	}
 }
