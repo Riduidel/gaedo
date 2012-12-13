@@ -40,7 +40,6 @@ import static org.junit.Assert.assertThat;
 
 @RunWith(Parameterized.class)
 public class GraphPostSubClassFinderServiceTest extends AbstractGraphTest{
-	private static final long SUB_POST_ID = 1000+ID_POST_1;
 	private static final Logger logger = Logger.getLogger(GraphPostSubClassFinderServiceTest.class.getName());
 	
 	@Parameters
@@ -83,8 +82,9 @@ public class GraphPostSubClassFinderServiceTest extends AbstractGraphTest{
 	@Test 
 	public void ensurePostSubClassServiceWorksWell() {
 		final String METHOD_NAME = "ensurePostSubClassServiceWorksWell";
-		PostSubClass newOne = new PostSubClass(SUB_POST_ID, METHOD_NAME,1.0f, State.PUBLIC, author);
+		PostSubClass newOne = new PostSubClass(0, METHOD_NAME,1.0f, State.PUBLIC, author);
 		Post saved = getPostSubService().create(newOne);
+		final long postId = saved.id;
 		assertThat(saved, Is.is(PostSubClass.class));
 		Post loaded = getPostService().find().matching(new QueryBuilder<PostInformer>() {
 			
@@ -107,7 +107,7 @@ public class GraphPostSubClassFinderServiceTest extends AbstractGraphTest{
 
 			@Override
 			public QueryExpression createMatchingExpression(PostInformer informer) {
-				return informer.getId().equalsTo(SUB_POST_ID);
+				return informer.getId().equalsTo(postId);
 			}
 		}).count(), Is.is(1));
 	}
@@ -116,8 +116,9 @@ public class GraphPostSubClassFinderServiceTest extends AbstractGraphTest{
 	@Test 
 	public void ensureBug23IsSolved() {
 		final String METHOD_NAME = "ensureBug23IsSolved";
-		PostSubClass newOne = new PostSubClass(SUB_POST_ID, METHOD_NAME,1.0f, State.PUBLIC, author);
+		PostSubClass newOne = new PostSubClass(0, METHOD_NAME,1.0f, State.PUBLIC, author);
 		Post saved = getPostSubService().create(newOne);
+		final long postId = saved.id;
 		assertThat(saved, Is.is(PostSubClass.class));
 		Post loaded = getPostService().find().matching(new QueryBuilder<PostInformer>() {
 			
@@ -135,7 +136,7 @@ public class GraphPostSubClassFinderServiceTest extends AbstractGraphTest{
 
 			@Override
 			public QueryExpression createMatchingExpression(PostInformer informer) {
-				return informer.getId().equalsTo(SUB_POST_ID);
+				return informer.getId().equalsTo(postId);
 			}
 		}).count(), Is.is(1));
 	}
@@ -143,7 +144,7 @@ public class GraphPostSubClassFinderServiceTest extends AbstractGraphTest{
 	@Test 
 	public void ensureBug26IsSolved() {
 		final String METHOD_NAME = "ensureBug26IsSolved";
-		PostSubClass newOne = new PostSubClass(SUB_POST_ID, METHOD_NAME,1.0f, State.PUBLIC, author);
+		PostSubClass newOne = new PostSubClass(0, METHOD_NAME,1.0f, State.PUBLIC, author);
 		newOne.state = State.PUBLIC;
 		newOne.anotherState = PostSubClass.AnotherStateForBug26.PUBLIC;
 		Post saved = getPostSubService().create(newOne);
@@ -163,7 +164,7 @@ public class GraphPostSubClassFinderServiceTest extends AbstractGraphTest{
 	@Test 
 	public void usingAnUntypedURIValueCouldWork() {
 		final String METHOD_NAME = "usingAnUntypedURIValueCouldWork";
-		PostSubClass newOne = new PostSubClass(SUB_POST_ID, METHOD_NAME,1.0f, State.PUBLIC, author);
+		PostSubClass newOne = new PostSubClass(0, METHOD_NAME,1.0f, State.PUBLIC, author);
 		newOne.state = State.PUBLIC;
 		newOne.anotherState = PostSubClass.AnotherStateForBug26.PUBLIC;
 		Post saved = getPostSubService().create(newOne);
@@ -204,7 +205,7 @@ public class GraphPostSubClassFinderServiceTest extends AbstractGraphTest{
 	@Test 
 	public void replacingACascadePersistValueWithNullShouldHaveNoEffect() {
 		final String METHOD_NAME = "usingAnUntypedURIValueCouldWork";
-		PostSubClass newOne = new PostSubClass(SUB_POST_ID, METHOD_NAME,1.0f, State.PUBLIC, author);
+		PostSubClass newOne = new PostSubClass(0, METHOD_NAME,1.0f, State.PUBLIC, author);
 		newOne.state = State.PUBLIC;
 		newOne.anotherState = PostSubClass.AnotherStateForBug26.PUBLIC;
 		newOne.creator = author;

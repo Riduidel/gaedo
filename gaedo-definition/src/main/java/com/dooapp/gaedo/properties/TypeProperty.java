@@ -1,46 +1,24 @@
 package com.dooapp.gaedo.properties;
 
 import java.lang.annotation.Annotation;
-import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
-import java.lang.reflect.Type;
-import java.util.Collection;
-import java.util.Collections;
 
-import com.dooapp.gaedo.utils.Utils;
-
-public class TypeProperty implements Property {
+public class TypeProperty extends AbstractPropertyAdapter implements Property {
 	/**
 	 * Constant instance used to generate some links
 	 */
 	public static final TypeProperty INSTANCE = new TypeProperty(TypeProperty.class);
 	
 	public static final String TYPE = "type";
-
-	private Class declaring;
 	
 	public TypeProperty(Class declaring) {
-		this.declaring = declaring;
-	}
-
-	@Override
-	public Class<?> getDeclaringClass() {
-		return Object.class;
-	}
-	
-	@Override
-	public String getName() {
-		return TYPE;
-	}
-	
-	@Override
-	public Class<?> getType() {
-		return declaring;
-	}
-	
-	@Override
-	public Type getGenericType() {
-		return declaring;
+		super();
+		setDeclaringClass(Object.class);
+		setName(TYPE);
+		setType(declaring);
+		setGenericType(declaring);
+		setModifier(Modifier.FINAL, true);
+		setModifier(Modifier.PUBLIC, true);
 	}
 	
 	@Override
@@ -58,47 +36,6 @@ public class TypeProperty implements Property {
 	}
 
 	@Override
-	public <T extends Annotation> T getAnnotation(Class<T> annotationClass) {
-		return null;
-	}
-
-	@Override
-	public Collection<? extends Annotation> getAnnotations() {
-		return Collections.emptyList();
-	}
-
-	@Override
-	public boolean hasModifier(int modifier) {
-		// abstract bit set
-		if((modifier & Modifier.ABSTRACT)!=0) {
-			return false;
-		} else if((modifier & Modifier.FINAL)!=0) {
-			return true;
-		} else if((modifier & Modifier.INTERFACE)!=0) {
-			return false;
-		} else if((modifier & Modifier.NATIVE)!=0) {
-			return false;
-		} else if((modifier & Modifier.PRIVATE)!=0) {
-			return false;
-		} else if((modifier & Modifier.PROTECTED)!=0) {
-			return false;
-		} else if((modifier & Modifier.PUBLIC)!=0) {
-			return true;
-		} else if((modifier & Modifier.STATIC)!=0) {
-			return false;
-		} else if((modifier & Modifier.STRICT)!=0) {
-			return false;
-		} else if((modifier & Modifier.SYNCHRONIZED)!=0) {
-			return false;
-		} else if((modifier & Modifier.TRANSIENT)!=0) {
-			return false;
-		} else if((modifier & Modifier.VOLATILE)!=0) {
-			return false;
-		}
-		return false;
-	}
-
-	@Override
 	public Object fromString(String value) {
 		// TODO Auto-generated method stub
 		throw new UnsupportedOperationException("method "+Property.class.getName()+"#fromString has not yet been implemented AT ALL");
@@ -112,7 +49,7 @@ public class TypeProperty implements Property {
 	public int hashCode() {
 		final int prime = 31;
 		int result = 1;
-		result = prime * result + ((declaring == null) ? 0 : declaring.hashCode());
+		result = prime * result + ((getDeclaringClass() == null) ? 0 : getDeclaringClass().hashCode());
 		return result;
 	}
 
@@ -130,12 +67,31 @@ public class TypeProperty implements Property {
 		if (getClass() != obj.getClass())
 			return false;
 		TypeProperty other = (TypeProperty) obj;
-		if (declaring == null) {
-			if (other.declaring != null)
+		if (getDeclaringClass() == null) {
+			if (other.getDeclaringClass() != null)
 				return false;
-		} else if (!declaring.getCanonicalName().equals(other.declaring.getCanonicalName()))
+		} else if (!getDeclaringClass().getCanonicalName().equals(other.getDeclaringClass().getCanonicalName()))
 			return false;
 		return true;
 	}
 
+	public TypeProperty withAnnotation(Annotation a) {
+		return (TypeProperty) super.withAnnotation(a);
+	}
+
+	/**
+	 * @return
+	 * @see java.lang.Object#toString()
+	 */
+	@Override
+	public String toString() {
+		StringBuilder builder = new StringBuilder();
+		builder.append("TypeProperty [");
+		if (getType() != null) {
+			builder.append("getType()=");
+			builder.append(getType());
+		}
+		builder.append("]");
+		return builder.toString();
+	}
 }

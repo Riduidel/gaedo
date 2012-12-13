@@ -226,4 +226,9 @@ public abstract class AbstractPropertyAdapter implements Property {
 		builder.append("]");
 		return builder.toString();
 	}
+
+	public AbstractPropertyAdapter withAnnotation(Annotation a) {
+		setAnnotation(a);
+		return this;
+	}
 }

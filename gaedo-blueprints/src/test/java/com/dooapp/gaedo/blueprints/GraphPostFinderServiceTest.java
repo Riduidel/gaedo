@@ -347,7 +347,9 @@ public class GraphPostFinderServiceTest extends AbstractGraphTest {
 
 	@Test
 	public void ensureCreateOnUpdateWorks() throws IOException, ClassNotFoundException {
+		// First find post with note "1"
 		Post first = getPostService().find().matching(new FindPostByNote(1)).getFirst();
+		// then remvoe its tags
 		if(first.tags.size()>0) {
 			first.tags.clear();
 			first = getPostService().update(first);
@@ -356,7 +358,9 @@ public class GraphPostFinderServiceTest extends AbstractGraphTest {
 		Tag t = new Tag();
 		t.setText(TEST_TAG_FOR_CREATE_ON_UPDATE);
 		first.tags.add(t);
+		// and now create that tag during the update operation
 		first = getPostService().update(first);
+		// if we could find it, it's a good sign !
 		Tag inDB = getTagService().find().matching(new QueryBuilder<TagInformer>() {
 
 			@Override

@@ -41,7 +41,7 @@ public class BluePrintsPersister {
      * @param service             source of modification
      * @param objectVertexId      object expected vertex id
      * @param objectVertex        vertex corresponding to object to update
-     * @param valueClass          TODO
+     * @param valueClass          class of the value to be updated here
      * @param containedProperties list of contained properties
      * @param toUpdate            object to update
      * @param cascade             kind of cascade used for dependent properties
@@ -98,21 +98,23 @@ public class BluePrintsPersister {
                 if (entry.getValue().contains(cascade)) {
                     used = cascade;
                 }
-                Class<?> rawPropertyType = p.getType();
-                Collection<CascadeType> toCascade = containedProperties.get(p);
-                if (Collection.class.isAssignableFrom(rawPropertyType)) {
-                    if (logger.isLoggable(Level.FINEST)) {
-                        logger.log(Level.FINEST, "property " + p.getName() + " is considered a collection one");
-                    }
-                    deleteCollection(service, database, p, toDelete, objectVertex, toCascade, objectsBeingAccessed);
-                    // each value should be written as an independant value
-                } else if (Map.class.isAssignableFrom(rawPropertyType)) {
-                    if (logger.isLoggable(Level.FINEST)) {
-                        logger.log(Level.FINEST, "property " + p.getName() + " is considered a map one");
-                    }
-                    deleteMap(service, database, p, toDelete, objectVertex, toCascade, objectsBeingAccessed);
-                } else {
-                    deleteSingle(service, database, p, toDelete, objectVertex, toCascade, objectsBeingAccessed);
+                if(used!=null) {
+	                Class<?> rawPropertyType = p.getType();
+	                Collection<CascadeType> toCascade = containedProperties.get(p);
+	                if (Collection.class.isAssignableFrom(rawPropertyType)) {
+	                    if (logger.isLoggable(Level.FINEST)) {
+	                        logger.log(Level.FINEST, "property " + p.getName() + " is considered a collection one");
+	                    }
+	                    deleteCollection(service, database, p, toDelete, objectVertex, toCascade, objectsBeingAccessed);
+	                    // each value should be written as an independant value
+	                } else if (Map.class.isAssignableFrom(rawPropertyType)) {
+	                    if (logger.isLoggable(Level.FINEST)) {
+	                        logger.log(Level.FINEST, "property " + p.getName() + " is considered a map one");
+	                    }
+	                    deleteMap(service, database, p, toDelete, objectVertex, toCascade, objectsBeingAccessed);
+	                } else {
+	                    deleteSingle(service, database, p, toDelete, objectVertex, toCascade, objectsBeingAccessed);
+	                }
                 }
             }
         }
@@ -212,20 +214,23 @@ public class BluePrintsPersister {
                 if (entry.getValue().contains(cascade)) {
                     used = cascade;
                 }
-                Class<?> rawPropertyType = p.getType();
-                if (Collection.class.isAssignableFrom(rawPropertyType)) {
-                    if (logger.isLoggable(Level.FINEST)) {
-                        logger.log(Level.FINEST, "property " + p.getName() + " is considered a collection one");
-                    }
-                    updateCollection(service, database, p, toUpdate, objectVertex, used, objectsBeingAccessed);
-                    // each value should be written as an independant value
-                } else if (Map.class.isAssignableFrom(rawPropertyType)) {
-                    if (logger.isLoggable(Level.FINEST)) {
-                        logger.log(Level.FINEST, "property " + p.getName() + " is considered a map one");
-                    }
-                    updateMap(service, database, p, toUpdate, objectVertex, used, objectsBeingAccessed);
-                } else {
-                    updateSingle(service, database, p, toUpdate, objectVertex, used, objectsBeingAccessed);
+                // We only perform operations on cascaded fields
+                if(used!=null) {
+	                Class<?> rawPropertyType = p.getType();
+	                if (Collection.class.isAssignableFrom(rawPropertyType)) {
+	                    if (logger.isLoggable(Level.FINEST)) {
+	                        logger.log(Level.FINEST, "property " + p.getName() + " is considered a collection one");
+	                    }
+	                    updateCollection(service, database, p, toUpdate, objectVertex, used, objectsBeingAccessed);
+	                    // each value should be written as an independant value
+	                } else if (Map.class.isAssignableFrom(rawPropertyType)) {
+	                    if (logger.isLoggable(Level.FINEST)) {
+	                        logger.log(Level.FINEST, "property " + p.getName() + " is considered a map one");
+	                    }
+	                    updateMap(service, database, p, toUpdate, objectVertex, used, objectsBeingAccessed);
+	                } else {
+	                    updateSingle(service, database, p, toUpdate, objectVertex, used, objectsBeingAccessed);
+	                }
                 }
             }
         }

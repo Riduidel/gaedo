@@ -1,10 +1,13 @@
 package com.dooapp.gaedo.blueprints.strategies;
 
+import java.lang.annotation.Annotation;
 import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import javax.persistence.CascadeType;
+import javax.persistence.FetchType;
+import javax.persistence.ManyToOne;
 
 import com.dooapp.gaedo.blueprints.GraphUtils;
 import com.dooapp.gaedo.blueprints.Kind;
@@ -26,6 +29,43 @@ import com.tinkerpop.blueprints.pgm.Edge;
 import com.tinkerpop.blueprints.pgm.Vertex;
 
 public class BeanBasedMappingStrategy<DataType> extends AbstractMappingStrategy<DataType> implements GraphMappingStrategy<DataType> {
+
+	private static final class ManyObjectsToOneType implements ManyToOne {
+		public static final CascadeType[] CASCADE = new CascadeType[] {
+			CascadeType.PERSIST,
+			CascadeType.MERGE
+		};
+		private final Class target;
+		public ManyObjectsToOneType(Class target) {
+			super();
+			this.target = target;
+		}
+
+		@Override
+		public Class<? extends Annotation> annotationType() {
+			return ManyToOne.class;
+		}
+
+		@Override
+		public Class targetEntity() {
+			return target;
+		}
+
+		@Override
+		public boolean optional() {
+			return false;
+		}
+
+		@Override
+		public FetchType fetch() {
+			return FetchType.EAGER;
+		}
+
+		@Override
+		public CascadeType[] cascade() {
+			return CASCADE;
+		}
+	}
 
 	/**
 	 * Visitor making sure there is a test done on class collection property
@@ -75,8 +115,10 @@ public class BeanBasedMappingStrategy<DataType> extends AbstractMappingStrategy<
 			// Finally, create a fake "classesCollection" property and add it to
 			// property
 			try {
-				beanPropertiesFor.put(new ClassCollectionProperty(objectClass), new LinkedList<CascadeType>());
-				beanPropertiesFor.put(new TypeProperty(objectClass), new LinkedList<CascadeType>());
+				ClassCollectionProperty classes = new ClassCollectionProperty(objectClass).withAnnotation(new ManyObjectsToOneType(objectClass.getClass()));
+				beanPropertiesFor.put(classes, StrategyUtils.extractCascadeOfJPAAnnotations(classes));
+				TypeProperty type = new TypeProperty(objectClass).withAnnotation(new ManyObjectsToOneType(objectClass.getClass()));
+				beanPropertiesFor.put(type, StrategyUtils.extractCascadeOfJPAAnnotations(type));
 			} catch (Exception e) {
 				logger.log(Level.SEVERE, "what ? a class without a \"class\" field ? WTF", e);
 			}

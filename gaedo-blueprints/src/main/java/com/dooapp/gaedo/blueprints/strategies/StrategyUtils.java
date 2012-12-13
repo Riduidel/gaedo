@@ -1,5 +1,6 @@
 package com.dooapp.gaedo.blueprints.strategies;
 
+import java.lang.reflect.Modifier;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -59,7 +60,8 @@ public class StrategyUtils {
 		} else if (p.getAnnotation(ManyToOne.class) != null) {
 			mapping = GraphUtils.extractCascadeOf(p.getAnnotation(ManyToOne.class).cascade());
 		} else {
-			mapping = GraphUtils.extractCascadeOf(new CascadeType[] {CascadeType.ALL});
+			if(!p.hasModifier(Modifier.STATIC) && !p.hasModifier(Modifier.TRANSIENT))
+				mapping = GraphUtils.extractCascadeOf(new CascadeType[] {CascadeType.ALL});
 		}
 		return mapping;
 	}
