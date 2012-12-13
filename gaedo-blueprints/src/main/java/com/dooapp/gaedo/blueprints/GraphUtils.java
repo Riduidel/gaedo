@@ -149,7 +149,8 @@ public class GraphUtils {
 				}
 			}
 		} catch (UnableToGetVertexTypeException e) {
-			effectiveType = GraphMappingStrategy.STRING_TYPE;
+			if(String.class.isAssignableFrom(defaultType))
+				effectiveType = GraphMappingStrategy.STRING_TYPE;
 		}
 		if (classLoader == null) {
 			throw new UnspecifiedClassLoader();
