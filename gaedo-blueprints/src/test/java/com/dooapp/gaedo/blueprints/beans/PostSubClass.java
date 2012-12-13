@@ -2,6 +2,9 @@ package com.dooapp.gaedo.blueprints.beans;
 
 import java.util.Map;
 
+import javax.persistence.CascadeType;
+import javax.persistence.ManyToOne;
+
 import com.dooapp.gaedo.test.beans.Post;
 import com.dooapp.gaedo.test.beans.State;
 import com.dooapp.gaedo.test.beans.User;
@@ -14,7 +17,11 @@ public class PostSubClass extends Post {
 	}
 
 	public AnotherStateForBug26 anotherState;
+	
+	@ManyToOne(cascade={CascadeType.PERSIST})
+	public User creator;
 
+	
 	public PostSubClass() {
 		super();
 	}

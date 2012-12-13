@@ -200,4 +200,21 @@ public class GraphPostSubClassFinderServiceTest extends AbstractGraphTest{
 		
 		assertThat(loaded.text, Is.is(BUG_31_URI));
 	}
+
+	@Test 
+	public void replacingACascadePersistValueWithNullShouldHaveNoEffect() {
+		final String METHOD_NAME = "usingAnUntypedURIValueCouldWork";
+		PostSubClass newOne = new PostSubClass(SUB_POST_ID, METHOD_NAME,1.0f, State.PUBLIC, author);
+		newOne.state = State.PUBLIC;
+		newOne.anotherState = PostSubClass.AnotherStateForBug26.PUBLIC;
+		newOne.creator = author;
+		PostSubClass saved = getPostSubService().create(newOne);
+		assertThat(saved, Is.is(PostSubClass.class));
+		
+		saved.creator = null;
+		getPostSubService().update(saved);
+		PostSubClass loaded = ((IdBasedService<PostSubClass>) getPostSubService()).findById(saved.id); 
+		
+		assertThat(loaded.creator, Is.is(author));
+	}
 }
