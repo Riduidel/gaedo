@@ -65,8 +65,9 @@ public abstract class AbstractGraphExecutableQuery implements GraphExecutableQue
 
 	@Override
 	public Vertex getVertex() {
-		if(getVertices().size()>0)
-			return getVertices().get(0);
+		List<Vertex> vertices = getVertices();
+		if(vertices.size()>0)
+			return vertices.get(0);
 		return null;
 	}
 	
