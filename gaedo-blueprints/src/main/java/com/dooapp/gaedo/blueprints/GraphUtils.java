@@ -111,7 +111,7 @@ public class GraphUtils {
 	 * @param driver
 	 *            driver used to load data
 	 * @param strategy
-	 *            TODO
+	 *            used graph mapping strategy
 	 * @param classLoader
 	 *            class loader used to find class
 	 * @param key

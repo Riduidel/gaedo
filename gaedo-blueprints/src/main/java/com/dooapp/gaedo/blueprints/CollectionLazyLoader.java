@@ -6,6 +6,8 @@ import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.util.Collection;
 import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import com.dooapp.gaedo.blueprints.strategies.GraphMappingStrategy;
 import com.dooapp.gaedo.finders.FinderCrudService;
@@ -16,6 +18,7 @@ import com.tinkerpop.blueprints.pgm.Edge;
 import com.tinkerpop.blueprints.pgm.Vertex;
 
 public class CollectionLazyLoader extends AbstractLazyLoader implements InvocationHandler, WriteReplaceable, Serializable {
+	private static final Logger logger = Logger.getLogger(CollectionLazyLoader.class.getName());
 
 	// Internal storage collection (not to be confused with external visible collection)
 	private Collection collection;
@@ -47,16 +50,22 @@ public class CollectionLazyLoader extends AbstractLazyLoader implements Invocati
 		try {
 			for(Edge e : rootVertex.getOutEdges(edgeName)) {
 				Vertex value = e.getInVertex();
-				Object temporaryValue = GraphUtils.createInstance(driver, strategy, classLoader, value, property.getType(), repository, objectsBeingAccessed);
-				if(repository.containsKey(temporaryValue.getClass())) {
-					FinderCrudService service = repository.get(temporaryValue.getClass());
-					if (service instanceof AbstractBluePrintsBackedFinderService) {
-						AbstractBluePrintsBackedFinderService<?, ?, ?> blueprints= (AbstractBluePrintsBackedFinderService<?, ?, ?>) service;
-						collection.add(blueprints.loadObject(value, objectsBeingAccessed));
+				try {
+					Object temporaryValue = GraphUtils.createInstance(driver, strategy, classLoader, value, property.getType(), repository, objectsBeingAccessed);
+					if(repository.containsKey(temporaryValue.getClass())) {
+						FinderCrudService service = repository.get(temporaryValue.getClass());
+						if (service instanceof AbstractBluePrintsBackedFinderService) {
+							AbstractBluePrintsBackedFinderService<?, ?, ?> blueprints= (AbstractBluePrintsBackedFinderService<?, ?, ?>) service;
+							collection.add(blueprints.loadObject(value, objectsBeingAccessed));
+						}
+					} else {
+						// Instance should be OK, as createinstance should support everything getVertexForBasicObject supports
+						collection.add(temporaryValue);
 					}
-				} else {
-					// Instance should be OK, as createinstance should support everything getVertexForBasicObject supports
-					collection.add(temporaryValue);
+				} catch(UnableToCreateException ex) {
+					if (logger.isLoggable(Level.WARNING)) {
+						logger.log(Level.WARNING, "we failed to load value associated to vertex "+GraphUtils.toString(value), ex);
+					}
 				}
 			}
 		} finally {

@@ -35,18 +35,22 @@ public class Transformers {
 	}
 
 	public static boolean containsKey(TransformerAssociation[] values, Class<? extends Object> valueClass) {
-		for(TransformerAssociation l : values) {
-			if(l.getDataClass().isAssignableFrom(valueClass)) {
-				return true;
+		if(valueClass!=null) {
+			for(TransformerAssociation l : values) {
+				if(l.getDataClass().isAssignableFrom(valueClass)) {
+					return true;
+				}
 			}
 		}
 		return false;
 	}
 
 	public static boolean containsKey(TransformerAssociation[] values, ClassLoader classLoader, String effectiveType) {
-		for(TransformerAssociation l : values) {
-			if(l.canHandle(classLoader, effectiveType)) {
-				return true;
+		if(effectiveType!=null) {
+			for(TransformerAssociation l : values) {
+				if(l.canHandle(classLoader, effectiveType)) {
+					return true;
+				}
 			}
 		}
 		return false;

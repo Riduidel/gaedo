@@ -6,6 +6,8 @@ import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import com.dooapp.gaedo.blueprints.strategies.GraphMappingStrategy;
 import com.dooapp.gaedo.finders.repository.ServiceRepository;
@@ -15,6 +17,7 @@ import com.tinkerpop.blueprints.pgm.Edge;
 import com.tinkerpop.blueprints.pgm.Vertex;
 
 public class MapLazyLoader extends AbstractLazyLoader implements InvocationHandler, Serializable, WriteReplaceable {
+	private static final Logger logger = Logger.getLogger(MapLazyLoader.class.getName());
 
 	// Internal storage collection (not to be confused with external visible
 	// collection)
@@ -52,8 +55,14 @@ public class MapLazyLoader extends AbstractLazyLoader implements InvocationHandl
 				Vertex value = e.getInVertex();
 				// Value is always a serialized map entry, so deserialize it
 				// with magic !
-				Map.Entry temporaryValue = (Entry) GraphUtils.createInstance(driver, strategy, classLoader, value, property.getType(), repository, objectsBeingAccessed);
-				map.put(temporaryValue.getKey(), temporaryValue.getValue());
+				try {
+					Map.Entry temporaryValue = (Entry) GraphUtils.createInstance(driver, strategy, classLoader, value, property.getType(), repository, objectsBeingAccessed);
+					map.put(temporaryValue.getKey(), temporaryValue.getValue());
+				} catch(UnableToCreateException ex) {
+					if (logger.isLoggable(Level.WARNING)) {
+						logger.log(Level.WARNING, "We failed to load entry associated to vertex "+GraphUtils.toString(value), ex);
+					}
+				}
 			}
 		} finally {
 			loaded = true;
