@@ -125,6 +125,17 @@ public class BluePrintsPersister {
     }
 
 
+    /**
+     * Delete value mapped by a single property.
+     * Value is deleted only if unchanged during the delete call (that to say value in object is the same that value in graph).
+     * @param service
+     * @param database
+     * @param p
+     * @param toDelete
+     * @param objectVertex
+     * @param toCascade
+     * @param objectsBeingAccessed
+     */
     private void deleteSingle(AbstractBluePrintsBackedFinderService<? extends Graph, ?, ?> service, Graph database, Property p, Object toDelete, Vertex objectVertex, Collection<CascadeType> toCascade, Map<String, Object> objectsBeingAccessed) {
         // there should be only one vertex to delete
         Iterable<Edge> edges = service.getStrategy().getOutEdgesFor(objectVertex, p);
@@ -134,12 +145,28 @@ public class BluePrintsPersister {
             // Now what to do with vertex ? Delete it ?
             if (toCascade.contains(CascadeType.REMOVE)) {
                 // yes, delete it forever (but before, see if there aren't more datas to delete
-                service.deleteOutEdgeVertex(objectVertex, valueVertex, p.get(toDelete), objectsBeingAccessed);
+                Object value = p.get(toDelete);
+                if(value!=null) {
+                	Vertex knownValueVertex = service.getVertexFor(value, CascadeType.REFRESH, objectsBeingAccessed);
+                	if(knownValueVertex.equals(valueVertex))
+                		service.deleteOutEdgeVertex(objectVertex, valueVertex, value, objectsBeingAccessed);
+                }
 
             }
         }
     }
 
+    /**
+     * Delete values from a map.
+     * Notice we only delete values which are mapped to vertices in graph that the edges corresponding to that property can lead us to.
+     * @param service service used to map values to vertices
+     * @param database database to remvoe vertices from
+     * @param p property from which map is loaded
+     * @param toDelete object we want to delete the map from
+     * @param objectVertex vertex corresponding to toDelete
+     * @param toCascade cascade mode
+     * @param objectsBeingAccessed
+     */
     private void deleteMap(AbstractBluePrintsBackedFinderService<? extends Graph, ?, ?> service, Graph database, Property p, Object toDelete, Vertex objectVertex, Collection<CascadeType> toCascade, Map<String, Object> objectsBeingAccessed) {
         Iterable<Edge> edges = service.getStrategy().getOutEdgesFor(objectVertex, p);
         Map<?, ?> values = (Map<?, ?>) p.get(toDelete);
@@ -176,14 +203,17 @@ public class BluePrintsPersister {
             oldVertices.put(inVertex, e);
         }
         for (Object v : values) {
-            Vertex valueVertex = service.getVertexFor(v, CascadeType.REFRESH, objectsBeingAccessed);
-            if (oldVertices.containsKey(valueVertex)) {
-                Edge oldEdge = oldVertices.remove(valueVertex);
-                database.removeEdge(oldEdge);
-                if (toCascade.contains(CascadeType.REMOVE)) {
-                    service.deleteOutEdgeVertex(objectVertex, valueVertex, v, objectsBeingAccessed);
-                }
-            }
+        	// already heard about null-containing collections ? I do know them, and they're pure EVIL
+        	if(v!=null) {
+	            Vertex valueVertex = service.getVertexFor(v, CascadeType.REFRESH, objectsBeingAccessed);
+	            if (oldVertices.containsKey(valueVertex)) {
+	                Edge oldEdge = oldVertices.remove(valueVertex);
+	                database.removeEdge(oldEdge);
+	                if (toCascade.contains(CascadeType.REMOVE)) {
+	                    service.deleteOutEdgeVertex(objectVertex, valueVertex, v, objectsBeingAccessed);
+	                }
+	            }
+        	}
         }
         if (oldVertices.size() > 0) {
             // force deletion of remaining edges
@@ -330,7 +360,9 @@ public class BluePrintsPersister {
     private Collection<Vertex> createCollectionVerticesFor(AbstractBluePrintsBackedFinderService<? extends Graph, ?, ?> service, Collection<?> value, CascadeType cascade, Map<String, Object> objectsBeingAccessed) {
         Collection<Vertex> returned = new HashSet<Vertex>();
         for (Object o : value) {
-            returned.add(service.getVertexFor(o, cascade, objectsBeingAccessed));
+        	// already heard about null-containing collections ? I do know them, and they're pure EVIL
+        	if(o!=null)
+        		returned.add(service.getVertexFor(o, cascade, objectsBeingAccessed));
         }
         return returned;
     }

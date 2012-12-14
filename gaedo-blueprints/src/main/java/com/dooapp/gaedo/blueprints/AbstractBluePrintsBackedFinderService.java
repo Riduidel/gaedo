@@ -280,39 +280,28 @@ public abstract class AbstractBluePrintsBackedFinderService<GraphClass extends G
 	 *            object value
 	 */
 	<Type> void deleteOutEdgeVertex(Vertex objectVertex, Vertex valueVertex, Type value, Map<String, Object> objectsBeingUpdated) {
-		// Locate vertex
-		Vertex knownValueVertex = getVertexFor(value, CascadeType.REMOVE, objectsBeingUpdated);
-		// Ensure vertex is our out one
-		if (valueVertex.equals(knownValueVertex)) {
-			// Delete vertex and other associated ones, only if they have no
-			// other input links (elsewhere delete is silently ignored)
-			if (valueVertex.getInEdges().iterator().hasNext()) {
-				// There are incoming edges to that vertex. Do nothing but log
-				// it
-				if (logger.isLoggable(Level.FINE)) {
-					logger.log(Level.FINE,
-									"while deleting " + GraphUtils.toString(objectVertex) + "" + " we tried to delete " + GraphUtils.toString(knownValueVertex)
-													+ "" + " which has other incoming edges, so we didn't deleted it");
-				}
-			} else {
-				// OK, time to delete value vertex. Is it a managed node ?
-				if (repository.containsKey(value.getClass())) {
-					FinderCrudService<Type, ?> finderCrudService = (FinderCrudService<Type, ?>) repository.get(value.getClass());
-					if (finderCrudService instanceof AbstractBluePrintsBackedFinderService) {
-						((AbstractBluePrintsBackedFinderService<?, Type, ?>) finderCrudService).doDelete(value, objectsBeingUpdated);
-					} else {
-						throw new IncompatibleServiceException(finderCrudService, value.getClass());
-					}
-				} else {
-					// Literal nodes can be deleted without any trouble
-					database.removeVertex(valueVertex);
-				}
+		// Delete vertex and other associated ones, only if they have no
+		// other input links (elsewhere delete is silently ignored)
+		if (valueVertex.getInEdges().iterator().hasNext()) {
+			// There are incoming edges to that vertex. Do nothing but log
+			// it
+			if (logger.isLoggable(Level.FINE)) {
+				logger.log(Level.FINE,
+								"while deleting " + GraphUtils.toString(objectVertex) + "" + " we tried to delete " + GraphUtils.toString(valueVertex)
+												+ "" + " which has other incoming edges, so we didn't deleted it");
 			}
 		} else {
-			if (logger.isLoggable(Level.WARNING)) {
-				logger.log(Level.WARNING, "that's strange : value " + value + " is associated to " + GraphUtils.toString(knownValueVertex) + ""
-								+ " which blueprints says is different from " + GraphUtils.toString(valueVertex) + "."
-								+ " Under those circumstances, we can delete neither of them");
+			// OK, time to delete value vertex. Is it a managed node ?
+			if (repository.containsKey(value.getClass())) {
+				FinderCrudService<Type, ?> finderCrudService = (FinderCrudService<Type, ?>) repository.get(value.getClass());
+				if (finderCrudService instanceof AbstractBluePrintsBackedFinderService) {
+					((AbstractBluePrintsBackedFinderService<?, Type, ?>) finderCrudService).doDelete(value, objectsBeingUpdated);
+				} else {
+					throw new IncompatibleServiceException(finderCrudService, value.getClass());
+				}
+			} else {
+				// Literal nodes can be deleted without any trouble
+				database.removeVertex(valueVertex);
 			}
 		}
 	}

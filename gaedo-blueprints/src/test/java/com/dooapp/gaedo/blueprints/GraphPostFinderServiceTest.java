@@ -533,4 +533,9 @@ public class GraphPostFinderServiceTest extends AbstractGraphTest {
 			note = p.note;
 		}
 	}
+	
+	public void deleteAPostWithNoAuthorShouldWorkForIssue33() {
+		Post toDelete = getPostService().create(new Post(0, "deleteAPostWithNoAuthorShouldWork", 10.5f, State.PUBLIC, (User) null));
+		getPostService().delete(toDelete);
+	}
 }
