@@ -31,7 +31,7 @@ public class Utils {
 	 * @param property
 	 * @return
 	 */
-	@SuppressWarnings("unchecked")
+	@SuppressWarnings("rawtypes")
 	public static Map<?, ?> generateMap(Class<?> rawContainerClass, Map<?, ?> property) {
 		if (property == null) {
 			if (SortedMap.class.isAssignableFrom(rawContainerClass)) {
@@ -168,7 +168,7 @@ public class Utils {
 	 * @param toCompareClass
 	 * @return
 	 */
-	public static Class primitize(Class<? extends Number> toCompareClass) {
+	public static Class<?> primitize(Class<? extends Number> toCompareClass) {
 		if(Integer.class.equals(toCompareClass)) {
 			return Integer.TYPE;
 		} else if(Long.class.equals(toCompareClass)) {
@@ -256,6 +256,7 @@ public class Utils {
 	 * @param type expected output type
 	 * @return an object of that type
 	 */
+	@SuppressWarnings("unchecked")
 	public static <Type> Type fromString(String value, Class<Type> type) {
 		if(String.class.equals(type)) {
 			return (Type) value.toString();
@@ -268,7 +269,7 @@ public class Utils {
 				throw new UnableToBuilddURIException("\""+value+"\" can't be transformed into an URI object", e);
 			}
 		} else if(Class.class.equals(type)) {
-			return classFromString(value);
+			return (Type) classFromString(value);
 		} else {
 			/* First check if a constructor exists */
 			try {
@@ -292,6 +293,7 @@ public class Utils {
 	 * @param value
 	 * @return
 	 */
+	@SuppressWarnings("unchecked")
 	private static <Type> Type classFromString(String value) {
 		value = maybeObjectify(value);
 		ClassLoader[] used = new ClassLoader[] {value.getClass().getClassLoader(), Utils.class.getClassLoader(), Thread.currentThread().getContextClassLoader()};
@@ -328,13 +330,13 @@ public class Utils {
 	 * @param declaring
 	 * @return
 	 */
-	public static Collection<Class> allClassesOf(Class<?> declaring) {
-		Collection<Class> returned = new LinkedList<Class>();
+	public static Collection<Class<?>> allClassesOf(Class<?> declaring) {
+		Collection<Class<?>> returned = new LinkedList<Class<?>>();
 		if(declaring!=null) {
 			if(!declaring.equals(Object.class)) {
 				returned.add(declaring);
 				returned.addAll(allClassesOf(declaring.getSuperclass()));
-				for(Class i : declaring.getInterfaces()) {
+				for(Class<?> i : declaring.getInterfaces()) {
 					returned.addAll(allClassesOf(i));
 				}
 			}
