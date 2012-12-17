@@ -34,7 +34,7 @@
 		<module>gaedo-tapestry</module>
 		<module>gaedo-guice</module>
 		<module>gaedo-graphviz</module>
-		<module>informer-generator</module>
+		<module>gaedo-informer-generator</module>
 		<module>gaedo-rest-server</module>
 		<module>gaedo-test-beans</module>
 		<module>gaedo-prevalence</module>
