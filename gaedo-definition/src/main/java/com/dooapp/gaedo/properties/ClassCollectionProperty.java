@@ -1,21 +1,18 @@
 package com.dooapp.gaedo.properties;
 
 import java.lang.annotation.Annotation;
-import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
-import java.lang.reflect.Type;
 import java.util.Collection;
-import java.util.Collections;
 
 import com.dooapp.gaedo.utils.Utils;
 
 public class ClassCollectionProperty extends AbstractPropertyAdapter implements Property {
 	public static final String CLASSES = "classes";
 
-	private Class declaring;
+	private Class<?> declaring;
 	
-	private Collection<Class> values;
+	private Collection<Class<?>> values;
 
 	private static Method allClassesOf;
 	
@@ -27,7 +24,7 @@ public class ClassCollectionProperty extends AbstractPropertyAdapter implements 
 		}
 	}
 
-	public ClassCollectionProperty(Class declaring) {
+	public ClassCollectionProperty(Class<?> declaring) {
 		setDeclaringClass(Object.class);
 		setName(CLASSES);
 		setType(allClassesOf.getReturnType());
