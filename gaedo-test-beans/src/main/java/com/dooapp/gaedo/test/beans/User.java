@@ -5,8 +5,8 @@ package com.dooapp.gaedo.test.beans;
 
 import java.io.Serializable;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.LinkedList;
+import java.util.List;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Id;
@@ -16,6 +16,8 @@ import com.dooapp.gaedo.extensions.hierarchy.Child;
 import com.dooapp.gaedo.test.beans.specific.Theme;
 
 public class User implements Serializable {
+	private static final long serialVersionUID = 1L;
+
 	@Id
 	public long id;
 	
@@ -32,7 +34,7 @@ public class User implements Serializable {
 	public Message about;
 
 	@Child
-	public Collection<Post> posts = new LinkedList<Post>();
+	public List<Post> posts = new LinkedList<Post>();
 	
 	public User() {
 		
