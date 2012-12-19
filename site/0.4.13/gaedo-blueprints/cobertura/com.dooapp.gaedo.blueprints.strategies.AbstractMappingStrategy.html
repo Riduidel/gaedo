@@ -1,0 +1,289 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+           "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+<title>Coverage Report</title>
+<link title="Style" type="text/css" rel="stylesheet" href="css/main.css"/>
+<script type="text/javascript" src="js/popup.js"></script>
+</head>
+<body>
+<h5>Coverage Report - com.dooapp.gaedo.blueprints.strategies.AbstractMappingStrategy</h5>
+<div class="separator">&nbsp;</div>
+<table class="report">
+<thead><tr>  <td class="heading">Classes in this File</td>  <td class="heading"><a class="dfn" href="help.html" onclick="popupwindow('help.html'); return false;">Line Coverage</a></td>  <td class="heading"><a class="dfn" href="help.html" onclick="popupwindow('help.html'); return false;">Branch Coverage</a></td>  <td class="heading"><a class="dfn" href="help.html" onclick="popupwindow('help.html'); return false;">Complexity</a></td></tr></thead>
+  <tr><td><a href="com.dooapp.gaedo.blueprints.strategies.AbstractMappingStrategy.html">AbstractMappingStrategy</a></td><td><table cellpadding="0px" cellspacing="0px" class="percentgraph"><tr class="percentgraph"><td align="right" class="percentgraph" width="40">79 %</td><td class="percentgraph"><div class="percentgraph"><div class="greenbar" style="width:79px"><span class="text">39/49</span></div></div></td></tr></table></td><td><table cellpadding="0px" cellspacing="0px" class="percentgraph"><tr class="percentgraph"><td align="right" class="percentgraph" width="40">58 %</td><td class="percentgraph"><div class="percentgraph"><div class="greenbar" style="width:58px"><span class="text">14/24</span></div></div></td></tr></table></td><td class="value"><span class="hidden">2.25;</span>2,25</td></tr>
+
+</table>
+<div class="separator">&nbsp;</div>
+<table cellspacing="0" cellpadding="0" class="src">
+<tr>  <td class="numLine">&nbsp;1</td>  <td class="nbHits">&nbsp;</td>
+  <td class="src"><pre class="src">&nbsp;<span class="keyword">package</span> com.dooapp.gaedo.blueprints.strategies;</pre></td></tr>
+<tr>  <td class="numLine">&nbsp;2</td>  <td class="nbHits">&nbsp;</td>
+  <td class="src"><pre class="src">&nbsp;</pre></td></tr>
+<tr>  <td class="numLine">&nbsp;3</td>  <td class="nbHits">&nbsp;</td>
+  <td class="src"><pre class="src">&nbsp;<span class="keyword">import</span> java.util.Arrays;</pre></td></tr>
+<tr>  <td class="numLine">&nbsp;4</td>  <td class="nbHits">&nbsp;</td>
+  <td class="src"><pre class="src">&nbsp;<span class="keyword">import</span> java.util.Collection;</pre></td></tr>
+<tr>  <td class="numLine">&nbsp;5</td>  <td class="nbHits">&nbsp;</td>
+  <td class="src"><pre class="src">&nbsp;<span class="keyword">import</span> java.util.LinkedList;</pre></td></tr>
+<tr>  <td class="numLine">&nbsp;6</td>  <td class="nbHits">&nbsp;</td>
+  <td class="src"><pre class="src">&nbsp;</pre></td></tr>
+<tr>  <td class="numLine">&nbsp;7</td>  <td class="nbHits">&nbsp;</td>
+  <td class="src"><pre class="src">&nbsp;<span class="keyword">import</span> javax.persistence.GeneratedValue;</pre></td></tr>
+<tr>  <td class="numLine">&nbsp;8</td>  <td class="nbHits">&nbsp;</td>
+  <td class="src"><pre class="src">&nbsp;</pre></td></tr>
+<tr>  <td class="numLine">&nbsp;9</td>  <td class="nbHits">&nbsp;</td>
+  <td class="src"><pre class="src">&nbsp;<span class="keyword">import</span> com.dooapp.gaedo.blueprints.AbstractBluePrintsBackedFinderService;</pre></td></tr>
+<tr>  <td class="numLine">&nbsp;10</td>  <td class="nbHits">&nbsp;</td>
+  <td class="src"><pre class="src">&nbsp;<span class="keyword">import</span> com.dooapp.gaedo.blueprints.GraphUtils;</pre></td></tr>
+<tr>  <td class="numLine">&nbsp;11</td>  <td class="nbHits">&nbsp;</td>
+  <td class="src"><pre class="src">&nbsp;<span class="keyword">import</span> com.dooapp.gaedo.blueprints.UnsupportedIdException;</pre></td></tr>
+<tr>  <td class="numLine">&nbsp;12</td>  <td class="nbHits">&nbsp;</td>
+  <td class="src"><pre class="src">&nbsp;<span class="keyword">import</span> com.dooapp.gaedo.blueprints.UnsupportedIdTypeException;</pre></td></tr>
+<tr>  <td class="numLine">&nbsp;13</td>  <td class="nbHits">&nbsp;</td>
+  <td class="src"><pre class="src">&nbsp;<span class="keyword">import</span> com.dooapp.gaedo.blueprints.queries.tests.AndVertexTest;</pre></td></tr>
+<tr>  <td class="numLine">&nbsp;14</td>  <td class="nbHits">&nbsp;</td>
+  <td class="src"><pre class="src">&nbsp;<span class="keyword">import</span> com.dooapp.gaedo.blueprints.queries.tests.CompoundVertexTest;</pre></td></tr>
+<tr>  <td class="numLine">&nbsp;15</td>  <td class="nbHits">&nbsp;</td>
+  <td class="src"><pre class="src">&nbsp;<span class="keyword">import</span> com.dooapp.gaedo.extensions.id.IdGenerator;</pre></td></tr>
+<tr>  <td class="numLine">&nbsp;16</td>  <td class="nbHits">&nbsp;</td>
+  <td class="src"><pre class="src">&nbsp;<span class="keyword">import</span> com.dooapp.gaedo.extensions.id.IntegerGenerator;</pre></td></tr>
+<tr>  <td class="numLine">&nbsp;17</td>  <td class="nbHits">&nbsp;</td>
+  <td class="src"><pre class="src">&nbsp;<span class="keyword">import</span> com.dooapp.gaedo.extensions.id.LongGenerator;</pre></td></tr>
+<tr>  <td class="numLine">&nbsp;18</td>  <td class="nbHits">&nbsp;</td>
+  <td class="src"><pre class="src">&nbsp;<span class="keyword">import</span> com.dooapp.gaedo.extensions.id.StringGenerator;</pre></td></tr>
+<tr>  <td class="numLine">&nbsp;19</td>  <td class="nbHits">&nbsp;</td>
+  <td class="src"><pre class="src">&nbsp;<span class="keyword">import</span> com.dooapp.gaedo.extensions.migrable.Migrator;</pre></td></tr>
+<tr>  <td class="numLine">&nbsp;20</td>  <td class="nbHits">&nbsp;</td>
+  <td class="src"><pre class="src">&nbsp;<span class="keyword">import</span> com.dooapp.gaedo.finders.id.AnnotationUtils;</pre></td></tr>
+<tr>  <td class="numLine">&nbsp;21</td>  <td class="nbHits">&nbsp;</td>
+  <td class="src"><pre class="src">&nbsp;<span class="keyword">import</span> com.dooapp.gaedo.properties.Property;</pre></td></tr>
+<tr>  <td class="numLine">&nbsp;22</td>  <td class="nbHits">&nbsp;</td>
+  <td class="src"><pre class="src">&nbsp;<span class="keyword">import</span> com.dooapp.gaedo.properties.PropertyProvider;</pre></td></tr>
+<tr>  <td class="numLine">&nbsp;23</td>  <td class="nbHits">&nbsp;</td>
+  <td class="src"><pre class="src">&nbsp;<span class="keyword">import</span> com.dooapp.gaedo.utils.Utils;</pre></td></tr>
+<tr>  <td class="numLine">&nbsp;24</td>  <td class="nbHits">&nbsp;</td>
+  <td class="src"><pre class="src">&nbsp;<span class="keyword">import</span> com.tinkerpop.blueprints.pgm.Edge;</pre></td></tr>
+<tr>  <td class="numLine">&nbsp;25</td>  <td class="nbHits">&nbsp;</td>
+  <td class="src"><pre class="src">&nbsp;<span class="keyword">import</span> com.tinkerpop.blueprints.pgm.Vertex;</pre></td></tr>
+<tr>  <td class="numLine">&nbsp;26</td>  <td class="nbHits">&nbsp;</td>
+  <td class="src"><pre class="src">&nbsp;</pre></td></tr>
+<tr>  <td class="numLine">&nbsp;27</td>  <td class="nbHits">&nbsp;</td>
+  <td class="src"><pre class="src">&nbsp;<span class="keyword">public</span> <span class="keyword">abstract</span> <span class="keyword">class</span> AbstractMappingStrategy&lt;DataType&gt; <span class="keyword">implements</span> GraphMappingStrategy&lt;DataType&gt;{</pre></td></tr>
+<tr>  <td class="numLine">&nbsp;28</td>  <td class="nbHits">&nbsp;</td>
+  <td class="src"><pre class="src">&nbsp;</pre></td></tr>
+<tr>  <td class="numLine">&nbsp;29</td>  <td class="nbHits">&nbsp;</td>
+  <td class="src"><pre class="src">&nbsp;    <span class="keyword">protected</span> <span class="keyword">final</span> PropertyProvider propertyProvider;</pre></td></tr>
+<tr>  <td class="numLine">&nbsp;30</td>  <td class="nbHits">&nbsp;</td>
+  <td class="src"><pre class="src">&nbsp;        <span class="keyword">protected</span> <span class="keyword">final</span> Class&lt;DataType&gt; serviceContainedClass;</pre></td></tr>
+<tr>  <td class="numLine">&nbsp;31</td>  <td class="nbHits">&nbsp;</td>
+  <td class="src"><pre class="src">&nbsp;        <span class="keyword">protected</span> <span class="keyword">final</span> Migrator migrator;</pre></td></tr>
+<tr>  <td class="numLine">&nbsp;32</td>  <td class="nbHits">&nbsp;</td>
+  <td class="src"><pre class="src">&nbsp;        <span class="comment">/**</span></pre></td></tr>
+<tr>  <td class="numLine">&nbsp;33</td>  <td class="nbHits">&nbsp;</td>
+  <td class="src"><pre class="src">&nbsp;<span class="comment">         * Property used to store id</span></pre></td></tr>
+<tr>  <td class="numLine">&nbsp;34</td>  <td class="nbHits">&nbsp;</td>
+  <td class="src"><pre class="src">&nbsp;<span class="comment">         */</span></pre></td></tr>
+<tr>  <td class="numLine">&nbsp;35</td>  <td class="nbHits">&nbsp;</td>
+  <td class="src"><pre class="src">&nbsp;        <span class="keyword">protected</span> Property idProperty;</pre></td></tr>
+<tr>  <td class="numLine">&nbsp;36</td>  <td class="nbHits">&nbsp;</td>
+  <td class="src"><pre class="src">&nbsp;        <span class="keyword">protected</span> <span class="keyword">boolean</span> idGenerationRequired;</pre></td></tr>
+<tr>  <td class="numLine">&nbsp;37</td>  <td class="nbHits">&nbsp;</td>
+  <td class="src"><pre class="src">&nbsp;        <span class="keyword">protected</span> AbstractBluePrintsBackedFinderService&lt;?, DataType, ?&gt; service;</pre></td></tr>
+<tr>  <td class="numLine">&nbsp;38</td>  <td class="nbHits">&nbsp;</td>
+  <td class="src"><pre class="src">&nbsp;</pre></td></tr>
+<tr>  <td class="numLine">&nbsp;39</td>  <td class="nbHits">&nbsp;</td>
+  <td class="src"><pre class="src">&nbsp;        <span class="keyword">public</span> AbstractMappingStrategy(Class&lt;DataType&gt; serviceContainedClass, PropertyProvider propertyProvider, Migrator migrator) {</pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;40</td>  <td class="nbHitsCovered">&nbsp;1524</td>  <td class="src"><pre class="src">&nbsp;                <span class="keyword">super</span>();</pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;41</td>  <td class="nbHitsCovered">&nbsp;1524</td>  <td class="src"><pre class="src">&nbsp;                <span class="keyword">this</span>.serviceContainedClass = serviceContainedClass;</pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;42</td>  <td class="nbHitsCovered">&nbsp;1524</td>  <td class="src"><pre class="src">&nbsp;                <span class="keyword">this</span>.propertyProvider = propertyProvider;</pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;43</td>  <td class="nbHitsCovered">&nbsp;1524</td>  <td class="src"><pre class="src">&nbsp;                <span class="keyword">this</span>.migrator = migrator;</pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;44</td>  <td class="nbHitsCovered">&nbsp;1524</td>  <td class="src"><pre class="src">&nbsp;                <span class="keyword">this</span>.idProperty = AnnotationUtils.locateIdField(propertyProvider, serviceContainedClass, Long.TYPE, Long.<span class="keyword">class</span>, String.<span class="keyword">class</span>);</pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;45</td>  <td class="nbHitsCovered"><a title="Line 45: Conditional coverage 100 % (2/2).">&nbsp;1524</a></td>  <td class="src"><pre class="src">&nbsp;<a title="Line 45: Conditional coverage 100 % (2/2).">                <span class="keyword">this</span>.idGenerationRequired = idProperty.getAnnotation(GeneratedValue.<span class="keyword">class</span>) != <span class="keyword">null</span>;</a></pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;46</td>  <td class="nbHitsCovered">&nbsp;1524</td>  <td class="src"><pre class="src">&nbsp;        }</pre></td></tr>
+<tr>  <td class="numLine">&nbsp;47</td>  <td class="nbHits">&nbsp;</td>
+  <td class="src"><pre class="src">&nbsp;</pre></td></tr>
+<tr>  <td class="numLine">&nbsp;48</td>  <td class="nbHits">&nbsp;</td>
+  <td class="src"><pre class="src">&nbsp;        <span class="comment">/**</span></pre></td></tr>
+<tr>  <td class="numLine">&nbsp;49</td>  <td class="nbHits">&nbsp;</td>
+  <td class="src"><pre class="src">&nbsp;<span class="comment">         * This implementation only supports single valued id</span></pre></td></tr>
+<tr>  <td class="numLine">&nbsp;50</td>  <td class="nbHits">&nbsp;</td>
+  <td class="src"><pre class="src">&nbsp;<span class="comment">         * @param value</span></pre></td></tr>
+<tr>  <td class="numLine">&nbsp;51</td>  <td class="nbHits">&nbsp;</td>
+  <td class="src"><pre class="src">&nbsp;<span class="comment">         * @param id</span></pre></td></tr>
+<tr>  <td class="numLine">&nbsp;52</td>  <td class="nbHits">&nbsp;</td>
+  <td class="src"><pre class="src">&nbsp;<span class="comment">         * @see com.dooapp.gaedo.blueprints.strategies.GraphMappingStrategy#assignId(java.lang.Object, java.lang.Object[])</span></pre></td></tr>
+<tr>  <td class="numLine">&nbsp;53</td>  <td class="nbHits">&nbsp;</td>
+  <td class="src"><pre class="src">&nbsp;<span class="comment">         */</span></pre></td></tr>
+<tr>  <td class="numLine">&nbsp;54</td>  <td class="nbHits">&nbsp;</td>
+  <td class="src"><pre class="src">&nbsp;        @Override</pre></td></tr>
+<tr>  <td class="numLine">&nbsp;55</td>  <td class="nbHits">&nbsp;</td>
+  <td class="src"><pre class="src">&nbsp;        <span class="keyword">public</span> <span class="keyword">void</span> assignId(DataType value, Object... id) {</pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;56</td>  <td class="nbHitsCovered">&nbsp;66</td>  <td class="src"><pre class="src">&nbsp;                idProperty.set(value, id[0]);</pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;57</td>  <td class="nbHitsCovered">&nbsp;66</td>  <td class="src"><pre class="src">&nbsp;        }</pre></td></tr>
+<tr>  <td class="numLine">&nbsp;58</td>  <td class="nbHits">&nbsp;</td>
+  <td class="src"><pre class="src">&nbsp;</pre></td></tr>
+<tr>  <td class="numLine">&nbsp;59</td>  <td class="nbHits">&nbsp;</td>
+  <td class="src"><pre class="src">&nbsp;        @Override</pre></td></tr>
+<tr>  <td class="numLine">&nbsp;60</td>  <td class="nbHits">&nbsp;</td>
+  <td class="src"><pre class="src">&nbsp;        <span class="keyword">public</span> <span class="keyword">void</span> generateValidIdFor(DataType toCreate) {</pre></td></tr>
+<tr>  <td class="numLine">&nbsp;61</td>  <td class="nbHits">&nbsp;</td>
+  <td class="src"><pre class="src">&nbsp;                <span class="comment">// Check value of idProperty</span></pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;62</td>  <td class="nbHitsCovered">&nbsp;6108</td>  <td class="src"><pre class="src">&nbsp;                Object value = idProperty.get(toCreate);</pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;63</td>  <td class="nbHitsUncovered"><a title="Line 63: Conditional coverage 50 % (1/2).">&nbsp;6108</a></td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;<a title="Line 63: Conditional coverage 50 % (1/2).">                <span class="keyword">if</span> (value == <span class="keyword">null</span>) {</a></span></pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;64</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;                        generateIdFor(service, toCreate);</span></pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;65</td>  <td class="nbHitsCovered"><a title="Line 65: Conditional coverage 100 % (2/2).">&nbsp;6108</a></td>  <td class="src"><pre class="src">&nbsp;<a title="Line 65: Conditional coverage 100 % (2/2).">                } <span class="keyword">else</span> <span class="keyword">if</span> (Number.<span class="keyword">class</span>.isAssignableFrom(Utils.maybeObjectify(idProperty.getType()))) {</a></pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;66</td>  <td class="nbHitsCovered">&nbsp;6066</td>  <td class="src"><pre class="src">&nbsp;                        Number n = (Number) value;</pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;67</td>  <td class="nbHitsUncovered"><a title="Line 67: Conditional coverage 75 % (3/4) [each condition: 50 %, 100 %].">&nbsp;6066</a></td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;<a title="Line 67: Conditional coverage 75 % (3/4) [each condition: 50 %, 100 %].">                        <span class="keyword">if</span> (n.equals(0) || n.equals(0l)) {</a></span></pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;68</td>  <td class="nbHitsCovered">&nbsp;66</td>  <td class="src"><pre class="src">&nbsp;                                generateIdFor(service, toCreate);</pre></td></tr>
+<tr>  <td class="numLine">&nbsp;69</td>  <td class="nbHits">&nbsp;</td>
+  <td class="src"><pre class="src">&nbsp;                        }</pre></td></tr>
+<tr>  <td class="numLine">&nbsp;70</td>  <td class="nbHits">&nbsp;</td>
+  <td class="src"><pre class="src">&nbsp;                }</pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;71</td>  <td class="nbHitsCovered">&nbsp;6108</td>  <td class="src"><pre class="src">&nbsp;        }</pre></td></tr>
+<tr>  <td class="numLine">&nbsp;72</td>  <td class="nbHits">&nbsp;</td>
+  <td class="src"><pre class="src">&nbsp;</pre></td></tr>
+<tr>  <td class="numLine">&nbsp;73</td>  <td class="nbHits">&nbsp;</td>
+  <td class="src"><pre class="src">&nbsp;        @Override</pre></td></tr>
+<tr>  <td class="numLine">&nbsp;74</td>  <td class="nbHits">&nbsp;</td>
+  <td class="src"><pre class="src">&nbsp;        <span class="keyword">public</span> String getIdString(DataType object) {</pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;75</td>  <td class="nbHitsCovered">&nbsp;10560</td>  <td class="src"><pre class="src">&nbsp;                Object objectId = idProperty.get(object);</pre></td></tr>
+<tr>  <td class="numLine">&nbsp;76</td>  <td class="nbHits">&nbsp;</td>
+  <td class="src"><pre class="src">&nbsp;                <span class="comment">// modified due to https://github.com/Riduidel/gaedo/issues/23</span></pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;77</td>  <td class="nbHitsCovered">&nbsp;10560</td>  <td class="src"><pre class="src">&nbsp;                <span class="keyword">return</span> GraphUtils.getIdOfLiteral(object.getClass(), idProperty, objectId);</pre></td></tr>
+<tr>  <td class="numLine">&nbsp;78</td>  <td class="nbHits">&nbsp;</td>
+  <td class="src"><pre class="src">&nbsp;        }</pre></td></tr>
+<tr>  <td class="numLine">&nbsp;79</td>  <td class="nbHits">&nbsp;</td>
+  <td class="src"><pre class="src">&nbsp;</pre></td></tr>
+<tr>  <td class="numLine">&nbsp;80</td>  <td class="nbHits">&nbsp;</td>
+  <td class="src"><pre class="src">&nbsp;        @Override</pre></td></tr>
+<tr>  <td class="numLine">&nbsp;81</td>  <td class="nbHits">&nbsp;</td>
+  <td class="src"><pre class="src">&nbsp;        <span class="keyword">public</span> String getAsId(Object object) {</pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;82</td>  <td class="nbHitsUncovered"><a title="Line 82: Conditional coverage 50 % (1/2).">&nbsp;132</a></td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;<a title="Line 82: Conditional coverage 50 % (1/2).">                <span class="keyword">if</span> (Utils.maybeObjectify(idProperty.getType()).isAssignableFrom(Utils.maybeObjectify(object.getClass()))) {</a></span></pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;83</td>  <td class="nbHitsCovered">&nbsp;132</td>  <td class="src"><pre class="src">&nbsp;                        <span class="keyword">return</span> GraphUtils.getIdOfLiteral(serviceContainedClass, idProperty, object);</pre></td></tr>
+<tr>  <td class="numLine">&nbsp;84</td>  <td class="nbHits">&nbsp;</td>
+  <td class="src"><pre class="src">&nbsp;                } <span class="keyword">else</span> {</pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;85</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;                        <span class="keyword">throw</span> <span class="keyword">new</span> UnsupportedIdException(object.getClass(), idProperty.getType());</span></pre></td></tr>
+<tr>  <td class="numLine">&nbsp;86</td>  <td class="nbHits">&nbsp;</td>
+  <td class="src"><pre class="src">&nbsp;                }</pre></td></tr>
+<tr>  <td class="numLine">&nbsp;87</td>  <td class="nbHits">&nbsp;</td>
+  <td class="src"><pre class="src">&nbsp;        }</pre></td></tr>
+<tr>  <td class="numLine">&nbsp;88</td>  <td class="nbHits">&nbsp;</td>
+  <td class="src"><pre class="src">&nbsp;</pre></td></tr>
+<tr>  <td class="numLine">&nbsp;89</td>  <td class="nbHits">&nbsp;</td>
+  <td class="src"><pre class="src">&nbsp;        @Override</pre></td></tr>
+<tr>  <td class="numLine">&nbsp;90</td>  <td class="nbHits">&nbsp;</td>
+  <td class="src"><pre class="src">&nbsp;        <span class="keyword">public</span> Collection&lt;Property&gt; getIdProperties() {</pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;91</td>  <td class="nbHitsCovered">&nbsp;78</td>  <td class="src"><pre class="src">&nbsp;                <span class="keyword">return</span> Arrays.asList(idProperty);</pre></td></tr>
+<tr>  <td class="numLine">&nbsp;92</td>  <td class="nbHits">&nbsp;</td>
+  <td class="src"><pre class="src">&nbsp;        }</pre></td></tr>
+<tr>  <td class="numLine">&nbsp;93</td>  <td class="nbHits">&nbsp;</td>
+  <td class="src"><pre class="src">&nbsp;</pre></td></tr>
+<tr>  <td class="numLine">&nbsp;94</td>  <td class="nbHits">&nbsp;</td>
+  <td class="src"><pre class="src">&nbsp;        @Override</pre></td></tr>
+<tr>  <td class="numLine">&nbsp;95</td>  <td class="nbHits">&nbsp;</td>
+  <td class="src"><pre class="src">&nbsp;        <span class="keyword">public</span> <span class="keyword">boolean</span> isIdGenerationRequired() {</pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;96</td>  <td class="nbHitsCovered">&nbsp;5580</td>  <td class="src"><pre class="src">&nbsp;                <span class="keyword">return</span> idGenerationRequired;</pre></td></tr>
+<tr>  <td class="numLine">&nbsp;97</td>  <td class="nbHits">&nbsp;</td>
+  <td class="src"><pre class="src">&nbsp;        }</pre></td></tr>
+<tr>  <td class="numLine">&nbsp;98</td>  <td class="nbHits">&nbsp;</td>
+  <td class="src"><pre class="src">&nbsp;</pre></td></tr>
+<tr>  <td class="numLine">&nbsp;99</td>  <td class="nbHits">&nbsp;</td>
+  <td class="src"><pre class="src">&nbsp;        <span class="keyword">public</span> <span class="keyword">void</span> generateIdFor(AbstractBluePrintsBackedFinderService&lt;?, DataType, ?&gt; service, DataType toCreate) {</pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;100</td>  <td class="nbHitsCovered">&nbsp;66</td>  <td class="src"><pre class="src">&nbsp;                IdGenerator generator = <span class="keyword">null</span>;</pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;101</td>  <td class="nbHitsCovered">&nbsp;66</td>  <td class="src"><pre class="src">&nbsp;                Class&lt;?&gt; objectType = Utils.maybeObjectify(idProperty.getType());</pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;102</td>  <td class="nbHitsUncovered"><a title="Line 102: Conditional coverage 50 % (1/2).">&nbsp;66</a></td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;<a title="Line 102: Conditional coverage 50 % (1/2).">                <span class="keyword">if</span> (Long.<span class="keyword">class</span>.isAssignableFrom(objectType)) {</a></span></pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;103</td>  <td class="nbHitsCovered">&nbsp;66</td>  <td class="src"><pre class="src">&nbsp;                        generator = <span class="keyword">new</span> LongGenerator(service, idProperty);</pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;104</td>  <td class="nbHitsUncovered"><a title="Line 104: Conditional coverage 0 % (0/2).">&nbsp;0</a></td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;<a title="Line 104: Conditional coverage 0 % (0/2).">                } <span class="keyword">else</span> <span class="keyword">if</span> (Integer.<span class="keyword">class</span>.isAssignableFrom(objectType)) {</a></span></pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;105</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;                        generator = <span class="keyword">new</span> IntegerGenerator(service, idProperty);</span></pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;106</td>  <td class="nbHitsUncovered"><a title="Line 106: Conditional coverage 0 % (0/2).">&nbsp;0</a></td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;<a title="Line 106: Conditional coverage 0 % (0/2).">                } <span class="keyword">else</span> <span class="keyword">if</span> (String.<span class="keyword">class</span>.isAssignableFrom(objectType)) {</a></span></pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;107</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;                        generator = <span class="keyword">new</span> StringGenerator(service, idProperty);</span></pre></td></tr>
+<tr>  <td class="numLine">&nbsp;108</td>  <td class="nbHits">&nbsp;</td>
+  <td class="src"><pre class="src">&nbsp;                } <span class="keyword">else</span> {</pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;109</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;                        <span class="keyword">throw</span> <span class="keyword">new</span> UnsupportedIdTypeException(objectType + <span class="string">" can't be used as id : we don't know how to generate its values !"</span>);</span></pre></td></tr>
+<tr>  <td class="numLine">&nbsp;110</td>  <td class="nbHits">&nbsp;</td>
+  <td class="src"><pre class="src">&nbsp;                }</pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;111</td>  <td class="nbHitsCovered">&nbsp;66</td>  <td class="src"><pre class="src">&nbsp;                generator.generateIdFor(toCreate);</pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;112</td>  <td class="nbHitsCovered">&nbsp;66</td>  <td class="src"><pre class="src">&nbsp;        }</pre></td></tr>
+<tr>  <td class="numLine">&nbsp;113</td>  <td class="nbHits">&nbsp;</td>
+  <td class="src"><pre class="src">&nbsp;</pre></td></tr>
+<tr>  <td class="numLine">&nbsp;114</td>  <td class="nbHits">&nbsp;</td>
+  <td class="src"><pre class="src">&nbsp;        @Override</pre></td></tr>
+<tr>  <td class="numLine">&nbsp;115</td>  <td class="nbHits">&nbsp;</td>
+  <td class="src"><pre class="src">&nbsp;        <span class="keyword">public</span> <span class="keyword">void</span> reloadWith(AbstractBluePrintsBackedFinderService&lt;?, DataType, ?&gt; service) {</pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;116</td>  <td class="nbHitsCovered">&nbsp;1584</td>  <td class="src"><pre class="src">&nbsp;                <span class="keyword">this</span>.service = service;</pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;117</td>  <td class="nbHitsCovered">&nbsp;1584</td>  <td class="src"><pre class="src">&nbsp;        }</pre></td></tr>
+<tr>  <td class="numLine">&nbsp;118</td>  <td class="nbHits">&nbsp;</td>
+  <td class="src"><pre class="src">&nbsp;</pre></td></tr>
+<tr>  <td class="numLine">&nbsp;119</td>  <td class="nbHits">&nbsp;</td>
+  <td class="src"><pre class="src">&nbsp;        <span class="comment">/**</span></pre></td></tr>
+<tr>  <td class="numLine">&nbsp;120</td>  <td class="nbHits">&nbsp;</td>
+  <td class="src"><pre class="src">&nbsp;<span class="comment">         * Default implementation will call subclass {@link #addDefaultSearchToAndTest(AndVertexTest)} on an {@link AndVertexTest} that may be created on the fly.</span></pre></td></tr>
+<tr>  <td class="numLine">&nbsp;121</td>  <td class="nbHits">&nbsp;</td>
+  <td class="src"><pre class="src">&nbsp;<span class="comment">         * </span></pre></td></tr>
+<tr>  <td class="numLine">&nbsp;122</td>  <td class="nbHits">&nbsp;</td>
+  <td class="src"><pre class="src">&nbsp;<span class="comment">         * @param vertexTest vertex test to add default search to</span></pre></td></tr>
+<tr>  <td class="numLine">&nbsp;123</td>  <td class="nbHits">&nbsp;</td>
+  <td class="src"><pre class="src">&nbsp;<span class="comment">         * @return a vertex test with default search installed</span></pre></td></tr>
+<tr>  <td class="numLine">&nbsp;124</td>  <td class="nbHits">&nbsp;</td>
+  <td class="src"><pre class="src">&nbsp;<span class="comment">         */</span></pre></td></tr>
+<tr>  <td class="numLine">&nbsp;125</td>  <td class="nbHits">&nbsp;</td>
+  <td class="src"><pre class="src">&nbsp;        @Override</pre></td></tr>
+<tr>  <td class="numLine">&nbsp;126</td>  <td class="nbHits">&nbsp;</td>
+  <td class="src"><pre class="src">&nbsp;        <span class="keyword">public</span> CompoundVertexTest addDefaultSearchTo(CompoundVertexTest vertexTest) {</pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;127</td>  <td class="nbHitsUncovered"><a title="Line 127: Conditional coverage 50 % (1/2).">&nbsp;354</a></td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;<a title="Line 127: Conditional coverage 50 % (1/2).">                <span class="keyword">if</span> (vertexTest <span class="keyword">instanceof</span> AndVertexTest) {</a></span></pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;128</td>  <td class="nbHitsCovered">&nbsp;354</td>  <td class="src"><pre class="src">&nbsp;                        <span class="keyword">return</span> addDefaultSearchToAndTest((AndVertexTest) vertexTest);</pre></td></tr>
+<tr>  <td class="numLine">&nbsp;129</td>  <td class="nbHits">&nbsp;</td>
+  <td class="src"><pre class="src">&nbsp;                } <span class="keyword">else</span> {</pre></td></tr>
+<tr>  <td class="numLine">&nbsp;130</td>  <td class="nbHits">&nbsp;</td>
+  <td class="src"><pre class="src">&nbsp;                        <span class="comment">// Create a new AndTest, add to it current vertex test and test on</span></pre></td></tr>
+<tr>  <td class="numLine">&nbsp;131</td>  <td class="nbHits">&nbsp;</td>
+  <td class="src"><pre class="src">&nbsp;                        <span class="comment">// class</span></pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;132</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;                        AndVertexTest used = <span class="keyword">new</span> AndVertexTest(vertexTest.getDriver(), vertexTest.getPath());</span></pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;133</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;                        used.add(vertexTest);</span></pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;134</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;                        <span class="keyword">return</span> addDefaultSearchTo(used);</span></pre></td></tr>
+<tr>  <td class="numLine">&nbsp;135</td>  <td class="nbHits">&nbsp;</td>
+  <td class="src"><pre class="src">&nbsp;                }</pre></td></tr>
+<tr>  <td class="numLine">&nbsp;136</td>  <td class="nbHits">&nbsp;</td>
+  <td class="src"><pre class="src">&nbsp;        }</pre></td></tr>
+<tr>  <td class="numLine">&nbsp;137</td>  <td class="nbHits">&nbsp;</td>
+  <td class="src"><pre class="src">&nbsp;</pre></td></tr>
+<tr>  <td class="numLine">&nbsp;138</td>  <td class="nbHits">&nbsp;</td>
+  <td class="src"><pre class="src">&nbsp;        <span class="comment">/**</span></pre></td></tr>
+<tr>  <td class="numLine">&nbsp;139</td>  <td class="nbHits">&nbsp;</td>
+  <td class="src"><pre class="src">&nbsp;<span class="comment">         * Add default search to an And vertex test, which is an obvious prerequisite.</span></pre></td></tr>
+<tr>  <td class="numLine">&nbsp;140</td>  <td class="nbHits">&nbsp;</td>
+  <td class="src"><pre class="src">&nbsp;<span class="comment">         * @param vertexTest</span></pre></td></tr>
+<tr>  <td class="numLine">&nbsp;141</td>  <td class="nbHits">&nbsp;</td>
+  <td class="src"><pre class="src">&nbsp;<span class="comment">         * @return</span></pre></td></tr>
+<tr>  <td class="numLine">&nbsp;142</td>  <td class="nbHits">&nbsp;</td>
+  <td class="src"><pre class="src">&nbsp;<span class="comment">         */</span></pre></td></tr>
+<tr>  <td class="numLine">&nbsp;143</td>  <td class="nbHits">&nbsp;</td>
+  <td class="src"><pre class="src">&nbsp;        <span class="keyword">protected</span> <span class="keyword">abstract</span> CompoundVertexTest addDefaultSearchToAndTest(AndVertexTest vertexTest);</pre></td></tr>
+<tr>  <td class="numLine">&nbsp;144</td>  <td class="nbHits">&nbsp;</td>
+  <td class="src"><pre class="src">&nbsp;</pre></td></tr>
+<tr>  <td class="numLine">&nbsp;145</td>  <td class="nbHits">&nbsp;</td>
+  <td class="src"><pre class="src">&nbsp;        @Override</pre></td></tr>
+<tr>  <td class="numLine">&nbsp;146</td>  <td class="nbHits">&nbsp;</td>
+  <td class="src"><pre class="src">&nbsp;        <span class="keyword">public</span> Iterable&lt;Edge&gt; getOutEdgesFor(Vertex rootVertex, Property p) {</pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;147</td>  <td class="nbHitsCovered">&nbsp;47274</td>  <td class="src"><pre class="src">&nbsp;                String edgeNameFor = GraphUtils.getEdgeNameFor(p);</pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;148</td>  <td class="nbHitsCovered">&nbsp;47274</td>  <td class="src"><pre class="src">&nbsp;                Iterable&lt;Edge&gt; allEdges = rootVertex.getOutEdges(edgeNameFor);</pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;149</td>  <td class="nbHitsCovered">&nbsp;47274</td>  <td class="src"><pre class="src">&nbsp;                Collection&lt;Edge&gt; returned = <span class="keyword">new</span> LinkedList&lt;Edge&gt;();</pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;150</td>  <td class="nbHitsCovered"><a title="Line 150: Conditional coverage 100 % (2/2).">&nbsp;47274</a></td>  <td class="src"><pre class="src">&nbsp;<a title="Line 150: Conditional coverage 100 % (2/2).">                <span class="keyword">for</span>(Edge e : allEdges) {</a></pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;151</td>  <td class="nbHitsUncovered"><a title="Line 151: Conditional coverage 50 % (1/2).">&nbsp;36246</a></td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;<a title="Line 151: Conditional coverage 50 % (1/2).">                        <span class="keyword">if</span>(GraphUtils.isInNamedGraphs(e, service.getLens())) {</a></span></pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;152</td>  <td class="nbHitsCovered">&nbsp;36246</td>  <td class="src"><pre class="src">&nbsp;                                returned.add(e);</pre></td></tr>
+<tr>  <td class="numLine">&nbsp;153</td>  <td class="nbHits">&nbsp;</td>
+  <td class="src"><pre class="src">&nbsp;                        }</pre></td></tr>
+<tr>  <td class="numLine">&nbsp;154</td>  <td class="nbHits">&nbsp;</td>
+  <td class="src"><pre class="src">&nbsp;                }</pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;155</td>  <td class="nbHitsCovered">&nbsp;47274</td>  <td class="src"><pre class="src">&nbsp;                <span class="keyword">return</span> returned;</pre></td></tr>
+<tr>  <td class="numLine">&nbsp;156</td>  <td class="nbHits">&nbsp;</td>
+  <td class="src"><pre class="src">&nbsp;        }</pre></td></tr>
+<tr>  <td class="numLine">&nbsp;157</td>  <td class="nbHits">&nbsp;</td>
+  <td class="src"><pre class="src">&nbsp;}</pre></td></tr>
+</table>
+
+<div class="footer">Report generated by <a href="http://cobertura.sourceforge.net/" target="_top">Cobertura</a> 1.9.4.1 on 19/12/12 15:28.</div>
+</body>
+</html>
