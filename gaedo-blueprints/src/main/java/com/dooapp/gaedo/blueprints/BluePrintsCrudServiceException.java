@@ -4,6 +4,8 @@ import com.dooapp.gaedo.CrudServiceException;
 
 public abstract class BluePrintsCrudServiceException extends CrudServiceException {
 
+	private static final long serialVersionUID = 1L;
+
 	public BluePrintsCrudServiceException() {
 		super();
 	}
