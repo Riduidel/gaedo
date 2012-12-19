@@ -20,5 +20,10 @@ public enum Properties {
 	/**
 	 * Contains the edge label (not appliable to vertices)
 	 */
-	label;
+	label,
+	/**
+	 * Indicates at which index in the Collection an Edge (or rather, the Node to which
+	 * the Edge links) should appear.
+	 */
+	collection_index;
 }

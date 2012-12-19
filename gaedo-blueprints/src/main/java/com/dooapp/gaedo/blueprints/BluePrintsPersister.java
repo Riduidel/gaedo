@@ -1,5 +1,23 @@
 package com.dooapp.gaedo.blueprints;
 
+import java.io.Serializable;
+import java.lang.reflect.Modifier;
+import java.lang.reflect.Proxy;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Set;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
+import javax.persistence.CascadeType;
+import javax.persistence.FetchType;
+import javax.persistence.ManyToMany;
+import javax.persistence.OneToMany;
+
 import com.dooapp.gaedo.blueprints.strategies.GraphMappingStrategy;
 import com.dooapp.gaedo.finders.id.AnnotationsFinder.Annotations;
 import com.dooapp.gaedo.finders.repository.ServiceRepository;
@@ -10,18 +28,6 @@ import com.tinkerpop.blueprints.pgm.Edge;
 import com.tinkerpop.blueprints.pgm.Graph;
 import com.tinkerpop.blueprints.pgm.IndexableGraph;
 import com.tinkerpop.blueprints.pgm.Vertex;
-
-import javax.persistence.CascadeType;
-import javax.persistence.FetchType;
-import javax.persistence.ManyToMany;
-import javax.persistence.OneToMany;
-import java.io.Serializable;
-import java.lang.reflect.Modifier;
-import java.lang.reflect.Proxy;
-import java.util.*;
-import java.util.Map.Entry;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 public class BluePrintsPersister {
     private static final Logger logger = Logger.getLogger(BluePrintsPersister.class.getName());
@@ -344,8 +350,11 @@ public class BluePrintsPersister {
                 database.removeEdge(entry.getValue());
             }
             // And finally add new vertices
+            int order = 0;
             for (Vertex newVertex : newVertices) {
-                service.getDriver().createEdgeFor(rootVertex, newVertex, p);
+                Edge createdEdge = service.getDriver().createEdgeFor(rootVertex, newVertex, p);
+                // Add a fancy-schmancy property to maintain order in this town
+                createdEdge.setProperty(Properties.collection_index.name(), order++);
             }
         }
     }
@@ -358,7 +367,7 @@ public class BluePrintsPersister {
      * @return collection of vertices created by {@link #getVertexFor(Object)}
      */
     private Collection<Vertex> createCollectionVerticesFor(AbstractBluePrintsBackedFinderService<? extends Graph, ?, ?> service, Collection<?> value, CascadeType cascade, Map<String, Object> objectsBeingAccessed) {
-        Collection<Vertex> returned = new HashSet<Vertex>();
+        Collection<Vertex> returned = new java.util.LinkedList<Vertex>();
         for (Object o : value) {
         	// already heard about null-containing collections ? I do know them, and they're pure EVIL
         	if(o!=null)
@@ -564,9 +573,21 @@ public class BluePrintsPersister {
      * @param returned
      * @param objectVertex
      */
-    private <DataType> void loadCollection(GraphDatabaseDriver driver, GraphMappingStrategy strategy, ClassLoader classLoader, ServiceRepository repository, Property p, DataType returned, Vertex objectVertex, Map<String, Object> objectsBeingAccessed) {
+    private <DataType> void loadCollection(
+	    	GraphDatabaseDriver driver,
+	    	GraphMappingStrategy strategy,
+	    	ClassLoader classLoader,
+	    	ServiceRepository repository,
+	    	Property p,
+	    	DataType returned,
+	    	Vertex objectVertex,
+	    	Map<String, Object> objectsBeingAccessed) {
+    	
+    	// Figure out whether we want to lazy- or eager-load
+    	
         boolean eagerLoad = false;
-        // property may be associated to a onetomany or manytomany mapping. in such a case, check if there is an eager loading info
+        // property may be associated with a one-to-many or many-to-many mapping. in such a case, check if
+        // there is an eager loading info
         OneToMany oneToMany = p.getAnnotation(OneToMany.class);
         if (oneToMany != null) {
             eagerLoad = FetchType.EAGER.equals(oneToMany.fetch());
@@ -577,6 +598,9 @@ public class BluePrintsPersister {
                 eagerLoad = FetchType.EAGER.equals(manyToMany.fetch());
             }
         }
+        
+        // Get down to brass tacks
+        
         Collection<Object> generatedCollection = Utils.generateCollection((Class<?>) p.getType(), null);
         CollectionLazyLoader handler = new CollectionLazyLoader(driver, strategy, classLoader, repository, p, objectVertex, generatedCollection, objectsBeingAccessed);
         if (eagerLoad) {

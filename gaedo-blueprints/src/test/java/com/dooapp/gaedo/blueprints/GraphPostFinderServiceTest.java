@@ -1,5 +1,8 @@
 package com.dooapp.gaedo.blueprints;
 
+import static com.dooapp.gaedo.blueprints.TestUtils.*;
+import static org.junit.Assert.assertThat;
+
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -20,6 +23,7 @@ import java.util.logging.Logger;
 
 import net.fortytwo.sesametools.nquads.NQuadsWriter;
 
+import static org.hamcrest.CoreMatchers.*;
 import org.hamcrest.core.Is;
 import org.hamcrest.core.IsNot;
 import org.hamcrest.core.IsNull;
@@ -42,9 +46,7 @@ import com.dooapp.gaedo.finders.QueryBuilder;
 import com.dooapp.gaedo.finders.QueryExpression;
 import com.dooapp.gaedo.finders.SortingBuilder;
 import com.dooapp.gaedo.finders.SortingExpression;
-import com.dooapp.gaedo.finders.SortingExpression.Direction;
 import com.dooapp.gaedo.finders.id.IdBasedService;
-import com.dooapp.gaedo.finders.sort.SortingExpressionImpl;
 import com.dooapp.gaedo.test.beans.Post;
 import com.dooapp.gaedo.test.beans.PostInformer;
 import com.dooapp.gaedo.test.beans.State;
@@ -57,19 +59,6 @@ import com.tinkerpop.blueprints.pgm.Edge;
 import com.tinkerpop.blueprints.pgm.Index;
 import com.tinkerpop.blueprints.pgm.IndexableGraph;
 import com.tinkerpop.blueprints.pgm.TransactionalGraph;
-
-import static com.dooapp.gaedo.blueprints.TestUtils.A;
-import static com.dooapp.gaedo.blueprints.TestUtils.ABOUT_ID;
-import static com.dooapp.gaedo.blueprints.TestUtils.ID_POST_1;
-import static com.dooapp.gaedo.blueprints.TestUtils.LOGIN_FOR_UPDATE_ON_CREATE;
-import static com.dooapp.gaedo.blueprints.TestUtils.SOME_NEW_TEXT;
-import static com.dooapp.gaedo.blueprints.TestUtils.TAG_TEXT;
-import static com.dooapp.gaedo.blueprints.TestUtils.TEST_TAG_FOR_CREATE_ON_UPDATE;
-import static com.dooapp.gaedo.blueprints.TestUtils.USER_LOGIN;
-import static com.dooapp.gaedo.blueprints.TestUtils.USER_PASSWORD;
-import static com.dooapp.gaedo.blueprints.TestUtils.simpleTest;
-
-import static org.junit.Assert.assertThat;
 
 @RunWith(Parameterized.class)
 public class GraphPostFinderServiceTest extends AbstractGraphTest {
