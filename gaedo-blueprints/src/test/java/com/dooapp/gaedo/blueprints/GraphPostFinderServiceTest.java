@@ -97,23 +97,6 @@ public class GraphPostFinderServiceTest extends AbstractGraphTest {
 		author = getUserService().update(author);
 	}
 	
-	@Test
-	public void makeSureListOrderIsPreserved() {
-		User user = getUserService().find().matching(new QueryBuilder<UserInformer>() {
-
-			@Override
-			public QueryExpression createMatchingExpression(UserInformer informer) {
-				return informer.getId().equalsTo(1);
-			}
-			
-		}).getFirst();
-		
-		assertThat("Make sure we got the right number of posts", user.posts.size(), is(3));
-		assertThat("First post is in correct position", user.posts.get(0), is(post1));
-		assertThat("Second post is in correct position", user.posts.get(1), is(post2));
-		assertThat("Third post is in correct position", user.posts.get(2), is(post3));
-	}
-	
 	private Map<String, String> theseMappings(String...strings) {
 		Map<String, String> returned = new TreeMap<String, String>();
 		for (int i = 0; i < strings.length; i++) {
