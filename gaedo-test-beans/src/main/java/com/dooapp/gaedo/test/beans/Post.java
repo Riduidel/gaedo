@@ -106,4 +106,22 @@ public class Post extends Identified implements Serializable, Message {
 		author = first;
 		return this;
 	}
+
+	@Override
+	public String toString() {
+		StringBuilder b = new StringBuilder();
+		
+		b.append("Post id = " + id + ":");
+		if(null != author)
+			b.append("\nauthor: " + author);
+		b.append("\nnote: " + note);
+		if(null != publicationDate)
+			b.append("\npublication date: " + publicationDate);
+		if(null != state)
+			b.append("\nstate: " + state);
+		if(null != text)
+			b.append("\ntext: " + text);
+		
+		return b.toString();
+	}
 }
