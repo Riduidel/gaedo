@@ -11,6 +11,7 @@ Gaedo initially stood for "Google App Engine Data Object", but has since evolved
 
 Since version 0.3.0, project documentation is available through [GitHub pages][1]. For reference, here are all versions' pages (sorted in reverse numeric order): 
 
+ * [0.4.13][13] released on December 19, 2012; contains some interesting tricks by Kricket
  * [0.4.11][2] also released on December 13, 2012; only contains bugfix for [issue #32][3]
  * [0.4.10][2] released on December 13, 2012; only contains bugfix for [issue #31][3]
  * [0.4.9][4] released on December 12, 2012 (can you imagine cascade flags were never taken into account before?)
@@ -35,4 +36,5 @@ Since version 0.3.0, project documentation is available through [GitHub pages][1
   [9]: http://riduidel.github.com/gaedo/site/0.4.1/
   [10]: http://riduidel.github.com/gaedo/site/0.4.1/
   [11]: http://riduidel.github.com/gaedo/site/0.4.0/
-  [12]: http://riduidel.github.com/gaedo/site/0.4.1/
+  [12]: http://riduidel.github.com/gaedo/site/0.3.0/
+  [13]: http://riduidel.github.com/gaedo/site/0.4.13/
