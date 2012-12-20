@@ -30,7 +30,11 @@ public class CollectionLazyLoader extends AbstractLazyLoader implements Invocati
 	
 	/**
 	 * Comparator used to sort the Edges linking an object with the the elements of a Collection.
-	 * This is used to maintain order in ordered collections like List.
+	 * This is used to maintain order in ordered Collections like List.
+	 * <p>Any Edges that do not have an associated order index, are considered "less than" those
+	 * with order information. The reason for this is that Edges without this information were
+	 * (probably) created by a previous version of gaedo, and were thus in the Collection
+	 * BEFORE the ordered Edges.
 	 */
 	private static Comparator<Edge> COLLECTION_EDGE_COMPARATOR = new Comparator<Edge>() {
 		@Override
@@ -38,8 +42,14 @@ public class CollectionLazyLoader extends AbstractLazyLoader implements Invocati
 			Integer o1Idx = (Integer) o1.getProperty(Properties.collection_index.name());
 			Integer o2Idx = (Integer) o2.getProperty(Properties.collection_index.name());
 			
-			if(null == o1Idx || null == o2Idx)
-				throw new UnableToSortException("An edge in an ordered collection does not have an index, so we don't know where to put it!");
+			if(null == o1Idx && null == o2Idx)
+				return 0;
+			
+			if(null == o1Idx)
+				return -1;
+			
+			if(null == o2Idx)
+				return 1;
 			
 			return o1Idx.compareTo(o2Idx);
 		}
