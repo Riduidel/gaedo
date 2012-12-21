@@ -361,10 +361,18 @@ public class GraphPostFinderServiceTest extends AbstractGraphTest {
 		assertThat(inDB.getId(), IsNot.not(0l));
 	}
 
+	/**
+	 * As a consequence of https://github.com/Riduidel/gaedo/issues/41
+	 * this test has been changed to make sure update on create has not the slightest influence
+	 * @throws IOException
+	 * @throws ClassNotFoundException
+	 */
 	@Test
-	public void ensureUpdateOnCreateWorks() throws IOException, ClassNotFoundException {
+	public void ensureUpdateOnCreateDoNotWork() throws IOException, ClassNotFoundException {
 		Post newxONe = new Post().withText(SOME_NEW_TEXT).withAuthor(author);
+		String initialLogin = author.getLogin();
 		author.setLogin(LOGIN_FOR_UPDATE_ON_CREATE);
+		String initialText = tag1.getText();
 		tag1.setText(TEST_TAG_FOR_CREATE_ON_UPDATE);
 		newxONe.tags.add(tag1);
 		newxONe = getPostService().create(newxONe);
@@ -376,7 +384,7 @@ public class GraphPostFinderServiceTest extends AbstractGraphTest {
 					return informer.getPassword().equalsTo(author.password);
 				}
 			}).getFirst();
-			assertThat(author.getLogin(), Is.is(LOGIN_FOR_UPDATE_ON_CREATE));
+			assertThat(author.getLogin(), Is.is(initialLogin));
 			Tag official = getTagService().find().matching(new QueryBuilder<TagInformer>() {
 	
 				@Override
@@ -384,11 +392,9 @@ public class GraphPostFinderServiceTest extends AbstractGraphTest {
 					return informer.getId().equalsTo(tag1.getId());
 				}
 			}).getFirst();
-			assertThat(official.getText(), Is.is(TEST_TAG_FOR_CREATE_ON_UPDATE));
+			assertThat(official.getText(), Is.is(initialText));
 		} finally {
 			getPostService().delete(newxONe);
-			tag1.setText(TAG_TEXT);
-			getTagService().update(tag1);
 		}
 	}
 	

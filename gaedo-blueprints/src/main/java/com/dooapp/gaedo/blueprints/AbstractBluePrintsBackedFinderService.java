@@ -407,7 +407,7 @@ public abstract class AbstractBluePrintsBackedFinderService<GraphClass extends G
 				returned = getIdVertexFor(containedClass.cast(value), allowIdGeneration);
 			} else {
 				// vertex already exist, but maybe object needs an update
-				if (CascadeType.PERSIST == cascade || CascadeType.MERGE == cascade) {
+				if (CascadeType.MERGE == cascade) {
 					doUpdate(containedClass.cast(value), cascade, objectsBeingUpdated);
 				}
 			}
