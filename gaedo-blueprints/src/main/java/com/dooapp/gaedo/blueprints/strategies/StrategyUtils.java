@@ -2,10 +2,9 @@ package com.dooapp.gaedo.blueprints.strategies;
 
 import java.lang.reflect.Modifier;
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.Map;
-import java.util.logging.Level;
+import java.util.TreeMap;
 import java.util.logging.Logger;
 
 import javax.persistence.CascadeType;
@@ -16,11 +15,10 @@ import javax.persistence.OneToOne;
 
 import com.dooapp.gaedo.blueprints.GraphUtils;
 import com.dooapp.gaedo.extensions.migrable.Migrator;
-import com.dooapp.gaedo.properties.ClassCollectionProperty;
+import com.dooapp.gaedo.properties.ComparePropertyByNameAndDeclaringClass;
 import com.dooapp.gaedo.properties.Property;
 import com.dooapp.gaedo.properties.PropertyProvider;
 import com.dooapp.gaedo.properties.PropertyProviderUtils;
-import com.dooapp.gaedo.properties.TypeProperty;
 
 public class StrategyUtils {
 	private static final Logger logger = Logger.getLogger(StrategyUtils.class.getName());
@@ -78,7 +76,7 @@ public class StrategyUtils {
 	 * @return a map linking each property to all its cascading informations
 	 */
 	public static Map<Property, Collection<CascadeType>> getBeanPropertiesFor(PropertyProvider provider, Class<?> searchedClass, Migrator migrator) {
-		Map<Property, Collection<CascadeType>> returned = new HashMap<Property, Collection<CascadeType>>();
+		Map<Property, Collection<CascadeType>> returned = new TreeMap<Property, Collection<CascadeType>>(new ComparePropertyByNameAndDeclaringClass());
 		Property[] properties = PropertyProviderUtils.getAllProperties(provider, searchedClass);
 		for (Property p : properties) {
 			returned.put(p, extractCascadeOfJPAAnnotations(p));

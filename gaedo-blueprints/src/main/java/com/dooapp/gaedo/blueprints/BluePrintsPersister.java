@@ -127,7 +127,7 @@ public class BluePrintsPersister {
         /* We try to locate vertex in graph before to delete it. Indeed, mainly due cascade delete, this vertex may have already been removed */ 
         Vertex notYetDeleted = service.getDriver().loadVertexFor(objectVertexId, service.getContainedClass().getName());
         if(notYetDeleted!=null)
-        	database.removeVertex(notYetDeleted);
+        	GraphUtils.removeSafely(database, notYetDeleted);
     }
 
 
@@ -147,7 +147,7 @@ public class BluePrintsPersister {
         Iterable<Edge> edges = service.getStrategy().getOutEdgesFor(objectVertex, p);
         for (Edge e : edges) {
             Vertex valueVertex = e.getInVertex();
-            database.removeEdge(e);
+            GraphUtils.removeSafely(database, e);
             // Now what to do with vertex ? Delete it ?
             if (toCascade.contains(CascadeType.REMOVE)) {
                 // yes, delete it forever (but before, see if there aren't more datas to delete
@@ -185,7 +185,7 @@ public class BluePrintsPersister {
             Vertex valueVertex = service.getVertexFor(v, CascadeType.REFRESH, objectsBeingAccessed);
             if (oldVertices.containsKey(valueVertex)) {
                 Edge oldEdge = oldVertices.remove(valueVertex);
-                database.removeEdge(oldEdge);
+                GraphUtils.removeSafely(database, oldEdge);
                 if (toCascade.contains(CascadeType.REMOVE)) {
                     service.deleteOutEdgeVertex(objectVertex, valueVertex, v, objectsBeingAccessed);
                 }
@@ -195,7 +195,7 @@ public class BluePrintsPersister {
             // force deletion of remaining edges
             // BUT assocaited vertices may not be deleted
             for (Edge e : oldVertices.values()) {
-                database.removeEdge(e);
+                GraphUtils.removeSafely(database, e);
             }
         }
     }
@@ -214,7 +214,7 @@ public class BluePrintsPersister {
 	            Vertex valueVertex = service.getVertexFor(v, CascadeType.REFRESH, objectsBeingAccessed);
 	            if (oldVertices.containsKey(valueVertex)) {
 	                Edge oldEdge = oldVertices.remove(valueVertex);
-	                database.removeEdge(oldEdge);
+	                GraphUtils.removeSafely(database, oldEdge);
 	                if (toCascade.contains(CascadeType.REMOVE)) {
 	                    service.deleteOutEdgeVertex(objectVertex, valueVertex, v, objectsBeingAccessed);
 	                }
@@ -225,7 +225,7 @@ public class BluePrintsPersister {
             // force deletion of remaining edges
             // BUT assocaited vertices may not be deleted
             for (Edge e : oldVertices.values()) {
-                database.removeEdge(e);
+                GraphUtils.removeSafely(database, e);
             }
         }
     }
@@ -306,7 +306,7 @@ public class BluePrintsPersister {
             }
             // Now the have been collected, remove all old vertices
             for (Map.Entry<Vertex, Edge> entry : oldVertices.entrySet()) {
-                database.removeEdge(entry.getValue());
+                GraphUtils.removeSafely(database, entry.getValue());
                 // TODO also remove map entry vertex assocaited edges
             }
             // And finally add new vertices
@@ -347,7 +347,7 @@ public class BluePrintsPersister {
             }
             // Now the have been collected, remove all old vertices
             for (Map.Entry<Vertex, Edge> entry : oldVertices.entrySet()) {
-                database.removeEdge(entry.getValue());
+                GraphUtils.removeSafely(database, entry.getValue());
             }
             // And finally add new vertices
             int order = 0;
@@ -402,7 +402,7 @@ public class BluePrintsPersister {
      * @param cascade    used cascade type, can be either {@link CascadeType#PERSIST} or {@link CascadeType#MERGE}
      * @category update
      */
-    public <DataType> void updateSingle(AbstractBluePrintsBackedFinderService<? extends Graph, DataType, ?> service, Graph database, Property p, Object toUpdate, Vertex rootVertex, CascadeType cascade, Map<String, Object> objectsBeingAccessed) {
+    private <DataType> void updateSingle(AbstractBluePrintsBackedFinderService<? extends Graph, DataType, ?> service, Graph database, Property p, Object toUpdate, Vertex rootVertex, CascadeType cascade, Map<String, Object> objectsBeingAccessed) {
         Object value = p.get(toUpdate);
         // As a convention, null values are never stored but they may replace existing ones, in which case previous values must be removed
         // as a consequenc,v alueVertex is loaded only for non null values
@@ -421,8 +421,8 @@ public class BluePrintsPersister {
                 // Nothing to do
                 link = existing;
             } else {
-                // delete old edge (TODO maybe delete vertex, if there is no other link (excepted obvious ones, like type, Object.classes, and id)
-                database.removeEdge(existing);
+                // delete old edge (if it exists)
+            	GraphUtils.removeSafely(database, existing);
                 if (value != null)
                     link = service.getDriver().createEdgeFor(rootVertex, valueVertex, p);
             }
@@ -437,7 +437,7 @@ public class BluePrintsPersister {
                 logger.log(Level.SEVERE, "Graph contains some incoherence :" + sOut.toString());
             }
             while (existingIterator.hasNext()) {
-                database.removeEdge(existingIterator.next());
+            	GraphUtils.removeSafely(database, existingIterator.next());
             }
         } else {
             if (link == null && value != null)

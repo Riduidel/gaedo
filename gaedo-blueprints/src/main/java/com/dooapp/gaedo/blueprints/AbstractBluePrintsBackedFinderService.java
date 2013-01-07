@@ -301,7 +301,7 @@ public abstract class AbstractBluePrintsBackedFinderService<GraphClass extends G
 				}
 			} else {
 				// Literal nodes can be deleted without any trouble
-				database.removeVertex(valueVertex);
+				GraphUtils.removeSafely(database, valueVertex);
 			}
 		}
 	}
@@ -377,8 +377,10 @@ public abstract class AbstractBluePrintsBackedFinderService<GraphClass extends G
 	private DataType doUpdate(DataType toUpdate, CascadeType cascade, Map<String, Object> treeMap) {
 		boolean generatesId = strategy.isIdGenerationRequired() ? (CascadeType.PERSIST == cascade) : false;
 		String objectVertexId = getIdVertexId(toUpdate, generatesId);
-		Vertex objectVertex = loadVertexFor(objectVertexId, toUpdate.getClass().getName());
-		return (DataType) persister.performUpdate(this, objectVertexId, objectVertex, toUpdate.getClass(), strategy.getContainedProperties(toUpdate, objectVertex, cascade), toUpdate, cascade,
+		Class<? extends Object> toUpdateClass = toUpdate.getClass();
+		Vertex objectVertex = loadVertexFor(objectVertexId, toUpdateClass.getName());
+		Map<Property, Collection<CascadeType>> containedProperties = strategy.getContainedProperties(toUpdate, objectVertex, cascade);
+		return (DataType) persister.performUpdate(this, objectVertexId, objectVertex, toUpdateClass, containedProperties, toUpdate, cascade,
 						treeMap);
 	}
 
@@ -401,17 +403,7 @@ public abstract class AbstractBluePrintsBackedFinderService<GraphClass extends G
 		// Here we suppose the service is the right one for the job (which may
 		// not be the case)
 		if (containedClass.isInstance(value)) {
-			Vertex returned = getIdVertexFor(containedClass.cast(value), allowIdGeneration);
-			if (returned == null) {
-				doUpdate(containedClass.cast(value), cascade, objectsBeingUpdated);
-				returned = getIdVertexFor(containedClass.cast(value), allowIdGeneration);
-			} else {
-				// vertex already exist, but maybe object needs an update
-				if (CascadeType.MERGE == cascade) {
-					doUpdate(containedClass.cast(value), cascade, objectsBeingUpdated);
-				}
-			}
-			return returned;
+			return getVertexForInstanceOfDataType(value, cascade, objectsBeingUpdated, allowIdGeneration);
 		}
 		Class<? extends Object> valueClass = value.getClass();
 		if (repository.containsKey(valueClass)) {
@@ -440,6 +432,41 @@ public abstract class AbstractBluePrintsBackedFinderService<GraphClass extends G
 			throw new ObjectIsNotARealLiteralException(value, valueClass);
 
 		}
+	}
+
+	/**
+	 * Get vertex for an instance of this service {@link #getContainedClass()}
+	 * @param value value for which we search the vertex
+	 * @param cascade current cascade type
+	 * @param objectsBeingUpdated
+	 * @param allowIdGeneration true if null id should be replaced by a new one
+	 * @return a vertex for an instance of the given object
+	 */
+	protected Vertex getVertexForInstanceOfDataType(Object value, CascadeType cascade, Map<String, Object> objectsBeingUpdated, boolean allowIdGeneration) {
+		// was there any vertex prior to that call ? (don't worry, it will be used later)
+		Vertex existing = getIdVertexFor(containedClass.cast(value), false);
+		Vertex returned = null;
+		if(existing==null) {
+			returned = getIdVertexFor(containedClass.cast(value), allowIdGeneration);
+		} else {
+			returned = existing;
+		}
+		if (returned == null) {
+			doUpdate(containedClass.cast(value), cascade, objectsBeingUpdated);
+			returned = getIdVertexFor(containedClass.cast(value), allowIdGeneration);
+		} else {
+			/* 
+			 * vertex already exist, but maybe object needs an update.
+			 * This can happen if MERGE has been set (directly or not), but also when cascading creations with @GeneratedValue set.
+			 * Indeed, in such a case, previous call to #getIdVertexFor will create a vertex with a "good" id, which will put us in this very case.
+			 * BUT cascade will be PERSIST, which is not supported. As a consequence, to avoid UPDATE on CREATE and support cascaded CREATE
+			 * we check (when cascade is create) if existing vertex (that's to say the one priori to id generation) exist. If not, we cascade.
+			 */
+			if (CascadeType.MERGE == cascade ||(CascadeType.PERSIST==cascade && existing==null)) {
+				doUpdate(containedClass.cast(value), cascade, objectsBeingUpdated);
+			}
+		}
+		return returned;
 	}
 
 	protected Vertex getVertexForTuple(Object value, Map<String, Object> objectsBeingUpdated) {

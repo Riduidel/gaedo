@@ -6,6 +6,7 @@ import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.Map;
 import java.util.Set;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -24,6 +25,7 @@ import com.dooapp.gaedo.blueprints.transformers.Tuples;
 import com.dooapp.gaedo.finders.repository.ServiceRepository;
 import com.dooapp.gaedo.properties.Property;
 import com.tinkerpop.blueprints.pgm.Edge;
+import com.tinkerpop.blueprints.pgm.Element;
 import com.tinkerpop.blueprints.pgm.Graph;
 import com.tinkerpop.blueprints.pgm.IndexableGraph;
 import com.tinkerpop.blueprints.pgm.Vertex;
@@ -304,12 +306,26 @@ public class GraphUtils {
 	 */
 	public static String toString(Vertex objectVertex) {
 		StringBuilder sOut = new StringBuilder("{");
+		toString(objectVertex, sOut);
+		return sOut.append("}").toString();
+	}
+
+	private static void toString(Element objectVertex, StringBuilder sOut) {
 		for (String s : objectVertex.getPropertyKeys()) {
 			if (sOut.length() > 1)
 				sOut.append("; ");
 			sOut.append(s).append("=").append(objectVertex.getProperty(s));
 		}
-		return sOut.append("}").toString();
+	}
+
+	private static String toString(Edge existing) {
+		StringBuilder sOut = new StringBuilder();
+		sOut.append("{{{");
+		toString(existing, sOut);
+		sOut.append("\n").append("outVertex => ").append(toString(existing.getOutVertex()));
+		sOut.append("\n").append("inVertex => ").append(toString(existing.getInVertex()));
+		sOut.append("\n}}}");
+		return sOut.toString();
 	}
 
 	/**
@@ -360,7 +376,7 @@ public class GraphUtils {
 	 * </pre>
 	 * 
 	 * You know why I do such a pattern matching ? Because sail graph named
-	 * graph definintion goes by concatenaing contexts URI in edges properties.
+	 * graph definintion goes by concatenating contexts URI in edges properties.
 	 * This is really douchebag code !
 	 */
 	public static final Pattern CONTEXTS_MATCHER = Pattern.compile("(N|U ([\\S]+))+");
@@ -379,5 +395,32 @@ public class GraphUtils {
 		// Only analyse edge if it is in named graph, and only in named graphs
 		boolean isInNamedGraphs = contexts.size() == namedGraphs.size() && contexts.containsAll(namedGraphs);
 		return isInNamedGraphs;
+	}
+
+	/**
+	 * Remove an edge "safely". That's to say with prior existence check.
+	 * @param database database from which edge should be removed 
+	 * @param existing edge to remove
+	 */
+	public static void removeSafely(Graph database, Edge existing) {
+		Edge toRemove = null;
+		if((toRemove = database.getEdge(existing.getId()))==null) {
+			if (logger.isLoggable(Level.INFO)) {
+				logger.log(Level.INFO, "We tried to remove non existing edge "+toString(existing));
+			}
+		} else {
+			database.removeEdge(toRemove);
+		}
+	}
+
+	public static void removeSafely(Graph database, Vertex existing) {
+		Vertex toRemove = null;
+		if((toRemove = database.getVertex(existing.getId()))==null) {
+			if (logger.isLoggable(Level.INFO)) {
+				logger.log(Level.INFO, "We tried to remove non existing vertex "+toString(existing));
+			}
+		} else {
+			database.removeVertex(toRemove);
+		}
 	}
 }

@@ -22,6 +22,7 @@ import com.dooapp.gaedo.properties.Property;
 import com.dooapp.gaedo.properties.PropertyProvider;
 import com.dooapp.gaedo.utils.Utils;
 import com.tinkerpop.blueprints.pgm.Edge;
+import com.tinkerpop.blueprints.pgm.Graph;
 import com.tinkerpop.blueprints.pgm.Vertex;
 
 public abstract class AbstractMappingStrategy<DataType> implements GraphMappingStrategy<DataType>{
@@ -34,7 +35,7 @@ public abstract class AbstractMappingStrategy<DataType> implements GraphMappingS
 	 */
 	protected Property idProperty;
 	protected boolean idGenerationRequired;
-	protected AbstractBluePrintsBackedFinderService<?, DataType, ?> service;
+	protected AbstractBluePrintsBackedFinderService<? extends Graph, DataType, ?> service;
 
 	public AbstractMappingStrategy(Class<DataType> serviceContainedClass, PropertyProvider propertyProvider, Migrator migrator) {
 		super();

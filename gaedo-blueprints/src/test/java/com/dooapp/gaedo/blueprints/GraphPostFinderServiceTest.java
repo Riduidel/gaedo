@@ -335,6 +335,23 @@ public class GraphPostFinderServiceTest extends AbstractGraphTest {
 	}
 
 	@Test
+	public void ensureCascadedCreateWorks() throws IOException, ClassNotFoundException {
+		String METHOD_NAME = "ensureCascadedCreateWorks";
+		Post toCreate = new Post();
+		toCreate.text = METHOD_NAME;
+		User author = new User();
+		author.password = METHOD_NAME;
+		author.setLogin(METHOD_NAME);
+		toCreate.author = author;
+		getPostService().create(toCreate);
+		// Find it back
+		Post found = getPostService().find().matching(new FindPostByText(METHOD_NAME)).getFirst();
+		assertThat(found, IsNull.notNullValue());
+		assertThat(found.author, IsNull.notNullValue());
+		assertThat(found.author.getLogin(), IsNull.notNullValue());
+	}
+
+	@Test
 	public void ensureCreateOnUpdateWorks() throws IOException, ClassNotFoundException {
 		// First find post with note "1"
 		Post first = getPostService().find().matching(new FindPostByNote(1)).getFirst();
