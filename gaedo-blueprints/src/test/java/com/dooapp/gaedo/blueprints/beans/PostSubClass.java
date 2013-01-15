@@ -1,6 +1,7 @@
 package com.dooapp.gaedo.blueprints.beans;
 
 import java.util.Map;
+import java.util.TreeMap;
 
 import javax.persistence.CascadeType;
 import javax.persistence.ManyToOne;
@@ -18,6 +19,11 @@ public class PostSubClass extends Post {
 
 	public AnotherStateForBug26 anotherState;
 	
+	/**
+	 * A list of pages for multipages messages
+	 */
+	private Map<Integer, PostSubClass> postPages = new TreeMap<Integer, PostSubClass>();
+	
 	@ManyToOne(cascade={CascadeType.PERSIST})
 	public User creator;
 
@@ -32,6 +38,24 @@ public class PostSubClass extends Post {
 
 	public PostSubClass(long i, String string, int j, State public1, User author2, Map<String, String> theseMappings) {
 		super(i, string, j, public1, author2, theseMappings);
+	}
+
+	/**
+	 * @return the postPages
+	 * @category getter
+	 * @category postPages
+	 */
+	public Map<Integer, PostSubClass> getPostPages() {
+		return postPages;
+	}
+
+	/**
+	 * @param postPages the postPages to set
+	 * @category setter
+	 * @category postPages
+	 */
+	public void setPostPages(Map<Integer, PostSubClass> postPages) {
+		this.postPages = postPages;
 	}
 	
 	

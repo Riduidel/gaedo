@@ -15,6 +15,7 @@ import org.junit.runners.Parameterized;
 import org.junit.runners.Parameterized.Parameters;
 
 import com.dooapp.gaedo.blueprints.beans.PostSubClass;
+import com.dooapp.gaedo.blueprints.finders.FindPostByText;
 import com.dooapp.gaedo.finders.QueryBuilder;
 import com.dooapp.gaedo.finders.QueryExpression;
 import com.dooapp.gaedo.finders.id.IdBasedService;
@@ -217,5 +218,21 @@ public class GraphPostSubClassFinderServiceTest extends AbstractGraphTest{
 		PostSubClass loaded = ((IdBasedService<PostSubClass>) getPostSubService()).findById(saved.id); 
 		
 		assertThat(loaded.creator, Is.is(author));
+	}
+
+	@Test 
+	public void ensureMapvaluesUpdatesCascadeWellForBug43() {
+		final String METHOD_NAME = "ensureMapvaluesUpdatesCascadeWellForBug";
+		PostSubClass newOne = new PostSubClass(0, METHOD_NAME,1.0f, State.PUBLIC, author);
+		newOne.state = State.PUBLIC;
+		newOne.anotherState = PostSubClass.AnotherStateForBug26.PUBLIC;
+		newOne.getPostPages().put(1, new PostSubClass(0, METHOD_NAME+"_page_1",1.0f, State.PUBLIC, author));
+		PostSubClass saved = getPostSubService().create(newOne);
+		assertThat(saved, Is.is(PostSubClass.class));
+		saved.getPostPages().get(1).text+= " updated";
+		String pageText = saved.getPostPages().get(1).text;
+		saved = getPostSubService().update(saved);
+		PostSubClass loaded = ((IdBasedService<PostSubClass>) getPostSubService()).findById(saved.id);
+		assertThat(loaded.getPostPages().get(1).text, Is.is(pageText));
 	}
 }

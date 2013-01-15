@@ -265,19 +265,20 @@ public class GraphUtils {
 	 *            service repository for non literal values
 	 * @param value
 	 *            tuple to persist
+	 * @param cascade cascade type to be used for all operations
 	 * @param objectsBeingUpdated
 	 *            map of objects already being accessed. Links object id to
 	 *            object
 	 * @return the
 	 */
 	public static Vertex getVertexForTuple(AbstractBluePrintsBackedFinderService<? extends Graph, ?, ?> service, ServiceRepository repository, Object value,
-					Map<String, Object> objectsBeingUpdated) {
+					CascadeType cascade, Map<String, Object> objectsBeingUpdated) {
 		Vertex returned = null;
 		// Now distinct behaviour between known objects and unknown ones
 		Class<? extends Object> valueClass = value.getClass();
 		if (Tuples.containsKey(valueClass)) {
 			TupleTransformer transformer = Tuples.get(valueClass);
-			returned = transformer.getVertexFor(service, valueClass.cast(value), objectsBeingUpdated);
+			returned = transformer.getVertexFor(service, valueClass.cast(value), cascade, objectsBeingUpdated);
 		} else {
 			throw new ObjectIsNotARealTupleException(value, valueClass);
 			// TODO do not forget to set id property

@@ -416,7 +416,7 @@ public abstract class AbstractBluePrintsBackedFinderService<GraphClass extends G
 		} else if (Literals.containsKey(valueClass)) {
 			return getVertexForLiteral(value);
 		} else if (Tuples.containsKey(valueClass)) {
-			return getVertexForTuple(value, objectsBeingUpdated);
+			return getVertexForTuple(value, cascade, objectsBeingUpdated);
 		} else {
 			/*
 			 * // OK, we will persist this object by ourselves, which is really
@@ -469,8 +469,8 @@ public abstract class AbstractBluePrintsBackedFinderService<GraphClass extends G
 		return returned;
 	}
 
-	protected Vertex getVertexForTuple(Object value, Map<String, Object> objectsBeingUpdated) {
-		return GraphUtils.getVertexForTuple(this, repository, value, objectsBeingUpdated);
+	protected Vertex getVertexForTuple(Object value, CascadeType cascade, Map<String, Object> objectsBeingUpdated) {
+		return GraphUtils.getVertexForTuple(this, repository, value, cascade, objectsBeingUpdated);
 	}
 
 	protected Vertex getVertexForLiteral(Object value) {

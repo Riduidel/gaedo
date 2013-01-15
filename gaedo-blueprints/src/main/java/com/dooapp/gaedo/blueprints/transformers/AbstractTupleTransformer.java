@@ -2,6 +2,7 @@ package com.dooapp.gaedo.blueprints.transformers;
 
 import java.util.Collection;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import javax.persistence.CascadeType;
 
@@ -20,13 +21,14 @@ public abstract class AbstractTupleTransformer<TupleType> {
 
 	protected final BluePrintsPersister persister = new BluePrintsPersister(Kind.uri);
 
-	public <DataType> Vertex getVertexFor(AbstractBluePrintsBackedFinderService<? extends Graph, DataType, ?> service, TupleType cast, Map<String, Object> objectsBeingUpdated) {
+	public <DataType> Vertex getVertexFor(AbstractBluePrintsBackedFinderService<? extends Graph, DataType, ?> service, TupleType cast, CascadeType cascade,
+					Map<String, Object> objectsBeingUpdated) {
 		// First step is to build an id for given tuple by concatenating key and value id (which is hopefully done separately)
 		String entryVertexId = getIdOfTuple(service.getRepository(), cast);
 		// No need to memorize updated version
 		String className = cast.getClass().getName();
 		Vertex objectVertex = service.loadVertexFor(entryVertexId, className);
-		persister.performUpdate(service, entryVertexId, objectVertex, getContainedClass(), getContainedProperties(), cast, CascadeType.PERSIST, objectsBeingUpdated);
+		persister.performUpdate(service, entryVertexId, objectVertex, getContainedClass(), getContainedProperties(), cast, cascade, objectsBeingUpdated);
 		if(objectVertex==null)
 			objectVertex = service.loadVertexFor(entryVertexId, className);
 		return objectVertex;

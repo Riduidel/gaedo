@@ -67,14 +67,14 @@ public class MapEntryTransformer extends AbstractTupleTransformer<Map.Entry> imp
 	 * @param cast
 	 * @param objectsBeingUpdated
 	 * @return
-	 * @see com.dooapp.gaedo.blueprints.transformers.AbstractTupleTransformer#getVertexFor(com.dooapp.gaedo.blueprints.indexable.IndexableGraphBackedFinderService, java.lang.Object, java.util.Map)
 	 */
 	@Override
-	public <DataType> Vertex getVertexFor(AbstractBluePrintsBackedFinderService<? extends Graph, DataType, ?> service, Entry cast, Map<String, Object> objectsBeingUpdated) {
+	public <DataType> Vertex getVertexFor(AbstractBluePrintsBackedFinderService<? extends Graph, DataType, ?> service, Entry cast, CascadeType cascade,
+					Map<String, Object> objectsBeingUpdated) {
 		if(!(cast instanceof WriteableKeyEntry)) {
 			cast = new WriteableKeyEntry(cast.getKey(), cast.getValue());
 		}
-		return super.getVertexFor(service, cast, objectsBeingUpdated);
+		return super.getVertexFor(service, cast, cascade, objectsBeingUpdated);
 	}
 
 	@Override
@@ -124,4 +124,5 @@ public class MapEntryTransformer extends AbstractTupleTransformer<Map.Entry> imp
 		returned.add(VALUE_PROPERTY);
 		return returned;
 	}
+
 }
