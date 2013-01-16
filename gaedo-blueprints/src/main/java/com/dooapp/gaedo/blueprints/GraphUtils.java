@@ -392,6 +392,8 @@ public class GraphUtils {
 	 * @return true if any of edge contexts is in namedGraphs. This implementation differs from previous one but, as stated in
 	 */
 	public static boolean isInNamedGraphs(Edge e, Collection<String> namedGraphs) {
+		if(namedGraphs.isEmpty())
+			return true;
 		Collection<String> contexts = getContextsOf(e);
 		// Only analyse edge if it is in named graph, and only in named graphs
         for(String s : contexts) {
