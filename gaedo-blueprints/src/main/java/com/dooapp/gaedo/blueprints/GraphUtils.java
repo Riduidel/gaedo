@@ -389,13 +389,16 @@ public class GraphUtils {
 	 *            edge to test
 	 * @param namedGraphs
 	 *            named graphs the edge must have
-	 * @return true if edge contexts are the given collection of named graphs
+	 * @return true if any of edge contexts is in namedGraphs. This implementation differs from previous one but, as stated in
 	 */
 	public static boolean isInNamedGraphs(Edge e, Collection<String> namedGraphs) {
 		Collection<String> contexts = getContextsOf(e);
 		// Only analyse edge if it is in named graph, and only in named graphs
-		boolean isInNamedGraphs = contexts.size() == namedGraphs.size() && contexts.containsAll(namedGraphs);
-		return isInNamedGraphs;
+        for(String s : contexts) {
+            if(namedGraphs.contains(s))
+                return true;
+        }
+		return false;
 	}
 
 	/**
