@@ -307,7 +307,8 @@ public abstract class AbstractBluePrintsBackedFinderService<GraphClass extends G
 	}
 
 	/**
-	 * Gets the id vertex for the given object (if that object exists)
+	 * Gets the id vertex for the given object (if that object exists).
+ 	 * Method is made package protected to allow some tests to call it
 	 * 
 	 * @param object
 	 *            object to get id vertex for
@@ -315,12 +316,13 @@ public abstract class AbstractBluePrintsBackedFinderService<GraphClass extends G
 	 *            when set to true, an id may be created for that object
 	 * @return first matching node if found, and null if not
 	 */
-	private Vertex getIdVertexFor(DataType object, boolean allowIdGeneration) {
+	Vertex getIdVertexFor(DataType object, boolean allowIdGeneration) {
 		return loadVertexFor(getIdVertexId(object, allowIdGeneration), object.getClass().getName());
 	}
 
 	/**
-	 * Notice it only works if id is a literal type
+	 * Notice it only works if id is a literal type.
+	 * Method is made package protected to allow some tests to call it
 	 * 
 	 * @param object
 	 *            object for which we want the id vertex id property
@@ -331,7 +333,7 @@ public abstract class AbstractBluePrintsBackedFinderService<GraphClass extends G
 	 *         the the instance value
 	 * @see GraphUtils#getIdVertexId(IndexableGraph, Class, Object, Property)
 	 */
-	private String getIdVertexId(DataType object, boolean requiresIdGeneration) {
+	String getIdVertexId(DataType object, boolean requiresIdGeneration) {
 		if (requiresIdGeneration) {
 			strategy.generateValidIdFor(object);
 		}

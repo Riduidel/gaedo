@@ -1,8 +1,5 @@
 package com.dooapp.gaedo.blueprints;
 
-import static com.dooapp.gaedo.blueprints.TestUtils.*;
-import static org.junit.Assert.assertThat;
-
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -23,13 +20,13 @@ import java.util.logging.Logger;
 
 import net.fortytwo.sesametools.nquads.NQuadsWriter;
 
-import static org.hamcrest.CoreMatchers.*;
 import org.hamcrest.core.Is;
 import org.hamcrest.core.IsNot;
 import org.hamcrest.core.IsNull;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.internal.matchers.IsCollectionContaining;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 import org.junit.runners.Parameterized.Parameters;
@@ -59,6 +56,22 @@ import com.tinkerpop.blueprints.pgm.Edge;
 import com.tinkerpop.blueprints.pgm.Index;
 import com.tinkerpop.blueprints.pgm.IndexableGraph;
 import com.tinkerpop.blueprints.pgm.TransactionalGraph;
+import com.tinkerpop.blueprints.pgm.Vertex;
+import com.tinkerpop.blueprints.pgm.TransactionalGraph.Conclusion;
+import com.tinkerpop.blueprints.pgm.oupls.sail.GraphSail;
+
+import static com.dooapp.gaedo.blueprints.TestUtils.A;
+import static com.dooapp.gaedo.blueprints.TestUtils.ABOUT_ID;
+import static com.dooapp.gaedo.blueprints.TestUtils.ID_POST_1;
+import static com.dooapp.gaedo.blueprints.TestUtils.LOGIN_FOR_UPDATE_ON_CREATE;
+import static com.dooapp.gaedo.blueprints.TestUtils.SOME_NEW_TEXT;
+import static com.dooapp.gaedo.blueprints.TestUtils.TAG_TEXT;
+import static com.dooapp.gaedo.blueprints.TestUtils.TEST_TAG_FOR_CREATE_ON_UPDATE;
+import static com.dooapp.gaedo.blueprints.TestUtils.USER_LOGIN;
+import static com.dooapp.gaedo.blueprints.TestUtils.USER_PASSWORD;
+import static com.dooapp.gaedo.blueprints.TestUtils.simpleTest;
+
+import static org.junit.Assert.assertThat;
 
 @RunWith(Parameterized.class)
 public class GraphPostFinderServiceTest extends AbstractGraphTest {
@@ -549,5 +562,46 @@ public class GraphPostFinderServiceTest extends AbstractGraphTest {
 	public void deleteAPostWithNoAuthorShouldWorkForIssue33() {
 		Post toDelete = getPostService().create(new Post(0, "deleteAPostWithNoAuthorShouldWork", 10.5f, State.PUBLIC, (User) null));
 		getPostService().delete(toDelete);
+	}
+
+	/**
+	 * This test ensure https://github.com/Riduidel/gaedo/issues/45 doesn't happen. For that, it creates a Tag and tries to link it to a Post in a different named graph from the default one.
+	 * This should made that link invisible to gaedo (if it honors correctly the named graph mapping to lenses).
+	 */
+	@Test
+	public void ensurePostDontLoadCollectionEdgesFromOtherNamedGraphs() {
+		// Don't yet work in SailGraph
+		String METHOD_NAME = "ensurePostDontLoadCollectionEdgesFromOtherNamedGraphs";
+		Post third= getPostService().find().matching(new FindPostByNote(3.0f)).getFirst();
+		// Find post vertex by forging its id
+		Vertex thirdVertex = ((AbstractBluePrintsBackedFinderService<?, Post, PostInformer>) getPostService()).getIdVertexFor(third, false);
+		
+		Tag unConnected = new Tag(METHOD_NAME);
+		unConnected = getTagService().create(unConnected);
+		Vertex tagVertex = ((AbstractBluePrintsBackedFinderService<?, Tag, TagInformer>) getTagService()).getIdVertexFor(unConnected, false);
+		
+		if(environment.graph instanceof TransactionalGraph) {
+			((TransactionalGraph) environment.graph).startTransaction();
+		}
+		// Now forge an edge outside of standard named graph
+		String edgeNameFor = Post.class.getName()+":"+"tags";
+		String predicateProperty = METHOD_NAME+"#test Edge";
+		Edge edge = environment.graph.addEdge(predicateProperty, thirdVertex, tagVertex, edgeNameFor);
+		edge.setProperty(GraphSail.PREDICATE_PROP, predicateProperty);
+		String contextProperty = GraphUtils.asSailProperty("https://github.com/Riduidel/gaedo/issues/45");
+		edge.setProperty(GraphSail.CONTEXT_PROP, contextProperty);
+		// Finally build the context-predicate property by concatenating both
+		edge.setProperty(GraphSail.CONTEXT_PROP + GraphSail.PREDICATE_PROP, contextProperty + " " + predicateProperty);
+
+		if(environment.graph instanceof TransactionalGraph) {
+			((TransactionalGraph) environment.graph).stopTransaction(Conclusion.SUCCESS);
+		}
+		
+		third= getPostService().find().matching(new FindPostByNote(3)).getFirst();
+		assertThat(third, IsNull.notNullValue());
+		assertThat(third.note, Is.is(3.0f));
+		assertThat(third.text, Is.is("3.0"));
+		// there should be no tags there
+		assertThat(third.tags.size(), Is.is(0));
 	}
 }
