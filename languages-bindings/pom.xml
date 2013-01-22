@@ -3,11 +3,11 @@
   <parent>
     <artifactId>gaedo</artifactId>
     <groupId>com.dooapp</groupId>
-    <version>0.4.19</version>
+    <version>0.4.20-SNAPSHOT</version>
   </parent>
   <groupId>com.dooapp</groupId>
   <artifactId>languages-bindings</artifactId>
-  <version>0.4.19</version>
+  <version>0.4.20-SNAPSHOT</version>
   <packaging>pom</packaging>
   <name>Language bindings</name>
   <description>provide root project for ensuring all exotic languages bindings arekept orthogonal to service implementations.</description>
