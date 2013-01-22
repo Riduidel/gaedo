@@ -7,6 +7,7 @@ import com.dooapp.gaedo.blueprints.GraphDatabaseDriver;
 import com.dooapp.gaedo.blueprints.GraphUtils;
 import com.dooapp.gaedo.blueprints.Properties;
 import com.dooapp.gaedo.blueprints.indexable.IndexableGraphBackedFinderService;
+import com.dooapp.gaedo.blueprints.strategies.GraphMappingStrategy;
 import com.dooapp.gaedo.blueprints.transformers.LiteralTransformer;
 import com.dooapp.gaedo.blueprints.transformers.Literals;
 import com.dooapp.gaedo.properties.Property;
@@ -31,8 +32,8 @@ public abstract class MonovaluedValuedVertexTest<ValueType extends Object> exten
 	 */
 	protected final ValueType expected;
 
-	public MonovaluedValuedVertexTest(GraphDatabaseDriver driver, Iterable<Property> p, ValueType value) {
-		super(driver, p);
+	public MonovaluedValuedVertexTest(GraphMappingStrategy<?> strategy, GraphDatabaseDriver driver, Iterable<Property> p, ValueType value) {
+		super(strategy, driver, p);
 		if(value==null) {
 			throw new NullExpectedValueException("impossible to build a "+getClass().getSimpleName()+" search condition on path "+p+" using null search value.");
 		}
@@ -53,7 +54,7 @@ public abstract class MonovaluedValuedVertexTest<ValueType extends Object> exten
 		// Counting path length allows us to check if we expect a null value
 		int currentPathLength = 0;
 		for(Property currentProperty : path) {
-			Iterator<Edge> edges = currentVertex.getOutEdges(GraphUtils.getEdgeNameFor(currentProperty)).iterator();
+			Iterator<Edge> edges = strategy.getOutEdgesFor(currentVertex, currentProperty).iterator();
 			if(edges.hasNext()) {
 				currentVertex = edges.next().getInVertex();
 			} else {

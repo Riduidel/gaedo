@@ -177,7 +177,7 @@ public class GraphBasedMappingStrategy<DataType> extends AbstractMappingStrategy
 
 	@Override
 	protected CompoundVertexTest addDefaultSearchToAndTest(AndVertexTest vertexTest) {
-		vertexTest.add(new VertexPropertyTest(service.getDriver(), new LinkedList<Property>(), Properties.kind.name(), Kind.uri.name()));
+		vertexTest.add(new VertexPropertyTest(this, service.getDriver(), new LinkedList<Property>(), Properties.kind.name(), Kind.uri.name()));
 		return vertexTest;
 	}
 

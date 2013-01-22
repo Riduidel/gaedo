@@ -5,6 +5,7 @@ import java.util.TreeMap;
 
 import com.dooapp.gaedo.blueprints.AbstractBluePrintsBackedFinderService;
 import com.dooapp.gaedo.blueprints.GraphDatabaseDriver;
+import com.dooapp.gaedo.blueprints.strategies.GraphMappingStrategy;
 import com.dooapp.gaedo.finders.repository.ServiceRepository;
 import com.dooapp.gaedo.properties.Property;
 import com.tinkerpop.blueprints.pgm.Vertex;
@@ -53,16 +54,22 @@ public class TargettedVertexTest {
 	 * Driver used to start this query
 	 */
 	private final GraphDatabaseDriver driver;
+	/**
+	 * Strategy used to navigate the edges
+	 */
+	protected final GraphMappingStrategy<?> strategy;
 
 	/**
 	 * Builds the vertex test
+	 * @param strategy graph mapping strategy, used to define which eddges will be navigated
 	 * @param driver database driver to perform common rehydration operations
 	 * @param path property path to navigate to that particular test.
 	 */
-	public TargettedVertexTest(GraphDatabaseDriver driver, Iterable<Property> path) {
+	public TargettedVertexTest(GraphMappingStrategy<?> strategy, GraphDatabaseDriver driver, Iterable<Property> path) {
 		this.path = path;
 		this.pathLength = computeLengthOf(path);
 		this.driver = driver;
+		this.strategy = strategy;
 	}
 
 	private int computeLengthOf(Iterable<Property> path) {

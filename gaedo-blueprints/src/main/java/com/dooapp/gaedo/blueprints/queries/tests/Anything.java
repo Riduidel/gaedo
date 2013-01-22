@@ -4,6 +4,7 @@ import java.util.Iterator;
 
 import com.dooapp.gaedo.blueprints.GraphDatabaseDriver;
 import com.dooapp.gaedo.blueprints.GraphUtils;
+import com.dooapp.gaedo.blueprints.strategies.GraphMappingStrategy;
 import com.dooapp.gaedo.finders.repository.ServiceRepository;
 import com.dooapp.gaedo.properties.Property;
 import com.tinkerpop.blueprints.pgm.Edge;
@@ -11,8 +12,8 @@ import com.tinkerpop.blueprints.pgm.Vertex;
 
 public class Anything extends TargettedVertexTest implements VertexTest {
 
-	public Anything(GraphDatabaseDriver driver, Iterable<Property> p) {
-		super(driver, p);
+	public Anything(GraphMappingStrategy<?> strategy, GraphDatabaseDriver driver, Iterable<Property> p) {
+		super(strategy, driver, p);
 	}
 
 	/**
@@ -26,7 +27,7 @@ public class Anything extends TargettedVertexTest implements VertexTest {
 		// Navigates to the first target edge and perform test when reached
 		Vertex currentVertex = examined;
 		for(Property currentProperty : path) {
-			Iterator<Edge> edges = currentVertex.getOutEdges(GraphUtils.getEdgeNameFor(currentProperty)).iterator();
+			Iterator<Edge> edges = strategy.getOutEdgesFor(currentVertex, currentProperty).iterator();
 			if(edges.hasNext()) {
 				currentVertex = edges.next().getInVertex();
 			} else {

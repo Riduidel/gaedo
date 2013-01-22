@@ -130,7 +130,7 @@ public abstract class AbstractMappingStrategy<DataType> implements GraphMappingS
 		} else {
 			// Create a new AndTest, add to it current vertex test and test on
 			// class
-			AndVertexTest used = new AndVertexTest(vertexTest.getDriver(), vertexTest.getPath());
+			AndVertexTest used = new AndVertexTest(this, vertexTest.getDriver(), vertexTest.getPath());
 			used.add(vertexTest);
 			return addDefaultSearchTo(used);
 		}

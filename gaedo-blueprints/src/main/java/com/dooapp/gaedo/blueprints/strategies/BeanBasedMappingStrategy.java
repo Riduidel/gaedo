@@ -139,8 +139,8 @@ public class BeanBasedMappingStrategy<DataType> extends AbstractMappingStrategy<
 		TestContainsClassProperty visitor = new TestContainsClassProperty(classCollectionProperty);
 		vertexTest.accept(visitor);
 		if(!visitor.isClassTested()) {
-			CollectionContains objectClassContains = new CollectionContains(vertexTest.getDriver(),
-							Arrays.asList(new Property[] { classCollectionProperty }), serviceContainedClass);
+			CollectionContains objectClassContains = new CollectionContains(this,
+							vertexTest.getDriver(), Arrays.asList(new Property[] { classCollectionProperty }), serviceContainedClass);
 			vertexTest.add(objectClassContains);
 		}
 		return vertexTest;

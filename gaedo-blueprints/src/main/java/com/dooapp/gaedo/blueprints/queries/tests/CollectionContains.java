@@ -4,6 +4,7 @@ import java.util.Iterator;
 
 import com.dooapp.gaedo.blueprints.GraphDatabaseDriver;
 import com.dooapp.gaedo.blueprints.GraphUtils;
+import com.dooapp.gaedo.blueprints.strategies.GraphMappingStrategy;
 import com.dooapp.gaedo.properties.Property;
 import com.tinkerpop.blueprints.pgm.Edge;
 import com.tinkerpop.blueprints.pgm.Vertex;
@@ -12,8 +13,8 @@ public class CollectionContains extends CollectionTargettedVertexTest implements
 
 	private final Object expected;
 
-	public CollectionContains(GraphDatabaseDriver driver, Iterable<Property> p, Object value) {
-		super(driver, p);
+	public CollectionContains(GraphMappingStrategy<?> strategy, GraphDatabaseDriver driver, Iterable<Property> p, Object value) {
+		super(strategy, driver, p);
 		this.expected = value;
 	}
 
@@ -29,7 +30,7 @@ public class CollectionContains extends CollectionTargettedVertexTest implements
 
 	@Override
 	protected boolean matchesVertex(Vertex examined, Property property) {
-		EqualsTo used = new EqualsTo(getDriver(), path, expected);
+		EqualsTo used = new EqualsTo(strategy, getDriver(), path, expected);
 		return used.matchesVertex(examined, property);
 	}
 

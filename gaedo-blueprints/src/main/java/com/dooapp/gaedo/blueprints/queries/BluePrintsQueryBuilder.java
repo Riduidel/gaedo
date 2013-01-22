@@ -45,7 +45,7 @@ public class BluePrintsQueryBuilder<DataType, InformerType extends Informer<Data
 	public BluePrintsQueryBuilder(AbstractBluePrintsBackedFinderService<?, DataType, InformerType> service) {
 		this.service = service;
 		/* Base test is always a AND one, associated to a test on class (will be used for optimized query building) */
-		this.tests.push(new AndVertexTest(service.getDriver(), null /* null indicates no property is navigated */));
+		this.tests.push(new AndVertexTest(service.getStrategy(), service.getDriver(), null /* null indicates no property is navigated */));
 	}
 
 	/**

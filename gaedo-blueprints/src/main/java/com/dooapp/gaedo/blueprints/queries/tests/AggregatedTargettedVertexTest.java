@@ -4,14 +4,15 @@ import java.util.Collection;
 import java.util.LinkedList;
 
 import com.dooapp.gaedo.blueprints.GraphDatabaseDriver;
+import com.dooapp.gaedo.blueprints.strategies.GraphMappingStrategy;
 import com.dooapp.gaedo.properties.Property;
 
 public abstract class AggregatedTargettedVertexTest extends TargettedVertexTest implements CompoundVertexTest{
 
 	protected Collection<VertexTest> tests = new LinkedList<VertexTest>();
 
-	public AggregatedTargettedVertexTest(GraphDatabaseDriver driver, Iterable<Property> p) {
-		super(driver, p);
+	public AggregatedTargettedVertexTest(GraphMappingStrategy<?> strategy, GraphDatabaseDriver driver, Iterable<Property> p) {
+		super(strategy, driver, p);
 	}
 
 	public <Type extends VertexTest> Type add(Type test) {
@@ -20,15 +21,15 @@ public abstract class AggregatedTargettedVertexTest extends TargettedVertexTest 
 	}
 	
 	public OrVertexTest or() {
-		return add(new OrVertexTest(getDriver(), path));
+		return add(new OrVertexTest(strategy, getDriver(), path));
 	}
 	
 	public AndVertexTest and() {
-		return add(new AndVertexTest(getDriver(), path));
+		return add(new AndVertexTest(strategy, getDriver(), path));
 	}
 	
 	public NotVertexTest not() {
-		return add(new NotVertexTest(getDriver(), path));
+		return add(new NotVertexTest(strategy, getDriver(), path));
 	}
 
 	/**
@@ -39,7 +40,7 @@ public abstract class AggregatedTargettedVertexTest extends TargettedVertexTest 
 	 * @category simple
 	 */
 	public VertexTest equalsTo(Iterable<Property> path, Object value) {
-		return add(new EqualsTo(getDriver(), path, value));
+		return add(new EqualsTo(strategy, getDriver(), path, value));
 	}
 	
 	/**
@@ -50,7 +51,7 @@ public abstract class AggregatedTargettedVertexTest extends TargettedVertexTest 
 	 * @category simple
 	 */
 	public <ComparableType extends Comparable<ComparableType>> VertexTest greaterThan(Iterable<Property> path, ComparableType value, boolean strictly) {
-		return add(new GreaterThan<ComparableType>(getDriver(), path, value, strictly));
+		return add(new GreaterThan<ComparableType>(strategy, getDriver(), path, value, strictly));
 	}
 
 	/**
@@ -62,42 +63,42 @@ public abstract class AggregatedTargettedVertexTest extends TargettedVertexTest 
 	 */
 	@Override
 	public <ComparableType extends Comparable<ComparableType>> VertexTest lowerThan(Iterable<Property> path, ComparableType value, boolean strictly) {
-		return add(new LowerThan<ComparableType>(getDriver(), path, value, strictly));
+		return add(new LowerThan<ComparableType>(strategy, getDriver(), path, value, strictly));
 	}
 
 	@Override
 	public VertexTest containsString(Iterable<Property> path, String contained) {
-		return add(new ContainsString(getDriver(), path, contained));
+		return add(new ContainsString(strategy, getDriver(), path, contained));
 	}
 
 	@Override
 	public VertexTest startsWith(Iterable<Property> path, String start) {
-		return add(new StartsWith(getDriver(), path, start));
+		return add(new StartsWith(strategy, getDriver(), path, start));
 	}
 
 	@Override
 	public VertexTest endsWith(Iterable<Property> path, String end) {
-		return add(new EndsWith(getDriver(), path, end));
+		return add(new EndsWith(strategy, getDriver(), path, end));
 	}
 
 	@Override
 	public VertexTest collectionContains(Iterable<Property> path, Object contained) {
-		return add(new CollectionContains(getDriver(), path, contained));
+		return add(new CollectionContains(strategy, getDriver(), path, contained));
 	}
 
 	@Override
 	public VertexTest mapContainsValue(Iterable<Property> path, Object contained) {
-		return add(new MapContainsValue(getDriver(), path, contained));
+		return add(new MapContainsValue(strategy, getDriver(), path, contained));
 	}
 
 	@Override
 	public VertexTest mapContainsKey(Iterable<Property> path, Object contained) {
-		return add(new MapContainsKey(getDriver(), path, contained));
+		return add(new MapContainsKey(strategy, getDriver(), path, contained));
 	}
 
 	@Override
 	public VertexTest anything(Iterable<Property> path) {
-		return add(new Anything(getDriver(), path));
+		return add(new Anything(strategy, getDriver(), path));
 	}
 
 	@Override

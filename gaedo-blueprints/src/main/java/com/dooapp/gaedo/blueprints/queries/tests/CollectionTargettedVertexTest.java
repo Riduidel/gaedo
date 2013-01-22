@@ -8,6 +8,7 @@ import java.util.List;
 
 import com.dooapp.gaedo.blueprints.GraphDatabaseDriver;
 import com.dooapp.gaedo.blueprints.GraphUtils;
+import com.dooapp.gaedo.blueprints.strategies.GraphMappingStrategy;
 import com.dooapp.gaedo.properties.Property;
 import com.dooapp.gaedo.utils.CollectionUtils;
 import com.tinkerpop.blueprints.pgm.Edge;
@@ -20,8 +21,8 @@ import com.tinkerpop.blueprints.pgm.Vertex;
  */
 public abstract class CollectionTargettedVertexTest extends TargettedVertexTest implements VertexTest {
 
-	public CollectionTargettedVertexTest(GraphDatabaseDriver driver, Iterable<Property> path) {
-		super(driver, path);
+	public CollectionTargettedVertexTest(GraphMappingStrategy<?> strategy, GraphDatabaseDriver driver, Iterable<Property> path) {
+		super(strategy, driver, path);
 	}
 
 
@@ -55,7 +56,7 @@ public abstract class CollectionTargettedVertexTest extends TargettedVertexTest 
 		} else {
 			Property evaluated = path.get(0);
 			List<Property> remaining =  path.size()>1 ? path.subList(1, path.size()) : new LinkedList<Property>();
-			Iterable<Edge> edges = examined.getOutEdges(GraphUtils.getEdgeNameFor(evaluated));
+			Iterable<Edge> edges = strategy.getOutEdgesFor(examined, evaluated);
 			for(Edge e : edges) {
 				returned = combineReturnedWith(matchesCollection(e.getInVertex(), remaining, evaluated), returned);
 			}
