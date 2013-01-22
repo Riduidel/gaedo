@@ -600,7 +600,7 @@ public class GraphPostFinderServiceTest extends AbstractGraphTest {
 		third= getPostService().find().matching(new FindPostByNote(3)).getFirst();
 		assertThat(third, IsNull.notNullValue());
 		assertThat(third.note, Is.is(3.0f));
-		assertThat(third.text, Is.is("3.0"));
+		assertThat(third.text, Is.is("post text for 3"));
 		// there should be no tags there
 		assertThat(third.tags.size(), Is.is(0));
 	}

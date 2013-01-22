@@ -85,7 +85,7 @@ public class CollectionLazyLoader extends AbstractLazyLoader implements Invocati
 			// Use the magic order property to try to put the elements in the correct order (if the property is there)
 			List<Edge> edges = new LinkedList<Edge>();
 			boolean needToSort = false;
-			for(Edge e : rootVertex.getOutEdges(edgeName)) {
+			for(Edge e : strategy.getOutEdgesFor(rootVertex, property)) {
 				edges.add(e);
 				if(e.getProperty(Properties.collection_index.name()) != null)
 					needToSort = true;

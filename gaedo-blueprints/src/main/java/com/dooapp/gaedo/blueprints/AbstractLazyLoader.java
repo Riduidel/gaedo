@@ -21,7 +21,7 @@ public abstract class AbstractLazyLoader {
 	 */
 	protected String edgeName;
 	protected GraphDatabaseDriver driver;
-	protected transient GraphMappingStrategy strategy;
+	protected transient GraphMappingStrategy<?> strategy;
 	
 	public AbstractLazyLoader() {
 		
@@ -37,7 +37,6 @@ public abstract class AbstractLazyLoader {
 		this.repository = repository;
 		this.classLoader = classLoader;
 		this.objectsBeingAccessed = objectsBeingAccessed;
-		this.edgeName = GraphUtils.getEdgeNameFor(property);
 	}
 
 	private Object writeReplace() throws ObjectStreamException {

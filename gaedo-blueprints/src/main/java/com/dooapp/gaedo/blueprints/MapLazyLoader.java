@@ -50,8 +50,7 @@ public class MapLazyLoader extends AbstractLazyLoader implements InvocationHandl
 
 	public void loadMap(Map map, Map<String, Object> objectsBeingAccessed) {
 		try {
-			// No need to lie, we know it's this one !
-			for (Edge e : rootVertex.getOutEdges(edgeName)) {
+			for (Edge e : strategy.getOutEdgesFor(rootVertex, property)) {
 				Vertex value = e.getInVertex();
 				// Value is always a serialized map entry, so deserialize it
 				// with magic !
