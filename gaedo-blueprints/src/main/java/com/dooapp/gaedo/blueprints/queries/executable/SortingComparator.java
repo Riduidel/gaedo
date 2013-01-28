@@ -81,6 +81,9 @@ public class SortingComparator implements Comparator<Vertex> {
 
 		@Override
 		public void endVisit(SortingExpression sortingExpression) {
+			// a trick to force all vertices being loaded (even when equals)
+			if(result==0)
+				result = firstSubGraph.vertex.getId().toString().compareTo(secondSubGraph.vertex.getId().toString());
 		}
 
 		/**
