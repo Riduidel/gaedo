@@ -34,6 +34,12 @@ public class ReflectionBackedInformer<DataType> implements Informer<DataType> {
 		 */
 		private List<Property> parentPath = Collections.emptyList();
 
+		public AsFieldInformer(Property field, List<Property> parentPath) {
+			super();
+			this.field = field;
+			this.parentPath = parentPath;
+		}
+		
 		public AsFieldInformer(Property field) {
 			this.field = field;
 		}
@@ -89,7 +95,7 @@ public class ReflectionBackedInformer<DataType> implements Informer<DataType> {
 
 		@Override
 		public FieldInformer with(Collection<Property> propertyPath) {
-			return new AsFieldInformer(field);
+			return new AsFieldInformer(field, new LinkedList<Property>(propertyPath));
 		}
 
 		/**
