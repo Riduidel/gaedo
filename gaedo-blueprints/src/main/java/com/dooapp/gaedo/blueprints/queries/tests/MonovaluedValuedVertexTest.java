@@ -34,9 +34,6 @@ public abstract class MonovaluedValuedVertexTest<ValueType extends Object> exten
 
 	public MonovaluedValuedVertexTest(GraphMappingStrategy<?> strategy, GraphDatabaseDriver driver, Iterable<Property> p, ValueType value) {
 		super(strategy, driver, p);
-		if(value==null) {
-			throw new NullExpectedValueException("impossible to build a "+getClass().getSimpleName()+" search condition on path "+p+" using null search value.");
-		}
 		this.expected = value;
 	}
 
@@ -63,6 +60,7 @@ public abstract class MonovaluedValuedVertexTest<ValueType extends Object> exten
 			finalProperty = currentProperty;
 			currentPathLength++;
 		}
+		// null final property indicates object has no value for that property
 		if(finalProperty==null) {
 			return matchesNull();
 		} else {
@@ -85,7 +83,7 @@ public abstract class MonovaluedValuedVertexTest<ValueType extends Object> exten
 	 * @return
 	 */
 	public boolean matchesVertex(Vertex currentVertex, Property finalProperty) {
-		if(getRepository().containsKey(expected.getClass())) {
+		if(expected!=null && getRepository().containsKey(expected.getClass())) {
 			return callMatchManaged(currentVertex, finalProperty);
 		} else {
 			return callMatchLiteral(currentVertex, finalProperty);
@@ -102,7 +100,8 @@ public abstract class MonovaluedValuedVertexTest<ValueType extends Object> exten
 	protected abstract boolean callMatchManaged(Vertex currentVertex, Property finalProperty);
 
 	/**
-	 * Check if literal (or tuple) value matches
+	 * Check if literal (or tuple) value matches.
+	 * Notice expected may in that case be a null value.
 	 * @param currentVertex vertex corresponding to finalProperty in property path
 	 * @param finalProperty property giving infos on class to use to read vertex value (when needed)
 	 * @return true if literal value matches ... yup, really awesome
@@ -132,8 +131,8 @@ public abstract class MonovaluedValuedVertexTest<ValueType extends Object> exten
 	}
 
 	public static Object getExpectedAsValueOf(Property used, Object expected) {
-		Class<?> usedType = Utils.maybeObjectify(used.getType());
-		Class<?> expectedValueClass = Utils.maybeObjectify(expected.getClass());
+		Class<?> usedType = Utils.maybeObjectify(expected==null ? Object.class : used.getType());
+		Class<?> expectedValueClass = Utils.maybeObjectify(expected==null ? Object.class : expected.getClass());
 		if(Number.class.isAssignableFrom(expectedValueClass) && Number.class.isAssignableFrom(usedType)) {
 			// same class cases are already handled with calls to maybeObjectify
 			return PrimitiveUtils.as((Number) expected, (Class<? extends Number>) usedType);

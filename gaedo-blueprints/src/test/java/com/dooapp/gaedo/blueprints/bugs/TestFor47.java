@@ -72,7 +72,7 @@ public class TestFor47 extends AbstractGraphPostTest {
 			@Override
 			public QueryExpression createMatchingExpression(PostInformer informer) {
 				tester.test(informer);
-				return informer.getId().equalsTo(0l);
+				return informer.getText().equalsTo(null);
 			}
 		}).count();
 		if(environment.getGraph() instanceof TransactionalGraph) {

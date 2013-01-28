@@ -119,7 +119,8 @@ public class VertexRootsCollector extends VertexTestVisitorAdapter implements Ve
 	
 	@Override
 	public void visit(EqualsTo equalsTo) {
-		result.put(load(equalsTo.getExpectedAsValue()), equalsTo.getPath());
+		if(equalsTo.getExpected()!=null)
+			result.put(load(equalsTo.getExpectedAsValue()), equalsTo.getPath());
 	}
 	
 	@Override
