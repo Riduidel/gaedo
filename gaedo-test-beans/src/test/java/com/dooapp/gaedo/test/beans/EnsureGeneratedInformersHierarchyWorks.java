@@ -20,7 +20,7 @@ public class EnsureGeneratedInformersHierarchyWorks {
 	 */
 	@Test
 	public void test() throws Exception {
-		assertThat(PostInformer.class.getDeclaredMethod("getId"), IsNull.notNullValue());
+		assertThat(PostInformer.class.getMethod("getId"), IsNull.notNullValue());
 	}
 
 }
