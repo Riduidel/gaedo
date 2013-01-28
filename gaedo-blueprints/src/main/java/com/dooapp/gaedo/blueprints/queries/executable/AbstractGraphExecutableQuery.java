@@ -1,12 +1,15 @@
 package com.dooapp.gaedo.blueprints.queries.executable;
 
+import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.TreeSet;
 
 import com.dooapp.gaedo.blueprints.AbstractBluePrintsBackedFinderService;
 import com.dooapp.gaedo.blueprints.queries.tests.CompoundVertexTest;
 import com.dooapp.gaedo.blueprints.queries.tests.VertexTest;
 import com.dooapp.gaedo.finders.SortingExpression;
+import com.dooapp.gaedo.utils.CollectionUtils;
 import com.tinkerpop.blueprints.pgm.Vertex;
 
 public abstract class AbstractGraphExecutableQuery implements GraphExecutableQuery {
@@ -28,20 +31,27 @@ public abstract class AbstractGraphExecutableQuery implements GraphExecutableQue
 	 * @return
 	 */
 	protected List<Vertex> getVertices() {
-		List<Vertex> returned = new LinkedList<Vertex>();
+		Collection<Vertex> unsortedVertices = null;
+		if(sort==null)
+			unsortedVertices = new LinkedList<Vertex>();
+		else
+			unsortedVertices = new TreeSet<Vertex>(new SortingComparator(service, sort));
 		Iterable<Vertex> examinedVertices = getVerticesToExamine();
 		for(Vertex v : examinedVertices) {
 			if(test.matches(v)) {
-				returned.add(v);
+				unsortedVertices.add(v);
 			}
-			// TODO add sorting here
+			// We don't need to add specific sorting here, as it is done by the Comparator
 		}
-		return returned;
+		// Hopefully, CollectionUtils#asList method is smart enough to not transform a list (which is what we obtain when no sorting expression is given)
+		return CollectionUtils.asList(unsortedVertices);
 	}
 
 	/**
-	 * Get the list of vertices to be examined
-	 * @return
+	 * Get the list of vertices to be examined.
+	 * This method is supposed to give to tests all the vertices in graph that may be valid results for tests. In other words, it must
+	 * result a superset of all valid vertices. Obviously, the goal is to find fast the smaller superset.
+	 * @return an unordered superset of matching vertices.
 	 */
 	protected abstract Iterable<Vertex> getVerticesToExamine();
 

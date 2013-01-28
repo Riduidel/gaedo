@@ -2,8 +2,10 @@ package com.dooapp.gaedo.blueprints.queries.executable;
 
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 
@@ -102,8 +104,17 @@ public class VertexRootsCollector extends VertexTestVisitorAdapter implements Ve
 		result.put(load(collectionContains.getExpectedAsValue()), collectionContains.getPath());
 	}
 
+	/**
+	 * Load if possible vertex associated to entry
+	 * @param expected
+	 * @return a list containing that vertex if it existed, or null elsewhere.
+	 */
 	private Collection<Vertex> load(Object expected) {
-		return Arrays.asList(service.getVertexFor(expected, CascadeType.REFRESH, objectsBeingAccessed));
+		Vertex vertexFor = service.getVertexFor(expected, CascadeType.REFRESH, objectsBeingAccessed);
+		if(vertexFor==null)
+			return Collections.emptyList();
+		else
+			return Arrays.asList(vertexFor);
 	}
 	
 	@Override

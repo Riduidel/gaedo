@@ -11,7 +11,19 @@ import com.dooapp.gaedo.patterns.WriteReplaceable;
 import com.dooapp.gaedo.utils.CollectionUtils;
 import com.tinkerpop.blueprints.pgm.Vertex;
 
+/**
+ * That Iterable iterates over a list of (qsorted) vertices and load objects during that iteration.
+ * In other wiords, it means an object doesn't exist as long as its associated vertex hasn't been iterated over.
+ * @author ndx
+ *
+ * @param <DataType>
+ */
 public class DataTypeIterable<DataType> implements Iterable<DataType>, WriteReplaceable {
+	/**
+	 * Inner iterator navigating the list of vertices and loading associated objects.
+	 * @author ndx
+	 *
+	 */
 	private class DataTypeIterator implements Iterator<DataType> {
 		private Iterator<Vertex> verticesIterator = vertices.iterator();
 		
@@ -49,16 +61,27 @@ public class DataTypeIterable<DataType> implements Iterable<DataType>, WriteRepl
 		
 	}
 
+	/**
+	 * Service used to load the objects
+	 */
 	private AbstractBluePrintsBackedFinderService<?, DataType, ?> service;
+	/**
+	 * Sorted list of vertices from which objects are to be loaded.
+	 */
 	private Iterable<Vertex> vertices;
 
+	/**
+	 * Construct the iterable by giving it both the service and the list of vertices.
+	 * @param service service used to laod vertices
+	 * @param asIterable vertices to navigate. That vertices list MUST be ordered before being given to this object.
+	 */
 	public DataTypeIterable(AbstractBluePrintsBackedFinderService<?, DataType, ?> service, Iterable<Vertex> asIterable) {
 		this.service = service;
 		this.vertices = asIterable;
 	}
 
 	@Override
-	public Iterator<DataType> iterator() {
+	public DataTypeIterator iterator() {
 		return new DataTypeIterator();
 	}
 

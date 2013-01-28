@@ -2,6 +2,7 @@ package com.dooapp.gaedo.finders;
 
 import java.util.Map.Entry;
 
+import com.dooapp.gaedo.exceptions.UncomparableObjectsInSortingException;
 import com.dooapp.gaedo.finders.sort.SortingExpressionImpl;
 import com.dooapp.gaedo.finders.sort.SortingExpressionVisitor;
 import com.dooapp.gaedo.patterns.Visitable;
@@ -42,6 +43,30 @@ public interface SortingExpression extends Iterable<Entry<FieldInformer, Sorting
 
 		private Direction(String name) {
 			this.text = name; 
+		}
+
+		/**
+		 * Compare objects and return a result according to direction
+		 * @param firstValue first compared value
+		 * @param secondValue second compared value
+		 * @return comparison result according to this ordering, or an exception if anything failed (a null somewhere, or a non comparable object)
+		 */
+		public int compareTo(Object firstValue, Object secondValue) {
+			switch(this) {
+			case Ascending:
+				if(firstValue instanceof Comparable)
+					return ((Comparable) firstValue).compareTo(secondValue);
+				else if(secondValue instanceof Comparable)
+					return -1*((Comparable) secondValue).compareTo(firstValue);
+				throw new UncomparableObjectsInSortingException("nor firstValue "+firstValue+" neither secondValue "+secondValue+" is Comparable !");
+			case Descending:
+				if(firstValue instanceof Comparable)
+					return -1*((Comparable) firstValue).compareTo(secondValue);
+				else if(secondValue instanceof Comparable)
+					return ((Comparable) secondValue).compareTo(firstValue);
+				throw new UncomparableObjectsInSortingException("nor firstValue "+firstValue+" neither secondValue "+secondValue+" is Comparable !");
+			}
+			throw new UnsupportedOperationException("this cas is unknown to Direction ("+this+")");
 		}
 	}
 

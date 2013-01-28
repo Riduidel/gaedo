@@ -64,10 +64,18 @@ public abstract class MonovaluedValuedVertexTest<ValueType extends Object> exten
 			currentPathLength++;
 		}
 		if(finalProperty==null) {
-			return false;
+			return matchesNull();
 		} else {
 			return matchesVertex(currentVertex, finalProperty);
 		}
+	}
+
+	/**
+	 * Define what that test must do when encountering a null value.
+	 * @return true if expected is null, false elsewhere.
+	 */
+	protected boolean matchesNull() {
+		return getExpected()==null;
 	}
 
 	/**

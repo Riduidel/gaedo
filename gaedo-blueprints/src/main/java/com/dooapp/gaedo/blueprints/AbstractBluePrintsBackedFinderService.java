@@ -308,7 +308,7 @@ public abstract class AbstractBluePrintsBackedFinderService<GraphClass extends G
 
 	/**
 	 * Gets the id vertex for the given object (if that object exists).
- 	 * Method is made package protected to allow some tests to call it
+ 	 * Method is made public to allow some tests to call it
 	 * 
 	 * @param object
 	 *            object to get id vertex for
@@ -316,13 +316,13 @@ public abstract class AbstractBluePrintsBackedFinderService<GraphClass extends G
 	 *            when set to true, an id may be created for that object
 	 * @return first matching node if found, and null if not
 	 */
-	Vertex getIdVertexFor(DataType object, boolean allowIdGeneration) {
+	public Vertex getIdVertexFor(DataType object, boolean allowIdGeneration) {
 		return loadVertexFor(getIdVertexId(object, allowIdGeneration), object.getClass().getName());
 	}
 
 	/**
 	 * Notice it only works if id is a literal type.
-	 * Method is made package protected to allow some tests to call it
+	 * Method is made public to allow some tests to call it
 	 * 
 	 * @param object
 	 *            object for which we want the id vertex id property
@@ -398,7 +398,7 @@ public abstract class AbstractBluePrintsBackedFinderService<GraphClass extends G
 	 * @param objectsBeingUpdated
 	 *            map of objects currently being updated, it avoid some loops
 	 *            during update, but is absolutely NOT a persistent cache
-	 * @return vertex for given value. May be null in soem rare cases (typically obtaining a vertex that doesn't exist yet for deleting it)
+	 * @return vertex for given value. May be null in some rare cases (typically obtaining a vertex that doesn't exist yet for deleting it)
 	 */
 	public Vertex getVertexFor(Object value, CascadeType cascade, Map<String, Object> objectsBeingUpdated) {
 		boolean allowIdGeneration = CascadeType.PERSIST.equals(cascade) || CascadeType.MERGE.equals(cascade);
@@ -442,7 +442,7 @@ public abstract class AbstractBluePrintsBackedFinderService<GraphClass extends G
 	 * @param cascade current cascade type
 	 * @param objectsBeingUpdated
 	 * @param allowIdGeneration true if null id should be replaced by a new one
-	 * @return a vertex for an instance of the given object
+	 * @return a vertex for an instance of the given object. Under some rare circumstances, this vertex may be null.
 	 */
 	protected Vertex getVertexForInstanceOfDataType(Object value, CascadeType cascade, Map<String, Object> objectsBeingUpdated, boolean allowIdGeneration) {
 		// was there any vertex prior to that call ? (don't worry, it will be used later)
@@ -454,7 +454,12 @@ public abstract class AbstractBluePrintsBackedFinderService<GraphClass extends G
 			returned = existing;
 		}
 		if (returned == null) {
-			doUpdate(containedClass.cast(value), cascade, objectsBeingUpdated);
+			/*
+			 * We als test cascade type here because we absolutely don't want to create vertices during search (as bug https://github.com/Riduidel/gaedo/issues/46 exposed)
+			 */
+			if(CascadeType.PERSIST==cascade || CascadeType.MERGE==cascade) {
+				doUpdate(containedClass.cast(value), cascade, objectsBeingUpdated);
+			}
 			returned = getIdVertexFor(containedClass.cast(value), allowIdGeneration);
 		} else {
 			/* 

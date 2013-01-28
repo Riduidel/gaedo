@@ -70,16 +70,6 @@ public class GraphPostSubClassFinderServiceTest extends AbstractGraphTest{
 		tag1 = getTagService().create(new Tag(1, TAG_TEXT));
 	}
 	
-	private Map<String, String> theseMappings(String...strings) {
-		Map<String, String> returned = new TreeMap<String, String>();
-		for (int i = 0; i < strings.length; i++) {
-			if(i+1<strings.length) {
-				returned.put(strings[i++], strings[i]);
-			}
-		}
-		return returned;
-	}
-
 	@Test 
 	public void ensurePostSubClassServiceWorksWell() {
 		final String METHOD_NAME = "ensurePostSubClassServiceWorksWell";

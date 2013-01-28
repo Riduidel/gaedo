@@ -86,7 +86,12 @@ public class GraphQueryStatement<
 		}
 	}
 
-	private Iterable<DataType> createResultsIterable(Iterable<Vertex> iterable) {
+	/**
+	 * Create result iterable from the vertex iterables.
+	 * @param iterable list of vertex to navigate
+	 * @return
+	 */
+	private DataTypeIterable<DataType> createResultsIterable(Iterable<Vertex> iterable) {
 		return new DataTypeIterable<DataType>(service, iterable);
 	}
 

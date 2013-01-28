@@ -13,8 +13,6 @@ import java.io.Serializable;
 import java.lang.reflect.Proxy;
 import java.nio.charset.Charset;
 import java.util.Collection;
-import java.util.Map;
-import java.util.TreeMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -24,7 +22,7 @@ import org.hamcrest.core.Is;
 import org.hamcrest.core.IsNot;
 import org.hamcrest.core.IsNull;
 import org.junit.Assert;
-import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.internal.matchers.IsCollectionContaining;
 import org.junit.runner.RunWith;
@@ -52,6 +50,7 @@ import com.dooapp.gaedo.test.beans.TagInformer;
 import com.dooapp.gaedo.test.beans.User;
 import com.dooapp.gaedo.test.beans.UserInformer;
 import com.dooapp.gaedo.utils.CollectionUtils;
+import com.dooapp.gaedo.utils.Utils;
 import com.tinkerpop.blueprints.pgm.Edge;
 import com.tinkerpop.blueprints.pgm.Index;
 import com.tinkerpop.blueprints.pgm.IndexableGraph;
@@ -65,59 +64,22 @@ import static com.dooapp.gaedo.blueprints.TestUtils.ABOUT_ID;
 import static com.dooapp.gaedo.blueprints.TestUtils.ID_POST_1;
 import static com.dooapp.gaedo.blueprints.TestUtils.LOGIN_FOR_UPDATE_ON_CREATE;
 import static com.dooapp.gaedo.blueprints.TestUtils.SOME_NEW_TEXT;
-import static com.dooapp.gaedo.blueprints.TestUtils.TAG_TEXT;
 import static com.dooapp.gaedo.blueprints.TestUtils.TEST_TAG_FOR_CREATE_ON_UPDATE;
 import static com.dooapp.gaedo.blueprints.TestUtils.USER_LOGIN;
-import static com.dooapp.gaedo.blueprints.TestUtils.USER_PASSWORD;
 import static com.dooapp.gaedo.blueprints.TestUtils.simpleTest;
 
 import static org.junit.Assert.assertThat;
 
 @RunWith(Parameterized.class)
-public class GraphPostFinderServiceTest extends AbstractGraphTest {
+public class GraphPostFinderServiceTest extends AbstractGraphPostTest {
 	private static final Logger logger = Logger.getLogger(GraphPostFinderServiceTest.class.getName());
 
 	@Parameters
 	public static Collection<Object[]> parameters() {
 		return simpleTest();
 	}
-	private User author;
-	private Post post1;
-	private Post post2;
-	private Post post3;
-	private Tag tag1;
-	
 	public GraphPostFinderServiceTest(AbstractGraphEnvironment<?> graph) {
 		super(graph);
-	}
-
-	@Before
-	public void loadService() throws Exception {
-		super.loadService();
-		// Now add some services
-
-		// create some objects
-		author = new User().withId(1).withLogin(USER_LOGIN).withPassword(USER_PASSWORD);
-		author.about = new Post(ABOUT_ID, "a message about that user", 5, State.PUBLIC, author);
-		author = getUserService().create(author);
-		post1 = getPostService().create(new Post(ID_POST_1, "post text for 1", 1, State.PUBLIC, author, theseMappings("a", "b")));
-		post2 = getPostService().create(new Post(2, "post text for 2", 2, State.PUBLIC, author));
-		post3 = getPostService().create(new Post(3, "post text for 3", 3, State.PUBLIC, author));
-		tag1 = getTagService().create(new Tag(1, TAG_TEXT));
-		author.posts.add(post1);
-		author.posts.add(post2);
-		author.posts.add(post3);
-		author = getUserService().update(author);
-	}
-	
-	private Map<String, String> theseMappings(String...strings) {
-		Map<String, String> returned = new TreeMap<String, String>();
-		for (int i = 0; i < strings.length; i++) {
-			if(i+1<strings.length) {
-				returned.put(strings[i++], strings[i]);
-			}
-		}
-		return returned;
 	}
 
 	@Test 
@@ -448,31 +410,6 @@ public class GraphPostFinderServiceTest extends AbstractGraphTest {
 			getPostService().delete(newxONe);
 		}
 	}
-	
-	@Test
-	public void ensureMapCanBeEmptiedForIssue13() throws Exception {
-		final String text = "#ensureMapCanBeEmptiedForIssue13";
-		Post newxONe = new Post().withText(text).withAuthor(author);
-		newxONe = getPostService().create(newxONe);
-		try {
-			newxONe.annotations.put(A, null);
-			getPostService().update(newxONe);
-			newxONe = getPostService().find().matching(new FindPostByText(text)).getFirst();
-			assertThat(newxONe.annotations.size(), Is.is(1));
-			assertThat(newxONe.annotations.containsKey(A), Is.is(true));
-			newxONe.annotations.clear();
-			getPostService().update(newxONe);
-			newxONe = getPostService().find().matching(new FindPostByText(text)).getFirst();
-			assertThat(newxONe.annotations.size(), Is.is(0));
-		} catch(Exception e) {
-			if (logger.isLoggable(Level.SEVERE)) {
-				logger.log(Level.SEVERE, "unable to run test", e);
-			}
-			throw e;
-		} finally {
-			getPostService().delete(newxONe);
-		}
-	}
 
 
 	@Test
@@ -531,77 +468,5 @@ public class GraphPostFinderServiceTest extends AbstractGraphTest {
 			assertThat(edgeIndex.count("label", Post.POST_TEXT_PROPERTY), IsNot.not(Is.is(0l)));
 			assertThat(edgeIndex.count("label", "Post.text"), Is.is(0l));
 		}
-	}
-
-	/**
-	 * According to latest modifications, the both note and text will be linked to literal vertex containing value "3.0". How will it work ?
-	 * @throws IOException
-	 * @throws ClassNotFoundException
-	 */
-	public void ensurePostscanBeSortedByNoteDescending() throws IOException, ClassNotFoundException {
-		Collection<Post> postsByAuthor= CollectionUtils.asList(getPostService().find().matching(new QueryBuilder<PostInformer>() {
-
-			@Override
-			public QueryExpression createMatchingExpression(PostInformer informer) {
-				return informer.getAuthor().equalsTo(author);
-			}
-		}).sortBy(new SortingBuilder<PostInformer>() {
-			
-			@Override
-			public SortingExpression createSortingExpression(PostInformer informer) {
-				return SortingExpression.Build.sort().withDescending(informer.getNote());
-			}
-		}).getAll());
-		float note = Float.MAX_VALUE;
-		for(Post p : postsByAuthor) {
-			assertThat(p.note<=note, Is.is(true));
-			note = p.note;
-		}
-	}
-	
-	public void deleteAPostWithNoAuthorShouldWorkForIssue33() {
-		Post toDelete = getPostService().create(new Post(0, "deleteAPostWithNoAuthorShouldWork", 10.5f, State.PUBLIC, (User) null));
-		getPostService().delete(toDelete);
-	}
-
-	/**
-	 * This test ensure https://github.com/Riduidel/gaedo/issues/45 doesn't happen. For that, it creates a Tag and tries to link it to a Post in a different named graph from the default one.
-	 * This should made that link invisible to gaedo (if it honors correctly the named graph mapping to lenses).
-	 */
-	@Test
-	public void ensurePostDontLoadCollectionEdgesFromOtherNamedGraphs() {
-		// Don't yet work in SailGraph
-		String METHOD_NAME = "ensurePostDontLoadCollectionEdgesFromOtherNamedGraphs";
-		Post third= getPostService().find().matching(new FindPostByNote(3.0f)).getFirst();
-		// Find post vertex by forging its id
-		Vertex thirdVertex = ((AbstractBluePrintsBackedFinderService<?, Post, PostInformer>) getPostService()).getIdVertexFor(third, false);
-		
-		Tag unConnected = new Tag(METHOD_NAME);
-		unConnected = getTagService().create(unConnected);
-		Vertex tagVertex = ((AbstractBluePrintsBackedFinderService<?, Tag, TagInformer>) getTagService()).getIdVertexFor(unConnected, false);
-		
-		if(environment.graph instanceof TransactionalGraph) {
-			((TransactionalGraph) environment.graph).startTransaction();
-		}
-		// Now forge an edge outside of standard named graph
-		String edgeNameFor = Post.class.getName()+":"+"tags";
-		String predicateProperty = METHOD_NAME+"#test Edge";
-		Edge edge = environment.graph.addEdge(predicateProperty, thirdVertex, tagVertex, edgeNameFor);
-		edge.setProperty(GraphSail.PREDICATE_PROP, predicateProperty);
-		String contextProperty = GraphUtils.asSailProperty("https://github.com/Riduidel/gaedo/issues/45");
-		edge.setProperty(GraphSail.CONTEXT_PROP, contextProperty);
-		// Finally build the context-predicate property by concatenating both
-		edge.setProperty(GraphSail.CONTEXT_PROP + GraphSail.PREDICATE_PROP, contextProperty + " " + predicateProperty);
-
-		if(environment.graph instanceof TransactionalGraph) {
-			((TransactionalGraph) environment.graph).stopTransaction(Conclusion.SUCCESS);
-		}
-		
-		third= getPostService().find().matching(new FindPostByNote(3)).getFirst();
-		assertThat(third, IsNull.notNullValue());
-		assertThat(third.note, Is.is(3.0f));
-		assertThat(third.text, Is.is("post text for 3"));
-		// there should be no tags there
-		assertThat(third.tags.size(), Is.is(0));
 	}
 }
