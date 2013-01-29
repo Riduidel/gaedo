@@ -1,0 +1,107 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+<meta http-equiv="content-type" content="text/html; charset=UTF-8" />
+<title>DateLiteralTransformer xref</title>
+<link type="text/css" rel="stylesheet" href="../../../../../stylesheet.css" />
+</head>
+<body>
+<div id="overview"><a href="../../../../../../apidocs/com/dooapp/gaedo/blueprints/transformers/DateLiteralTransformer.html">View Javadoc</a></div><pre>
+
+<a class="jxr_linenumber" name="1" href="#1">1</a>   <strong class="jxr_keyword">package</strong> com.dooapp.gaedo.blueprints.transformers;
+<a class="jxr_linenumber" name="2" href="#2">2</a>   
+<a class="jxr_linenumber" name="3" href="#3">3</a>   <strong class="jxr_keyword">import</strong> java.text.ParseException;
+<a class="jxr_linenumber" name="4" href="#4">4</a>   <strong class="jxr_keyword">import</strong> java.util.Date;
+<a class="jxr_linenumber" name="5" href="#5">5</a>   <strong class="jxr_keyword">import</strong> java.util.Map;
+<a class="jxr_linenumber" name="6" href="#6">6</a>   <strong class="jxr_keyword">import</strong> java.util.TreeMap;
+<a class="jxr_linenumber" name="7" href="#7">7</a>   <strong class="jxr_keyword">import</strong> java.util.WeakHashMap;
+<a class="jxr_linenumber" name="8" href="#8">8</a>   
+<a class="jxr_linenumber" name="9" href="#9">9</a>   <strong class="jxr_keyword">import</strong> com.dooapp.gaedo.blueprints.GraphDatabaseDriver;
+<a class="jxr_linenumber" name="10" href="#10">10</a>  <strong class="jxr_keyword">import</strong> com.dooapp.gaedo.blueprints.Properties;
+<a class="jxr_linenumber" name="11" href="#11">11</a>  <strong class="jxr_keyword">import</strong> com.dooapp.gaedo.utils.date.DateFormatThreadedLoader;
+<a class="jxr_linenumber" name="12" href="#12">12</a>  <strong class="jxr_keyword">import</strong> com.tinkerpop.blueprints.pgm.Vertex;
+<a class="jxr_linenumber" name="13" href="#13">13</a>  
+<a class="jxr_linenumber" name="14" href="#14">14</a>  <em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="15" href="#15">15</a>  <em class="jxr_javadoccomment"> * As SimpleDateFormat is not thread-safe and construction heavy, see here</em>
+<a class="jxr_linenumber" name="16" href="#16">16</a>  <em class="jxr_javadoccomment"> * (http:</em>
+<a class="jxr_linenumber" name="17" href="#17">17</a>  <em class="jxr_javadoccomment"> * //www.jmdoudoux.fr/java/dej/chap-utilisation_dates.htm#utilisation_dates-3)</em>
+<a class="jxr_linenumber" name="18" href="#18">18</a>  <em class="jxr_javadoccomment"> * for the why of this pattern</em>
+<a class="jxr_linenumber" name="19" href="#19">19</a>  <em class="jxr_javadoccomment"> * </em>
+<a class="jxr_linenumber" name="20" href="#20">20</a>  <em class="jxr_javadoccomment"> * Furthermore, used pattern is ISO standard (see there : <a href="http://www.fileformat.info/tip/java/simpledateformat.htm)" target="alexandria_uri">http://www.fileformat.info/tip/java/simpledateformat.htm)</a></em>
+<a class="jxr_linenumber" name="21" href="#21">21</a>  <em class="jxr_javadoccomment"> * </em>
+<a class="jxr_linenumber" name="22" href="#22">22</a>  <em class="jxr_javadoccomment"> * @author ndx</em>
+<a class="jxr_linenumber" name="23" href="#23">23</a>  <em class="jxr_javadoccomment"> * </em>
+<a class="jxr_linenumber" name="24" href="#24">24</a>  <em class="jxr_javadoccomment"> */</em>
+<a class="jxr_linenumber" name="25" href="#25">25</a>  <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">class</strong> <a href="../../../../../com/dooapp/gaedo/blueprints/transformers/DateLiteralTransformer.html">DateLiteralTransformer</a> <strong class="jxr_keyword">extends</strong> AbstractSimpleLiteralTransformer&lt;Date&gt; <strong class="jxr_keyword">implements</strong> LiteralTransformer&lt;Date&gt; {
+<a class="jxr_linenumber" name="26" href="#26">26</a>  	
+<a class="jxr_linenumber" name="27" href="#27">27</a>  	<em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="28" href="#28">28</a>  <em class="jxr_javadoccomment">	 * Map linking date format specification (a uri like xsd:date or <a href="http://www.w3.org/2001/XMLSchema" target="alexandria_uri">http://www.w3.org/2001/XMLSchema</a>#date) to the format string used to parse it.</em>
+<a class="jxr_linenumber" name="29" href="#29">29</a>  <em class="jxr_javadoccomment">	 */</em>
+<a class="jxr_linenumber" name="30" href="#30">30</a>  	<strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">final</strong> Map&lt;String, String&gt; FORMATS = <strong class="jxr_keyword">new</strong> TreeMap&lt;String, String&gt;();
+<a class="jxr_linenumber" name="31" href="#31">31</a>  	
+<a class="jxr_linenumber" name="32" href="#32">32</a>  	<strong class="jxr_keyword">static</strong> {
+<a class="jxr_linenumber" name="33" href="#33">33</a>  		FORMATS.put(<span class="jxr_string">"xsd:date"</span>, <span class="jxr_string">"yyyy-MM-dd'T'HH:mm:ssz"</span>);
+<a class="jxr_linenumber" name="34" href="#34">34</a>  		FORMATS.put(<span class="jxr_string">"http://www.w3.org/2001/XMLSchema#date"</span>, <span class="jxr_string">"yyy-MM-dd"</span>);
+<a class="jxr_linenumber" name="35" href="#35">35</a>  	}
+<a class="jxr_linenumber" name="36" href="#36">36</a>  					
+<a class="jxr_linenumber" name="37" href="#37">37</a>  	
+<a class="jxr_linenumber" name="38" href="#38">38</a>  	<em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="39" href="#39">39</a>  <em class="jxr_javadoccomment">	 * A map allowing lazy loading of those inconvenient threaded loaders.</em>
+<a class="jxr_linenumber" name="40" href="#40">40</a>  <em class="jxr_javadoccomment">	 */</em>
+<a class="jxr_linenumber" name="41" href="#41">41</a>  	<strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">final</strong> Map&lt;String, DateFormatThreadedLoader&gt; loaders = <strong class="jxr_keyword">new</strong> TreeMap&lt;String, DateFormatThreadedLoader&gt;();
+<a class="jxr_linenumber" name="42" href="#42">42</a>  	
+<a class="jxr_linenumber" name="43" href="#43">43</a>  	<em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="44" href="#44">44</a>  <em class="jxr_javadoccomment">	 * Cache linking dates to toeir associated format definition.</em>
+<a class="jxr_linenumber" name="45" href="#45">45</a>  <em class="jxr_javadoccomment">	 * As the dates are in memory, and the formats are constants, this weak hash map should have very low memory impact.</em>
+<a class="jxr_linenumber" name="46" href="#46">46</a>  <em class="jxr_javadoccomment">	 */</em>
+<a class="jxr_linenumber" name="47" href="#47">47</a>  	<strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">static</strong> Map&lt;Date, String&gt; dateCache = <strong class="jxr_keyword">new</strong> WeakHashMap&lt;Date, String&gt;();
+<a class="jxr_linenumber" name="48" href="#48">48</a>  	
+<a class="jxr_linenumber" name="49" href="#49">49</a>  	<strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">static</strong> <a href="../../../../../com/dooapp/gaedo/utils/date/DateFormatThreadedLoader.html">DateFormatThreadedLoader</a> getLoader(String format) {
+<a class="jxr_linenumber" name="50" href="#50">50</a>  		<strong class="jxr_keyword">if</strong>(!loaders.containsKey(format))
+<a class="jxr_linenumber" name="51" href="#51">51</a>  			loaders.put(format, <strong class="jxr_keyword">new</strong> <a href="../../../../../com/dooapp/gaedo/utils/date/DateFormatThreadedLoader.html">DateFormatThreadedLoader</a>(format));
+<a class="jxr_linenumber" name="52" href="#52">52</a>  		<strong class="jxr_keyword">return</strong> loaders.get(format);
+<a class="jxr_linenumber" name="53" href="#53">53</a>  	}
+<a class="jxr_linenumber" name="54" href="#54">54</a>  	
+<a class="jxr_linenumber" name="55" href="#55">55</a>  	<strong class="jxr_keyword">public</strong> <a href="../../../../../com/dooapp/gaedo/blueprints/transformers/DateLiteralTransformer.html">DateLiteralTransformer</a>() {
+<a class="jxr_linenumber" name="56" href="#56">56</a>  		<strong class="jxr_keyword">super</strong>(Date.<strong class="jxr_keyword">class</strong>);
+<a class="jxr_linenumber" name="57" href="#57">57</a>  	}
+<a class="jxr_linenumber" name="58" href="#58">58</a>  
+<a class="jxr_linenumber" name="59" href="#59">59</a>  	@Override
+<a class="jxr_linenumber" name="60" href="#60">60</a>  	<strong class="jxr_keyword">protected</strong> Object getVertexValue(Date value) {
+<a class="jxr_linenumber" name="61" href="#61">61</a>  		<em class="jxr_comment">// fallback value</em>
+<a class="jxr_linenumber" name="62" href="#62">62</a>  		String format = getTypeOf(value);
+<a class="jxr_linenumber" name="63" href="#63">63</a>  		<strong class="jxr_keyword">return</strong> getLoader(FORMATS.get(format)).format(value);
+<a class="jxr_linenumber" name="64" href="#64">64</a>  	}
+<a class="jxr_linenumber" name="65" href="#65">65</a>  
+<a class="jxr_linenumber" name="66" href="#66">66</a>  	<strong class="jxr_keyword">public</strong> Date loadObject(<a href="../../../../../com/dooapp/gaedo/blueprints/GraphDatabaseDriver.html">GraphDatabaseDriver</a> driver, Class valueClass, Vertex key) {
+<a class="jxr_linenumber" name="67" href="#67">67</a>  		String property = driver.getValue(key).toString();
+<a class="jxr_linenumber" name="68" href="#68">68</a>  		String type = key.getProperty(Properties.type.name()).toString();
+<a class="jxr_linenumber" name="69" href="#69">69</a>  		<strong class="jxr_keyword">try</strong> {
+<a class="jxr_linenumber" name="70" href="#70">70</a>  			Date returned = getLoader(FORMATS.get(type)).parse(property);
+<a class="jxr_linenumber" name="71" href="#71">71</a>  			dateCache.put(returned, type);
+<a class="jxr_linenumber" name="72" href="#72">72</a>  			<strong class="jxr_keyword">return</strong> returned;
+<a class="jxr_linenumber" name="73" href="#73">73</a>  		} <strong class="jxr_keyword">catch</strong> (ParseException e) {
+<a class="jxr_linenumber" name="74" href="#74">74</a>  			<strong class="jxr_keyword">throw</strong> <strong class="jxr_keyword">new</strong> <a href="../../../../../com/dooapp/gaedo/blueprints/transformers/BadLiteralException.html">BadLiteralException</a>(<span class="jxr_string">"\&quot;"</span> + property + <span class="jxr_string">"\&quot; can't be efficiently parsed from a \&quot;"</span>+type+<span class="jxr_string">"\&quot; supposed to contain a date"</span>);
+<a class="jxr_linenumber" name="75" href="#75">75</a>  		}
+<a class="jxr_linenumber" name="76" href="#76">76</a>  	}
+<a class="jxr_linenumber" name="77" href="#77">77</a>  	
+<a class="jxr_linenumber" name="78" href="#78">78</a>  	<em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="79" href="#79">79</a>  <em class="jxr_javadoccomment">	 * Type of date depends upon the date</em>
+<a class="jxr_linenumber" name="80" href="#80">80</a>  <em class="jxr_javadoccomment">	 * @param value</em>
+<a class="jxr_linenumber" name="81" href="#81">81</a>  <em class="jxr_javadoccomment">	 * @return</em>
+<a class="jxr_linenumber" name="82" href="#82">82</a>  <em class="jxr_javadoccomment">	 * @see com.dooapp.gaedo.blueprints.transformers.AbstractLiteralTransformer#getTypeOf(java.lang.Object)</em>
+<a class="jxr_linenumber" name="83" href="#83">83</a>  <em class="jxr_javadoccomment">	 */</em>
+<a class="jxr_linenumber" name="84" href="#84">84</a>  	@Override
+<a class="jxr_linenumber" name="85" href="#85">85</a>  	<strong class="jxr_keyword">public</strong> String getTypeOf(Object value) {
+<a class="jxr_linenumber" name="86" href="#86">86</a>  		String format = <span class="jxr_string">"xsd:date"</span>;
+<a class="jxr_linenumber" name="87" href="#87">87</a>  		<strong class="jxr_keyword">if</strong>(dateCache.containsKey(value)) {
+<a class="jxr_linenumber" name="88" href="#88">88</a>  			format = dateCache.get(value);
+<a class="jxr_linenumber" name="89" href="#89">89</a>  		}
+<a class="jxr_linenumber" name="90" href="#90">90</a>  		dateCache.put((Date) value, format);
+<a class="jxr_linenumber" name="91" href="#91">91</a>  		<strong class="jxr_keyword">return</strong> format;
+<a class="jxr_linenumber" name="92" href="#92">92</a>  	}
+<a class="jxr_linenumber" name="93" href="#93">93</a>  }
+</pre>
+<hr/><div id="footer">This page was automatically generated by <a href="http://maven.apache.org/">Maven</a></div></body>
+</html>
+
