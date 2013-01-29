@@ -11,6 +11,7 @@ Gaedo initially stood for "Google App Engine Data Object", but has since evolved
 
 Since version 0.3.0, project documentation is available through [GitHub pages][1]. For reference, here are all versions' pages (sorted in reverse numeric order): 
 
+ * [0.4.21][15] released on January 29, 2013; contains two bugfixes and support for `findByRange` in graph queries
  * [0.4.19][14] released on January 22, 2013; contains a single bugfix
  * [0.4.18][14] released on January 16, 2013; contains a modification to the way named graphs are used
  * [0.4.13][13] released on December 19, 2012; contains some interesting tricks by Kricket
@@ -41,3 +42,4 @@ Since version 0.3.0, project documentation is available through [GitHub pages][1
   [12]: http://riduidel.github.com/gaedo/site/0.3.0/
   [13]: http://riduidel.github.com/gaedo/site/0.4.13/
   [14]: http://riduidel.github.com/gaedo/site/0.4.18/
+  [15]: http://riduidel.github.com/gaedo/site/0.4.21/
