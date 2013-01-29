@@ -40,34 +40,17 @@ import static org.junit.Assert.assertThat;
 
 
 @RunWith(Parameterized.class)
-public class GraphPostSubClassFinderServiceTest extends AbstractGraphTest{
+public class GraphPostSubClassFinderServiceTest extends AbstractGraphPostSubClassTest{
 	private static final Logger logger = Logger.getLogger(GraphPostSubClassFinderServiceTest.class.getName());
 	
 	@Parameters
 	public static Collection<Object[]> parameters() {
 		return simpleTest();
 	}
-
-	private User author;
-	private Post post1;
-	private Post post2;
-	private Post post3;
-	private Tag tag1;
 	
 	public GraphPostSubClassFinderServiceTest(AbstractGraphEnvironment<?> environment) {
 		super(environment);
 		// TODO Auto-generated constructor stub
-	}
-
-	@Before
-	public void loadService() throws Exception {
-		super.loadService();
-
-		// create some objects
-		author = new User().withId(1).withLogin(USER_LOGIN).withPassword(USER_PASSWORD);
-		author.about = new Post(ABOUT_ID, "a message about that user", 5, State.PUBLIC, author);
-		author = getUserService().create(author);
-		tag1 = getTagService().create(new Tag(1, TAG_TEXT));
 	}
 	
 	@Test 
@@ -132,25 +115,6 @@ public class GraphPostSubClassFinderServiceTest extends AbstractGraphTest{
 		}).count(), Is.is(1));
 	}
 
-	@Test 
-	public void ensureBug26IsSolved() {
-		final String METHOD_NAME = "ensureBug26IsSolved";
-		PostSubClass newOne = new PostSubClass(0, METHOD_NAME,1.0f, State.PUBLIC, author);
-		newOne.state = State.PUBLIC;
-		newOne.anotherState = PostSubClass.AnotherStateForBug26.PUBLIC;
-		Post saved = getPostSubService().create(newOne);
-		assertThat(saved, Is.is(PostSubClass.class));
-		Post loaded = getPostService().find().matching(new QueryBuilder<PostInformer>() {
-			
-			@Override
-			public QueryExpression createMatchingExpression(PostInformer informer) {
-				return informer.getText().equalsTo(METHOD_NAME);
-			}
-		}).getFirst();
-		// exposition of https://github.com/Riduidel/gaedo/issues/23 here !
-		// by updating object with basic post service, I create a second vertex in graph i can then retrieve in count.
-		loaded = getPostService().update(loaded);
-	}
 
 	@Test 
 	public void usingAnUntypedURIValueCouldWork() {
@@ -210,19 +174,4 @@ public class GraphPostSubClassFinderServiceTest extends AbstractGraphTest{
 		assertThat(loaded.creator, Is.is(author));
 	}
 
-	@Test 
-	public void ensureMapvaluesUpdatesCascadeWellForBug43() {
-		final String METHOD_NAME = "ensureMapvaluesUpdatesCascadeWellForBug";
-		PostSubClass newOne = new PostSubClass(0, METHOD_NAME,1.0f, State.PUBLIC, author);
-		newOne.state = State.PUBLIC;
-		newOne.anotherState = PostSubClass.AnotherStateForBug26.PUBLIC;
-		newOne.getPostPages().put(1, new PostSubClass(0, METHOD_NAME+"_page_1",1.0f, State.PUBLIC, author));
-		PostSubClass saved = getPostSubService().create(newOne);
-		assertThat(saved, Is.is(PostSubClass.class));
-		saved.getPostPages().get(1).text+= " updated";
-		String pageText = saved.getPostPages().get(1).text;
-		saved = getPostSubService().update(saved);
-		PostSubClass loaded = ((IdBasedService<PostSubClass>) getPostSubService()).findById(saved.id);
-		assertThat(loaded.getPostPages().get(1).text, Is.is(pageText));
-	}
 }
