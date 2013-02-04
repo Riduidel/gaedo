@@ -262,10 +262,11 @@ public abstract class AbstractBluePrintsBackedFinderService<GraphClass extends G
 																	 * generation
 																	 * on delete
 																	 */);
-		Vertex objectVertex = loadVertexFor(vertexId, toDelete.getClass().getName());
+		Class<? extends Object> toDeleteClass = toDelete.getClass();
+		Vertex objectVertex = loadVertexFor(vertexId, toDeleteClass.getName());
 		if (objectVertex != null) {
 			Map<Property, Collection<CascadeType>> containedProperties = strategy.getContainedProperties(toDelete, objectVertex, CascadeType.REMOVE);
-			persister.performDelete(this, vertexId, objectVertex, containedClass, containedProperties, toDelete, CascadeType.REMOVE, objectsBeingAccessed);
+			persister.performDelete(this, vertexId, objectVertex, toDeleteClass, containedProperties, toDelete, CascadeType.REMOVE, objectsBeingAccessed);
 		}
 	}
 
@@ -416,7 +417,7 @@ public abstract class AbstractBluePrintsBackedFinderService<GraphClass extends G
 				throw new IncompatibleServiceException(service, valueClass);
 			}
 		} else if (Literals.containsKey(valueClass)) {
-			return getVertexForLiteral(value);
+			return getVertexForLiteral(value, cascade);
 		} else if (Tuples.containsKey(valueClass)) {
 			return getVertexForTuple(value, cascade, objectsBeingUpdated);
 		} else {
@@ -480,8 +481,15 @@ public abstract class AbstractBluePrintsBackedFinderService<GraphClass extends G
 		return GraphUtils.getVertexForTuple(this, repository, value, cascade, objectsBeingUpdated);
 	}
 
-	protected Vertex getVertexForLiteral(Object value) {
-		return GraphUtils.getVertexForLiteral(getDriver(), value);
+	/**
+	 * Get vertex for a given literal
+	 * @param value value to get
+	 * @param cascade cascade mode
+	 * @return the vertex associated to that literal, or null if cascade mode prevented that cascade loading.
+	 * @see GraphUtils#getVertexForLiteral(GraphDatabaseDriver, Object)
+	 */
+	protected Vertex getVertexForLiteral(Object value, CascadeType cascade) {
+		return GraphUtils.getVertexForLiteral(getDriver(), value, cascade);
 	}
 
 	/**

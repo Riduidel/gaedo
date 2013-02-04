@@ -1,5 +1,7 @@
 package com.dooapp.gaedo.blueprints.transformers;
 
+import javax.persistence.CascadeType;
+
 import com.dooapp.gaedo.blueprints.GraphDatabaseDriver;
 import com.dooapp.gaedo.blueprints.Kind;
 import com.tinkerpop.blueprints.pgm.Vertex;
@@ -20,10 +22,11 @@ public interface LiteralTransformer<Type> extends Transformer {
 	/**
 	 * Get vertex for given object. This vertex may be simple or the root of a sub-graph
 	 * @param database
-	 * @param value
+	 * @param cascade cascade type. if nor PERSIST neither MERGE and vertex doesn't exist, null may be returned
+	 * @param cascade 
 	 * @return
 	 */
-	Vertex getVertexFor(GraphDatabaseDriver database, Type value);
+	Vertex getVertexFor(GraphDatabaseDriver database, Type value, CascadeType cascade);
 	
 	/**
 	 * Load given vertex into an object

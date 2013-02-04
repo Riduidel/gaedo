@@ -1,6 +1,9 @@
 package com.dooapp.gaedo.blueprints.transformers;
 
+import javax.persistence.CascadeType;
+
 import com.dooapp.gaedo.blueprints.GraphDatabaseDriver;
+import com.dooapp.gaedo.blueprints.GraphUtils;
 import com.dooapp.gaedo.blueprints.Kind;
 import com.dooapp.gaedo.blueprints.UnableToCreateException;
 import com.dooapp.gaedo.utils.Utils;
@@ -20,11 +23,11 @@ public abstract class AbstractLiteralTransformer<Type> {
 	 * @param value
 	 * @return
 	 */
-	public Vertex getVertexFor(GraphDatabaseDriver driver, Type value) {
+	public Vertex getVertexFor(GraphDatabaseDriver driver, Type value, CascadeType cascade) {
 		String vertexId = getVertexId(value);
 		Vertex returned = driver.loadVertexFor(vertexId, value.getClass().getName());
-		// If vertex doesn't exist ... load it !
-		if(returned==null) {
+		// If vertex doesn't exist (and cascade allow its creation) ... load it !
+		if(returned==null && GraphUtils.canCreateVertex(cascade)) {
 			returned = driver.createEmptyVertex(value.getClass(), vertexId, value);
 			driver.setValue(returned, getVertexValue(value));
 		}

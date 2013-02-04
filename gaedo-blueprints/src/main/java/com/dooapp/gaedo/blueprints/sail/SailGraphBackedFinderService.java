@@ -3,6 +3,8 @@ package com.dooapp.gaedo.blueprints.sail;
 import java.util.SortedSet;
 import java.util.UUID;
 
+import javax.persistence.CascadeType;
+
 import com.dooapp.gaedo.blueprints.AbstractBluePrintsBackedFinderService;
 import com.dooapp.gaedo.blueprints.GraphUtils;
 import com.dooapp.gaedo.blueprints.Kind;
@@ -119,7 +121,7 @@ public class SailGraphBackedFinderService<DataType, InformerType extends Informe
 					returned = database.addVertex(tupleTransformer.getKind().getURIFor(vertexId, valueClass));
 				}
 				// obtain vertex for type
-				Vertex classVertex = classTransformer.getVertexFor(getDriver(), valueClass);
+				Vertex classVertex = classTransformer.getVertexFor(getDriver(), valueClass, CascadeType.PERSIST);
 				Edge toType = getDriver().createEdgeFor(returned, classVertex, TypeProperty.INSTANCE);
 				/*
 				 * Make sure literals are literals by changing that particular

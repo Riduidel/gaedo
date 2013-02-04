@@ -125,7 +125,7 @@ public class BluePrintsPersister {
             }
         }
         /* We try to locate vertex in graph before to delete it. Indeed, mainly due cascade delete, this vertex may have already been removed */ 
-        Vertex notYetDeleted = service.getDriver().loadVertexFor(objectVertexId, service.getContainedClass().getName());
+        Vertex notYetDeleted = service.getDriver().loadVertexFor(objectVertexId, valueClass.getName());
         if(notYetDeleted!=null)
         	GraphUtils.removeSafely(database, notYetDeleted);
     }

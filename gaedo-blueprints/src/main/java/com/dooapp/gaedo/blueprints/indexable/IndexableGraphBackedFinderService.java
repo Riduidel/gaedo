@@ -4,6 +4,8 @@ import java.util.Collection;
 import java.util.SortedSet;
 import java.util.UUID;
 
+import javax.persistence.CascadeType;
+
 import com.dooapp.gaedo.blueprints.AbstractBluePrintsBackedFinderService;
 import com.dooapp.gaedo.blueprints.GraphUtils;
 import com.dooapp.gaedo.blueprints.Kind;
@@ -181,7 +183,7 @@ public class IndexableGraphBackedFinderService<DataType, InformerType extends In
 				returned.setProperty(Properties.kind.name(), Tuples.get(valueClass).getKind().name());
 			}
 			// obtain vertex for type
-			Vertex classVertex = classTransformer.getVertexFor(getDriver(), valueClass);
+			Vertex classVertex = classTransformer.getVertexFor(getDriver(), valueClass, CascadeType.PERSIST);
 			Edge toType = getDriver().createEdgeFor(returned, classVertex, TypeProperty.INSTANCE);
 			/*
 			 * Make sure literals are literals by changing that particular edge

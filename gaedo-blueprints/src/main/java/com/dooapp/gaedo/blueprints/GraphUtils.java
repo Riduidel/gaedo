@@ -48,6 +48,11 @@ public class GraphUtils {
 
 	private static final Logger logger = Logger.getLogger(GraphUtils.class.getName());
 
+	/**
+	 * Log level used for "normal" removals
+	 */
+	private static final Level REMOVAL_LOG_LEVEL = Level.FINE;
+
 	public static String asSailProperty(String context) {
 		if (GraphSail.NULL_CONTEXT_NATIVE.equals(context))
 			return context;
@@ -90,15 +95,19 @@ public class GraphUtils {
 	 * @param database
 	 *            database in which vertex will be stored
 	 * @param value
-	 * @return
+	 *            value to get
+	 * @param cascade
+	 *            cascade type. if nor PERSIST neither MERGE and vertex doesn't
+	 *            exist, null may be returned
+	 * @return vertex associated to literal or null if none found.
 	 */
-	public static Vertex getVertexForLiteral(GraphDatabaseDriver database, Object value) {
+	public static Vertex getVertexForLiteral(GraphDatabaseDriver database, Object value, CascadeType cascade) {
 		Vertex returned = null;
 		// Now distinct behaviour between known objects and unknown ones
 		Class<? extends Object> valueClass = value.getClass();
 		if (Literals.containsKey(valueClass)) {
 			LiteralTransformer transformer = Literals.get(valueClass);
-			returned = transformer.getVertexFor(database, valueClass.cast(value));
+			returned = transformer.getVertexFor(database, valueClass.cast(value), cascade);
 		} else {
 			throw new ObjectIsNotARealLiteralException(value, valueClass);
 			// TODO do not forget to set id property
@@ -151,8 +160,10 @@ public class GraphUtils {
 				// nothing to do : we use effective type - or try to
 			}
 			if (effectiveType == null) {
-				// First alternative is here for untyped strings in uris nodes (like uris themselves when treated as strings)
-				// Second alternative is there for cases when we try to load a collection of untyped thingies
+				// First alternative is here for untyped strings in uris nodes
+				// (like uris themselves when treated as strings)
+				// Second alternative is there for cases when we try to load a
+				// collection of untyped thingies
 				if (String.class.isAssignableFrom(defaultType) || Collection.class.isAssignableFrom(defaultType))
 					effectiveType = GraphMappingStrategy.STRING_TYPE;
 
@@ -265,7 +276,8 @@ public class GraphUtils {
 	 *            service repository for non literal values
 	 * @param value
 	 *            tuple to persist
-	 * @param cascade cascade type to be used for all operations
+	 * @param cascade
+	 *            cascade type to be used for all operations
 	 * @param objectsBeingUpdated
 	 *            map of objects already being accessed. Links object id to
 	 *            object
@@ -389,44 +401,76 @@ public class GraphUtils {
 	 *            edge to test
 	 * @param namedGraphs
 	 *            named graphs the edge must have
-	 * @return true if any of edge contexts is in namedGraphs. This implementation differs from previous one but, as stated in
+	 * @return true if any of edge contexts is in namedGraphs. This
+	 *         implementation differs from previous one but, as stated in
 	 */
 	public static boolean isInNamedGraphs(Edge e, Collection<String> namedGraphs) {
-		if(namedGraphs.isEmpty())
+		if (namedGraphs.isEmpty())
 			return true;
 		Collection<String> contexts = getContextsOf(e);
 		// Only analyse edge if it is in named graph, and only in named graphs
-        for(String s : contexts) {
-            if(namedGraphs.contains(s))
-                return true;
-        }
+		for (String s : contexts) {
+			if (namedGraphs.contains(s))
+				return true;
+		}
 		return false;
 	}
 
 	/**
 	 * Remove an edge "safely". That's to say with prior existence check.
-	 * @param database database from which edge should be removed 
-	 * @param existing edge to remove
+	 * 
+	 * @param database
+	 *            database from which edge should be removed
+	 * @param existing
+	 *            edge to remove
 	 */
 	public static void removeSafely(Graph database, Edge existing) {
+		if (logger.isLoggable(REMOVAL_LOG_LEVEL)) {
+			logger.log(REMOVAL_LOG_LEVEL, "removing safely " + existing);
+		}
 		Edge toRemove = null;
-		if((toRemove = database.getEdge(existing.getId()))==null) {
-			if (logger.isLoggable(Level.INFO)) {
-				logger.log(Level.INFO, "We tried to remove non existing edge "+toString(existing));
+		if ((toRemove = database.getEdge(existing.getId())) == null) {
+			if (logger.isLoggable(Level.WARNING)) {
+				logger.log(Level.WARNING, "We tried to remove non existing edge " + toString(existing));
 			}
 		} else {
 			database.removeEdge(toRemove);
+			if (logger.isLoggable(REMOVAL_LOG_LEVEL)) {
+				logger.log(REMOVAL_LOG_LEVEL, "REMOVED " + toRemove);
+			}
 		}
 	}
 
 	public static void removeSafely(Graph database, Vertex existing) {
+		if (logger.isLoggable(REMOVAL_LOG_LEVEL)) {
+			logger.log(REMOVAL_LOG_LEVEL, "removing safely " + existing);
+		}
 		Vertex toRemove = null;
-		if((toRemove = database.getVertex(existing.getId()))==null) {
-			if (logger.isLoggable(Level.INFO)) {
-				logger.log(Level.INFO, "We tried to remove non existing vertex "+toString(existing));
+		if ((toRemove = database.getVertex(existing.getId())) == null) {
+			if (logger.isLoggable(Level.WARNING)) {
+				logger.log(Level.WARNING, "We tried to remove non existing vertex " + toString(existing));
 			}
 		} else {
 			database.removeVertex(toRemove);
+			if (logger.isLoggable(REMOVAL_LOG_LEVEL)) {
+				logger.log(REMOVAL_LOG_LEVEL, "REMOVED " + toRemove);
+			}
+		}
+	}
+
+	/**
+	 * Define if a vertex can be created when using the given cascade type
+	 * 
+	 * @param cascade
+	 * @return true for PERSIST and MERGE, false otherwise
+	 */
+	public static boolean canCreateVertex(CascadeType cascade) {
+		switch (cascade) {
+		case PERSIST:
+		case MERGE:
+			return true;
+		default:
+			return false;
 		}
 	}
 }

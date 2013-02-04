@@ -11,6 +11,7 @@ import org.junit.runners.Parameterized.Parameters;
 
 import com.dooapp.gaedo.blueprints.AbstractGraphEnvironment;
 import com.dooapp.gaedo.blueprints.AbstractGraphPostSubClassTest;
+import com.dooapp.gaedo.blueprints.NoReturnableVertexException;
 import com.dooapp.gaedo.blueprints.beans.PostSubClass;
 import com.dooapp.gaedo.finders.Informer;
 import com.dooapp.gaedo.finders.id.IdBasedService;
@@ -44,7 +45,11 @@ public class TestFor48 extends AbstractGraphPostSubClassTest {
 		getPostService().delete(newOne);
 		newOne = null;
 		// it should be deleted, no ?
-		newOne = ((IdBasedService<PostSubClass>) getPostSubService()).findById(newId);
-		assertThat(newOne, IsNull.nullValue());
+		try {
+			newOne = ((IdBasedService<PostSubClass>) getPostSubService()).findById(newId);
+			assertThat(newOne, IsNull.nullValue());
+		} catch(NoReturnableVertexException e) {
+			// this is the normal result : vertex associated to PostSubClass should have been deleted now
+		}
 	}
 }
