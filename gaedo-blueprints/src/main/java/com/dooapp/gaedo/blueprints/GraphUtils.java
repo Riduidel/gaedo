@@ -32,6 +32,12 @@ import com.tinkerpop.blueprints.pgm.Vertex;
 import com.tinkerpop.blueprints.pgm.oupls.sail.GraphSail;
 
 public class GraphUtils {
+
+	/**
+	 * Log level used for "normal" removals. This is the best way to track some weird transaction bugs
+	 */
+	private static final Level REMOVAL_LOG_LEVEL = Level.FINE;
+
 	private static final String GAEDO_PREFIX = "https://github.com/Riduidel/gaedo/";
 
 	/**
@@ -47,11 +53,6 @@ public class GraphUtils {
 	public static final String GAEDO_HIDDEN_CONTEXT = GAEDO_PREFIX + "hidden";
 
 	private static final Logger logger = Logger.getLogger(GraphUtils.class.getName());
-
-	/**
-	 * Log level used for "normal" removals
-	 */
-	private static final Level REMOVAL_LOG_LEVEL = Level.FINE;
 
 	public static String asSailProperty(String context) {
 		if (GraphSail.NULL_CONTEXT_NATIVE.equals(context))

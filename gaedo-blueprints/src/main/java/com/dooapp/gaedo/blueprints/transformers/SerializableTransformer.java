@@ -67,7 +67,7 @@ public class SerializableTransformer implements TupleTransformer<Serializable> {
 			}
 		}
 		// Gently ask service for effective access to value
-		return service.getVertexFor(cast, null, objectsBeingUpdated);
+		return service.getVertexFor(cast, CascadeType.REFRESH, objectsBeingUpdated);
 	}
 
 	

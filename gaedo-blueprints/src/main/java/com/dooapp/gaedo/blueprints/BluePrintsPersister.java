@@ -154,7 +154,7 @@ public class BluePrintsPersister {
                 Object value = p.get(toDelete);
                 if(value!=null) {
                 	Vertex knownValueVertex = service.getVertexFor(value, CascadeType.REFRESH, objectsBeingAccessed);
-                	if(knownValueVertex.equals(valueVertex))
+                	if(knownValueVertex!=null && knownValueVertex.equals(valueVertex))
                 		service.deleteOutEdgeVertex(objectVertex, valueVertex, value, objectsBeingAccessed);
                 }
 
@@ -183,7 +183,7 @@ public class BluePrintsPersister {
         }
         for (Object v : values.entrySet()) {
             Vertex valueVertex = service.getVertexFor(v, CascadeType.REFRESH, objectsBeingAccessed);
-            if (oldVertices.containsKey(valueVertex)) {
+            if (valueVertex!=null && oldVertices.containsKey(valueVertex)) {
                 Edge oldEdge = oldVertices.remove(valueVertex);
                 GraphUtils.removeSafely(database, oldEdge);
                 if (toCascade.contains(CascadeType.REMOVE)) {
@@ -212,7 +212,7 @@ public class BluePrintsPersister {
         	// already heard about null-containing collections ? I do know them, and they're pure EVIL
         	if(v!=null) {
 	            Vertex valueVertex = service.getVertexFor(v, CascadeType.REFRESH, objectsBeingAccessed);
-	            if (oldVertices.containsKey(valueVertex)) {
+	            if (valueVertex !=null && oldVertices.containsKey(valueVertex)) {
 	                Edge oldEdge = oldVertices.remove(valueVertex);
 	                GraphUtils.removeSafely(database, oldEdge);
 	                if (toCascade.contains(CascadeType.REMOVE)) {
@@ -410,6 +410,10 @@ public class BluePrintsPersister {
         if (value != null) {
             valueVertex = service.getVertexFor(value, cascade, objectsBeingAccessed);
         }
+        /* Totally crazy confident non-nullity lack of test :
+         * this method is only called when cascade type is either PERSIST or MERGE. In both cases the call to getVertexFor will create the vertex if missing.
+         * As a consequence there is no need for nullity check.
+         */
         Edge link = null;
         // Get previously existing vertex
         Iterator<Edge> existingIterator = service.getStrategy().getOutEdgesFor(rootVertex, p).iterator();
