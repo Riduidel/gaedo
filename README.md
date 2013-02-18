@@ -11,6 +11,8 @@ Gaedo initially stood for "Google App Engine Data Object", but has since evolved
 
 Since version 0.3.0, project documentation is available through [GitHub pages][1]. For reference, here are all versions' pages (sorted in reverse numeric order): 
 
+ * [0.4.23][15] released on February 15, 2013; contains one bigfix regarding deletion of null vertices
+ * [0.4.22][15] released on February, 2013;
  * [0.4.21][15] released on January 29, 2013; contains two bugfixes and support for `findByRange` in graph queries
  * [0.4.19][14] released on January 22, 2013; contains a single bugfix
  * [0.4.18][14] released on January 16, 2013; contains a modification to the way named graphs are used
