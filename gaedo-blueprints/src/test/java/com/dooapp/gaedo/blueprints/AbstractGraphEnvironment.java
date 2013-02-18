@@ -1,6 +1,10 @@
 package com.dooapp.gaedo.blueprints;
 
 import java.io.File;
+import java.io.IOException;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.LinkedList;
 import java.util.SortedSet;
 
 import org.junit.After;
@@ -40,20 +44,61 @@ import com.tinkerpop.blueprints.pgm.Graph;
  * @param <GraphType>
  */
 public abstract class AbstractGraphEnvironment<GraphType extends Graph> {
+	/**
+	 * component bag that is used through a {@link ThreadLocal} reference, allowing standard usage in monothread tests, but creating new objects
+	 * (as a consequence avoiding most of synchronization bugs) when performing multithreaded tests
+	 * @author ndx
+	 *
+	 */
+	private class GaedoComponentBag {
+		protected SimpleServiceRepository serviceRrepository;
+		protected PropertyProvider provider;
+		protected CumulativeFieldInformerLocator locator;
+		protected ReflectionBackedInformerFactory reflectiveFactory;
+		protected ProxyBackedInformerFactory proxyInformerFactory;
+		private FinderCrudService<Tag, TagInformer> tagService;
+		private FinderCrudService<Post, PostInformer> postService;
+		private FinderCrudService<PostSubClass, PostSubClassInformer> postSubService;
+		private FinderCrudService<User, UserInformer> userService;
+		private FinderCrudService<Theme, ThemeInformer> themeService;
+		private GraphType graph;
 
-	protected String name;
-	protected GraphType graph;
-	protected SimpleServiceRepository serviceRrepository;
-	protected GraphProvider graphProvider;
-	protected PropertyProvider provider;
-	protected CumulativeFieldInformerLocator locator;
-	protected ReflectionBackedInformerFactory reflectiveFactory;
-	protected ProxyBackedInformerFactory proxyInformerFactory;
-	private FinderCrudService<Tag, TagInformer> tagService;
-	private FinderCrudService<Post, PostInformer> postService;
-	private FinderCrudService<PostSubClass, PostSubClassInformer> postSubService;
-	private FinderCrudService<User, UserInformer> userService;
-	private FinderCrudService<Theme, ThemeInformer> themeService;
+		public void load() {
+			if(graph==null) {
+				graph = createGraph(graphProvider);
+				
+				serviceRrepository = new SimpleServiceRepository();
+				provider = new FieldBackedPropertyProvider();
+				locator = new CumulativeFieldInformerLocator();
+				locator.add(new BasicFieldInformerLocator());
+				locator.add(new ServiceBackedFieldLocator(serviceRrepository));
+				locator.add(new LazyInterfaceInformerLocator());
+				reflectiveFactory = new ReflectionBackedInformerFactory(
+						locator, provider);
+				proxyInformerFactory = new ProxyBackedInformerFactory(
+						reflectiveFactory);
+				
+				// Now add some services
+				tagService = createServiceFor(Tag.class, TagInformer.class, strategy );
+				postService = createServiceFor(Post.class, PostInformer.class, strategy);
+				postSubService= createServiceFor(PostSubClass.class, PostSubClassInformer.class, strategy);
+				userService = createServiceFor(User.class, UserInformer.class, strategy);
+				themeService = createServiceFor(Theme.class, ThemeInformer.class, strategy);
+			}
+		}
+
+		public void unload() {
+			if(graph!=null) {
+				graph.shutdown();
+				graph = null;
+			}
+		}
+	}
+
+	protected final String name;
+	protected final GraphProvider graphProvider;
+	protected ThreadLocal<GaedoComponentBag> bag = new ThreadLocal<GaedoComponentBag>();
+	
 	private StrategyType strategy = StrategyType.beanBased;
 
 	public AbstractGraphEnvironment(GraphProvider graph) {
@@ -63,44 +108,31 @@ public abstract class AbstractGraphEnvironment<GraphType extends Graph> {
 
 	@After
 	public void unload() throws Exception {
-		if(graph!=null) {
-			graph.shutdown();
-			graph = null;
+		synchronized(this) {
+			getBag().unload();
+			File f = new File(graphPath());
+			try {
+				FileUtils.deleteRecursively(f);
+			} catch(IOException e) {
+				System.out.println("there was a failure during graph deletion : "+e.getMessage());
+			}
 		}
-		File f = new File(graphPath());
-		FileUtils.deleteRecursively(f);
 	}
 
 	public void loadService() throws Exception {
-		serviceRrepository = new SimpleServiceRepository();
-		provider = new FieldBackedPropertyProvider();
-		locator = new CumulativeFieldInformerLocator();
-		locator.add(new BasicFieldInformerLocator());
-		locator.add(new ServiceBackedFieldLocator(serviceRrepository));
-		locator.add(new LazyInterfaceInformerLocator());
-		reflectiveFactory = new ReflectionBackedInformerFactory(
-				locator, provider);
-		proxyInformerFactory = new ProxyBackedInformerFactory(
-				reflectiveFactory);
-		
-		graph = createGraph(graphProvider);
-		
-		// Now add some services
-		tagService = createServiceFor(Tag.class, TagInformer.class, strategy );
-		postService = createServiceFor(Post.class, PostInformer.class, strategy);
-		postSubService= createServiceFor(PostSubClass.class, PostSubClassInformer.class, strategy);
-		userService = createServiceFor(User.class, UserInformer.class, strategy);
-		themeService = createServiceFor(Theme.class, ThemeInformer.class, strategy);
+		synchronized(this) {
+			getBag().load();
+		}
 	}
 
 	protected abstract GraphType createGraph(GraphProvider graphProvider);
 
 	public final <Type, InformerType extends Informer<Type>> InViewService<Type, InformerType, SortedSet<String>> createServiceFor(Class<Type> beanClass, Class<InformerType> informerClass, StrategyType strategy) {
-		if(!serviceRrepository.containsKey(beanClass)) {
+		if(!getBag().serviceRrepository.containsKey(beanClass)) {
 			FinderCrudService<Type, InformerType> created = doCreateServiceFor(beanClass, informerClass, strategy);
-			serviceRrepository.add(created);
+			getBag().serviceRrepository.add(created);
 		}
-		return (InViewService<Type, InformerType, SortedSet<String>>) serviceRrepository.get(beanClass);
+		return (InViewService<Type, InformerType, SortedSet<String>>) getBag().serviceRrepository.get(beanClass);
 	}
 
 	protected abstract <Type, InformerType extends Informer<Type>> InViewService<Type, InformerType, SortedSet<String>> doCreateServiceFor(Class<Type> beanClass, Class<InformerType> informerClass, StrategyType strategy);
@@ -111,7 +143,7 @@ public abstract class AbstractGraphEnvironment<GraphType extends Graph> {
 	 * @category tagService
 	 */
 	public FinderCrudService<Tag, TagInformer> getTagService() {
-		return tagService;
+		return getBag().tagService;
 	}
 
 	/**
@@ -120,7 +152,7 @@ public abstract class AbstractGraphEnvironment<GraphType extends Graph> {
 	 * @category postService
 	 */
 	public FinderCrudService<Post, PostInformer> getPostService() {
-		return postService;
+		return getBag().postService;
 	}
 
 	/**
@@ -129,7 +161,7 @@ public abstract class AbstractGraphEnvironment<GraphType extends Graph> {
 	 * @category postSubService
 	 */
 	public FinderCrudService<PostSubClass, PostSubClassInformer> getPostSubService() {
-		return postSubService;
+		return getBag().postSubService;
 	}
 
 	/**
@@ -138,7 +170,7 @@ public abstract class AbstractGraphEnvironment<GraphType extends Graph> {
 	 * @category userService
 	 */
 	public FinderCrudService<User, UserInformer> getUserService() {
-		return userService;
+		return getBag().userService;
 	}
 
 	/**
@@ -162,16 +194,7 @@ public abstract class AbstractGraphEnvironment<GraphType extends Graph> {
 	 * @category provider
 	 */
 	public PropertyProvider getProvider() {
-		return provider;
-	}
-
-	/**
-	 * @param provider the provider to set
-	 * @category setter
-	 * @category provider
-	 */
-	public void setProvider(PropertyProvider provider) {
-		this.provider = provider;
+		return getBag().provider;
 	}
 
 	/**
@@ -180,16 +203,7 @@ public abstract class AbstractGraphEnvironment<GraphType extends Graph> {
 	 * @category locator
 	 */
 	public CumulativeFieldInformerLocator getLocator() {
-		return locator;
-	}
-
-	/**
-	 * @param locator the locator to set
-	 * @category setter
-	 * @category locator
-	 */
-	public void setLocator(CumulativeFieldInformerLocator locator) {
-		this.locator = locator;
+		return getBag().locator;
 	}
 
 	/**
@@ -198,7 +212,7 @@ public abstract class AbstractGraphEnvironment<GraphType extends Graph> {
 	 * @category reflectiveFactory
 	 */
 	public ReflectionBackedInformerFactory getReflectiveFactory() {
-		return reflectiveFactory;
+		return getBag().reflectiveFactory;
 	}
 
 	/**
@@ -207,7 +221,7 @@ public abstract class AbstractGraphEnvironment<GraphType extends Graph> {
 	 * @category proxyInformerFactory
 	 */
 	public InformerFactory getInformerFactory() {
-		return proxyInformerFactory;
+		return getBag().proxyInformerFactory;
 	}
 
 	/**
@@ -216,16 +230,15 @@ public abstract class AbstractGraphEnvironment<GraphType extends Graph> {
 	 * @category serviceRrepository
 	 */
 	public SimpleServiceRepository getServiceRrepository() {
-		return serviceRrepository;
+		return getBag().serviceRrepository;
 	}
 
-	/**
-	 * @param serviceRrepository the serviceRrepository to set
-	 * @category setter
-	 * @category serviceRrepository
-	 */
-	public void setServiceRrepository(SimpleServiceRepository serviceRrepository) {
-		this.serviceRrepository = serviceRrepository;
+	private GaedoComponentBag getBag() {
+		if(bag.get()==null) {
+			bag.set(new GaedoComponentBag());
+			bag.get().load();
+		}
+		return bag.get();
 	}
 
 	/**
@@ -234,6 +247,15 @@ public abstract class AbstractGraphEnvironment<GraphType extends Graph> {
 	 * @category graph
 	 */
 	public GraphType getGraph() {
-		return graph;
+		while(getBag().graph==null) {
+			synchronized(this) {
+				try {
+					wait(100);
+				} catch (InterruptedException e) {
+                    // nothing to do but wait a little more
+   				}
+			}
+		}
+		return getBag().graph;
 	}
 }

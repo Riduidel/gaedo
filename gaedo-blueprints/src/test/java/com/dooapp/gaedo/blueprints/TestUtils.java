@@ -2,6 +2,7 @@ package com.dooapp.gaedo.blueprints;
 
 import java.util.Collection;
 import java.util.LinkedList;
+import java.util.List;
 
 import com.dooapp.gaedo.blueprints.indexable.IndexableGraphEnvironment;
 import com.dooapp.gaedo.blueprints.providers.Neo4j;
@@ -58,11 +59,40 @@ public class TestUtils {
 		return returned;
 	}
 	
+	public static Collection<GraphProvider> neo4j() {
+		Collection<GraphProvider> returned = new LinkedList<GraphProvider>();
+		returned.add(new Neo4j());
+		return returned;
+	}
+	
+	public static Collection<GraphProvider> tinker() {
+		Collection<GraphProvider> returned = new LinkedList<GraphProvider>();
+		returned.add(new Tinker());
+		return returned;
+	}
+	
+	public static Collection<GraphProvider> providers() {
+		Collection<GraphProvider> returned = new LinkedList<GraphProvider>();
+		returned.addAll(neo4j());
+		returned.addAll(tinker());
+		return returned;
+		
+	}
+	
 	public static Collection<Object[]> simpleTestProviders() {
+		return simpleTestProviders(providers());
+	}
+	
+	/**
+	 * Transform providers into their arrays counterpart for encapsulation
+	 * @param providers
+	 * @return
+	 */
+	public static Collection<Object[]> simpleTestProviders(Collection<GraphProvider> providers) {
 		Collection<Object[]> returned = new LinkedList<Object[]>();
-		returned.add(new Object[] { new Tinker()});
-//		returned.add(new Object[] { new OrientDB()});
-		returned.add(new Object[] { new Neo4j()});
+		for(GraphProvider gp : providers) {
+			returned.add(new Object[] { gp});
+		}
 		return returned;
 	}
 
@@ -79,8 +109,8 @@ public class TestUtils {
 	 * @param loadTestProviders
 	 * @return
 	 */
-	private static Collection<Object[]> environmentsFor(Collection<Object[]> providers) {
-		Collection<Object[]> returned = new LinkedList<Object[]>();
+	public static List<Object[]> environmentsFor(Collection<Object[]> providers) {
+		List<Object[]> returned = new LinkedList<Object[]>();
 		for(Object[] p : providers) {
 			returned.add(covnertProviderToEnvironment(p, new EnvironmentCreator() {
 

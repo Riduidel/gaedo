@@ -35,6 +35,14 @@
 			<groupId>junit</groupId>
 			<artifactId>junit</artifactId>
 		</dependency>
+			<dependency>
+				<groupId>com.google.code.tempus-fugit</groupId>
+				<artifactId>tempus-fugit</artifactId>
+			</dependency>
+			<dependency>
+				<groupId>org.databene</groupId>
+				<artifactId>contiperf</artifactId>
+			</dependency>
 		<!-- using neo4j for tests -->
 		<dependency>
 			<groupId>com.tinkerpop.blueprints</groupId>

@@ -159,8 +159,8 @@ public class GraphPostFinderServiceTest extends AbstractGraphPostTest {
 		assertThat(about, IsNull.notNullValue());
 		getUserService().delete(other);
 		try {
-			if (environment.graph instanceof TransactionalGraph) {
-				TransactionalGraph transactionalGraph = (TransactionalGraph) environment.graph;
+			if (environment.getGraph() instanceof TransactionalGraph) {
+				TransactionalGraph transactionalGraph = (TransactionalGraph) environment.getGraph();
 				transactionalGraph.startTransaction();
 			}
 			about = ((IdBasedService<Post>) getPostService()).findById(id);
@@ -460,8 +460,8 @@ public class GraphPostFinderServiceTest extends AbstractGraphPostTest {
 	 */
 	@Test 
 	public void makeSureGraphDoesntContainAnyEdgeNamedText() {
-		if (environment.graph instanceof IndexableGraph) {
-			IndexableGraph indexableGraph = (IndexableGraph) environment.graph;
+		if (environment.getGraph() instanceof IndexableGraph) {
+			IndexableGraph indexableGraph = (IndexableGraph) environment.getGraph();
 			
 			Index<Edge> edgeIndex = indexableGraph.getIndex(Index.EDGES, Edge.class);
 //			assertThat(edgeIndex.count("label", "Identified.id"), IsNot.not(Is.is(0l)));

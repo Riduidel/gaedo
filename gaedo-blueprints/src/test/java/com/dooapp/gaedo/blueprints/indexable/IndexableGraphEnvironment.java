@@ -31,7 +31,7 @@ public class IndexableGraphEnvironment extends AbstractGraphEnvironment<Indexabl
 					Class<InformerType> informerClass, 
 					StrategyType strategy)  {
 		return new IndexableGraphBackedFinderService<Type, InformerType>(
-						graph, 
+						getGraph(), 
 						beanClass,
 						informerClass,
 						getInformerFactory(), 
@@ -42,7 +42,7 @@ public class IndexableGraphEnvironment extends AbstractGraphEnvironment<Indexabl
 
 	@Override
 	public SailRepository getSailRepository() {
-		return new SailRepository(new GraphSail(graph));
+		return new SailRepository(new GraphSail(getGraph()));
 	}
 
 	@Override

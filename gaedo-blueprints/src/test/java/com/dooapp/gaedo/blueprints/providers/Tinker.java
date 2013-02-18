@@ -12,6 +12,7 @@ public class Tinker extends AbstractGraphProvider implements GraphProvider {
 	public IndexableGraph get(String path) {
 		String fullPath = path(path);
 		File f = new File(fullPath);
+		f.getParentFile().mkdirs();
 		return new TinkerGraph(f.getAbsolutePath());
 	}
 

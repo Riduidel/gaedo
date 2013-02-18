@@ -22,7 +22,7 @@ public class SailGraphEnvironment extends AbstractGraphEnvironment<SailGraph> {
 
 
 	public <Type, InformerType extends Informer<Type>> InViewService<Type, InformerType, SortedSet<String>> doCreateServiceFor(Class<Type> beanClass, Class<InformerType> informerClass, StrategyType strategy) {
-		return new SailGraphBackedFinderService(graph,
+		return new SailGraphBackedFinderService(getGraph(),
 						beanClass,
 						informerClass,
 						getInformerFactory(),
@@ -45,7 +45,7 @@ public class SailGraphEnvironment extends AbstractGraphEnvironment<SailGraph> {
 
 	@Override
 	public SailRepository getSailRepository() {
-		SailRepository sailRepository = new SailRepository(graph.getRawGraph());
+		SailRepository sailRepository = new SailRepository(getGraph().getRawGraph());
 		return sailRepository;
 	}
 
