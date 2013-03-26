@@ -83,10 +83,14 @@ public abstract class MonovaluedValuedVertexTest<ValueType extends Object> exten
 	 * @return
 	 */
 	public boolean matchesVertex(Vertex currentVertex, Property finalProperty) {
-		if(expected!=null && getRepository().containsKey(expected.getClass())) {
-			return callMatchManaged(currentVertex, finalProperty);
+		if(expected==null) {
+			return currentVertex==null;
 		} else {
-			return callMatchLiteral(currentVertex, finalProperty);
+			if(getRepository().containsKey(expected.getClass())) {
+				return callMatchManaged(currentVertex, finalProperty);
+			} else {
+				return callMatchLiteral(currentVertex, finalProperty);
+			}
 		}
 	}
 

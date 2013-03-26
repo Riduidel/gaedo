@@ -48,15 +48,15 @@ import static com.dooapp.gaedo.blueprints.TestUtils.USER_LOGIN;
 import static com.dooapp.gaedo.blueprints.TestUtils.simpleTest;
 
 @RunWith(Parameterized.class)
-public class TestFor09 extends AbstractGraphPostTest {
-	private static final Logger logger = Logger.getLogger(TestFor09.class.getName());
+public class TestFor53 extends AbstractGraphPostTest {
+	private static final Logger logger = Logger.getLogger(TestFor53.class.getName());
 
 	@Parameters
 	public static Collection<Object[]> parameters() {
 		return simpleTest();
 	}
 
-	public TestFor09(AbstractGraphEnvironment<?> environment) {
+	public TestFor53(AbstractGraphEnvironment<?> environment) {
 		super(environment);
 	}
 
@@ -66,25 +66,15 @@ public class TestFor09 extends AbstractGraphPostTest {
 	 * @throws ClassNotFoundException
 	 */
 	@Test
-	public void ensurePostscanBeSortedByNoteDescending() throws IOException, ClassNotFoundException {
+	public void ensurePostscanBeSortedByNoteDescending() {
 		Collection<Post> postsByAuthor= CollectionUtils.asList(getPostService().find().matching(new QueryBuilder<PostInformer>() {
 
 			@Override
 			public QueryExpression createMatchingExpression(PostInformer informer) {
-				return informer.getAuthor().equalsTo(author);
-			}
-		}).sortBy(new SortingBuilder<PostInformer>() {
-			
-			@Override
-			public SortingExpression createSortingExpression(PostInformer informer) {
-				return SortingExpression.Build.sort().withDescending(informer.getNote());
+				// the precise thing issue #53 result into
+				return informer.getAuthor().equalsTo(null);
 			}
 		}).getAll());
-		assertThat(postsByAuthor, IsCollectionContaining.hasItems(post1, post2, post3));
-		float note = Float.MAX_VALUE;
-		for(Post p : postsByAuthor) {
-			assertThat(p.note<=note, Is.is(true));
-			note = p.note;
-		}
+		assertThat(postsByAuthor.size(), Is.is(0));
 	}
 }
