@@ -3,6 +3,9 @@ package com.dooapp.gaedo.blueprints;
 import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.logging.Handler;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import com.dooapp.gaedo.blueprints.indexable.IndexableGraphEnvironment;
 import com.dooapp.gaedo.blueprints.providers.Neo4j;
@@ -14,6 +17,17 @@ import com.dooapp.gaedo.blueprints.providers.Tinker;
  *
  */
 public class TestUtils {
+	/**
+	 * Activate all logging for tests
+	 */
+	static {
+		Logger logger = Logger.getLogger("");
+		logger.setLevel(Level.ALL);
+		Handler[] handlers = logger.getHandlers();
+		for(Handler h : handlers) {
+			h.setLevel(Level.ALL);
+		}
+	}
 	private static interface EnvironmentCreator {
 
 		Object environmentFor(GraphProvider o);
@@ -73,7 +87,7 @@ public class TestUtils {
 	
 	public static Collection<GraphProvider> providers() {
 		Collection<GraphProvider> returned = new LinkedList<GraphProvider>();
-		returned.addAll(neo4j());
+//		returned.addAll(neo4j());
 		returned.addAll(tinker());
 		return returned;
 		

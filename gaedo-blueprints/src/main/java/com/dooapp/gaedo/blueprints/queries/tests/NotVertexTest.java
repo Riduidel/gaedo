@@ -3,7 +3,7 @@ package com.dooapp.gaedo.blueprints.queries.tests;
 import com.dooapp.gaedo.blueprints.GraphDatabaseDriver;
 import com.dooapp.gaedo.blueprints.strategies.GraphMappingStrategy;
 import com.dooapp.gaedo.properties.Property;
-import com.tinkerpop.blueprints.pgm.Vertex;
+import com.tinkerpop.blueprints.Vertex;
 
 /**
  * A not is just the opposite of an or : if or returns true, not return false

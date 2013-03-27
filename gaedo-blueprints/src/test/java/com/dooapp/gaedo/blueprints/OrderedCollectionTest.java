@@ -1,10 +1,5 @@
 package com.dooapp.gaedo.blueprints;
 
-import static com.dooapp.gaedo.blueprints.TestUtils.*;
-import static org.hamcrest.CoreMatchers.is;
-import static org.junit.Assert.*;
-import static org.junit.Assert.assertThat;
-
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -29,10 +24,20 @@ import com.dooapp.gaedo.test.beans.PostInformer;
 import com.dooapp.gaedo.test.beans.State;
 import com.dooapp.gaedo.test.beans.User;
 import com.dooapp.gaedo.test.beans.UserInformer;
-import com.tinkerpop.blueprints.pgm.Edge;
-import com.tinkerpop.blueprints.pgm.TransactionalGraph;
-import com.tinkerpop.blueprints.pgm.TransactionalGraph.Conclusion;
-import com.tinkerpop.blueprints.pgm.Vertex;
+import com.tinkerpop.blueprints.Direction;
+import com.tinkerpop.blueprints.Edge;
+import com.tinkerpop.blueprints.TransactionalGraph;
+import com.tinkerpop.blueprints.TransactionalGraph.Conclusion;
+import com.tinkerpop.blueprints.Vertex;
+
+import static com.dooapp.gaedo.blueprints.TestUtils.ABOUT_ID;
+import static com.dooapp.gaedo.blueprints.TestUtils.USER_LOGIN;
+import static com.dooapp.gaedo.blueprints.TestUtils.USER_PASSWORD;
+import static com.dooapp.gaedo.blueprints.TestUtils.simpleTest;
+import static org.hamcrest.CoreMatchers.is;
+
+import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertTrue;
 
 @RunWith(Parameterized.class)
 public class OrderedCollectionTest extends AbstractGraphTest {
@@ -150,12 +155,12 @@ public class OrderedCollectionTest extends AbstractGraphTest {
 			(AbstractBluePrintsBackedFinderService<?, User, ?>) getUserService();
 		Vertex authorVertex = userService.getVertexFor(author, CascadeType.REFRESH, new TreeMap<String, Object>());
 		
-		if(environment.getGraph() instanceof TransactionalGraph)
-			((TransactionalGraph) environment.getGraph()).startTransaction();
+//		if(environment.getGraph() instanceof TransactionalGraph)
+//			((TransactionalGraph) environment.getGraph()).startTransaction();
 		
 		// This String should be the same thing as what GraphUtils.getDefaultEdgeNameFor
 		// would return if we had the Property object
-		Iterable<Edge> postEdges = authorVertex.getOutEdges("com.dooapp.gaedo.test.beans.User:posts");
+		Iterable<Edge> postEdges = authorVertex.getEdges(Direction.OUT, "com.dooapp.gaedo.test.beans.User:posts");
 		for(Edge e : postEdges) {
 			e.removeProperty(Properties.collection_index.name());
 		}

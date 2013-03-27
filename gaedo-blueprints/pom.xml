@@ -1,4 +1,5 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	<parent>
 		<artifactId>gaedo</artifactId>
@@ -9,6 +10,10 @@
 	<artifactId>gaedo-blueprints</artifactId>
 	<name>Gaedo blueprints backed services</name>
 	<description>Implementation of gaedo mechanisms backed by blueprints graph layer</description>
+	<properties>
+		<blueprints.version>2.3.0</blueprints.version>
+		<neo4j.version>1.8</neo4j.version>
+	</properties>
 	<dependencies>
 		<dependency>
 			<groupId>org.apache.geronimo.specs</groupId>
@@ -35,20 +40,40 @@
 			<groupId>junit</groupId>
 			<artifactId>junit</artifactId>
 		</dependency>
-			<dependency>
-				<groupId>com.google.code.tempus-fugit</groupId>
-				<artifactId>tempus-fugit</artifactId>
-			</dependency>
-			<dependency>
-				<groupId>org.databene</groupId>
-				<artifactId>contiperf</artifactId>
-			</dependency>
+		<dependency>
+			<groupId>com.google.code.tempus-fugit</groupId>
+			<artifactId>tempus-fugit</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.databene</groupId>
+			<artifactId>contiperf</artifactId>
+		</dependency>
 		<!-- using neo4j for tests -->
 		<dependency>
 			<groupId>com.tinkerpop.blueprints</groupId>
 			<artifactId>blueprints-neo4j-graph</artifactId>
 			<scope>test</scope>
 			<version>${blueprints.version}</version>
+			<exclusions>
+				<exclusion>
+					<artifactId>neo4j</artifactId>
+					<groupId>org.neo4j</groupId>
+				</exclusion>
+				<exclusion>
+					<artifactId>neo4j-ha</artifactId>
+					<groupId>org.neo4j</groupId>
+				</exclusion>
+				<exclusion>
+					<artifactId>neo4j-management</artifactId>
+					<groupId>org.neo4j</groupId>
+				</exclusion>
+			</exclusions>
+		</dependency>
+		<dependency>
+			<artifactId>neo4j</artifactId>
+			<groupId>org.neo4j</groupId>
+			<scope>test</scope>
+			<version>${neo4j.version}</version>
 		</dependency>
 		<!-- using orientdb for tests -->
 		<!-- <dependency> <groupId>com.tinkerpop.blueprints</groupId> <artifactId>blueprints-orient-graph</artifactId> 

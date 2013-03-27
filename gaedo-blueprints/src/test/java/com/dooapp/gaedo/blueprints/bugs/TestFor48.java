@@ -17,6 +17,7 @@ import com.dooapp.gaedo.finders.Informer;
 import com.dooapp.gaedo.finders.id.IdBasedService;
 
 import static com.dooapp.gaedo.blueprints.TestUtils.simpleTest;
+
 import static org.junit.Assert.assertThat;
 
 @RunWith(Parameterized.class)

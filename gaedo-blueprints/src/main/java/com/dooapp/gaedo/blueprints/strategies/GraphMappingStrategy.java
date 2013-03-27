@@ -8,8 +8,8 @@ import javax.persistence.CascadeType;
 import com.dooapp.gaedo.blueprints.AbstractBluePrintsBackedFinderService;
 import com.dooapp.gaedo.blueprints.queries.tests.CompoundVertexTest;
 import com.dooapp.gaedo.properties.Property;
-import com.tinkerpop.blueprints.pgm.Edge;
-import com.tinkerpop.blueprints.pgm.Vertex;
+import com.tinkerpop.blueprints.Edge;
+import com.tinkerpop.blueprints.Vertex;
 
 /**
  * Interface adapting some specific behaviours of a graph service. This interface should typically allow one to choose bvetween bean based graph mapping and graph based bean mapping (in which case

@@ -1,18 +1,15 @@
 package com.dooapp.gaedo.blueprints.queries.tests;
 
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 
 import com.dooapp.gaedo.blueprints.GraphDatabaseDriver;
-import com.dooapp.gaedo.blueprints.GraphUtils;
 import com.dooapp.gaedo.blueprints.strategies.GraphMappingStrategy;
 import com.dooapp.gaedo.properties.Property;
 import com.dooapp.gaedo.utils.CollectionUtils;
-import com.tinkerpop.blueprints.pgm.Edge;
-import com.tinkerpop.blueprints.pgm.Vertex;
+import com.tinkerpop.blueprints.Direction;
+import com.tinkerpop.blueprints.Edge;
+import com.tinkerpop.blueprints.Vertex;
 
 /**
  * Base class for collection tests
@@ -58,7 +55,7 @@ public abstract class CollectionTargettedVertexTest extends TargettedVertexTest 
 			List<Property> remaining =  path.size()>1 ? path.subList(1, path.size()) : new LinkedList<Property>();
 			Iterable<Edge> edges = strategy.getOutEdgesFor(examined, evaluated);
 			for(Edge e : edges) {
-				returned = combineReturnedWith(matchesCollection(e.getInVertex(), remaining, evaluated), returned);
+				returned = combineReturnedWith(matchesCollection(e.getVertex(Direction.IN), remaining, evaluated), returned);
 			}
 		}
 		return returned;

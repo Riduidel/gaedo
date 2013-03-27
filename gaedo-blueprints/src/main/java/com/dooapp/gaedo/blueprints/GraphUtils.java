@@ -24,12 +24,13 @@ import com.dooapp.gaedo.blueprints.transformers.TupleTransformer;
 import com.dooapp.gaedo.blueprints.transformers.Tuples;
 import com.dooapp.gaedo.finders.repository.ServiceRepository;
 import com.dooapp.gaedo.properties.Property;
-import com.tinkerpop.blueprints.pgm.Edge;
-import com.tinkerpop.blueprints.pgm.Element;
-import com.tinkerpop.blueprints.pgm.Graph;
-import com.tinkerpop.blueprints.pgm.IndexableGraph;
-import com.tinkerpop.blueprints.pgm.Vertex;
-import com.tinkerpop.blueprints.pgm.oupls.sail.GraphSail;
+import com.tinkerpop.blueprints.Direction;
+import com.tinkerpop.blueprints.Edge;
+import com.tinkerpop.blueprints.Element;
+import com.tinkerpop.blueprints.Graph;
+import com.tinkerpop.blueprints.IndexableGraph;
+import com.tinkerpop.blueprints.Vertex;
+import com.tinkerpop.blueprints.oupls.sail.GraphSail;
 
 public class GraphUtils {
 
@@ -324,7 +325,7 @@ public class GraphUtils {
 		return sOut.append("}").toString();
 	}
 
-	private static void toString(Element objectVertex, StringBuilder sOut) {
+	public static void toString(Element objectVertex, StringBuilder sOut) {
 		for (String s : objectVertex.getPropertyKeys()) {
 			if (sOut.length() > 1)
 				sOut.append("; ");
@@ -332,12 +333,13 @@ public class GraphUtils {
 		}
 	}
 
-	private static String toString(Edge existing) {
+	public static String toString(Edge existing) {
 		StringBuilder sOut = new StringBuilder();
 		sOut.append("{{{");
+		sOut.append("\n").append("fromVertex (aka outVertex) => ").append(toString(existing.getVertex(Direction.OUT)));
+		sOut.append("\n\t").append(existing.getLabel());
 		toString(existing, sOut);
-		sOut.append("\n").append("outVertex => ").append(toString(existing.getOutVertex()));
-		sOut.append("\n").append("inVertex => ").append(toString(existing.getInVertex()));
+		sOut.append("\n").append("toVertex (aka inVertex) => ").append(toString(existing.getVertex(Direction.IN)));
 		sOut.append("\n}}}");
 		return sOut.toString();
 	}

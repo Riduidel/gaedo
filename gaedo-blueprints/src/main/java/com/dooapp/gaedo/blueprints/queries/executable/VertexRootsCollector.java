@@ -5,13 +5,13 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 
 import javax.persistence.CascadeType;
 
 import com.dooapp.gaedo.blueprints.AbstractBluePrintsBackedFinderService;
+import com.dooapp.gaedo.blueprints.indexable.IndexNames;
 import com.dooapp.gaedo.blueprints.queries.tests.CollectionContains;
 import com.dooapp.gaedo.blueprints.queries.tests.EqualsTo;
 import com.dooapp.gaedo.blueprints.queries.tests.MapContainsKey;
@@ -22,10 +22,10 @@ import com.dooapp.gaedo.blueprints.queries.tests.VertexPropertyTest;
 import com.dooapp.gaedo.blueprints.queries.tests.VertexTestVisitor;
 import com.dooapp.gaedo.blueprints.queries.tests.VertexTestVisitorAdapter;
 import com.dooapp.gaedo.properties.Property;
-import com.tinkerpop.blueprints.pgm.Graph;
-import com.tinkerpop.blueprints.pgm.Index;
-import com.tinkerpop.blueprints.pgm.IndexableGraph;
-import com.tinkerpop.blueprints.pgm.Vertex;
+import com.tinkerpop.blueprints.Graph;
+import com.tinkerpop.blueprints.Index;
+import com.tinkerpop.blueprints.IndexableGraph;
+import com.tinkerpop.blueprints.Vertex;
 
 /**
  * Class visiting vertex test to grab possible query roots. What are query roots ? 
@@ -146,7 +146,8 @@ public class VertexRootsCollector extends VertexTestVisitorAdapter implements Ve
 		Graph g = service.getDatabase();
 		if (g instanceof IndexableGraph) {
 			final IndexableGraph indexable = (IndexableGraph) g;
-			final Index<Vertex> vertices = indexable.getIndex(Index.VERTICES, Vertex.class);
+			final Index<Vertex> vertices = indexable
+							.getIndex(IndexNames.VERTICES.getIndexName(), Vertex.class);
 			result.put(new Iterable<Vertex>() {
 				
 				@Override

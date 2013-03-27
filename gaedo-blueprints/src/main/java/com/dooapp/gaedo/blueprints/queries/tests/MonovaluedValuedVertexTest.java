@@ -4,17 +4,14 @@ import java.util.Iterator;
 
 import com.dooapp.gaedo.blueprints.AbstractBluePrintsBackedFinderService;
 import com.dooapp.gaedo.blueprints.GraphDatabaseDriver;
-import com.dooapp.gaedo.blueprints.GraphUtils;
-import com.dooapp.gaedo.blueprints.Properties;
 import com.dooapp.gaedo.blueprints.indexable.IndexableGraphBackedFinderService;
 import com.dooapp.gaedo.blueprints.strategies.GraphMappingStrategy;
-import com.dooapp.gaedo.blueprints.transformers.LiteralTransformer;
-import com.dooapp.gaedo.blueprints.transformers.Literals;
 import com.dooapp.gaedo.properties.Property;
 import com.dooapp.gaedo.utils.PrimitiveUtils;
 import com.dooapp.gaedo.utils.Utils;
-import com.tinkerpop.blueprints.pgm.Edge;
-import com.tinkerpop.blueprints.pgm.Vertex;
+import com.tinkerpop.blueprints.Direction;
+import com.tinkerpop.blueprints.Edge;
+import com.tinkerpop.blueprints.Vertex;
 
 /**
  * Base class for all simple tests (like contains, greater than, ...).
@@ -53,7 +50,7 @@ public abstract class MonovaluedValuedVertexTest<ValueType extends Object> exten
 		for(Property currentProperty : path) {
 			Iterator<Edge> edges = strategy.getOutEdgesFor(currentVertex, currentProperty).iterator();
 			if(edges.hasNext()) {
-				currentVertex = edges.next().getInVertex();
+				currentVertex = edges.next().getVertex(Direction.IN);
 			} else {
 				return false;
 			}

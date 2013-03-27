@@ -10,25 +10,17 @@ import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 import org.junit.runners.Parameterized.Parameters;
 
-import com.dooapp.gaedo.blueprints.AbstractBluePrintsBackedFinderService;
 import com.dooapp.gaedo.blueprints.AbstractGraphEnvironment;
 import com.dooapp.gaedo.blueprints.AbstractGraphPostTest;
 import com.dooapp.gaedo.finders.QueryBuilder;
 import com.dooapp.gaedo.finders.QueryExpression;
 import com.dooapp.gaedo.test.beans.PostInformer;
 import com.dooapp.gaedo.test.beans.User;
-import com.dooapp.gaedo.test.beans.UserInformer;
-import com.tinkerpop.blueprints.pgm.Vertex;
+import com.tinkerpop.blueprints.Vertex;
+
+import static com.dooapp.gaedo.blueprints.TestUtils.simpleTest;
 
 import static org.junit.Assert.assertThat;
-import static com.dooapp.gaedo.blueprints.TestUtils.A;
-import static com.dooapp.gaedo.blueprints.TestUtils.ABOUT_ID;
-import static com.dooapp.gaedo.blueprints.TestUtils.ID_POST_1;
-import static com.dooapp.gaedo.blueprints.TestUtils.LOGIN_FOR_UPDATE_ON_CREATE;
-import static com.dooapp.gaedo.blueprints.TestUtils.SOME_NEW_TEXT;
-import static com.dooapp.gaedo.blueprints.TestUtils.TEST_TAG_FOR_CREATE_ON_UPDATE;
-import static com.dooapp.gaedo.blueprints.TestUtils.USER_LOGIN;
-import static com.dooapp.gaedo.blueprints.TestUtils.simpleTest;
 
 @RunWith(Parameterized.class)
 public class TestFor46 extends AbstractGraphPostTest {

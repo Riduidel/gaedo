@@ -11,12 +11,11 @@ import com.dooapp.gaedo.test.beans.State;
 import com.dooapp.gaedo.test.beans.Tag;
 import com.dooapp.gaedo.test.beans.User;
 import com.dooapp.gaedo.test.beans.UserInformer;
-import com.tinkerpop.blueprints.pgm.TransactionalGraph;
-import com.tinkerpop.blueprints.pgm.TransactionalGraph.Conclusion;
-import com.tinkerpop.blueprints.pgm.Vertex;
+import com.tinkerpop.blueprints.TransactionalGraph;
+import com.tinkerpop.blueprints.TransactionalGraph.Conclusion;
+import com.tinkerpop.blueprints.Vertex;
 
 import static com.dooapp.gaedo.blueprints.TestUtils.ABOUT_ID;
-import static com.dooapp.gaedo.blueprints.TestUtils.ID_POST_1;
 import static com.dooapp.gaedo.blueprints.TestUtils.TAG_TEXT;
 import static com.dooapp.gaedo.blueprints.TestUtils.USER_LOGIN;
 import static com.dooapp.gaedo.blueprints.TestUtils.USER_PASSWORD;
@@ -50,9 +49,9 @@ public abstract class AbstractGraphPostSubClassTest extends AbstractGraphTest {
 	}
 
 	protected Vertex findVertexIn(FinderCrudService<User, UserInformer> userService, User author) {
-		if(environment.getGraph() instanceof TransactionalGraph) {
-			((TransactionalGraph) environment.getGraph()).startTransaction();
-		}
+//		if(environment.getGraph() instanceof TransactionalGraph) {
+//			((TransactionalGraph) environment.getGraph()).startTransaction();
+//		}
 		try {
 			return ((AbstractBluePrintsBackedFinderService) getUserService()).getIdVertexFor(author, false);
 		} finally {

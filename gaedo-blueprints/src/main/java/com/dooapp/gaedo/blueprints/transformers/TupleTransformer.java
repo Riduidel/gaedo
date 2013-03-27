@@ -9,8 +9,8 @@ import com.dooapp.gaedo.blueprints.GraphDatabaseDriver;
 import com.dooapp.gaedo.blueprints.Kind;
 import com.dooapp.gaedo.blueprints.strategies.GraphMappingStrategy;
 import com.dooapp.gaedo.finders.repository.ServiceRepository;
-import com.tinkerpop.blueprints.pgm.Graph;
-import com.tinkerpop.blueprints.pgm.Vertex;
+import com.tinkerpop.blueprints.Graph;
+import com.tinkerpop.blueprints.Vertex;
 
 public interface TupleTransformer<Type> extends Transformer {
 
@@ -22,7 +22,7 @@ public interface TupleTransformer<Type> extends Transformer {
 	 * @param objectsBeingUpdated map of already accessed objects
 	 * @return
 	 */
-	public <DataType> Vertex getVertexFor(AbstractBluePrintsBackedFinderService<? extends Graph, DataType, ?> service, Type cast, CascadeType cascade, Map<String, Object> objectsBeingUpdated);
+	public <DataType> com.tinkerpop.blueprints.Vertex getVertexFor(AbstractBluePrintsBackedFinderService<? extends Graph, DataType, ?> service, Type cast, CascadeType cascade, Map<String, Object> objectsBeingUpdated);
 	
 	/**
 	 * Create an identifier for tuple value, which can be done in any fashion

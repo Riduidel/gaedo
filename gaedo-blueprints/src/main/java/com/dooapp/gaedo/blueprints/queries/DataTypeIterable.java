@@ -6,10 +6,9 @@ import java.util.Map;
 import java.util.TreeMap;
 
 import com.dooapp.gaedo.blueprints.AbstractBluePrintsBackedFinderService;
-import com.dooapp.gaedo.blueprints.indexable.IndexableGraphBackedFinderService;
 import com.dooapp.gaedo.patterns.WriteReplaceable;
 import com.dooapp.gaedo.utils.CollectionUtils;
-import com.tinkerpop.blueprints.pgm.Vertex;
+import com.tinkerpop.blueprints.Vertex;
 
 /**
  * That Iterable iterates over a list of (qsorted) vertices and load objects during that iteration.

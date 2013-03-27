@@ -1,21 +1,16 @@
 package com.dooapp.gaedo.blueprints.dynabeans;
 
 import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
-import java.util.Map;
 import java.util.SortedSet;
-import java.util.TreeMap;
 import java.util.TreeSet;
 
 import org.hamcrest.core.Is;
 import org.hamcrest.core.IsNot;
 import org.hamcrest.core.IsNull;
-import org.junit.After;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -29,7 +24,6 @@ import org.openrdf.rio.RDFParseException;
 
 import com.dooapp.gaedo.blueprints.AbstractGraphEnvironment;
 import com.dooapp.gaedo.blueprints.AbstractGraphTest;
-import com.dooapp.gaedo.blueprints.Properties;
 import com.dooapp.gaedo.blueprints.TestUtils;
 import com.dooapp.gaedo.blueprints.annotations.GraphProperty;
 import com.dooapp.gaedo.blueprints.strategies.StrategyType;
@@ -40,8 +34,6 @@ import com.dooapp.gaedo.finders.id.IdBasedService;
 import com.dooapp.gaedo.finders.informers.CollectionFieldInformer;
 import com.dooapp.gaedo.properties.Property;
 import com.dooapp.gaedo.utils.CollectionUtils;
-import com.tinkerpop.blueprints.pgm.util.graphml.GraphMLTokens;
-import com.tinkerpop.blueprints.pgm.util.graphml.GraphMLWriter;
 
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.fail;
@@ -70,17 +62,18 @@ public class PropertyBagTest extends AbstractGraphTest {
 		}
 	}
 	
-	private static final String ENGINEERING = "http://nasa.dataincubator.org/discipline/engineering";
-	private static final String ARIANE_L01_WIKIEDIA_DESCRIPTION = "Ariane 1 was the first rocket in the Ariane launcher family. Ariane 1 was designed primarily to put two telecommunications satellites at a time into orbit, thus reducing costs. As the size of satellites grew, Ariane 1 gave way to the more powerful Ariane 2 and Ariane 3 launchers.";
-	private static final String ARIANE_L01 = "http://nasa.dataincubator.org/spacecraft/ARIANEL01";
-	private static final String SATURN_SA_1_WIKIPEDIA_DESCRIPTION = "SA-1 was the first Saturn I space launch vehicle, the first in the Saturn family, and first mission of the American Apollo program. The rocket was launched on October 27, 1961 from Cape Canaveral, Florida.";
-	private static final String DYNAMIC_DESCRIPTION = "http://purl.org/dc/elements/1.1/description";
-	private static final String RUSSIAN_033B = "http://nasa.dataincubator.org/spacecraft/1989-033B";
-	private static final String PION2 = "http://nasa.dataincubator.org/spacecraft/PION2";
-	private static final String SATURN_SA1 = "http://nasa.dataincubator.org/spacecraft/SATURNSA1";
-	private static final String PLANETARY_SCIENCE = "http://nasa.dataincubator.org/discipline/planetaryscience";
-	private static final String DYNAMIC_DISCIPLINE = "http://purl.org/net/schemas/space/discipline";
-	private static final String DYNAMIC_NAME = "http://xmlns.com/foaf/0.1/name";
+	protected static final String ENGINEERING = "http://nasa.dataincubator.org/discipline/engineering";
+	protected static final String ARIANE_L01_WIKIEDIA_DESCRIPTION = "Ariane 1 was the first rocket in the Ariane launcher family. Ariane 1 was designed primarily to put two telecommunications satellites at a time into orbit, thus reducing costs. As the size of satellites grew, Ariane 1 gave way to the more powerful Ariane 2 and Ariane 3 launchers.";
+	protected static final String ARIANE_L01 = "http://nasa.dataincubator.org/spacecraft/ARIANEL01";
+	protected static final String SATURN_SA_1_WIKIPEDIA_DESCRIPTION = "SA-1 was the first Saturn I space launch vehicle, the first in the Saturn family, and first mission of the American Apollo program. The rocket was launched on October 27, 1961 from Cape Canaveral, Florida.";
+	protected static final String DYNAMIC_DESCRIPTION = "http://purl.org/dc/elements/1.1/description";
+	protected static final String RUSSIAN_033B = "http://nasa.dataincubator.org/spacecraft/1989-033B";
+	protected static final String PION2 = "http://nasa.dataincubator.org/spacecraft/PION2";
+	protected static final String SATURN_SA1 = "http://nasa.dataincubator.org/spacecraft/SATURNSA1";
+	protected static final String PLANETARY_SCIENCE = "http://nasa.dataincubator.org/discipline/planetaryscience";
+	protected static final String LIFE_SCIENCE = "http://nasa.dataincubator.org/discipline/lifescience";
+	protected static final String DYNAMIC_DISCIPLINE = "http://purl.org/net/schemas/space/discipline";
+	protected static final String DYNAMIC_NAME = "http://xmlns.com/foaf/0.1/name";
 	/**
 	 * File from which data will be loaded
 	 */
@@ -269,6 +262,42 @@ public class PropertyBagTest extends AbstractGraphTest {
 		focus.add("#twoServcieShouldntShareConfig()");
 		InViewService<PropertyBagMap, PropertyBagInformer, SortedSet<String>> focused = propertyBagService.focusOn(focus);
 		assertThat(propertyBagService.getLens(), IsNot.not(focus));
+	}
+	
+	@Test
+	public void Saturn_SA1_can_have_concurrent_description_in_concurrent_named_graph() {
+		if (propertyBagService instanceof IdBasedService) {
+			IdBasedService<PropertyBagMap> idService = (IdBasedService<PropertyBagMap>) propertyBagService;
+			PropertyBagMap engineering = idService.findById(ENGINEERING);
+			PropertyBagMap saturnSa1 = idService.findById(SATURN_SA1);
+			InViewService<PropertyBagMap, PropertyBagInformer, SortedSet<String>> epistemologicalService = propertyBagService.focusOn(new TreeSet<String>(Arrays.asList("https://en.wikipedia.org/wiki/Category:Philosophy_of_science")));
+			InViewService<PropertyBagMap, PropertyBagInformer, SortedSet<String>> metaphoricalService = propertyBagService.focusOn(new TreeSet<String>(Arrays.asList("https://en.wikipedia.org/wiki/Category:Phallic_symbols")));
+			// pure metaphorical service
+			PropertyBagMap phallical = new PropertyBagMap();
+			phallical.setId("https://en.wikipedia.org/wiki/Phallic_symbolism");
+			// create a second elvel edge to see if it is navigated
+			phallical.set(DYNAMIC_DISCIPLINE, idService.findById(LIFE_SCIENCE));
+			phallical = metaphoricalService.create(phallical);
+			saturnSa1.set(DYNAMIC_DISCIPLINE, phallical);
+			metaphoricalService.update(saturnSa1);
+			// and pure epistemological one
+			saturnSa1.set(DYNAMIC_DISCIPLINE, engineering);
+			epistemologicalService.update(saturnSa1);
+			
+			// how the engineering sees our spaceship ?
+			saturnSa1 = ((IdBasedService<PropertyBagMap>) epistemologicalService).findById(SATURN_SA1);
+			assertThat(saturnSa1.get(DYNAMIC_DISCIPLINE), IsCollectionContaining.hasItems((Object) engineering));
+			// how the metaphorical do see our spaceship ?
+			saturnSa1 = ((IdBasedService<PropertyBagMap>) metaphoricalService).findById(SATURN_SA1);
+			assertThat(saturnSa1.get(DYNAMIC_DISCIPLINE), IsCollectionContaining.hasItems((Object) phallical));
+			/* this test should be false (due to the load limit on PropertyBag
+			 * However, if there is a bug in ServiceRepository usage, it will load the engineering value and as a consequence expose a particularly
+			 * weird bug
+			 */
+			assertThat(((PropertyBag) saturnSa1.get(DYNAMIC_DISCIPLINE).get(0)).contains(DYNAMIC_DISCIPLINE), Is.is(false)); 
+		} else {
+			fail("service should be id based \"by design\"");
+		}
 	}
 	
 	

@@ -18,8 +18,9 @@ import com.dooapp.gaedo.finders.FinderCrudService;
 import com.dooapp.gaedo.finders.repository.ServiceRepository;
 import com.dooapp.gaedo.patterns.WriteReplaceable;
 import com.dooapp.gaedo.properties.Property;
-import com.tinkerpop.blueprints.pgm.Edge;
-import com.tinkerpop.blueprints.pgm.Vertex;
+import com.tinkerpop.blueprints.Direction;
+import com.tinkerpop.blueprints.Edge;
+import com.tinkerpop.blueprints.Vertex;
 
 @SuppressWarnings("rawtypes")
 public class CollectionLazyLoader extends AbstractLazyLoader implements InvocationHandler, WriteReplaceable, Serializable {
@@ -95,7 +96,7 @@ public class CollectionLazyLoader extends AbstractLazyLoader implements Invocati
 			
 			// Now that everything is in order, we can load the real collection
 			for(Edge e : edges) {
-				Vertex value = e.getInVertex();
+				Vertex value = e.getVertex(Direction.IN);
 				try {
 					Object temporaryValue = GraphUtils.createInstance(driver, strategy, classLoader, value, property.getType(), repository, objectsBeingAccessed);
 					if(repository.containsKey(temporaryValue.getClass())) {

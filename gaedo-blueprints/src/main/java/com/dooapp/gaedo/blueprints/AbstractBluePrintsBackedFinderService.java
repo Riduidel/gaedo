@@ -35,11 +35,12 @@ import com.dooapp.gaedo.finders.root.AbstractFinderService;
 import com.dooapp.gaedo.finders.root.InformerFactory;
 import com.dooapp.gaedo.properties.Property;
 import com.dooapp.gaedo.properties.PropertyProvider;
-import com.tinkerpop.blueprints.pgm.Edge;
-import com.tinkerpop.blueprints.pgm.Graph;
-import com.tinkerpop.blueprints.pgm.IndexableGraph;
-import com.tinkerpop.blueprints.pgm.TransactionalGraph;
-import com.tinkerpop.blueprints.pgm.Vertex;
+import com.tinkerpop.blueprints.Direction;
+import com.tinkerpop.blueprints.Edge;
+import com.tinkerpop.blueprints.Graph;
+import com.tinkerpop.blueprints.IndexableGraph;
+import com.tinkerpop.blueprints.TransactionalGraph;
+import com.tinkerpop.blueprints.Vertex;
 
 /**
  * Base class for all finder service using blueprints graphs as storage
@@ -283,7 +284,7 @@ public abstract class AbstractBluePrintsBackedFinderService<GraphClass extends G
 	<Type> void deleteOutEdgeVertex(Vertex objectVertex, Vertex valueVertex, Type value, Map<String, Object> objectsBeingUpdated) {
 		// Delete vertex and other associated ones, only if they have no
 		// other input links (elsewhere delete is silently ignored)
-		if (valueVertex.getInEdges().iterator().hasNext()) {
+		if (valueVertex.getEdges(Direction.IN).iterator().hasNext()) {
 			// There are incoming edges to that vertex. Do nothing but log
 			// it
 			if (logger.isLoggable(Level.FINE)) {

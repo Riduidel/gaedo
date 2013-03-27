@@ -1,39 +1,30 @@
 package com.dooapp.gaedo.blueprints;
 
 import java.util.Collection;
-import java.util.Map;
 import java.util.TreeMap;
 import java.util.logging.Logger;
 
 import javax.persistence.CascadeType;
 
 import org.hamcrest.core.Is;
-import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 import org.junit.runners.Parameterized.Parameters;
 
 import com.dooapp.gaedo.blueprints.beans.PostSubClass;
-import com.dooapp.gaedo.blueprints.finders.FindPostByText;
 import com.dooapp.gaedo.finders.QueryBuilder;
 import com.dooapp.gaedo.finders.QueryExpression;
 import com.dooapp.gaedo.finders.id.IdBasedService;
 import com.dooapp.gaedo.test.beans.Post;
 import com.dooapp.gaedo.test.beans.PostInformer;
 import com.dooapp.gaedo.test.beans.State;
-import com.dooapp.gaedo.test.beans.Tag;
-import com.dooapp.gaedo.test.beans.User;
-import com.tinkerpop.blueprints.pgm.Edge;
-import com.tinkerpop.blueprints.pgm.TransactionalGraph;
-import com.tinkerpop.blueprints.pgm.Vertex;
-import com.tinkerpop.blueprints.pgm.oupls.sail.GraphSail;
+import com.tinkerpop.blueprints.Direction;
+import com.tinkerpop.blueprints.Edge;
+import com.tinkerpop.blueprints.TransactionalGraph;
+import com.tinkerpop.blueprints.Vertex;
+import com.tinkerpop.blueprints.oupls.sail.GraphSail;
 
-import static com.dooapp.gaedo.blueprints.TestUtils.ABOUT_ID;
-import static com.dooapp.gaedo.blueprints.TestUtils.ID_POST_1;
-import static com.dooapp.gaedo.blueprints.TestUtils.TAG_TEXT;
-import static com.dooapp.gaedo.blueprints.TestUtils.USER_LOGIN;
-import static com.dooapp.gaedo.blueprints.TestUtils.USER_PASSWORD;
 import static com.dooapp.gaedo.blueprints.TestUtils.simpleTest;
 
 import static org.junit.Assert.assertThat;
@@ -129,8 +120,8 @@ public class GraphPostSubClassFinderServiceTest extends AbstractGraphPostSubClas
 		AbstractBluePrintsBackedFinderService<?, PostSubClass, ?> postSubService = (AbstractBluePrintsBackedFinderService<?, PostSubClass, ?>) getPostSubService();
 		Vertex postVertex = postSubService.getVertexFor(newOne, CascadeType.REFRESH, new TreeMap<String, Object>());
 		
-		if(environment.getGraph() instanceof TransactionalGraph)
-			((TransactionalGraph) environment.getGraph()).startTransaction();
+//		if(environment.getGraph() instanceof TransactionalGraph)
+//			((TransactionalGraph) environment.getGraph()).startTransaction();
 		Vertex valueVertex = environment.getGraph().addVertex("new-text-vertex");
 		valueVertex.setProperty(Properties.kind.name(), Kind.uri.name());
 		String BUG_31_URI = "https://github.com/Riduidel/gaedo/issues/31";
@@ -138,7 +129,7 @@ public class GraphPostSubClassFinderServiceTest extends AbstractGraphPostSubClas
 		
 		// Have you notice this property is annotated ?
 		String textPropertyName = "post:text";
-		Iterable<Edge> previous = postVertex.getOutEdges(textPropertyName);
+		Iterable<Edge> previous = postVertex.getEdges(Direction.IN, textPropertyName);
 		for(Edge e : previous) {
 			environment.getGraph().removeEdge(e);
 		}

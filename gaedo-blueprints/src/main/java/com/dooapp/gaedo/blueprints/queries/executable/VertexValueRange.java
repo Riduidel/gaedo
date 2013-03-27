@@ -9,8 +9,9 @@ import java.util.concurrent.atomic.AtomicLong;
 
 import com.dooapp.gaedo.blueprints.GraphUtils;
 import com.dooapp.gaedo.properties.Property;
-import com.tinkerpop.blueprints.pgm.Edge;
-import com.tinkerpop.blueprints.pgm.Vertex;
+import com.tinkerpop.blueprints.Direction;
+import com.tinkerpop.blueprints.Edge;
+import com.tinkerpop.blueprints.Vertex;
 
 /**
  * Class linking a vertex, and a path to a global score describing how well it selects data in the DB
@@ -44,9 +45,9 @@ public class VertexValueRange {
 			// clear parameter to let it be populated by result
 			vertexAccumulator.clear();
 			for(Vertex v : toScan) {
-				Iterable<Edge> edges = v.getInEdges(GraphUtils.getEdgeNameFor(current));
+				Iterable<Edge> edges = v.getEdges(Direction.IN, GraphUtils.getEdgeNameFor(current));
 				for(Edge e : edges) {
-					vertexAccumulator.add(e.getOutVertex());
+					vertexAccumulator.add(e.getVertex(Direction.OUT));
 				}
 			}
 		} else {
@@ -88,9 +89,9 @@ public class VertexValueRange {
 				// clear parameter to let it be populated by result
 				verticesToCountEdgesIn.clear();
 				for(Vertex v : toScan) {
-					Iterable<Edge> edges = v.getInEdges(GraphUtils.getEdgeNameFor(current));
+					Iterable<Edge> edges = v.getEdges(Direction.IN, GraphUtils.getEdgeNameFor(current));
 					for(Edge e : edges) {
-						verticesToCountEdgesIn.add(e.getOutVertex());
+						verticesToCountEdgesIn.add(e.getVertex(Direction.OUT));
 						totalEdgeCount = edgesCount.addAndGet(1);
 						if(totalEdgeCount>this.edgesCount)
 							return this;

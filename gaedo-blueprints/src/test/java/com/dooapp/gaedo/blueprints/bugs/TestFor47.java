@@ -17,8 +17,8 @@ import com.dooapp.gaedo.finders.QueryBuilder;
 import com.dooapp.gaedo.finders.QueryExpression;
 import com.dooapp.gaedo.test.beans.Post;
 import com.dooapp.gaedo.test.beans.PostInformer;
-import com.tinkerpop.blueprints.pgm.TransactionalGraph;
-import com.tinkerpop.blueprints.pgm.TransactionalGraph.Conclusion;
+import com.tinkerpop.blueprints.TransactionalGraph;
+import com.tinkerpop.blueprints.TransactionalGraph.Conclusion;
 
 import static com.dooapp.gaedo.blueprints.TestUtils.simpleTest;
 import static com.dooapp.gaedo.utils.CollectionUtils.asList;
@@ -61,9 +61,9 @@ public class TestFor47 extends AbstractGraphPostTest {
 	}
 
 	private void accessInformer(final InformerTester tester) {
-		if(environment.getGraph() instanceof TransactionalGraph) {
-			((TransactionalGraph) environment.getGraph()).startTransaction();
-		}
+//		if(environment.getGraph() instanceof TransactionalGraph) {
+//			((TransactionalGraph) environment.getGraph()).startTransaction();
+//		}
 		FinderCrudService<Post, PostInformer> service = getPostService();
 		// Create a finder just to check some elements
 		// Unfortunatly lazy evaluation requires to run the query (which will find no result)

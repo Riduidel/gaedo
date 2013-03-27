@@ -24,10 +24,11 @@ import com.dooapp.gaedo.finders.repository.ServiceRepository;
 import com.dooapp.gaedo.patterns.WriteReplaceable;
 import com.dooapp.gaedo.properties.Property;
 import com.dooapp.gaedo.utils.Utils;
-import com.tinkerpop.blueprints.pgm.Edge;
-import com.tinkerpop.blueprints.pgm.Graph;
-import com.tinkerpop.blueprints.pgm.IndexableGraph;
-import com.tinkerpop.blueprints.pgm.Vertex;
+import com.tinkerpop.blueprints.Direction;
+import com.tinkerpop.blueprints.Edge;
+import com.tinkerpop.blueprints.Graph;
+import com.tinkerpop.blueprints.IndexableGraph;
+import com.tinkerpop.blueprints.Vertex;
 
 public class BluePrintsPersister {
     private static final Logger logger = Logger.getLogger(BluePrintsPersister.class.getName());
@@ -146,7 +147,7 @@ public class BluePrintsPersister {
         // there should be only one vertex to delete
         Iterable<Edge> edges = service.getStrategy().getOutEdgesFor(objectVertex, p);
         for (Edge e : edges) {
-            Vertex valueVertex = e.getInVertex();
+            Vertex valueVertex = e.getVertex(Direction.IN);
             GraphUtils.removeSafely(database, e);
             // Now what to do with vertex ? Delete it ?
             if (toCascade.contains(CascadeType.REMOVE)) {
@@ -178,7 +179,7 @@ public class BluePrintsPersister {
         Map<?, ?> values = (Map<?, ?>) p.get(toDelete);
         Map<Vertex, Edge> oldVertices = new HashMap<Vertex, Edge>();
         for (Edge e : edges) {
-            Vertex inVertex = e.getInVertex();
+            Vertex inVertex = e.getVertex(Direction.IN);
             oldVertices.put(inVertex, e);
         }
         for (Object v : values.entrySet()) {
@@ -205,7 +206,7 @@ public class BluePrintsPersister {
         Collection<?> values = (Collection<?>) p.get(toDelete);
         Map<Vertex, Edge> oldVertices = new HashMap<Vertex, Edge>();
         for (Edge e : edges) {
-            Vertex inVertex = e.getInVertex();
+            Vertex inVertex = e.getVertex(Direction.IN);
             oldVertices.put(inVertex, e);
         }
         for (Object v : values) {
@@ -297,7 +298,7 @@ public class BluePrintsPersister {
             Collection<Vertex> newVertices = createMapVerticesFor(service, value, cascade, objectsBeingAccessed);
             Map<Vertex, Edge> oldVertices = new HashMap<Vertex, Edge>();
             for (Edge e : existingIterator) {
-                Vertex inVertex = e.getInVertex();
+                Vertex inVertex = e.getVertex(Direction.IN);
                 if (newVertices.contains(inVertex)) {
                     newVertices.remove(inVertex);
                 } else {
@@ -338,7 +339,7 @@ public class BluePrintsPersister {
             Collection<Vertex> newVertices = createCollectionVerticesFor(service, value, cascade, objectsBeingAccessed);
             Map<Vertex, Edge> oldVertices = new HashMap<Vertex, Edge>();
             for (Edge e : existingIterator) {
-                Vertex inVertex = e.getInVertex();
+                Vertex inVertex = e.getVertex(Direction.IN);
                 if (newVertices.contains(inVertex)) {
                     newVertices.remove(inVertex);
                 } else {
@@ -354,6 +355,7 @@ public class BluePrintsPersister {
             for (Vertex newVertex : newVertices) {
                 Edge createdEdge = service.getDriver().createEdgeFor(rootVertex, newVertex, p);
                 // Add a fancy-schmancy property to maintain order in this town
+                // This property is not indexed, as it would have absolutely no meaning to query that index
                 createdEdge.setProperty(Properties.collection_index.name(), order++);
             }
         }
@@ -421,7 +423,7 @@ public class BluePrintsPersister {
         if (existingIterator.hasNext()) {
             // There is an existing edge, change its target and maybe delete previous one
             Edge existing = existingIterator.next();
-            if (valueVertex != null && existing.getInVertex().equals(valueVertex)) {
+            if (valueVertex != null && existing.getVertex(Direction.IN).equals(valueVertex)) {
                 // Nothing to do
                 link = existing;
             } else {
@@ -436,7 +438,7 @@ public class BluePrintsPersister {
                 // There is some incoherent data in graph .. log it !
                 StringBuilder sOut = new StringBuilder("An object with the following monovalued property\n").append(p.toGenericString()).append(" is linked to more than one vertex :");
                 while (existingIterator.hasNext()) {
-                    sOut.append("\n\t").append(existingIterator.next().getInVertex().toString());
+                    sOut.append("\n\t").append(existingIterator.next().getVertex(Direction.IN).toString());
                 }
                 logger.log(Level.SEVERE, "Graph contains some incoherence :" + sOut.toString());
             }
@@ -555,7 +557,7 @@ public class BluePrintsPersister {
         if (iterator.hasNext()) {
             // yeah, there is a value !
             Edge edge = iterator.next();
-            Vertex firstVertex = edge.getInVertex();
+            Vertex firstVertex = edge.getVertex(Direction.IN);
             Object value = GraphUtils.createInstance(driver, strategy, classloader, firstVertex, p.getType(), repository, objectsBeingAccessed);
             if (repository.containsKey(value.getClass())) {
                 // value requires fields loading

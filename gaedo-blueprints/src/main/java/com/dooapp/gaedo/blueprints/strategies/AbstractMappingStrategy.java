@@ -21,9 +21,10 @@ import com.dooapp.gaedo.finders.id.AnnotationUtils;
 import com.dooapp.gaedo.properties.Property;
 import com.dooapp.gaedo.properties.PropertyProvider;
 import com.dooapp.gaedo.utils.Utils;
-import com.tinkerpop.blueprints.pgm.Edge;
-import com.tinkerpop.blueprints.pgm.Graph;
-import com.tinkerpop.blueprints.pgm.Vertex;
+import com.tinkerpop.blueprints.Direction;
+import com.tinkerpop.blueprints.Edge;
+import com.tinkerpop.blueprints.Graph;
+import com.tinkerpop.blueprints.Vertex;
 
 public abstract class AbstractMappingStrategy<DataType> implements GraphMappingStrategy<DataType>{
 
@@ -146,7 +147,7 @@ public abstract class AbstractMappingStrategy<DataType> implements GraphMappingS
 	@Override
 	public Iterable<Edge> getOutEdgesFor(Vertex rootVertex, Property p) {
 		String edgeNameFor = GraphUtils.getEdgeNameFor(p);
-		Iterable<Edge> allEdges = rootVertex.getOutEdges(edgeNameFor);
+		Iterable<Edge> allEdges = rootVertex.getEdges(Direction.OUT, edgeNameFor);
 		Collection<Edge> returned = new LinkedList<Edge>();
 		for(Edge e : allEdges) {
 			if(GraphUtils.isInNamedGraphs(e, service.getLens())) {

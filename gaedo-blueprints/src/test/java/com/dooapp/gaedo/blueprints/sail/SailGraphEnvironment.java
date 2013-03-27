@@ -9,10 +9,9 @@ import com.dooapp.gaedo.blueprints.GraphProvider;
 import com.dooapp.gaedo.blueprints.TestUtils;
 import com.dooapp.gaedo.blueprints.strategies.StrategyType;
 import com.dooapp.gaedo.extensions.views.InViewService;
-import com.dooapp.gaedo.finders.FinderCrudService;
 import com.dooapp.gaedo.finders.Informer;
-import com.tinkerpop.blueprints.pgm.impls.sail.SailGraph;
-import com.tinkerpop.blueprints.pgm.oupls.sail.GraphSail;
+import com.tinkerpop.blueprints.impls.sail.SailGraph;
+import com.tinkerpop.blueprints.oupls.sail.GraphSail;
 
 public class SailGraphEnvironment extends AbstractGraphEnvironment<SailGraph> {
 
@@ -34,7 +33,8 @@ public class SailGraphEnvironment extends AbstractGraphEnvironment<SailGraph> {
 
 	@Override
 	protected SailGraph createGraph(GraphProvider graphProvider) {
-		return new SailGraph(new GraphSail(graphProvider.get(usablePath())));
+		return null;
+//		return new SailGraph(new GraphSail(graphProvider.get(usablePath())));
 	}
 
 

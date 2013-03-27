@@ -11,8 +11,8 @@ import org.neo4j.kernel.EmbeddedGraphDatabase;
 
 import com.dooapp.gaedo.blueprints.AbstractGraphProvider;
 import com.dooapp.gaedo.blueprints.GraphProvider;
-import com.tinkerpop.blueprints.pgm.IndexableGraph;
-import com.tinkerpop.blueprints.pgm.impls.neo4j.Neo4jGraph;
+import com.tinkerpop.blueprints.IndexableGraph;
+import com.tinkerpop.blueprints.impls.neo4j.Neo4jGraph;
 
 public class Neo4j extends AbstractGraphProvider implements GraphProvider {
 	private Map<String, GraphDatabaseService> services = Collections.synchronizedMap(new TreeMap<String, GraphDatabaseService>());
@@ -53,7 +53,7 @@ public class Neo4j extends AbstractGraphProvider implements GraphProvider {
 			}
 		}
 		Neo4jGraph neo4jgraph = new Neo4jGraph(service);
-		neo4jgraph.setMaxBufferSize(0);
+		neo4jgraph.setCheckElementsInTransaction(true);
 		return neo4jgraph;
 	}
 

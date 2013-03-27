@@ -17,7 +17,7 @@ import com.dooapp.gaedo.finders.SortingBuilder;
 import com.dooapp.gaedo.finders.SortingExpression;
 import com.dooapp.gaedo.finders.repository.ServiceRepository;
 import com.dooapp.gaedo.finders.sort.SortingExpressionImpl;
-import com.tinkerpop.blueprints.pgm.Vertex;
+import com.tinkerpop.blueprints.Vertex;
 
 public class GraphQueryStatement<
 		DataType, 

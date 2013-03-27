@@ -14,8 +14,8 @@ import com.dooapp.gaedo.finders.SortingExpression;
 import com.dooapp.gaedo.finders.SortingExpression.Direction;
 import com.dooapp.gaedo.finders.sort.SortingExpressionVisitor;
 import com.dooapp.gaedo.properties.Property;
-import com.tinkerpop.blueprints.pgm.Edge;
-import com.tinkerpop.blueprints.pgm.Vertex;
+import com.tinkerpop.blueprints.Edge;
+import com.tinkerpop.blueprints.Vertex;
 
 public class SortingComparator implements Comparator<Vertex> {
 	private class SortedPropertiesSubGraph {
@@ -40,7 +40,7 @@ public class SortingComparator implements Comparator<Vertex> {
 				for(Property currentProperty : key.getFieldPath()) {
 					Iterator<Edge> edges = service.getStrategy().getOutEdgesFor(currentVertex, currentProperty).iterator();
 					if(edges.hasNext()) {
-						currentVertex = edges.next().getInVertex();
+						currentVertex = edges.next().getVertex(com.tinkerpop.blueprints.Direction.IN);
 					} else {
 						// no navigable value ? Then null is the bad result we're looking for
 						currentVertex = null;

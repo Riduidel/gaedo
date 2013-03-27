@@ -1,6 +1,6 @@
 package com.dooapp.gaedo.blueprints.queries.executable;
 
-import com.tinkerpop.blueprints.pgm.Vertex;
+import com.tinkerpop.blueprints.Vertex;
 
 /**
  * Executable query performing the search/sort and returing corresponding vertices

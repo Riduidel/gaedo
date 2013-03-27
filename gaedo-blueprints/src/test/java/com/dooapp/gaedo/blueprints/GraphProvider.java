@@ -1,6 +1,6 @@
 package com.dooapp.gaedo.blueprints;
 
-import com.tinkerpop.blueprints.pgm.IndexableGraph;
+import com.tinkerpop.blueprints.IndexableGraph;
 
 public interface GraphProvider {
 	public static final String GRAPH_DIR = System.getProperty("user.dir")+"/target/tests/graph";

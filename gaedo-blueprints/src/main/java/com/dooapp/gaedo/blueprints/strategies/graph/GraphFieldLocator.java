@@ -4,13 +4,14 @@ import java.util.SortedSet;
 
 import com.dooapp.gaedo.blueprints.GraphDatabaseDriver;
 import com.dooapp.gaedo.blueprints.Properties;
+import com.dooapp.gaedo.blueprints.indexable.IndexNames;
 import com.dooapp.gaedo.finders.FieldInformer;
 import com.dooapp.gaedo.finders.root.FieldInformerLocator;
 import com.dooapp.gaedo.properties.Property;
-import com.tinkerpop.blueprints.pgm.Edge;
-import com.tinkerpop.blueprints.pgm.Graph;
-import com.tinkerpop.blueprints.pgm.Index;
-import com.tinkerpop.blueprints.pgm.IndexableGraph;
+import com.tinkerpop.blueprints.Edge;
+import com.tinkerpop.blueprints.Graph;
+import com.tinkerpop.blueprints.Index;
+import com.tinkerpop.blueprints.IndexableGraph;
 
 public class GraphFieldLocator<DataType> implements FieldInformerLocator {
 
@@ -66,7 +67,7 @@ public class GraphFieldLocator<DataType> implements FieldInformerLocator {
 	private FieldInformer getInformerFor(String fieldName) {
 		if (graph instanceof IndexableGraph) {
 			IndexableGraph indexable = (IndexableGraph) graph;
-			Index<Edge> edges = indexable.getIndex(Index.EDGES, Edge.class);
+			Index<Edge> edges = indexable.getIndex(IndexNames.EDGES.getIndexName(), Edge.class);
 			long count = edges.count(Properties.label.name(), fieldName);
 			if(count>0) {
 				GraphBasedPropertyBuilder<DataType> builder = new GraphBasedPropertyBuilder<DataType>(dataClass, driver, namedGraphs);

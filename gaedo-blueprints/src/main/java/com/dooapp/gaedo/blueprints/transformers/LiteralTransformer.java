@@ -4,7 +4,7 @@ import javax.persistence.CascadeType;
 
 import com.dooapp.gaedo.blueprints.GraphDatabaseDriver;
 import com.dooapp.gaedo.blueprints.Kind;
-import com.tinkerpop.blueprints.pgm.Vertex;
+import com.tinkerpop.blueprints.Vertex;
 
 /**
  * Allow transformation of a data type into a literal vertex

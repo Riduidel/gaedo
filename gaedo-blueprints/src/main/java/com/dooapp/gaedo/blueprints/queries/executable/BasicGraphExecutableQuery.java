@@ -13,9 +13,10 @@ import com.dooapp.gaedo.blueprints.transformers.LiteralTransformer;
 import com.dooapp.gaedo.blueprints.transformers.Literals;
 import com.dooapp.gaedo.finders.SortingExpression;
 import com.dooapp.gaedo.properties.ClassCollectionProperty;
-import com.tinkerpop.blueprints.pgm.Edge;
-import com.tinkerpop.blueprints.pgm.IndexableGraph;
-import com.tinkerpop.blueprints.pgm.Vertex;
+import com.tinkerpop.blueprints.Direction;
+import com.tinkerpop.blueprints.Edge;
+import com.tinkerpop.blueprints.IndexableGraph;
+import com.tinkerpop.blueprints.Vertex;
 
 /**
  * Basic graph query execution
@@ -45,9 +46,9 @@ public class BasicGraphExecutableQuery extends AbstractGraphExecutableQuery impl
 			return returned;
 		}
 		// Now iterate on all instances and perform test on each one
-		Iterable<Edge> objectsClassEdges = classVertex.getInEdges(GraphUtils.getEdgeNameFor(classes));
+		Iterable<Edge> objectsClassEdges = classVertex.getEdges(Direction.IN, GraphUtils.getEdgeNameFor(classes));
 		for(Edge e : objectsClassEdges) {
-			returned.add(e.getOutVertex());
+			returned.add(e.getVertex(Direction.OUT));
 		}
 		return returned;
 	}

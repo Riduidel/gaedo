@@ -1,8 +1,11 @@
 package com.dooapp.gaedo.blueprints.indexable;
 
 import java.util.Collection;
+import java.util.Iterator;
 import java.util.SortedSet;
 import java.util.UUID;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import javax.persistence.CascadeType;
 
@@ -16,7 +19,6 @@ import com.dooapp.gaedo.blueprints.strategies.UnableToGetVertexTypeException;
 import com.dooapp.gaedo.blueprints.transformers.ClassLiteralTransformer;
 import com.dooapp.gaedo.blueprints.transformers.Literals;
 import com.dooapp.gaedo.blueprints.transformers.Tuples;
-import com.dooapp.gaedo.blueprints.transformers.TypeUtils;
 import com.dooapp.gaedo.extensions.views.InViewService;
 import com.dooapp.gaedo.finders.Informer;
 import com.dooapp.gaedo.finders.repository.ServiceRepository;
@@ -24,18 +26,23 @@ import com.dooapp.gaedo.finders.root.InformerFactory;
 import com.dooapp.gaedo.properties.Property;
 import com.dooapp.gaedo.properties.PropertyProvider;
 import com.dooapp.gaedo.properties.TypeProperty;
-import com.tinkerpop.blueprints.pgm.CloseableSequence;
-import com.tinkerpop.blueprints.pgm.Edge;
-import com.tinkerpop.blueprints.pgm.Index;
-import com.tinkerpop.blueprints.pgm.IndexableGraph;
-import com.tinkerpop.blueprints.pgm.Vertex;
-import com.tinkerpop.blueprints.pgm.oupls.sail.GraphSail;
+import com.tinkerpop.blueprints.CloseableIterable;
+import com.tinkerpop.blueprints.Edge;
+import com.tinkerpop.blueprints.Element;
+import com.tinkerpop.blueprints.Index;
+import com.tinkerpop.blueprints.IndexableGraph;
+import com.tinkerpop.blueprints.Vertex;
+import com.tinkerpop.blueprints.oupls.sail.GraphSail;
 
 /**
  * Indexable graph backed version of finder service.
  * 
  * Notice we maintain {@link AbstractCooperantFinderService} infos about objects
- * being accessed as String containing, in fact, vertex ids
+ * being accessed as String containing, in fact, vertex ids.
+ * 
+ * Since Blueprints 2.*, there is a distinction between manual indices (provided by IndexableGraph) and automatic key indices, provided by KeyIndexableGraph. Why using the first ones ?
+ * For queries, obviously : an {@link Index} can return the {@link Index#count(String, Object)} number of element, what a KeyIndexableGraph
+ * do not yet provide. And, to have a good execution plan (without relying upon graph queries), this is invaluable.
  * 
  * @author ndx
  * 
@@ -46,6 +53,8 @@ import com.tinkerpop.blueprints.pgm.oupls.sail.GraphSail;
  */
 public class IndexableGraphBackedFinderService<DataType, InformerType extends Informer<DataType>> extends
 				AbstractBluePrintsBackedFinderService<IndexableGraph, DataType, InformerType> {
+	
+	private static final Logger logger = Logger.getLogger(IndexableGraphBackedFinderService.class.getName());
 
 	public static final String TYPE_EDGE_NAME = GraphUtils.getEdgeNameFor(TypeProperty.INSTANCE);
 
@@ -81,6 +90,7 @@ public class IndexableGraphBackedFinderService<DataType, InformerType extends In
 	public IndexableGraphBackedFinderService(IndexableGraph graph, Class<DataType> containedClass, Class<InformerType> informerClass, InformerFactory factory,
 					ServiceRepository repository, PropertyProvider provider, GraphMappingStrategy<DataType> strategy) {
 		super(graph, containedClass, informerClass, factory, repository, provider, strategy);
+		loadIndices(graph);
 	}
 
 	/**
@@ -106,17 +116,40 @@ public class IndexableGraphBackedFinderService<DataType, InformerType extends In
 	public IndexableGraphBackedFinderService(IndexableGraph graph, Class<DataType> containedClass, Class<InformerType> informerClass, InformerFactory factory,
 					ServiceRepository repository, PropertyProvider provider, StrategyType strategy) {
 		super(graph, containedClass, informerClass, factory, repository, provider, strategy);
+		loadIndices(graph);
 	}
 
 	public IndexableGraphBackedFinderService(IndexableGraph graph, Class<DataType> containedClass, Class<InformerType> informerClass, InformerFactory factory,
 					ServiceRepository repository, PropertyProvider provider) {
 		super(graph, containedClass, informerClass, factory, repository, provider);
+		loadIndices(graph);
+	}
+
+	/**
+	 * There is no automatic index creation !
+	 * No worry, we will add them by hand
+	 * @param graph
+	 */
+	private void loadIndices(IndexableGraph graph) {
+		for(IndexNames index : IndexNames.values()) {
+			Index<? extends Element> associatedIndex = graph.getIndex(index.getIndexName(), index.getIndexed());
+			if(associatedIndex==null) {
+				if (logger.isLoggable(Level.INFO)) {
+					logger.log(Level.INFO, "There were no indice "+index.describe()+". Creating it");
+				}
+				graph.createIndex(index.getIndexName(), index.getIndexed());
+				if (logger.isLoggable(Level.INFO)) {
+					logger.log(Level.INFO, "index "+index.describe()+" has been created");
+				}
+			}
+		}
 	}
 
 	@Override
 	public Vertex loadVertexFor(String objectVertexId, String className) {
 		Vertex defaultVertex = null;
-		CloseableSequence<Vertex> matching = database.getIndex(Index.VERTICES, Vertex.class).get(Properties.value.name(), objectVertexId);
+		CloseableIterable<Vertex> matchingIterable = database.getIndex(IndexNames.VERTICES.getIndexName(), Vertex.class).get(Properties.value.name(), objectVertexId);
+		Iterator<Vertex> matching = matchingIterable.iterator();
 		if (matching.hasNext()) {
 			while (matching.hasNext()) {
 				Vertex vertex = matching.next();
@@ -168,19 +201,19 @@ public class IndexableGraphBackedFinderService<DataType, InformerType extends In
 		// technical vertex id is no more used by gaedo which only rley upon the
 		// getIdOfVertex method !
 		Vertex returned = database.addVertex(valueClass.getName() + ":" + vertexId);
-		returned.setProperty(Properties.value.name(), vertexId);
+		setIndexedProperty(returned, Properties.value.name(), vertexId, IndexNames.VERTICES);
 		if (Literals.containsKey(valueClass)) {
 			// some literals aren't so ... literal, as they can accept incoming
 			// connections (like classes)
-			returned.setProperty(Properties.kind.name(), Literals.get(valueClass).getKind().name());
-			returned.setProperty(Properties.type.name(), Literals.get(valueClass).getTypeOf(value));
+			setIndexedProperty(returned, Properties.kind.name(), Literals.get(valueClass).getKind().name(), IndexNames.VERTICES);
+			setIndexedProperty(returned, Properties.type.name(), Literals.get(valueClass).getTypeOf(value), IndexNames.VERTICES);
 		} else {
 			if (repository.containsKey(valueClass)) {
-				returned.setProperty(Properties.kind.name(), Kind.uri.name());
+				setIndexedProperty(returned, Properties.kind.name(), Kind.uri.name(), IndexNames.VERTICES);
 			} else if (Tuples.containsKey(valueClass)) {
 				// some literals aren't so ... literal, as they can accept
 				// incoming connections (like classes)
-				returned.setProperty(Properties.kind.name(), Tuples.get(valueClass).getKind().name());
+				setIndexedProperty(returned, Properties.kind.name(), Tuples.get(valueClass).getKind().name(), IndexNames.VERTICES);
 			}
 			// obtain vertex for type
 			Vertex classVertex = classTransformer.getVertexFor(getDriver(), valueClass, CascadeType.PERSIST);
@@ -190,10 +223,12 @@ public class IndexableGraphBackedFinderService<DataType, InformerType extends In
 			 * context to a null value. Notice we COULD have stored literal type
 			 * as a property, instead of using
 			 */
-			toType.setProperty(GraphSail.CONTEXT_PROP, GraphUtils.asSailProperty(GraphUtils.GAEDO_CONTEXT));
+			setIndexedProperty(toType, GraphSail.CONTEXT_PROP, GraphUtils.asSailProperty(GraphUtils.GAEDO_CONTEXT), IndexNames.EDGES);
 		}
 		// Yup, this if has no default else statement, and that's normal.
-
+		if (logger.isLoggable(Level.FINE)) {
+			logger.log(Level.FINE, "created vertex "+GraphUtils.toString(returned));
+		}
 		return returned;
 	}
 
@@ -204,7 +239,7 @@ public class IndexableGraphBackedFinderService<DataType, InformerType extends In
 
 	@Override
 	protected void setValue(Vertex vertex, Object value) {
-		vertex.setProperty(Properties.value.name(), value);
+		setIndexedProperty(vertex, Properties.value.name(), value, IndexNames.VERTICES);
 	}
 
 	@Override
@@ -214,9 +249,11 @@ public class IndexableGraphBackedFinderService<DataType, InformerType extends In
 
 	public Edge createEdgeFor(Vertex fromVertex, Vertex toVertex, Property property) {
 		String edgeNameFor = GraphUtils.getEdgeNameFor(property);
-		Edge edge = database.addEdge(getEdgeId(fromVertex, toVertex, property), fromVertex, toVertex, edgeNameFor);
+		Edge returned = database.addEdge(getEdgeId(fromVertex, toVertex, property), fromVertex, toVertex, edgeNameFor);
+		// Did you know labels are not edges properties ? Absolutely stunning discovery !
+		database.getIndex(IndexNames.EDGES.getIndexName(), Edge.class).put("label", edgeNameFor, returned);
 		String predicateProperty = GraphUtils.asSailProperty(GraphUtils.getEdgeNameFor(property));
-		edge.setProperty(GraphSail.PREDICATE_PROP, predicateProperty);
+		setIndexedProperty(returned, GraphSail.PREDICATE_PROP, predicateProperty, IndexNames.EDGES);
 		Collection<String> contexts = getLens();
 		StringBuilder contextPropertyBuilder = new StringBuilder();
 		if (contexts.size() == 0) {
@@ -230,10 +267,27 @@ public class IndexableGraphBackedFinderService<DataType, InformerType extends In
 			}
 		}
 		String contextProperty = contextPropertyBuilder.toString();
-		edge.setProperty(GraphSail.CONTEXT_PROP, contextProperty);
+		setIndexedProperty(returned, GraphSail.CONTEXT_PROP, contextProperty, IndexNames.EDGES);
 		// Finally build the context-predicate property by concatenating both
-		edge.setProperty(GraphSail.CONTEXT_PROP + GraphSail.PREDICATE_PROP, contextProperty + " " + predicateProperty);
-		return edge;
+		setIndexedProperty(returned, GraphSail.CONTEXT_PROP + GraphSail.PREDICATE_PROP, contextProperty + " " + predicateProperty, IndexNames.EDGES);
+		
+		if (logger.isLoggable(Level.FINE)) {
+			logger.log(Level.FINE, "created edge "+GraphUtils.toString(returned));
+		}
+		return returned;
+	}
+
+	/**
+	 * Set an indexed property on any graph element, updating the given list of indices
+	 * @param graphElement
+	 * @param propertyName
+	 * @param propertyValue
+	 * @param indexName
+	 */
+	private <ElementType extends Element> void setIndexedProperty(ElementType graphElement, String propertyName, Object propertyValue, IndexNames indexName) {
+		graphElement.setProperty(propertyName, propertyValue);
+		Index<ElementType> index = database.getIndex(indexName.getIndexName(), (Class<ElementType>) indexName.getIndexed());
+		index.put(propertyName, propertyValue, graphElement);
 	}
 
 	public String getEdgeId(Vertex fromVertex, Vertex toVertex, Property property) {

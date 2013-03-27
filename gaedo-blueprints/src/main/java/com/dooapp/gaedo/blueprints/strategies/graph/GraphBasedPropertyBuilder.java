@@ -16,9 +16,10 @@ import com.dooapp.gaedo.blueprints.strategies.PropertyMappingStrategy;
 import com.dooapp.gaedo.blueprints.strategies.UnableToGetVertexTypeException;
 import com.dooapp.gaedo.blueprints.transformers.TypeUtils;
 import com.dooapp.gaedo.properties.Property;
-import com.tinkerpop.blueprints.pgm.Edge;
-import com.tinkerpop.blueprints.pgm.Vertex;
-import com.tinkerpop.blueprints.pgm.oupls.sail.GraphSail;
+import com.tinkerpop.blueprints.Direction;
+import com.tinkerpop.blueprints.Edge;
+import com.tinkerpop.blueprints.Vertex;
+import com.tinkerpop.blueprints.oupls.sail.GraphSail;
 
 /**
  * Build property from informations given by output edges.
@@ -61,12 +62,12 @@ public class GraphBasedPropertyBuilder<DataType> {
 		for(Edge e : correspondingEdges) {
 			name = e.getLabel();
 			if(GraphUtils.isInNamedGraphs(e, namedGraphs)) {
-				Vertex inVertex = e.getOutVertex();
+				Vertex inVertex = e.getVertex(Direction.OUT);
 				if(!edgesPerInVertices.containsKey(inVertex)) {
 					edgesPerInVertices.put(inVertex, new AtomicLong(0));
 				}
 				edgesPerInVertices.get(inVertex).incrementAndGet();
-				Vertex outVertex = e.getInVertex();
+				Vertex outVertex = e.getVertex(Direction.IN);
 				try {
 					targetTypes.add(driver.getEffectiveType(outVertex));
 				} catch(UnableToGetVertexTypeException noType) {

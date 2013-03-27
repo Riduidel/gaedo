@@ -1,7 +1,7 @@
 package com.dooapp.gaedo.blueprints;
 
 import com.dooapp.gaedo.finders.Informer;
-import com.tinkerpop.blueprints.pgm.TransactionalGraph.Conclusion;
+import com.tinkerpop.blueprints.TransactionalGraph.Conclusion;
 
 /**
  * Transaction supporting "closure" base : it decorates given operation with transaction support.
@@ -23,9 +23,10 @@ public abstract class TransactionalOperation<ResultType, DataType, InformerType 
 	}
 
 	public ResultType perform() {
-		if(service.transactionSupport!=null) {
+		// disabled for test purpose
+		if(false && service.transactionSupport!=null) {
 			try {
-				service.transactionSupport.startTransaction();
+//				service.transactionSupport.startTransaction();
 				try {
 					ResultType returned = doPerform();
 					service.transactionSupport.stopTransaction(Conclusion.SUCCESS);

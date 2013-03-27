@@ -3,12 +3,11 @@ package com.dooapp.gaedo.blueprints.queries.tests;
 import java.util.Iterator;
 
 import com.dooapp.gaedo.blueprints.GraphDatabaseDriver;
-import com.dooapp.gaedo.blueprints.GraphUtils;
 import com.dooapp.gaedo.blueprints.strategies.GraphMappingStrategy;
-import com.dooapp.gaedo.finders.repository.ServiceRepository;
 import com.dooapp.gaedo.properties.Property;
-import com.tinkerpop.blueprints.pgm.Edge;
-import com.tinkerpop.blueprints.pgm.Vertex;
+import com.tinkerpop.blueprints.Direction;
+import com.tinkerpop.blueprints.Edge;
+import com.tinkerpop.blueprints.Vertex;
 
 public class Anything extends TargettedVertexTest implements VertexTest {
 
@@ -29,7 +28,7 @@ public class Anything extends TargettedVertexTest implements VertexTest {
 		for(Property currentProperty : path) {
 			Iterator<Edge> edges = strategy.getOutEdgesFor(currentVertex, currentProperty).iterator();
 			if(edges.hasNext()) {
-				currentVertex = edges.next().getInVertex();
+				currentVertex = edges.next().getVertex(Direction.IN);
 			} else {
 				return false;
 			}

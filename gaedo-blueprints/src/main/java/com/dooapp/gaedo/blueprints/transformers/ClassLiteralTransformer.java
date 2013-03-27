@@ -1,7 +1,7 @@
 package com.dooapp.gaedo.blueprints.transformers;
 
 import com.dooapp.gaedo.blueprints.Kind;
-import com.tinkerpop.blueprints.pgm.Vertex;
+import com.tinkerpop.blueprints.Vertex;
 
 
 public class ClassLiteralTransformer extends AbstractSimpleLiteralTransformer<Class> implements LiteralTransformer<Class> {

@@ -32,8 +32,9 @@ import com.dooapp.gaedo.finders.root.ProxyBackedInformerFactory;
 import com.dooapp.gaedo.finders.root.ReflectionBackedInformerFactory;
 import com.dooapp.gaedo.properties.Property;
 import com.dooapp.gaedo.properties.PropertyProvider;
-import com.tinkerpop.blueprints.pgm.Edge;
-import com.tinkerpop.blueprints.pgm.Vertex;
+import com.tinkerpop.blueprints.Direction;
+import com.tinkerpop.blueprints.Edge;
+import com.tinkerpop.blueprints.Vertex;
 
 /**
  * When using this strategy, properties will be directly determined from edges
@@ -106,7 +107,7 @@ public class GraphBasedMappingStrategy<DataType> extends AbstractMappingStrategy
 		if (vertex == null) {
 		} else {
 			Map<String, GraphBasedPropertyBuilder<DataType>> edgeLabelToProperty = new TreeMap<String, GraphBasedPropertyBuilder<DataType>>();
-			for (Edge e : vertex.getOutEdges()) {
+			for (Edge e : vertex.getEdges(Direction.OUT)) {
 				String edgeLabel = e.getLabel();
 				if (!edgeLabelToProperty.containsKey(edgeLabel)) {
 					edgeLabelToProperty.put(edgeLabel, new GraphBasedPropertyBuilder<DataType>(serviceContainedClass, service.getDriver(), service.getLens()));

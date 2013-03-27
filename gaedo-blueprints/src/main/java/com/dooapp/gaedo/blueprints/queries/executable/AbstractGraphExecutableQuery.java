@@ -10,7 +10,7 @@ import com.dooapp.gaedo.blueprints.queries.tests.CompoundVertexTest;
 import com.dooapp.gaedo.blueprints.queries.tests.VertexTest;
 import com.dooapp.gaedo.finders.SortingExpression;
 import com.dooapp.gaedo.utils.CollectionUtils;
-import com.tinkerpop.blueprints.pgm.Vertex;
+import com.tinkerpop.blueprints.Vertex;
 
 public abstract class AbstractGraphExecutableQuery implements GraphExecutableQuery {
 

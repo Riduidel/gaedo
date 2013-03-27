@@ -9,7 +9,6 @@ import com.dooapp.gaedo.blueprints.AbstractBluePrintsBackedFinderService;
 import com.dooapp.gaedo.blueprints.GraphUtils;
 import com.dooapp.gaedo.blueprints.Kind;
 import com.dooapp.gaedo.blueprints.Properties;
-import com.dooapp.gaedo.blueprints.indexable.IndexableGraphBackedFinderService;
 import com.dooapp.gaedo.blueprints.strategies.GraphMappingStrategy;
 import com.dooapp.gaedo.blueprints.strategies.StrategyType;
 import com.dooapp.gaedo.blueprints.transformers.ClassLiteralTransformer;
@@ -25,11 +24,11 @@ import com.dooapp.gaedo.finders.root.InformerFactory;
 import com.dooapp.gaedo.properties.Property;
 import com.dooapp.gaedo.properties.PropertyProvider;
 import com.dooapp.gaedo.properties.TypeProperty;
-import com.tinkerpop.blueprints.pgm.Edge;
-import com.tinkerpop.blueprints.pgm.IndexableGraph;
-import com.tinkerpop.blueprints.pgm.Vertex;
-import com.tinkerpop.blueprints.pgm.impls.sail.SailGraph;
-import com.tinkerpop.blueprints.pgm.oupls.sail.GraphSail;
+import com.tinkerpop.blueprints.Direction;
+import com.tinkerpop.blueprints.Edge;
+import com.tinkerpop.blueprints.Vertex;
+import com.tinkerpop.blueprints.impls.sail.SailGraph;
+import com.tinkerpop.blueprints.oupls.sail.GraphSail;
 
 /**
  * Do NOT use that fidner service, which should under no circumstance be considered production ready.
@@ -144,8 +143,8 @@ public class SailGraphBackedFinderService<DataType, InformerType extends Informe
 		if (vertex.getProperty(Properties.type.name()) != null) {
 			return TypeUtils.getClass(vertex.getProperty(Properties.type.name()).toString());
 		} else {
-			Edge toType = vertex.getOutEdges(TYPE_EDGE_NAME).iterator().next();
-			Vertex type = toType.getInVertex();
+			Edge toType = vertex.getEdges(Direction.OUT, TYPE_EDGE_NAME).iterator().next();
+			Vertex type = toType.getVertex(Direction.IN);
 			// Do not use ClassLiteral here as this method must be blazing fast
 			return classTransformer.extractClassIn(getValue(type).toString());
 		}

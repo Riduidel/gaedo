@@ -7,7 +7,7 @@ import com.dooapp.gaedo.blueprints.GraphUtils;
 import com.dooapp.gaedo.blueprints.Kind;
 import com.dooapp.gaedo.blueprints.UnableToCreateException;
 import com.dooapp.gaedo.utils.Utils;
-import com.tinkerpop.blueprints.pgm.Vertex;
+import com.tinkerpop.blueprints.Vertex;
 
 /**
  * Helper class for literal transformer

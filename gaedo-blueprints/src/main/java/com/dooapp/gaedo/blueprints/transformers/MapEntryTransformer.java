@@ -14,8 +14,8 @@ import com.dooapp.gaedo.blueprints.BluePrintsCrudServiceException;
 import com.dooapp.gaedo.blueprints.GraphUtils;
 import com.dooapp.gaedo.properties.DescribedProperty;
 import com.dooapp.gaedo.properties.Property;
-import com.tinkerpop.blueprints.pgm.Graph;
-import com.tinkerpop.blueprints.pgm.Vertex;
+import com.tinkerpop.blueprints.Graph;
+import com.tinkerpop.blueprints.Vertex;
 
 public class MapEntryTransformer extends AbstractTupleTransformer<Map.Entry> implements TupleTransformer<Map.Entry> {
 	private static class UnableToGetKeyOrValueProperty extends BluePrintsCrudServiceException {

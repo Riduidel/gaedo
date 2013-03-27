@@ -1,7 +1,12 @@
 package com.dooapp.gaedo.blueprints.strategies;
 
 import java.lang.annotation.Annotation;
-import java.util.*;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -25,8 +30,9 @@ import com.dooapp.gaedo.properties.Property;
 import com.dooapp.gaedo.properties.PropertyProvider;
 import com.dooapp.gaedo.properties.TypeProperty;
 import com.dooapp.gaedo.utils.CollectionUtils;
-import com.tinkerpop.blueprints.pgm.Edge;
-import com.tinkerpop.blueprints.pgm.Vertex;
+import com.tinkerpop.blueprints.Direction;
+import com.tinkerpop.blueprints.Edge;
+import com.tinkerpop.blueprints.Vertex;
 
 public class BeanBasedMappingStrategy<DataType> extends AbstractMappingStrategy<DataType> implements GraphMappingStrategy<DataType> {
 
@@ -154,10 +160,10 @@ public class BeanBasedMappingStrategy<DataType> extends AbstractMappingStrategy<
             if(Kind.literal.equals(GraphUtils.getKindOf(vertex))) {
                 // a literal with no type information should always been considered a string literal
             } else {
-                Iterator<Edge> typeIterator = vertex.getOutEdges(IndexableGraphBackedFinderService.TYPE_EDGE_NAME).iterator();
+                Iterator<Edge> typeIterator = vertex.getEdges(Direction.OUT, IndexableGraphBackedFinderService.TYPE_EDGE_NAME).iterator();
                 if(typeIterator.hasNext()) {
                     Edge toType = typeIterator.next();
-                    Vertex type = toType.getInVertex();
+                    Vertex type = toType.getVertex(Direction.IN);
                     // Do not use ClassLiteral here as this method must be blazing fast
                     return IndexableGraphBackedFinderService.classTransformer.extractClassIn(service.getDriver().getValue(type).toString());
                 }

@@ -2,9 +2,6 @@ package com.dooapp.gaedo.blueprints;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.LinkedList;
 import java.util.SortedSet;
 
 import org.junit.After;
@@ -17,6 +14,7 @@ import com.dooapp.gaedo.blueprints.strategies.StrategyType;
 import com.dooapp.gaedo.extensions.views.InViewService;
 import com.dooapp.gaedo.finders.FinderCrudService;
 import com.dooapp.gaedo.finders.Informer;
+import com.dooapp.gaedo.finders.repository.InheriterRepository;
 import com.dooapp.gaedo.finders.repository.ServiceBackedFieldLocator;
 import com.dooapp.gaedo.finders.repository.SimpleServiceRepository;
 import com.dooapp.gaedo.finders.root.BasicFieldInformerLocator;
@@ -35,7 +33,7 @@ import com.dooapp.gaedo.test.beans.User;
 import com.dooapp.gaedo.test.beans.UserInformer;
 import com.dooapp.gaedo.test.beans.specific.Theme;
 import com.dooapp.gaedo.test.beans.specific.ThemeInformer;
-import com.tinkerpop.blueprints.pgm.Graph;
+import com.tinkerpop.blueprints.Graph;
 
 /**
  * Class defining all graph elements and properties, used by tests.
@@ -67,7 +65,7 @@ public abstract class AbstractGraphEnvironment<GraphType extends Graph> {
 			if(graph==null) {
 				graph = createGraph(graphProvider);
 				
-				serviceRrepository = new SimpleServiceRepository();
+				serviceRrepository = new InheriterRepository();
 				provider = new FieldBackedPropertyProvider();
 				locator = new CumulativeFieldInformerLocator();
 				locator.add(new BasicFieldInformerLocator());

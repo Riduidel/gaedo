@@ -9,7 +9,7 @@ import java.util.WeakHashMap;
 import com.dooapp.gaedo.blueprints.GraphDatabaseDriver;
 import com.dooapp.gaedo.blueprints.Properties;
 import com.dooapp.gaedo.utils.date.DateFormatThreadedLoader;
-import com.tinkerpop.blueprints.pgm.Vertex;
+import com.tinkerpop.blueprints.Vertex;
 
 /**
  * As SimpleDateFormat is not thread-safe and construction heavy, see here

@@ -2,13 +2,10 @@ package com.dooapp.gaedo.blueprints.strategies.graph;
 
 import java.util.Collection;
 
-import com.dooapp.gaedo.blueprints.GraphUtils;
 import com.dooapp.gaedo.blueprints.dynabeans.PropertyMapPropertyAccess;
 import com.dooapp.gaedo.blueprints.strategies.BeanIsNotAPropertyBagException;
-import com.dooapp.gaedo.blueprints.strategies.PropertyMappingStrategy;
 import com.dooapp.gaedo.blueprints.strategies.UnableToSetTypeException;
 import com.dooapp.gaedo.properties.AbstractPropertyAdapter;
-import com.dooapp.gaedo.utils.CollectionUtils;
 import com.dooapp.gaedo.utils.Utils;
 
 public class GraphProperty extends AbstractPropertyAdapter {

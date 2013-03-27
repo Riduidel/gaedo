@@ -4,8 +4,8 @@ import java.io.File;
 
 import com.dooapp.gaedo.blueprints.AbstractGraphProvider;
 import com.dooapp.gaedo.blueprints.GraphProvider;
-import com.tinkerpop.blueprints.pgm.IndexableGraph;
-import com.tinkerpop.blueprints.pgm.impls.tg.TinkerGraph;
+import com.tinkerpop.blueprints.IndexableGraph;
+import com.tinkerpop.blueprints.impls.tg.TinkerGraph;
 
 public class Tinker extends AbstractGraphProvider implements GraphProvider {
 	@Override

@@ -9,10 +9,8 @@ import com.dooapp.gaedo.blueprints.GraphProvider;
 import com.dooapp.gaedo.blueprints.TestUtils;
 import com.dooapp.gaedo.blueprints.strategies.StrategyType;
 import com.dooapp.gaedo.extensions.views.InViewService;
-import com.dooapp.gaedo.finders.FinderCrudService;
 import com.dooapp.gaedo.finders.Informer;
-import com.tinkerpop.blueprints.pgm.IndexableGraph;
-import com.tinkerpop.blueprints.pgm.oupls.sail.GraphSail;
+import com.tinkerpop.blueprints.IndexableGraph;
 
 public class IndexableGraphEnvironment extends AbstractGraphEnvironment<IndexableGraph> {
 
@@ -42,7 +40,8 @@ public class IndexableGraphEnvironment extends AbstractGraphEnvironment<Indexabl
 
 	@Override
 	public SailRepository getSailRepository() {
-		return new SailRepository(new GraphSail(getGraph()));
+		return null;
+//		return new SailRepository(new GraphSail<IndexableGraph>(getGraph()));
 	}
 
 	@Override

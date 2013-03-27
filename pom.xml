@@ -22,7 +22,6 @@
 		</license>
 	</licenses>
 	<properties>
-		<blueprints.version>1.1</blueprints.version>
 		<cobertura.version>2.5.2</cobertura.version>
 		<github.global.server>github</github.global.server>
 	</properties>

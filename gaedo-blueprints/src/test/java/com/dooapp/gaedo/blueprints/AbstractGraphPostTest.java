@@ -2,6 +2,8 @@ package com.dooapp.gaedo.blueprints;
 
 import java.util.Map;
 import java.util.TreeMap;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import org.junit.Before;
 
@@ -11,9 +13,9 @@ import com.dooapp.gaedo.test.beans.State;
 import com.dooapp.gaedo.test.beans.Tag;
 import com.dooapp.gaedo.test.beans.User;
 import com.dooapp.gaedo.test.beans.UserInformer;
-import com.tinkerpop.blueprints.pgm.TransactionalGraph;
-import com.tinkerpop.blueprints.pgm.TransactionalGraph.Conclusion;
-import com.tinkerpop.blueprints.pgm.Vertex;
+import com.tinkerpop.blueprints.TransactionalGraph;
+import com.tinkerpop.blueprints.TransactionalGraph.Conclusion;
+import com.tinkerpop.blueprints.Vertex;
 
 import static com.dooapp.gaedo.blueprints.TestUtils.ABOUT_ID;
 import static com.dooapp.gaedo.blueprints.TestUtils.ID_POST_1;
@@ -27,6 +29,8 @@ import static com.dooapp.gaedo.blueprints.TestUtils.USER_PASSWORD;
  *
  */
 public abstract class AbstractGraphPostTest extends AbstractGraphTest {
+	private static final String TEST_SEPARATOR = "====================================================================\n";
+	private static final Logger logger = Logger.getLogger(AbstractGraphPostTest.class.getName());
 
 	protected User author;
 	protected Post post1;
@@ -40,6 +44,9 @@ public abstract class AbstractGraphPostTest extends AbstractGraphTest {
 
 	@Before
 	public void loadService() throws Exception {
+		if (logger.isLoggable(Level.FINE)) {
+			logger.log(Level.FINE, TEST_SEPARATOR+"Starting loading services\n"+TEST_SEPARATOR);
+		}
 		super.loadService();
 		// Now add some services
 	
@@ -55,12 +62,15 @@ public abstract class AbstractGraphPostTest extends AbstractGraphTest {
 		author.posts.add(post2);
 		author.posts.add(post3);
 		author = getUserService().update(author);
+		if (logger.isLoggable(Level.FINE)) {
+			logger.log(Level.FINE, TEST_SEPARATOR+"Loaded all services and test data\n"+TEST_SEPARATOR);
+		}
 	}
 
 	protected Vertex findVertexIn(FinderCrudService<User, UserInformer> userService, User author) {
-		if(environment.getGraph() instanceof TransactionalGraph) {
-			((TransactionalGraph) environment.getGraph()).startTransaction();
-		}
+//		if(environment.getGraph() instanceof TransactionalGraph) {
+//			((TransactionalGraph) environment.getGraph()).startTransaction();
+//		}
 		try {
 			return ((AbstractBluePrintsBackedFinderService) getUserService()).getIdVertexFor(author, false);
 		} finally {

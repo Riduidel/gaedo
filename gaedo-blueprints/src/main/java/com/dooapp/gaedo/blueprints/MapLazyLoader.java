@@ -13,8 +13,9 @@ import com.dooapp.gaedo.blueprints.strategies.GraphMappingStrategy;
 import com.dooapp.gaedo.finders.repository.ServiceRepository;
 import com.dooapp.gaedo.patterns.WriteReplaceable;
 import com.dooapp.gaedo.properties.Property;
-import com.tinkerpop.blueprints.pgm.Edge;
-import com.tinkerpop.blueprints.pgm.Vertex;
+import com.tinkerpop.blueprints.Direction;
+import com.tinkerpop.blueprints.Edge;
+import com.tinkerpop.blueprints.Vertex;
 
 public class MapLazyLoader extends AbstractLazyLoader implements InvocationHandler, Serializable, WriteReplaceable {
 	private static final Logger logger = Logger.getLogger(MapLazyLoader.class.getName());
@@ -51,7 +52,7 @@ public class MapLazyLoader extends AbstractLazyLoader implements InvocationHandl
 	public void loadMap(Map map, Map<String, Object> objectsBeingAccessed) {
 		try {
 			for (Edge e : strategy.getOutEdgesFor(rootVertex, property)) {
-				Vertex value = e.getInVertex();
+				Vertex value = e.getVertex(Direction.IN);
 				// Value is always a serialized map entry, so deserialize it
 				// with magic !
 				try {

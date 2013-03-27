@@ -1,7 +1,6 @@
 package com.dooapp.gaedo.blueprints.bugs;
 
 import java.util.Collection;
-
 import java.util.logging.Logger;
 
 import org.hamcrest.core.Is;
@@ -13,19 +12,11 @@ import org.junit.runners.Parameterized.Parameters;
 import com.dooapp.gaedo.blueprints.AbstractGraphEnvironment;
 import com.dooapp.gaedo.blueprints.AbstractGraphPostSubClassTest;
 import com.dooapp.gaedo.blueprints.beans.PostSubClass;
-import com.dooapp.gaedo.finders.FinderCrudService;
 import com.dooapp.gaedo.finders.Informer;
-import com.dooapp.gaedo.finders.QueryBuilder;
-import com.dooapp.gaedo.finders.QueryExpression;
 import com.dooapp.gaedo.finders.id.IdBasedService;
-import com.dooapp.gaedo.test.beans.Post;
-import com.dooapp.gaedo.test.beans.PostInformer;
 import com.dooapp.gaedo.test.beans.State;
-import com.tinkerpop.blueprints.pgm.TransactionalGraph;
-import com.tinkerpop.blueprints.pgm.TransactionalGraph.Conclusion;
 
 import static com.dooapp.gaedo.blueprints.TestUtils.simpleTest;
-import static com.dooapp.gaedo.utils.CollectionUtils.asList;
 
 import static org.junit.Assert.assertThat;
 

@@ -8,7 +8,7 @@ import com.dooapp.gaedo.blueprints.strategies.GraphMappingStrategy;
 import com.dooapp.gaedo.blueprints.transformers.MapEntryTransformer;
 import com.dooapp.gaedo.blueprints.transformers.Tuples;
 import com.dooapp.gaedo.properties.Property;
-import com.tinkerpop.blueprints.pgm.Vertex;
+import com.tinkerpop.blueprints.Vertex;
 
 public class MapContainsKey extends MonovaluedValuedVertexTest<Object> implements VertexTest {
 
