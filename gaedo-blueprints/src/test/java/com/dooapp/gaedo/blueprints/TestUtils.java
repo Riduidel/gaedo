@@ -21,13 +21,14 @@ public class TestUtils {
 	 * Activate all logging for tests
 	 */
 	static {
-		Logger logger = Logger.getLogger("");
-		logger.setLevel(Level.ALL);
-		Handler[] handlers = logger.getHandlers();
-		for(Handler h : handlers) {
-			h.setLevel(Level.ALL);
-		}
+//		Logger logger = Logger.getLogger("");
+//		logger.setLevel(Level.ALL);
+//		Handler[] handlers = logger.getHandlers();
+//		for(Handler h : handlers) {
+//			h.setLevel(Level.ALL);
+//		}
 	}
+
 	private static interface EnvironmentCreator {
 
 		Object environmentFor(GraphProvider o);

@@ -15,6 +15,7 @@ import javax.persistence.CascadeType;
 import javax.persistence.Column;
 
 import com.dooapp.gaedo.blueprints.annotations.GraphProperty;
+import com.dooapp.gaedo.blueprints.indexable.IndexNames;
 import com.dooapp.gaedo.blueprints.strategies.GraphMappingStrategy;
 import com.dooapp.gaedo.blueprints.strategies.PropertyMappingStrategy;
 import com.dooapp.gaedo.blueprints.strategies.UnableToGetVertexTypeException;
@@ -28,6 +29,7 @@ import com.tinkerpop.blueprints.Direction;
 import com.tinkerpop.blueprints.Edge;
 import com.tinkerpop.blueprints.Element;
 import com.tinkerpop.blueprints.Graph;
+import com.tinkerpop.blueprints.Index;
 import com.tinkerpop.blueprints.IndexableGraph;
 import com.tinkerpop.blueprints.Vertex;
 import com.tinkerpop.blueprints.oupls.sail.GraphSail;
@@ -475,5 +477,19 @@ public class GraphUtils {
 		default:
 			return false;
 		}
+	}
+
+	/**
+	 * Set an indexed property on any graph element, updating the given list of indices
+	 * @param graph graph from which indices should be loaded
+	 * @param graphElement graph element to update
+	 * @param propertyName property to set
+	 * @param propertyValue value to set
+	 * @param indexName index to update. Notice removing value from index on mutation is not supported, as gaedo vertices and edges are not considered as mutable
+	 */
+	public static <ElementType extends Element> void setIndexedProperty(IndexableGraph graph, ElementType graphElement, String propertyName, Object propertyValue, IndexNames indexName) {
+		graphElement.setProperty(propertyName, propertyValue);
+		Index<ElementType> index = graph.getIndex(indexName.getIndexName(), (Class<ElementType>) indexName.getIndexed());
+		index.put(propertyName, propertyValue, graphElement);
 	}
 }

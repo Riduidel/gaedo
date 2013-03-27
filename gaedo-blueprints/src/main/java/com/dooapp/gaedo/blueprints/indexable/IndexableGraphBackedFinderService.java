@@ -134,12 +134,12 @@ public class IndexableGraphBackedFinderService<DataType, InformerType extends In
 		for(IndexNames index : IndexNames.values()) {
 			Index<? extends Element> associatedIndex = graph.getIndex(index.getIndexName(), index.getIndexed());
 			if(associatedIndex==null) {
-				if (logger.isLoggable(Level.INFO)) {
-					logger.log(Level.INFO, "There were no indice "+index.describe()+". Creating it");
+				if (logger.isLoggable(Level.FINE)) {
+					logger.log(Level.FINE, "There were no indice "+index.describe()+". Creating it");
 				}
 				graph.createIndex(index.getIndexName(), index.getIndexed());
-				if (logger.isLoggable(Level.INFO)) {
-					logger.log(Level.INFO, "index "+index.describe()+" has been created");
+				if (logger.isLoggable(Level.FINE)) {
+					logger.log(Level.FINE, "index "+index.describe()+" has been created");
 				}
 			}
 		}
@@ -285,9 +285,7 @@ public class IndexableGraphBackedFinderService<DataType, InformerType extends In
 	 * @param indexName
 	 */
 	public <ElementType extends Element> void setIndexedProperty(ElementType graphElement, String propertyName, Object propertyValue, IndexNames indexName) {
-		graphElement.setProperty(propertyName, propertyValue);
-		Index<ElementType> index = database.getIndex(indexName.getIndexName(), (Class<ElementType>) indexName.getIndexed());
-		index.put(propertyName, propertyValue, graphElement);
+		GraphUtils.setIndexedProperty(database, graphElement, propertyName, propertyValue, indexName);
 	}
 
 	public String getEdgeId(Vertex fromVertex, Vertex toVertex, Property property) {

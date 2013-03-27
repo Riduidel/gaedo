@@ -126,9 +126,9 @@ public class GraphPostSubClassFinderServiceTest extends AbstractGraphPostSubClas
 //			((TransactionalGraph) environment.getGraph()).startTransaction();
 		Vertex valueVertex = environment.getGraph().addVertex("new-text-vertex");
 		// using the service method, as it allows us to add properties to indices with ease
-		postSubService.setIndexedProperty(valueVertex, Properties.kind.name(), Kind.uri.name(), IndexNames.VERTICES);
+		GraphUtils.setIndexedProperty(postSubService.getDatabase(), valueVertex, Properties.kind.name(), Kind.uri.name(), IndexNames.VERTICES);
 		String BUG_31_URI = "https://github.com/Riduidel/gaedo/issues/31";
-		postSubService.setIndexedProperty(valueVertex, Properties.value.name(), BUG_31_URI, IndexNames.VERTICES);
+		GraphUtils.setIndexedProperty(postSubService.getDatabase(), valueVertex, Properties.value.name(), BUG_31_URI, IndexNames.VERTICES);
 		
 		// Have you notice this property is annotated ?
 		String textPropertyName = "post:text";
@@ -139,9 +139,9 @@ public class GraphPostSubClassFinderServiceTest extends AbstractGraphPostSubClas
 		
 		Edge edgeToURI = environment.getGraph().addEdge(textPropertyName, postVertex, valueVertex, textPropertyName);
 		String predicateProperty = GraphUtils.asSailProperty(textPropertyName);
-		postSubService.setIndexedProperty(edgeToURI,GraphSail.PREDICATE_PROP, predicateProperty, IndexNames.EDGES); 
-		postSubService.setIndexedProperty(edgeToURI,GraphSail.CONTEXT_PROP, "U "+GraphUtils.GAEDO_CONTEXT, IndexNames.EDGES);
-		postSubService.setIndexedProperty(edgeToURI,GraphSail.CONTEXT_PROP + GraphSail.PREDICATE_PROP, 
+		GraphUtils.setIndexedProperty(postSubService.getDatabase(), edgeToURI,GraphSail.PREDICATE_PROP, predicateProperty, IndexNames.EDGES); 
+		GraphUtils.setIndexedProperty(postSubService.getDatabase(), edgeToURI,GraphSail.CONTEXT_PROP, "U "+GraphUtils.GAEDO_CONTEXT, IndexNames.EDGES);
+		GraphUtils.setIndexedProperty(postSubService.getDatabase(), edgeToURI,GraphSail.CONTEXT_PROP + GraphSail.PREDICATE_PROP, 
 						edgeToURI.getProperty(GraphSail.CONTEXT_PROP).toString()+" "+
 						edgeToURI.getProperty(GraphSail.PREDICATE_PROP).toString(), IndexNames.EDGES);
 

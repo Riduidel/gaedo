@@ -22,8 +22,11 @@ public abstract class TransactionalOperation<ResultType, DataType, InformerType 
 		service = bluePrintsBackedFinderService;
 	}
 
+	/**
+	 * This is now a no-op code, as gaedo should not handle transactions itself.
+	 * @return
+	 */
 	public ResultType perform() {
-		// disabled for test purpose
 		if(false && service.transactionSupport!=null) {
 			try {
 //				service.transactionSupport.startTransaction();
