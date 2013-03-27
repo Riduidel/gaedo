@@ -2,6 +2,8 @@ package com.dooapp.gaedo.blueprints;
 
 import java.util.Map;
 import java.util.TreeMap;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import org.junit.Before;
 
@@ -26,6 +28,7 @@ import static com.dooapp.gaedo.blueprints.TestUtils.USER_PASSWORD;
  *
  */
 public abstract class AbstractGraphPostSubClassTest extends AbstractGraphTest {
+	private static final Logger logger = Logger.getLogger(AbstractGraphPostSubClassTest.class.getName());
 
 	protected User author;
 	protected Post post1;
@@ -39,6 +42,9 @@ public abstract class AbstractGraphPostSubClassTest extends AbstractGraphTest {
 
 	@Before
 	public void loadService() throws Exception {
+		if (logger.isLoggable(Level.FINE)) {
+			logger.log(Level.FINE, TestUtils.TEST_SEPARATOR+"Starting loading services\n"+TestUtils.TEST_SEPARATOR);
+		}
 		super.loadService();
 
 		// create some objects
@@ -46,6 +52,9 @@ public abstract class AbstractGraphPostSubClassTest extends AbstractGraphTest {
 		author.about = new Post(ABOUT_ID, "a message about that user", 5, State.PUBLIC, author);
 		author = getUserService().create(author);
 		tag1 = getTagService().create(new Tag(1, TAG_TEXT));
+		if (logger.isLoggable(Level.FINE)) {
+			logger.log(Level.FINE, TestUtils.TEST_SEPARATOR+"Loaded all services and test data\n"+TestUtils.TEST_SEPARATOR);
+		}
 	}
 
 	protected Vertex findVertexIn(FinderCrudService<User, UserInformer> userService, User author) {

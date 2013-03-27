@@ -13,6 +13,9 @@ import org.junit.runners.Parameterized;
 import org.junit.runners.Parameterized.Parameters;
 
 import com.dooapp.gaedo.blueprints.beans.PostSubClass;
+import com.dooapp.gaedo.blueprints.beans.PostSubClassInformer;
+import com.dooapp.gaedo.blueprints.indexable.IndexNames;
+import com.dooapp.gaedo.blueprints.indexable.IndexableGraphBackedFinderService;
 import com.dooapp.gaedo.finders.QueryBuilder;
 import com.dooapp.gaedo.finders.QueryExpression;
 import com.dooapp.gaedo.finders.id.IdBasedService;
@@ -21,7 +24,6 @@ import com.dooapp.gaedo.test.beans.PostInformer;
 import com.dooapp.gaedo.test.beans.State;
 import com.tinkerpop.blueprints.Direction;
 import com.tinkerpop.blueprints.Edge;
-import com.tinkerpop.blueprints.TransactionalGraph;
 import com.tinkerpop.blueprints.Vertex;
 import com.tinkerpop.blueprints.oupls.sail.GraphSail;
 
@@ -108,8 +110,8 @@ public class GraphPostSubClassFinderServiceTest extends AbstractGraphPostSubClas
 
 
 	@Test 
-	public void usingAnUntypedURIValueCouldWork() {
-		final String METHOD_NAME = "usingAnUntypedURIValueCouldWork";
+	public void usingAnUntypedURIValueCouldWork_for_bug_32() {
+		final String METHOD_NAME = "usingAnUntypedURIValueCouldWork_for_bug_32";
 		PostSubClass newOne = new PostSubClass(0, METHOD_NAME,1.0f, State.PUBLIC, author);
 		newOne.state = State.PUBLIC;
 		newOne.anotherState = PostSubClass.AnotherStateForBug26.PUBLIC;
@@ -117,30 +119,31 @@ public class GraphPostSubClassFinderServiceTest extends AbstractGraphPostSubClas
 		assertThat(saved, Is.is(PostSubClass.class));
 		
 		// Directly manipulating vertex to link it to a raw uri node (used as ... text)
-		AbstractBluePrintsBackedFinderService<?, PostSubClass, ?> postSubService = (AbstractBluePrintsBackedFinderService<?, PostSubClass, ?>) getPostSubService();
+		IndexableGraphBackedFinderService<PostSubClass, PostSubClassInformer> postSubService = (IndexableGraphBackedFinderService<PostSubClass, PostSubClassInformer>) getPostSubService();
 		Vertex postVertex = postSubService.getVertexFor(newOne, CascadeType.REFRESH, new TreeMap<String, Object>());
 		
 //		if(environment.getGraph() instanceof TransactionalGraph)
 //			((TransactionalGraph) environment.getGraph()).startTransaction();
 		Vertex valueVertex = environment.getGraph().addVertex("new-text-vertex");
-		valueVertex.setProperty(Properties.kind.name(), Kind.uri.name());
+		// using the service method, as it allows us to add properties to indices with ease
+		postSubService.setIndexedProperty(valueVertex, Properties.kind.name(), Kind.uri.name(), IndexNames.VERTICES);
 		String BUG_31_URI = "https://github.com/Riduidel/gaedo/issues/31";
-		valueVertex.setProperty(Properties.value.name(), BUG_31_URI);
+		postSubService.setIndexedProperty(valueVertex, Properties.value.name(), BUG_31_URI, IndexNames.VERTICES);
 		
 		// Have you notice this property is annotated ?
 		String textPropertyName = "post:text";
-		Iterable<Edge> previous = postVertex.getEdges(Direction.IN, textPropertyName);
+		Iterable<Edge> previous = postVertex.getEdges(Direction.OUT, textPropertyName);
 		for(Edge e : previous) {
 			environment.getGraph().removeEdge(e);
 		}
 		
 		Edge edgeToURI = environment.getGraph().addEdge(textPropertyName, postVertex, valueVertex, textPropertyName);
 		String predicateProperty = GraphUtils.asSailProperty(textPropertyName);
-		edgeToURI.setProperty(GraphSail.PREDICATE_PROP, predicateProperty);
-		edgeToURI.setProperty(GraphSail.CONTEXT_PROP, "U "+GraphUtils.GAEDO_CONTEXT);
-		edgeToURI.setProperty(GraphSail.CONTEXT_PROP + GraphSail.PREDICATE_PROP, 
+		postSubService.setIndexedProperty(edgeToURI,GraphSail.PREDICATE_PROP, predicateProperty, IndexNames.EDGES); 
+		postSubService.setIndexedProperty(edgeToURI,GraphSail.CONTEXT_PROP, "U "+GraphUtils.GAEDO_CONTEXT, IndexNames.EDGES);
+		postSubService.setIndexedProperty(edgeToURI,GraphSail.CONTEXT_PROP + GraphSail.PREDICATE_PROP, 
 						edgeToURI.getProperty(GraphSail.CONTEXT_PROP).toString()+" "+
-						edgeToURI.getProperty(GraphSail.PREDICATE_PROP).toString());
+						edgeToURI.getProperty(GraphSail.PREDICATE_PROP).toString(), IndexNames.EDGES);
 
 		
 		Post loaded = postSubService.findById(newOne.id);
@@ -150,7 +153,7 @@ public class GraphPostSubClassFinderServiceTest extends AbstractGraphPostSubClas
 
 	@Test 
 	public void replacingACascadePersistValueWithNullShouldHaveNoEffect() {
-		final String METHOD_NAME = "usingAnUntypedURIValueCouldWork";
+		final String METHOD_NAME = "replacingACascadePersistValueWithNullShouldHaveNoEffect";
 		PostSubClass newOne = new PostSubClass(0, METHOD_NAME,1.0f, State.PUBLIC, author);
 		newOne.state = State.PUBLIC;
 		newOne.anotherState = PostSubClass.AnotherStateForBug26.PUBLIC;

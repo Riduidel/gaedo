@@ -11,3 +11,7 @@ First signifiant change is that, as indices are no more automatically created, t
 Have you noticed the lingo about neo4jGraph [`setCheckElementsInTransaction`](http://www.tinkerpop.com/docs/javadocs/blueprints/2.3.0/com/tinkerpop/blueprints/impls/neo4j/Neo4jGraph.html#setCheckElementsInTransaction(boolean)) ? No ? Well, I urgently advise you to take a look at this. Indeed, gaedo test suite has revealed it **requires** this flag to be set. In fact, when not set, the `GraphPostFinderServiceTest#ensureDeleteCascadesWell()` test not only fails, but also crash during execution, which is not good. Also, notice gaedo doesn't hard check if that flag is set (because it would require gaedo havign the blueprints-neo4j module as a compile dependency, which we absolutely don't want.
 
 So, in any case you have cascade failures, or `java.lang.IllegalStateException: Node[*] has been deleted in this tx` well ... make sure this flag is set.
+
+
+## And now for something completely different ##
+Support for PropertyBag has been totally remvoed from this version : it was a cumbersome way to address the problem of data defined from a graph DB.

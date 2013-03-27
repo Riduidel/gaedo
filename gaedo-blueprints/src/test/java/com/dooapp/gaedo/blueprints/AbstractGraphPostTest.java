@@ -29,7 +29,6 @@ import static com.dooapp.gaedo.blueprints.TestUtils.USER_PASSWORD;
  *
  */
 public abstract class AbstractGraphPostTest extends AbstractGraphTest {
-	private static final String TEST_SEPARATOR = "====================================================================\n";
 	private static final Logger logger = Logger.getLogger(AbstractGraphPostTest.class.getName());
 
 	protected User author;
@@ -45,7 +44,7 @@ public abstract class AbstractGraphPostTest extends AbstractGraphTest {
 	@Before
 	public void loadService() throws Exception {
 		if (logger.isLoggable(Level.FINE)) {
-			logger.log(Level.FINE, TEST_SEPARATOR+"Starting loading services\n"+TEST_SEPARATOR);
+			logger.log(Level.FINE, TestUtils.TEST_SEPARATOR+"Starting loading services\n"+TestUtils.TEST_SEPARATOR);
 		}
 		super.loadService();
 		// Now add some services
@@ -63,7 +62,7 @@ public abstract class AbstractGraphPostTest extends AbstractGraphTest {
 		author.posts.add(post3);
 		author = getUserService().update(author);
 		if (logger.isLoggable(Level.FINE)) {
-			logger.log(Level.FINE, TEST_SEPARATOR+"Loaded all services and test data\n"+TEST_SEPARATOR);
+			logger.log(Level.FINE, TestUtils.TEST_SEPARATOR+"Loaded all services and test data\n"+TestUtils.TEST_SEPARATOR);
 		}
 	}
 

@@ -284,7 +284,7 @@ public class IndexableGraphBackedFinderService<DataType, InformerType extends In
 	 * @param propertyValue
 	 * @param indexName
 	 */
-	private <ElementType extends Element> void setIndexedProperty(ElementType graphElement, String propertyName, Object propertyValue, IndexNames indexName) {
+	public <ElementType extends Element> void setIndexedProperty(ElementType graphElement, String propertyName, Object propertyValue, IndexNames indexName) {
 		graphElement.setProperty(propertyName, propertyValue);
 		Index<ElementType> index = database.getIndex(indexName.getIndexName(), (Class<ElementType>) indexName.getIndexed());
 		index.put(propertyName, propertyValue, graphElement);

@@ -87,7 +87,7 @@ public class TestUtils {
 	
 	public static Collection<GraphProvider> providers() {
 		Collection<GraphProvider> returned = new LinkedList<GraphProvider>();
-//		returned.addAll(neo4j());
+		returned.addAll(neo4j());
 		returned.addAll(tinker());
 		return returned;
 		
@@ -159,5 +159,7 @@ public class TestUtils {
 	private static IndexableGraphEnvironment environmentFor(GraphProvider o) {
 		return new IndexableGraphEnvironment((GraphProvider) o);
 	}
+
+	static final String TEST_SEPARATOR = "====================================================================\n";
 
 }

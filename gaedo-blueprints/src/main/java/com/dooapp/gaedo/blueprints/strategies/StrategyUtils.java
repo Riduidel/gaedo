@@ -35,8 +35,6 @@ public class StrategyUtils {
 		switch(strategy) {
 		case beanBased:
 			return new BeanBasedMappingStrategy<DataType>(containedClass, propertyProvider, migrator);
-		case graphBased:
-			return new GraphBasedMappingStrategy<DataType>(containedClass, propertyProvider, migrator);
 		default:
 			throw new UnsupportedOperationException("the StrategyType "+strategy.name()+" is not yet supported");
 		}

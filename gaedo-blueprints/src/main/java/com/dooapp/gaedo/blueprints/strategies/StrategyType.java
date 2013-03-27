@@ -6,6 +6,5 @@ package com.dooapp.gaedo.blueprints.strategies;
  *
  */
 public enum StrategyType {
-	beanBased,
-	graphBased;
+	beanBased;
 }
