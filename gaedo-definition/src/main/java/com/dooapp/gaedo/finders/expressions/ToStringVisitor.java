@@ -7,6 +7,7 @@ import com.dooapp.gaedo.finders.informers.MapContainingValueExpression;
 import com.dooapp.gaedo.properties.Property;
 
 public class ToStringVisitor implements QueryExpressionVisitor {
+	private static final String NULL = "***null***";
 	private String indent = "\t";
 	private int deepness = 0;
 	private StringBuilder out = new StringBuilder();
@@ -56,7 +57,7 @@ public class ToStringVisitor implements QueryExpressionVisitor {
 	public void visit(EqualsExpression expression) {
 		out.append(deepnessString()).append(
 				getFieldText(expression)).append("\t==?\t")
-				.append(expression.getValue().toString()).append("\n");
+				.append(unNull(expression.getValue()).toString()).append("\n");
 	}
 
 	/**
@@ -76,13 +77,22 @@ public class ToStringVisitor implements QueryExpressionVisitor {
 	public String toString() {
 		return out.toString();
 	}
+	
+	/**
+	 * Replace a potentially null value with a non null one
+	 * @param value
+	 * @return the value {@value #NULL}
+	 */
+	private Object unNull(Object value) {
+		return value==null ? NULL : value;
+	}
 
 	public <ComparableType extends Comparable<ComparableType>> void visit(GreaterThanExpression<ComparableType> greaterThanExpression) {
 		out.append(deepnessString()).append(
 				getFieldText(greaterThanExpression)).append(
 				">").append(greaterThanExpression.isStrictly() ? "" : "=")
 				.append("?")
-				.append(greaterThanExpression.getValue().toString()).append(
+				.append(unNull(greaterThanExpression.getValue()).toString()).append(
 						"\n");
 	}
 
@@ -90,7 +100,7 @@ public class ToStringVisitor implements QueryExpressionVisitor {
 		out.append(deepnessString()).append(
 				getFieldText(lowerThanExpression)).append(
 				"<").append(lowerThanExpression.isStrictly() ? "" : "=")
-				.append("?").append(lowerThanExpression.getValue().toString())
+				.append("?").append(unNull(lowerThanExpression.getValue()).toString())
 				.append("\n");
 	}
 
@@ -119,20 +129,20 @@ public class ToStringVisitor implements QueryExpressionVisitor {
 	public void visit(CollectionContaingExpression expression) {
 		out.append(deepnessString()).append(
 				getFieldText(expression)).append(
-				" contains? ").append(expression.getContained().toString()).append("\n");
+				" contains? ").append(unNull(expression.getContained()).toString()).append("\n");
 	}
 
 	@Override
 	public void visit(MapContainingValueExpression expression) {
 		out.append(deepnessString()).append(
 				getFieldText(expression)).append(
-				" containsKey? ").append(expression.getContained().toString()).append("\n");
+				" containsKey? ").append(unNull(expression.getContained()).toString()).append("\n");
 	}
 
 	@Override
 	public void visit(MapContainingKeyExpression expression) {
 		out.append(deepnessString()).append(
 				getFieldText(expression)).append(
-				" containsValue? ").append(expression.getContained().toString()).append("\n");
+				" containsValue? ").append(unNull(expression.getContained()).toString()).append("\n");
 	}
 }
