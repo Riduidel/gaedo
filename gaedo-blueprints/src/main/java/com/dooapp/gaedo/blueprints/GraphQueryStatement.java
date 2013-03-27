@@ -2,6 +2,8 @@ package com.dooapp.gaedo.blueprints;
 
 import java.beans.PropertyChangeEvent;
 import java.util.TreeMap;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import com.dooapp.gaedo.blueprints.queries.BluePrintsQueryBuilder;
 import com.dooapp.gaedo.blueprints.queries.DataTypeIterable;
@@ -23,7 +25,7 @@ public class GraphQueryStatement<
 		DataType, 
 		InformerType extends Informer<DataType>> 
 	implements QueryStatement<DataType, InformerType> {
-
+	
 	protected QueryBuilder<InformerType> query;
 	protected AbstractBluePrintsBackedFinderService<?, DataType, InformerType> service;
 	protected ServiceRepository repository;
@@ -53,12 +55,21 @@ public class GraphQueryStatement<
 
 	private GraphExecutableQuery prepareQuery() {
 		try {
+			if (QueryLog.logger.isLoggable(QueryLog.QUERY_LOGGING_LEVEL)) {
+				QueryLog.logger.log(QueryLog.QUERY_LOGGING_LEVEL, "preparing query "+id);
+			}
 			BluePrintsQueryBuilder<DataType, InformerType> builder = new BluePrintsQueryBuilder<DataType, InformerType>(service);
 			InformerType informer = service.getInformer();
 			filterExpression = query.createMatchingExpression(informer);
 			filterExpression.accept(builder);
+			if (QueryLog.logger.isLoggable(QueryLog.QUERY_LOGGING_LEVEL)) {
+				QueryLog.logger.log(QueryLog.QUERY_LOGGING_LEVEL, "filering expression for "+id+" is "+filterExpression);
+			}
 			return builder.getQuery(sortingExpression);
 		} finally {
+			if (QueryLog.logger.isLoggable(QueryLog.QUERY_LOGGING_LEVEL)) {
+				QueryLog.logger.log(QueryLog.QUERY_LOGGING_LEVEL, "query "+id+" is constructed and usable ... now matching");
+			}
 			setState(State.MATCHING);
 		}
 	}

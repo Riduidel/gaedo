@@ -30,7 +30,7 @@ public class VertexValueRange {
 	 * While the {@link #findBestMatch(Entry)} focus on checking if this entry has the smallest value range, this one simply return the while value range
 	 * @return
 	 */
-	public Iterable<Vertex> getValues() {
+	public List<Vertex> getValues() {
 		Iterator<Property> pathIterator = entry.getValue().iterator();
 		ArrayList<Vertex> arrayList = new ArrayList<Vertex>();
 		getValues(entry, pathIterator, arrayList);

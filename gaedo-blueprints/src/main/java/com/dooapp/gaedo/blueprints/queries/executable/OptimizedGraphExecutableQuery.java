@@ -1,9 +1,13 @@
 package com.dooapp.gaedo.blueprints.queries.executable;
 
+import java.util.Collection;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
 import com.dooapp.gaedo.blueprints.AbstractBluePrintsBackedFinderService;
+import com.dooapp.gaedo.blueprints.GraphUtils;
+import com.dooapp.gaedo.blueprints.QueryLog;
 import com.dooapp.gaedo.blueprints.queries.tests.CompoundVertexTest;
 import com.dooapp.gaedo.blueprints.queries.tests.VertexTest;
 import com.dooapp.gaedo.blueprints.strategies.GraphMappingStrategy;
@@ -77,11 +81,20 @@ public class OptimizedGraphExecutableQuery extends AbstractGraphExecutableQuery 
 	 * @see com.dooapp.gaedo.blueprints.queries.executable.AbstractGraphExecutableQuery#getVerticesToExamine()
 	 */
 	@Override
-	protected Iterable<Vertex> getVerticesToExamine() {
+	protected Collection<Vertex> getVerticesToExamine() {
 		// First step is to get all possible query root vertices
 		Map<Iterable<Vertex>, Iterable<Property>> possibleRoots = getPossibleRootsOf(test);
 		VertexValueRange bestMatch = findBestRootIn(possibleRoots);
-		return bestMatch.getValues();
+		List<Vertex> returned = bestMatch.getValues();
+		if(QueryLog.logger.isLoggable(QueryLog.QUERY_LOGGING_LEVEL)) {
+			StringBuilder sOut = new StringBuilder();
+			sOut.append("query roots for test ").append(test).append("\nare the ").append(returned.size()).append(" following vertices");
+			for(Vertex v : returned) {
+				sOut.append("\n").append(GraphUtils.toString(v));
+			}
+			QueryLog.logger.log(QueryLog.QUERY_LOGGING_LEVEL, sOut.toString());
+		}
+		return returned;
 	}
 
 	/**
