@@ -439,6 +439,7 @@ public class GraphUtils {
 				logger.log(Level.WARNING, "We tried to remove non existing edge " + toString(existing));
 			}
 		} else {
+			removeFromIndex(database, existing, IndexNames.EDGES);
 			database.removeEdge(toRemove);
 			if (logger.isLoggable(REMOVAL_LOG_LEVEL)) {
 				logger.log(REMOVAL_LOG_LEVEL, "REMOVED " + toRemove);
@@ -456,10 +457,28 @@ public class GraphUtils {
 				logger.log(Level.WARNING, "We tried to remove non existing vertex " + toString(existing));
 			}
 		} else {
-			// don't forget to remove vertex from any index it may be in
+			removeFromIndex(database, existing, IndexNames.VERTICES);
 			database.removeVertex(toRemove);
 			if (logger.isLoggable(REMOVAL_LOG_LEVEL)) {
 				logger.log(REMOVAL_LOG_LEVEL, "REMOVED " + toRemove);
+			}
+		}
+	}
+
+	/**
+	 * Remove given element from index by removing all bindings from its properties names to its properties values
+	 * @param database
+	 * @param existing
+	 * @param indexName
+	 */
+	public static <Type extends Element> void removeFromIndex(Graph database, Type existing, IndexNames indexName) {
+		if (database instanceof IndexableGraph) {
+			IndexableGraph indexable = (IndexableGraph) database;
+			if(indexName.isUsable()) {
+				Index<Type> index = (Index<Type>) indexable.getIndex(indexName.getIndexName(), indexName.getIndexed());
+				for(String propertyName : existing.getPropertyKeys()) {
+					index.remove(propertyName, existing.getProperty(propertyName), existing);
+				}
 			}
 		}
 	}
