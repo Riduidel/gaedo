@@ -29,15 +29,16 @@ import static org.junit.Assert.assertThat;
  * @author ndx
  *
  */
+@Ignore
 public class StandardMultiwritePerformanceAndSearchTest extends AbstractGraphPostSubClassTest {
 
 	private static final Logger logger = Logger.getLogger(StandardMultiwritePerformanceAndSearchTest.class.getName());
-	
+
     @Rule
     public ContiPerfRule i = new ContiPerfRule();
-    
-    private AtomicInteger sessions = new AtomicInteger(0); 
-    private AtomicInteger tests = new AtomicInteger(0); 
+
+    private AtomicInteger sessions = new AtomicInteger(0);
+    private AtomicInteger tests = new AtomicInteger(0);
 
 	public StandardMultiwritePerformanceAndSearchTest() {
 		// use first possible test
