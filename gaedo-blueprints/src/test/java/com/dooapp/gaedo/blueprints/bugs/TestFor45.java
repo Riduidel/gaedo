@@ -53,11 +53,11 @@ public class TestFor45 extends AbstractGraphPostTest {
 		Post third= getPostService().find().matching(new FindPostByNote(3.0f)).getFirst();
 		// Find post vertex by forging its id
 		Vertex thirdVertex = ((AbstractBluePrintsBackedFinderService<?, Post, PostInformer>) getPostService()).getIdVertexFor(third, false);
-		
+
 		Tag unConnected = new Tag(METHOD_NAME);
 		unConnected = getTagService().create(unConnected);
 		Vertex tagVertex = ((AbstractBluePrintsBackedFinderService<?, Tag, TagInformer>) getTagService()).getIdVertexFor(unConnected, false);
-		
+
 //		if(environment.getGraph() instanceof TransactionalGraph) {
 //			((TransactionalGraph) environment.getGraph()).startTransaction();
 //		}
@@ -65,16 +65,16 @@ public class TestFor45 extends AbstractGraphPostTest {
 		String edgeNameFor = Post.class.getName()+":"+"tags";
 		String predicateProperty = METHOD_NAME+"#test Edge";
 		Edge edge = environment.getGraph().addEdge(predicateProperty, thirdVertex, tagVertex, edgeNameFor);
-		edge.setProperty(GraphSail.PREDICATE_PROP, predicateProperty);
+		edge.setProperty(GraphUtils.PREDICATE_PROPERTY, predicateProperty);
 		String contextProperty = GraphUtils.asSailProperty("https://github.com/Riduidel/gaedo/issues/45");
-		edge.setProperty(GraphSail.CONTEXT_PROP, contextProperty);
+		edge.setProperty(GraphUtils.CONTEXT_PROPERTY, contextProperty);
 		// Finally build the context-predicate property by concatenating both
-		edge.setProperty(GraphSail.CONTEXT_PROP + GraphSail.PREDICATE_PROP, contextProperty + " " + predicateProperty);
+		edge.setProperty(GraphUtils.CONTEXT_PREDICATE_PROPERTY, contextProperty + " " + predicateProperty);
 
 		if(environment.getGraph() instanceof TransactionalGraph) {
 			((TransactionalGraph) environment.getGraph()).stopTransaction(Conclusion.SUCCESS);
 		}
-		
+
 		third= getPostService().find().matching(new FindPostByNote(3)).getFirst();
 		assertThat(third, IsNull.notNullValue());
 		assertThat(third.note, Is.is(3.0f));

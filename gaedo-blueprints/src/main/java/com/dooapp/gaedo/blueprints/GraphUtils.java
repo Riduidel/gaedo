@@ -55,6 +55,43 @@ public class GraphUtils {
 	 */
 	public static final String GAEDO_HIDDEN_CONTEXT = GAEDO_PREFIX + "hidden";
 
+	/**
+	 * Compiled pattern used to match strings such as
+	 *
+	 * <pre>
+	 * U https://github.com/Riduidel/gaedo/visible  U http://purl.org/dc/elements/1.1/description
+	 * </pre>
+	 *
+	 * or
+	 *
+	 * <pre>
+	 * N U http://purl.org/dc/elements/1.1/description
+	 * </pre>
+	 *
+	 * or even
+	 *
+	 * <pre>
+	 * N
+	 * </pre>
+	 *
+	 * You know why I do such a pattern matching ? Because sail graph named
+	 * graph definintion goes by concatenating contexts URI in edges properties.
+	 * This is really douchebag code !
+	 */
+	public static final Pattern CONTEXTS_MATCHER = Pattern.compile("(N|U ([\\S]+))+");
+
+	/**
+	 * Context property, used for named graphs.
+	 */
+	public static final String CONTEXT_PROPERTY = GraphSail.CONTEXT_PROP;
+
+	/**
+	 * Predicate property, declared in a way that totally matches Sail graph one
+	 */
+	public static final String PREDICATE_PROPERTY = GraphSail.PREDICATE_PROP;
+
+	public static final String CONTEXT_PREDICATE_PROPERTY = CONTEXT_PROPERTY + PREDICATE_PROPERTY;
+
 	private static final Logger logger = Logger.getLogger(GraphUtils.class.getName());
 
 	public static String asSailProperty(String context) {
@@ -368,7 +405,7 @@ public class GraphUtils {
 
 	/**
 	 * Find all contexts in given edge by looking, in
-	 * {@link GraphSail#CONTEXT_PROP} property, what are the contexts. These
+	 * {@link GraphUtils#CONTEXT_PROPERTY} property, what are the contexts. These
 	 * contexts are extracted by iteratively calling {@link #CONTEXTS_MATCHER}
 	 * and {@link Matcher#find(int)} method.
 	 *
@@ -377,7 +414,7 @@ public class GraphUtils {
 	 * @return collection of declared contexts.
 	 */
 	public static Collection<String> getContextsOf(Edge edge) {
-		String contextsString = edge.getProperty(GraphSail.CONTEXT_PROP).toString();
+		String contextsString = edge.getProperty(GraphUtils.CONTEXT_PROPERTY).toString();
 		Matcher matcher = CONTEXTS_MATCHER.matcher(contextsString);
 		Collection<String> output = new LinkedList<String>();
 		int character = 0;
@@ -393,31 +430,6 @@ public class GraphUtils {
 		}
 		return output;
 	}
-
-	/**
-	 * Compiled pattern used to match strings such as
-	 *
-	 * <pre>
-	 * U https://github.com/Riduidel/gaedo/visible  U http://purl.org/dc/elements/1.1/description
-	 * </pre>
-	 *
-	 * or
-	 *
-	 * <pre>
-	 * N U http://purl.org/dc/elements/1.1/description
-	 * </pre>
-	 *
-	 * or even
-	 *
-	 * <pre>
-	 * N
-	 * </pre>
-	 *
-	 * You know why I do such a pattern matching ? Because sail graph named
-	 * graph definintion goes by concatenating contexts URI in edges properties.
-	 * This is really douchebag code !
-	 */
-	public static final Pattern CONTEXTS_MATCHER = Pattern.compile("(N|U ([\\S]+))+");
 
 	/**
 	 * Check if edge has the required named graphs list

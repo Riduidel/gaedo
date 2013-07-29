@@ -223,7 +223,7 @@ public class IndexableGraphBackedFinderService<DataType, InformerType extends In
 			 * context to a null value. Notice we COULD have stored literal type
 			 * as a property, instead of using
 			 */
-			setIndexedProperty(toType, GraphSail.CONTEXT_PROP, GraphUtils.asSailProperty(GraphUtils.GAEDO_CONTEXT), IndexNames.EDGES);
+			setIndexedProperty(toType, GraphUtils.CONTEXT_PROPERTY, GraphUtils.asSailProperty(GraphUtils.GAEDO_CONTEXT), IndexNames.EDGES);
 		}
 		// Yup, this if has no default else statement, and that's normal.
 		if (logger.isLoggable(Level.FINE)) {
@@ -253,7 +253,7 @@ public class IndexableGraphBackedFinderService<DataType, InformerType extends In
 		// Did you know labels are not edges properties ? Absolutely stunning discovery !
 //		database.getIndex(IndexNames.EDGES.getIndexName(), Edge.class).put("label", edgeNameFor, returned);
 		String predicateProperty = GraphUtils.asSailProperty(GraphUtils.getEdgeNameFor(property));
-		setIndexedProperty(returned, GraphSail.PREDICATE_PROP, predicateProperty, IndexNames.EDGES);
+		setIndexedProperty(returned, GraphUtils.PREDICATE_PROPERTY, predicateProperty, IndexNames.EDGES);
 		Collection<String> contexts = getLens();
 		StringBuilder contextPropertyBuilder = new StringBuilder();
 		if (contexts.size() == 0) {
@@ -267,9 +267,9 @@ public class IndexableGraphBackedFinderService<DataType, InformerType extends In
 			}
 		}
 		String contextProperty = contextPropertyBuilder.toString();
-		setIndexedProperty(returned, GraphSail.CONTEXT_PROP, contextProperty, IndexNames.EDGES);
+		setIndexedProperty(returned, GraphUtils.CONTEXT_PROPERTY, contextProperty, IndexNames.EDGES);
 		// Finally build the context-predicate property by concatenating both
-		setIndexedProperty(returned, GraphSail.CONTEXT_PROP + GraphSail.PREDICATE_PROP, contextProperty + " " + predicateProperty, IndexNames.EDGES);
+		setIndexedProperty(returned, GraphUtils.CONTEXT_PREDICATE_PROPERTY, contextProperty + " " + predicateProperty, IndexNames.EDGES);
 
 		if (logger.isLoggable(Level.FINE)) {
 			logger.log(Level.FINE, "created edge "+GraphUtils.toString(returned));

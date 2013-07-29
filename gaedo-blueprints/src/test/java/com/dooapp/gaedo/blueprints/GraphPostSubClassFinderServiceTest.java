@@ -35,18 +35,18 @@ import static org.junit.Assert.assertThat;
 @RunWith(Parameterized.class)
 public class GraphPostSubClassFinderServiceTest extends AbstractGraphPostSubClassTest{
 	private static final Logger logger = Logger.getLogger(GraphPostSubClassFinderServiceTest.class.getName());
-	
+
 	@Parameters
 	public static Collection<Object[]> parameters() {
 		return simpleTest();
 	}
-	
+
 	public GraphPostSubClassFinderServiceTest(AbstractGraphEnvironment<?> environment) {
 		super(environment);
 		// TODO Auto-generated constructor stub
 	}
-	
-	@Test 
+
+	@Test
 	public void ensurePostSubClassServiceWorksWell() {
 		final String METHOD_NAME = "ensurePostSubClassServiceWorksWell";
 		PostSubClass newOne = new PostSubClass(0, METHOD_NAME,1.0f, State.PUBLIC, author);
@@ -54,7 +54,7 @@ public class GraphPostSubClassFinderServiceTest extends AbstractGraphPostSubClas
 		final long postId = saved.id;
 		assertThat(saved, Is.is(PostSubClass.class));
 		Post loaded = getPostService().find().matching(new QueryBuilder<PostInformer>() {
-			
+
 			@Override
 			public QueryExpression createMatchingExpression(PostInformer informer) {
 				return informer.getText().equalsTo(METHOD_NAME);
@@ -80,7 +80,7 @@ public class GraphPostSubClassFinderServiceTest extends AbstractGraphPostSubClas
 	}
 
 
-	@Test 
+	@Test
 	public void ensureBug23IsSolved() {
 		final String METHOD_NAME = "ensureBug23IsSolved";
 		PostSubClass newOne = new PostSubClass(0, METHOD_NAME,1.0f, State.PUBLIC, author);
@@ -88,7 +88,7 @@ public class GraphPostSubClassFinderServiceTest extends AbstractGraphPostSubClas
 		final long postId = saved.id;
 		assertThat(saved, Is.is(PostSubClass.class));
 		Post loaded = getPostService().find().matching(new QueryBuilder<PostInformer>() {
-			
+
 			@Override
 			public QueryExpression createMatchingExpression(PostInformer informer) {
 				return informer.getText().equalsTo(METHOD_NAME);
@@ -109,7 +109,7 @@ public class GraphPostSubClassFinderServiceTest extends AbstractGraphPostSubClas
 	}
 
 
-	@Test 
+	@Test
 	public void usingAnUntypedURIValueCouldWork_for_bug_32() {
 		final String METHOD_NAME = "usingAnUntypedURIValueCouldWork_for_bug_32";
 		PostSubClass newOne = new PostSubClass(0, METHOD_NAME,1.0f, State.PUBLIC, author);
@@ -117,11 +117,11 @@ public class GraphPostSubClassFinderServiceTest extends AbstractGraphPostSubClas
 		newOne.anotherState = PostSubClass.AnotherStateForBug26.PUBLIC;
 		Post saved = getPostSubService().create(newOne);
 		assertThat(saved, Is.is(PostSubClass.class));
-		
+
 		// Directly manipulating vertex to link it to a raw uri node (used as ... text)
 		IndexableGraphBackedFinderService<PostSubClass, PostSubClassInformer> postSubService = (IndexableGraphBackedFinderService<PostSubClass, PostSubClassInformer>) getPostSubService();
 		Vertex postVertex = postSubService.getVertexFor(newOne, CascadeType.REFRESH, new TreeMap<String, Object>());
-		
+
 //		if(environment.getGraph() instanceof TransactionalGraph)
 //			((TransactionalGraph) environment.getGraph()).startTransaction();
 		Vertex valueVertex = environment.getGraph().addVertex("new-text-vertex");
@@ -129,29 +129,29 @@ public class GraphPostSubClassFinderServiceTest extends AbstractGraphPostSubClas
 		GraphUtils.setIndexedProperty(postSubService.getDatabase(), valueVertex, Properties.kind.name(), Kind.uri.name(), IndexNames.VERTICES);
 		String BUG_31_URI = "https://github.com/Riduidel/gaedo/issues/31";
 		GraphUtils.setIndexedProperty(postSubService.getDatabase(), valueVertex, Properties.value.name(), BUG_31_URI, IndexNames.VERTICES);
-		
+
 		// Have you notice this property is annotated ?
 		String textPropertyName = "post:text";
 		Iterable<Edge> previous = postVertex.getEdges(Direction.OUT, textPropertyName);
 		for(Edge e : previous) {
 			environment.getGraph().removeEdge(e);
 		}
-		
+
 		Edge edgeToURI = environment.getGraph().addEdge(textPropertyName, postVertex, valueVertex, textPropertyName);
 		String predicateProperty = GraphUtils.asSailProperty(textPropertyName);
-		GraphUtils.setIndexedProperty(postSubService.getDatabase(), edgeToURI,GraphSail.PREDICATE_PROP, predicateProperty, IndexNames.EDGES); 
-		GraphUtils.setIndexedProperty(postSubService.getDatabase(), edgeToURI,GraphSail.CONTEXT_PROP, "U "+GraphUtils.GAEDO_CONTEXT, IndexNames.EDGES);
-		GraphUtils.setIndexedProperty(postSubService.getDatabase(), edgeToURI,GraphSail.CONTEXT_PROP + GraphSail.PREDICATE_PROP, 
-						edgeToURI.getProperty(GraphSail.CONTEXT_PROP).toString()+" "+
-						edgeToURI.getProperty(GraphSail.PREDICATE_PROP).toString(), IndexNames.EDGES);
+		GraphUtils.setIndexedProperty(postSubService.getDatabase(), edgeToURI,GraphUtils.PREDICATE_PROPERTY, predicateProperty, IndexNames.EDGES);
+		GraphUtils.setIndexedProperty(postSubService.getDatabase(), edgeToURI,GraphUtils.CONTEXT_PROPERTY, "U "+GraphUtils.GAEDO_CONTEXT, IndexNames.EDGES);
+		GraphUtils.setIndexedProperty(postSubService.getDatabase(), edgeToURI,GraphUtils.CONTEXT_PREDICATE_PROPERTY,
+						edgeToURI.getProperty(GraphUtils.CONTEXT_PROPERTY).toString()+" "+
+						edgeToURI.getProperty(GraphUtils.PREDICATE_PROPERTY).toString(), IndexNames.EDGES);
 
-		
+
 		Post loaded = postSubService.findById(newOne.id);
-		
+
 		assertThat(loaded.text, Is.is(BUG_31_URI));
 	}
 
-	@Test 
+	@Test
 	public void replacingACascadePersistValueWithNullShouldHaveNoEffect() {
 		final String METHOD_NAME = "replacingACascadePersistValueWithNullShouldHaveNoEffect";
 		PostSubClass newOne = new PostSubClass(0, METHOD_NAME,1.0f, State.PUBLIC, author);
@@ -160,11 +160,11 @@ public class GraphPostSubClassFinderServiceTest extends AbstractGraphPostSubClas
 		newOne.creator = author;
 		PostSubClass saved = getPostSubService().create(newOne);
 		assertThat(saved, Is.is(PostSubClass.class));
-		
+
 		saved.creator = null;
 		getPostSubService().update(saved);
-		PostSubClass loaded = ((IdBasedService<PostSubClass>) getPostSubService()).findById(saved.id); 
-		
+		PostSubClass loaded = ((IdBasedService<PostSubClass>) getPostSubService()).findById(saved.id);
+
 		assertThat(loaded.creator, Is.is(author));
 	}
 
