@@ -75,7 +75,7 @@ public class GraphPostFinderServiceTest extends AbstractGraphPostTest {
 		super(graph);
 	}
 
-	@Test 
+	@Test
 	public void searchPostByNote() {
 		Post noted2 = getPostService().find().matching(new QueryBuilder<PostInformer>() {
 
@@ -84,7 +84,7 @@ public class GraphPostFinderServiceTest extends AbstractGraphPostTest {
 				return informer.getNote().equalsTo(2.0);
 			}
 		}).getFirst();
-		
+
 		assertThat(noted2.id, Is.is(post2.id));
 	}
 
@@ -185,7 +185,7 @@ public class GraphPostFinderServiceTest extends AbstractGraphPostTest {
 		about = ((IdBasedService<Post>) getPostService()).findById(id);
 		assertThat(about, IsNull.notNullValue());
 		assertThat(about.text, Is.is(POST_TEXT+POST_TEXT));
-		
+
 	}
 
 	@Test
@@ -195,16 +195,16 @@ public class GraphPostFinderServiceTest extends AbstractGraphPostTest {
 		assertThat(u1.about, Is.is(Post.class));
 		assertThat(((Post) u1.about).text, IsNull.notNullValue());
 	}
-	
+
 	@Test
 	public void serializeAuthorAndPosts() throws IOException, ClassNotFoundException {
 		User u1 = getUserService().find().matching(new FindFirstUserByLogin()).getFirst();
 		assertThat(u1, IsNull.notNullValue());
 		assertThat(u1.posts.size(), IsNot.not(0));
-		
+
 		// Now serialize and deserialize a second version of author
 		User u2 = getUserService().find().matching(new FindFirstUserByLogin()).getFirst();
-		
+
 		// Serialize it
 		ByteArrayOutputStream bos = new ByteArrayOutputStream();
 		ObjectOutputStream output = new ObjectOutputStream(bos);
@@ -217,16 +217,16 @@ public class GraphPostFinderServiceTest extends AbstractGraphPostTest {
 		User u3 = (User) input.readObject();
 		input.close();
 		bis.close();
-		
+
 		assertThat(u3, Is.is(u1));
 		assertThat(u3.posts.size(), Is.is(u1.posts.size()));
 		assertThat(Proxy.isProxyClass(u3.posts.getClass()), Is.is(false));
 	}
-	
+
 	@Test
 	public void ensureMapIsWellLoaded() throws IOException, ClassNotFoundException {
 		Post first = getPostService().find().matching(new FindPostByNote(1)).getFirst();
-		
+
 		assertThat(first.id, Is.is(1L));
 		assertThat(first.annotations.size(), IsNot.not(0));
 		// Now serialize all to the second
@@ -242,14 +242,14 @@ public class GraphPostFinderServiceTest extends AbstractGraphPostTest {
 		assertThat(second.annotations, IsNull.notNullValue());
 		assertThat(second.annotations.size(), IsNot.not(0));
 	}
-	
+
 	@Test
 	public void ensureFindByIdWorksWell() {
 		if (getPostService() instanceof IdBasedService) {
 			IdBasedService idPosts = (IdBasedService) getPostService();
 			Post first = (Post) idPosts.findById(ID_POST_1);
 			assertThat(first, IsNull.notNullValue());
-		} else { 
+		} else {
 			Assert.fail("post service is an id based service, we all know that !");
 		}
 	}
@@ -257,13 +257,13 @@ public class GraphPostFinderServiceTest extends AbstractGraphPostTest {
 	@Test
 	public void ensureSerializableIsWellLoadedWithString() throws IOException, ClassNotFoundException {
 		Post first = getPostService().find().matching(new FindPostByNote(1)).getFirst();
-		
+
 		String string = "a string";
 		first.associatedData = string;
 		first = getPostService().update(first);
-		
+
 		first = getPostService().find().matching(new FindPostByNote(1)).getFirst();;
-		
+
 		assertThat(first.associatedData, Is.is((Serializable) string));
 	}
 
@@ -271,12 +271,12 @@ public class GraphPostFinderServiceTest extends AbstractGraphPostTest {
 	public void ensureSerializableIsWellLoadedWithPost() throws IOException, ClassNotFoundException {
 		Post first = getPostService().find().matching(new FindPostByNote(1)).getFirst();
 		User user = getUserService().find().matching(new FindFirstUserByLogin()).getFirst();
-		
+
 		first.associatedData = user;
 		first = getPostService().update(first);
-		
+
 		first = getPostService().find().matching(new FindPostByNote(1)).getFirst();;
-		
+
 		assertThat(first.associatedData, Is.is((Serializable) user));
 	}
 
@@ -284,13 +284,13 @@ public class GraphPostFinderServiceTest extends AbstractGraphPostTest {
 	public void ensureSerializableIsWellLoadedWithUnknownSerializable() throws IOException, ClassNotFoundException {
 		Post first = getPostService().find().matching(new FindPostByNote(1)).getFirst();
 		User user = getUserService().find().matching(new FindFirstUserByLogin()).getFirst();
-		
+
 		UnknownSerializable value = new UnknownSerializable().withText("a string");
 		first.associatedData = value;
 		first = getPostService().update(first);
-		
+
 		first = getPostService().find().matching(new FindPostByNote(1)).getFirst();;
-		
+
 		assertThat(first.associatedData, Is.is((Serializable) value));
 	}
 
@@ -363,7 +363,7 @@ public class GraphPostFinderServiceTest extends AbstractGraphPostTest {
 		newxONe = getPostService().create(newxONe);
 		try {
 			author = getUserService().find().matching(new QueryBuilder<UserInformer>() {
-	
+
 				@Override
 				public QueryExpression createMatchingExpression(UserInformer informer) {
 					return informer.getPassword().equalsTo(author.password);
@@ -371,7 +371,7 @@ public class GraphPostFinderServiceTest extends AbstractGraphPostTest {
 			}).getFirst();
 			assertThat(author.getLogin(), Is.is(initialLogin));
 			Tag official = getTagService().find().matching(new QueryBuilder<TagInformer>() {
-	
+
 				@Override
 				public QueryExpression createMatchingExpression(TagInformer informer) {
 					return informer.getId().equalsTo(tag1.getId());
@@ -382,7 +382,7 @@ public class GraphPostFinderServiceTest extends AbstractGraphPostTest {
 			getPostService().delete(newxONe);
 		}
 	}
-	
+
 	@Test
 	public void ensureMapWorksInAllCases() throws Exception {
 		Post newxONe = new Post().withText(SOME_NEW_TEXT).withAuthor(author);
@@ -439,23 +439,25 @@ public class GraphPostFinderServiceTest extends AbstractGraphPostTest {
 	public void allowExport() throws FileNotFoundException, RepositoryException, RDFHandlerException {
 		SailRepository repository = getRepository();
 		repository.initialize();
-		
+
 		File output = new File(environment.graphPath()+"export.rdf");
 		output.getParentFile().mkdirs();
 		RDFHandler handler = new NQuadsWriter(new OutputStreamWriter(new FileOutputStream(output), Charset.forName("UTF-8")));
 
 		repository.getConnection().export(handler, new URIImpl(GraphUtils.GAEDO_CONTEXT));
 	}
-	
+
 	/**
 	 * This test makes sure property rewriting works ok (by checking no {@link Post#text} property is written to graph.
 	 * As one may has notice, posts are created during @Before method and as a consequence are available before each test (including this one).
+	 *
+	 * Notice that, as edge index is now disabled, this test is of no use now.
 	 */
-	@Test 
+	@Test @Ignore
 	public void makeSureGraphDoesntContainAnyEdgeNamedText() {
 		if (environment.getGraph() instanceof IndexableGraph) {
 			IndexableGraph indexableGraph = (IndexableGraph) environment.getGraph();
-			
+
 			Index<Edge> edgeIndex = indexableGraph.getIndex(IndexNames.EDGES.getIndexName(), Edge.class);
 			assertThat(edgeIndex.count("label", "com.dooapp.gaedo.test.beans.base.Identified:id"), IsNot.not(Is.is(0l)));
 			assertThat(edgeIndex.count("label", Post.POST_TEXT_PROPERTY), IsNot.not(Is.is(0l)));

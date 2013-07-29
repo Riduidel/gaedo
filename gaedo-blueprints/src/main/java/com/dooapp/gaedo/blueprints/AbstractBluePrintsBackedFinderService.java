@@ -335,7 +335,7 @@ public abstract class AbstractBluePrintsBackedFinderService<GraphClass extends G
 	 *         the the instance value
 	 * @see GraphUtils#getIdVertexId(IndexableGraph, Class, Object, Property)
 	 */
-	String getIdVertexId(DataType object, boolean requiresIdGeneration) {
+	public String getIdVertexId(DataType object, boolean requiresIdGeneration) {
 		if (requiresIdGeneration) {
 			strategy.generateValidIdFor(object);
 		}

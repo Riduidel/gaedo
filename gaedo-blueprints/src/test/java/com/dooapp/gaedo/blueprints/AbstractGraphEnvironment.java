@@ -15,6 +15,7 @@ import com.dooapp.gaedo.extensions.views.InViewService;
 import com.dooapp.gaedo.finders.FinderCrudService;
 import com.dooapp.gaedo.finders.Informer;
 import com.dooapp.gaedo.finders.repository.InheriterRepository;
+import com.dooapp.gaedo.finders.repository.NoSuchServiceException;
 import com.dooapp.gaedo.finders.repository.ServiceBackedFieldLocator;
 import com.dooapp.gaedo.finders.repository.SimpleServiceRepository;
 import com.dooapp.gaedo.finders.root.BasicFieldInformerLocator;
@@ -126,7 +127,16 @@ public abstract class AbstractGraphEnvironment<GraphType extends Graph> {
 	protected abstract GraphType createGraph(GraphProvider graphProvider);
 
 	public final <Type, InformerType extends Informer<Type>> InViewService<Type, InformerType, SortedSet<String>> createServiceFor(Class<Type> beanClass, Class<InformerType> informerClass, StrategyType strategy) {
-		if(!getBag().serviceRrepository.containsKey(beanClass)) {
+		// It's an inheriterrepository ! so this call may return true even for a class which is not in repository (but which parent class is)
+//		if(!getBag().serviceRrepository.containsKey(beanClass)) {
+		
+		boolean serviceExists = false;
+		try {
+			serviceExists = getBag().serviceRrepository.get(beanClass).getContainedClass().equals(beanClass);
+		} catch(NoSuchServiceException e) {
+			
+		}
+		if(!serviceExists) {
 			FinderCrudService<Type, InformerType> created = doCreateServiceFor(beanClass, informerClass, strategy);
 			getBag().serviceRrepository.add(created);
 		}

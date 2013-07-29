@@ -40,6 +40,10 @@ public abstract class AbstractGraphPostSubClassTest extends AbstractGraphTest {
 		super(environment);
 	}
 
+	public AbstractGraphPostSubClassTest(GraphProvider graphProvider) {
+		super(graphProvider);
+	}
+
 	@Before
 	public void loadService() throws Exception {
 		if (logger.isLoggable(Level.FINE)) {

@@ -22,17 +22,24 @@ public class TestUtils {
 	 */
 	static {
 		Logger logger = Logger.getLogger("");
-		logger.setLevel(Level.ALL);
+//		logger.setLevel(Level.ALL);
 		Handler[] handlers = logger.getHandlers();
 		for(Handler h : handlers) {
 			h.setLevel(Level.ALL);
 		}
 	}
 
+	private static final class IndexableEnvironmentProvider implements EnvironmentCreator {
+		@Override
+		public AbstractGraphEnvironment<?> environmentFor(GraphProvider o) {
+			return new IndexableGraphEnvironment(o);
+		}
+	}
+
 	private static interface EnvironmentCreator {
 
-		Object environmentFor(GraphProvider o);
-		
+		AbstractGraphEnvironment<?> environmentFor(GraphProvider o);
+
 	}
 	public static final String A = "A";
 	public static final String B = "B";
@@ -45,7 +52,7 @@ public class TestUtils {
 	public static final long ABOUT_ID = 10;
 	public static final String USER_PASSWORD = "user password";
 	public static final String USER_LOGIN = "user login";
-	
+
 
 	/**
 	 * Get directory name for indexable graph storage
@@ -73,31 +80,35 @@ public class TestUtils {
 //		returned.add(new Object[] { "neo4jgraph", new Neo4j(),1000000000000l});
 		return returned;
 	}
-	
+
+	/**
+	 * One elemtn collection containing only neo4j
+	 * @return
+	 */
 	public static Collection<GraphProvider> neo4j() {
 		Collection<GraphProvider> returned = new LinkedList<GraphProvider>();
 		returned.add(new Neo4j());
 		return returned;
 	}
-	
+
 	public static Collection<GraphProvider> tinker() {
 		Collection<GraphProvider> returned = new LinkedList<GraphProvider>();
 		returned.add(new Tinker());
 		return returned;
 	}
-	
+
 	public static Collection<GraphProvider> providers() {
 		Collection<GraphProvider> returned = new LinkedList<GraphProvider>();
 		returned.addAll(neo4j());
 		returned.addAll(tinker());
 		return returned;
-		
+
 	}
-	
+
 	public static Collection<Object[]> simpleTestProviders() {
 		return simpleTestProviders(providers());
 	}
-	
+
 	/**
 	 * Transform providers into their arrays counterpart for encapsulation
 	 * @param providers
@@ -119,6 +130,10 @@ public class TestUtils {
 		return environmentsFor(simpleTestProviders());
 	}
 
+	public static AbstractGraphEnvironment<?> indexable(GraphProvider provider) {
+		return new IndexableEnvironmentProvider().environmentFor(provider);
+	}
+
 	/**
 	 * Create all required environments by replacing {@link GraphProvider} instance with pairs
 	 * @param loadTestProviders
@@ -127,25 +142,13 @@ public class TestUtils {
 	public static List<Object[]> environmentsFor(Collection<Object[]> providers) {
 		List<Object[]> returned = new LinkedList<Object[]>();
 		for(Object[] p : providers) {
-			returned.add(covnertProviderToEnvironment(p, new EnvironmentCreator() {
-
-				@Override
-				public Object environmentFor(GraphProvider o) {
-					return new IndexableGraphEnvironment(o);
-				}
-			}).toArray());
-//			returned.add(covnertProviderToEnvironment(p, new EnvironmentCreator() {
-//
-//				@Override
-//				public Object environmentFor(GraphProvider o) {
-//					return new SailGraphEnvironment(o);
-//				}
-//			}).toArray());
+			returned.add(convertProviderToEnvironment(p, new IndexableEnvironmentProvider()).toArray());
+//			returned.add(convertProviderToEnvironment(p, new SailEnvironmentProvider()).toArray());
 		}
 		return returned;
 	}
 
-	private static Collection<Object> covnertProviderToEnvironment(Object[] p, EnvironmentCreator creator) {
+	private static Collection<Object> convertProviderToEnvironment(Object[] p, EnvironmentCreator creator) {
 		Collection<Object> temporary = new LinkedList<Object>();
 		for(Object o : p) {
 			if(o instanceof GraphProvider) {

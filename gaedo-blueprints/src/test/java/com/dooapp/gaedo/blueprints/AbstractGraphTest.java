@@ -22,6 +22,14 @@ public class AbstractGraphTest  {
 		this.environment = environment;
 	}
 
+	/**
+	 * Perform that test using an IndexableGraph, as given by {@link TestUtils#indexable(GraphProvider)}
+	 * @param graphProvider
+	 */
+	public AbstractGraphTest(GraphProvider graphProvider) {
+		this(TestUtils.indexable(graphProvider));
+	}
+
 	@Before
 	public void loadService() throws Exception {
 		environment.loadService();

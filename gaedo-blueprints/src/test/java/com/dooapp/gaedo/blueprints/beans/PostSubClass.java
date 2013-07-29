@@ -13,7 +13,7 @@ import com.dooapp.gaedo.test.beans.User;
 public class PostSubClass extends Post {
 	
 	public static enum AnotherStateForBug26 {
-		PUBLIC
+		PUBLIC, FAMILY
 		
 	}
 
