@@ -455,13 +455,5 @@ public class GraphPostFinderServiceTest extends AbstractGraphPostTest {
 	 */
 	@Test @Ignore
 	public void makeSureGraphDoesntContainAnyEdgeNamedText() {
-		if (environment.getGraph() instanceof IndexableGraph) {
-			IndexableGraph indexableGraph = (IndexableGraph) environment.getGraph();
-
-			Index<Edge> edgeIndex = indexableGraph.getIndex(IndexNames.EDGES.getIndexName(), Edge.class);
-			assertThat(edgeIndex.count("label", "com.dooapp.gaedo.test.beans.base.Identified:id"), IsNot.not(Is.is(0l)));
-			assertThat(edgeIndex.count("label", Post.POST_TEXT_PROPERTY), IsNot.not(Is.is(0l)));
-			assertThat(edgeIndex.count("label", "Post.text"), Is.is(0l));
-		}
 	}
 }
