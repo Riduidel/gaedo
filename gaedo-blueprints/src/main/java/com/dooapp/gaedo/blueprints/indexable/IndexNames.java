@@ -28,7 +28,7 @@ public enum IndexNames {
 	/**
 	 * Indicates this index can be used. This is a side effect of https://github.com/Riduidel/gaedo/issues/59
 	 */
-	private boolean usable;
+	private final boolean usable;
 
 	private IndexNames(String indexName, Class<? extends Element> indexed, boolean usable) {
 		this.indexName = indexName;
@@ -67,5 +67,14 @@ public enum IndexNames {
 				returned.add(index);
 		}
 		return returned;
+	}
+
+	/**
+	 * @return the usable
+	 * @category getter
+	 * @category usable
+	 */
+	public boolean isUsable() {
+		return usable;
 	}
 }

@@ -467,9 +467,9 @@ public class GraphUtils {
 
 	/**
 	 * Remove given element from index by removing all bindings from its properties names to its properties values
-	 * @param database
-	 * @param existing
-	 * @param indexName
+	 * @param database graph on which remove operation will be performed (must be indexable)
+	 * @param existing element to remove index entries
+	 * @param indexName name of index associated to element
 	 */
 	public static <Type extends Element> void removeFromIndex(Graph database, Type existing, IndexNames indexName) {
 		if (database instanceof IndexableGraph) {
