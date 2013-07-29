@@ -55,12 +55,6 @@ public class GraphUtils {
 
 	private static final Logger logger = Logger.getLogger(GraphUtils.class.getName());
 
-	public static String asSailProperty(String context) {
-		if (SemanticGraphConstants.NULL_CONTEXT_NATIVE.equals(context))
-			return context;
-		return SemanticGraphConstants.URI_PREFIX + " " + context;
-	}
-
 	/**
 	 * Generate edge name from property infos. Notice generated edge name will
 	 * first be searched in property annotations, and only if none compatile
@@ -362,56 +356,6 @@ public class GraphUtils {
 		sOut.append("\n").append("toVertex (aka inVertex) => ").append(toString(existing.getVertex(Direction.IN)));
 		sOut.append("\n}}}");
 		return sOut.toString();
-	}
-
-	/**
-	 * Find all contexts in given edge by looking, in
-	 * {@link SemanticGraphConstants#CONTEXT_PROPERTY} property, what are the contexts. These
-	 * contexts are extracted by iteratively calling {@link SemanticGraphConstants#CONTEXTS_MATCHER}
-	 * and {@link Matcher#find(int)} method.
-	 *
-	 * @param edge
-	 *            input edge
-	 * @return collection of declared contexts.
-	 */
-	public static Collection<String> getContextsOf(Edge edge) {
-		String contextsString = edge.getProperty(SemanticGraphConstants.CONTEXT_PROPERTY).toString();
-		Matcher matcher = SemanticGraphConstants.CONTEXTS_MATCHER.matcher(contextsString);
-		Collection<String> output = new LinkedList<String>();
-		int character = 0;
-		while (matcher.find(character)) {
-			if (SemanticGraphConstants.NULL_CONTEXT_NATIVE.equals(matcher.group(1))) {
-				// the null context is a low-level view. It should be associated
-				// with "no named graph" (that's to say an empty collection).
-				return output;
-			} else if (matcher.group(1).startsWith(SemanticGraphConstants.URI_PREFIX + "")) {
-				output.add(matcher.group(2));
-			}
-			character = matcher.end();
-		}
-		return output;
-	}
-
-	/**
-	 * Check if edge has the required named graphs list
-	 *
-	 * @param e
-	 *            edge to test
-	 * @param namedGraphs
-	 *            named graphs the edge must have
-	 * @return true if any of edge contexts is in namedGraphs. This
-	 *         implementation differs from previous one but, as stated in
-	 */
-	public static boolean isInNamedGraphs(Edge e, Collection<String> namedGraphs) {
-		if (namedGraphs.isEmpty())
-			return true;
-		Collection<String> contexts = getContextsOf(e);
-		// Only analyse edge if it is in named graph, and only in named graphs
-		for (String s : contexts) {
-			if (namedGraphs.contains(s))
-				return true;
-		}
-		return false;
 	}
 
 	/**

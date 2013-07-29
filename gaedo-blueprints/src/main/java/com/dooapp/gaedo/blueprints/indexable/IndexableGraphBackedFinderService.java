@@ -1,6 +1,5 @@
 package com.dooapp.gaedo.blueprints.indexable;
 
-import java.util.Collection;
 import java.util.Iterator;
 import java.util.SortedSet;
 import java.util.UUID;
@@ -13,7 +12,6 @@ import com.dooapp.gaedo.blueprints.AbstractBluePrintsBackedFinderService;
 import com.dooapp.gaedo.blueprints.GraphUtils;
 import com.dooapp.gaedo.blueprints.Kind;
 import com.dooapp.gaedo.blueprints.Properties;
-import com.dooapp.gaedo.blueprints.SemanticGraphConstants;
 import com.dooapp.gaedo.blueprints.strategies.GraphMappingStrategy;
 import com.dooapp.gaedo.blueprints.strategies.StrategyType;
 import com.dooapp.gaedo.blueprints.strategies.UnableToGetVertexTypeException;
@@ -218,12 +216,6 @@ public class IndexableGraphBackedFinderService<DataType, InformerType extends In
 			// obtain vertex for type
 			Vertex classVertex = classTransformer.getVertexFor(getDriver(), valueClass, CascadeType.PERSIST);
 			Edge toType = getDriver().createEdgeFor(returned, classVertex, TypeProperty.INSTANCE);
-			/*
-			 * Make sure literals are literals by changing that particular edge
-			 * context to a null value. Notice we COULD have stored literal type
-			 * as a property, instead of using
-			 */
-			setIndexedProperty(toType, SemanticGraphConstants.CONTEXT_PROPERTY, GraphUtils.asSailProperty(GraphUtils.GAEDO_CONTEXT), IndexNames.EDGES);
 		}
 		// Yup, this if has no default else statement, and that's normal.
 		if (logger.isLoggable(Level.FINE)) {
@@ -252,24 +244,6 @@ public class IndexableGraphBackedFinderService<DataType, InformerType extends In
 		Edge returned = database.addEdge(getEdgeId(fromVertex, toVertex, property), fromVertex, toVertex, edgeNameFor);
 		// Did you know labels are not edges properties ? Absolutely stunning discovery !
 //		database.getIndex(IndexNames.EDGES.getIndexName(), Edge.class).put("label", edgeNameFor, returned);
-		String predicateProperty = GraphUtils.asSailProperty(GraphUtils.getEdgeNameFor(property));
-		setIndexedProperty(returned, SemanticGraphConstants.PREDICATE_PROPERTY, predicateProperty, IndexNames.EDGES);
-		Collection<String> contexts = getLens();
-		StringBuilder contextPropertyBuilder = new StringBuilder();
-		if (contexts.size() == 0) {
-			contextPropertyBuilder.append(GraphUtils.asSailProperty(SemanticGraphConstants.NULL_CONTEXT_NATIVE));
-		} else {
-			for (String context : contexts) {
-				if (contextPropertyBuilder.length() > 0)
-					contextPropertyBuilder.append(" ");
-				contextPropertyBuilder.append(GraphUtils.asSailProperty(context));
-
-			}
-		}
-		String contextProperty = contextPropertyBuilder.toString();
-		setIndexedProperty(returned, SemanticGraphConstants.CONTEXT_PROPERTY, contextProperty, IndexNames.EDGES);
-		// Finally build the context-predicate property by concatenating both
-		setIndexedProperty(returned, SemanticGraphConstants.CONTEXT_PREDICATE_PROPERTY, contextProperty + " " + predicateProperty, IndexNames.EDGES);
 
 		if (logger.isLoggable(Level.FINE)) {
 			logger.log(Level.FINE, "created edge "+GraphUtils.toString(returned));

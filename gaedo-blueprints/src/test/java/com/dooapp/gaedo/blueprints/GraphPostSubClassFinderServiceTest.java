@@ -137,12 +137,6 @@ public class GraphPostSubClassFinderServiceTest extends AbstractGraphPostSubClas
 		}
 
 		Edge edgeToURI = environment.getGraph().addEdge(textPropertyName, postVertex, valueVertex, textPropertyName);
-		String predicateProperty = GraphUtils.asSailProperty(textPropertyName);
-		GraphUtils.setIndexedProperty(postSubService.getDatabase(), edgeToURI,SemanticGraphConstants.PREDICATE_PROPERTY, predicateProperty, IndexNames.EDGES);
-		GraphUtils.setIndexedProperty(postSubService.getDatabase(), edgeToURI,SemanticGraphConstants.CONTEXT_PROPERTY, "U "+GraphUtils.GAEDO_CONTEXT, IndexNames.EDGES);
-		GraphUtils.setIndexedProperty(postSubService.getDatabase(), edgeToURI,SemanticGraphConstants.CONTEXT_PREDICATE_PROPERTY,
-						edgeToURI.getProperty(SemanticGraphConstants.CONTEXT_PROPERTY).toString()+" "+
-						edgeToURI.getProperty(SemanticGraphConstants.PREDICATE_PROPERTY).toString(), IndexNames.EDGES);
 
 
 		Post loaded = postSubService.findById(newOne.id);

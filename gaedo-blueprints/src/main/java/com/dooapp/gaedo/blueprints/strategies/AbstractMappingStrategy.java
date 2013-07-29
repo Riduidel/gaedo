@@ -120,7 +120,7 @@ public abstract class AbstractMappingStrategy<DataType> implements GraphMappingS
 
 	/**
 	 * Default implementation will call subclass {@link #addDefaultSearchToAndTest(AndVertexTest)} on an {@link AndVertexTest} that may be created on the fly.
-	 * 
+	 *
 	 * @param vertexTest vertex test to add default search to
 	 * @return a vertex test with default search installed
 	 */
@@ -150,9 +150,7 @@ public abstract class AbstractMappingStrategy<DataType> implements GraphMappingS
 		Iterable<Edge> allEdges = rootVertex.getEdges(Direction.OUT, edgeNameFor);
 		Collection<Edge> returned = new LinkedList<Edge>();
 		for(Edge e : allEdges) {
-			if(GraphUtils.isInNamedGraphs(e, service.getLens())) {
-				returned.add(e);
-			}
+			returned.add(e);
 		}
 		return returned;
 	}
