@@ -3,6 +3,7 @@ package com.dooapp.gaedo.blueprints.transformers;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import com.dooapp.gaedo.blueprints.GraphUtils;
 import com.dooapp.gaedo.blueprints.Kind;
 
 public class EnumLiteralTransformer extends AbstractLiteralTransformer<Enum> implements LiteralTransformer<Enum> {
@@ -26,7 +27,7 @@ public class EnumLiteralTransformer extends AbstractLiteralTransformer<Enum> imp
 	@Override
 	public boolean canHandle(ClassLoader classLoader, String effectiveType) {
 		try {
-			return Enum.class.isAssignableFrom(classLoader.loadClass(effectiveType));
+			return Enum.class.isAssignableFrom(GraphUtils.loadClass(classLoader, effectiveType));
 		} catch (ClassNotFoundException e) {
 //			throw new UnsupportedOperationException("class "+effectiveType+" isn't considered to be an enum ... Maybe is there any classloader issue hidden there", e);
 			if (logger.isLoggable(Level.WARNING)) {

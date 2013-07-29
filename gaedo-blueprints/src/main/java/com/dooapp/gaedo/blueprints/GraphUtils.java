@@ -181,7 +181,7 @@ public class GraphUtils {
 				LiteralTransformer transformer = Literals.get(classLoader, effectiveType);
 				return transformer.loadObject(driver, classLoader, effectiveType, key);
 			} else {
-				Class<?> type = classLoader.loadClass(effectiveType);
+				Class<?> type = loadClass(classLoader, effectiveType);
 				if (Tuples.containsKey(type) && !repository.containsKey(type)) {
 					// Tuples are handled the object way (easier, but more
 					// dangerous
@@ -192,7 +192,27 @@ public class GraphUtils {
 				}
 			}
 		} catch (Exception e) {
-			throw new UnableToCreateException(effectiveType, e);
+			throw UnableToCreateException.dueTo(key, effectiveType, e);
+		}
+	}
+
+	/**
+	 * Load given class if possible.
+	 * If not, a clear message should be output (or at least a special exception should be used)
+	 * @param classLoader
+	 * @param effectiveType the type we want to load
+	 * @return
+	 * @throws ClassNotFoundException
+	 */
+	public static Class<?> loadClass(ClassLoader classLoader, String effectiveType) throws ClassNotFoundException {
+		try {
+			Class<?> returned = classLoader.loadClass(effectiveType);
+			if(returned==null) {
+				throw new UnableToLoadClassException("unable to load class \""+effectiveType+"\"");
+			}
+			return returned;
+		} catch(Exception e) {
+			throw new UnableToLoadClassException("unable to load class \""+effectiveType+"\"", e);
 		}
 	}
 

@@ -47,17 +47,16 @@ public abstract class AbstractLiteralTransformer<Type> {
 			Class valueClass = Class.forName(effectiveType);
 			return loadObject(driver, valueClass, key);
 		} catch (ClassNotFoundException e) {
-			throw new UnableToCreateException(effectiveType, e);
+			throw UnableToCreateException.dueTo(key, effectiveType, e);
 		}
 	}
 
 	public Object loadObject(GraphDatabaseDriver driver, ClassLoader classLoader, String effectiveType, Vertex key) {
 		try {
-			Class<?> loadedClass;
-			loadedClass = classLoader.loadClass(resolveType(effectiveType));
+			Class<?> loadedClass = GraphUtils.loadClass(classLoader, effectiveType);
 			return loadObject(driver, loadedClass, key);
 		} catch (ClassNotFoundException e) {
-			throw new UnableToCreateException(effectiveType, e);
+			throw UnableToCreateException.dueTo(key, effectiveType, e);
 		}
 	}
 
@@ -116,10 +115,10 @@ public abstract class AbstractLiteralTransformer<Type> {
 	protected abstract Class getValueClass(Type value);
 
 	public boolean isVertexEqualsTo(GraphDatabaseDriver driver, Vertex currentVertex, Type expected) {
-		return ((expected==null && currentVertex==null) || 
-						(expected!=null && getVertexValue(expected).equals(driver.getValue(currentVertex)))); 
+		return ((expected==null && currentVertex==null) ||
+						(expected!=null && getVertexValue(expected).equals(driver.getValue(currentVertex))));
 	}
-	
+
 	public Kind getKind() {
 		return Kind.literal;
 	}
