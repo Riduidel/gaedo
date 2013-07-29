@@ -9,7 +9,6 @@ import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
@@ -32,7 +31,6 @@ import com.tinkerpop.blueprints.Graph;
 import com.tinkerpop.blueprints.Index;
 import com.tinkerpop.blueprints.IndexableGraph;
 import com.tinkerpop.blueprints.Vertex;
-import com.tinkerpop.blueprints.oupls.sail.GraphSail;
 
 public class GraphUtils {
 
@@ -55,49 +53,12 @@ public class GraphUtils {
 	 */
 	public static final String GAEDO_HIDDEN_CONTEXT = GAEDO_PREFIX + "hidden";
 
-	/**
-	 * Compiled pattern used to match strings such as
-	 *
-	 * <pre>
-	 * U https://github.com/Riduidel/gaedo/visible  U http://purl.org/dc/elements/1.1/description
-	 * </pre>
-	 *
-	 * or
-	 *
-	 * <pre>
-	 * N U http://purl.org/dc/elements/1.1/description
-	 * </pre>
-	 *
-	 * or even
-	 *
-	 * <pre>
-	 * N
-	 * </pre>
-	 *
-	 * You know why I do such a pattern matching ? Because sail graph named
-	 * graph definintion goes by concatenating contexts URI in edges properties.
-	 * This is really douchebag code !
-	 */
-	public static final Pattern CONTEXTS_MATCHER = Pattern.compile("(N|U ([\\S]+))+");
-
-	/**
-	 * Context property, used for named graphs.
-	 */
-	public static final String CONTEXT_PROPERTY = GraphSail.CONTEXT_PROP;
-
-	/**
-	 * Predicate property, declared in a way that totally matches Sail graph one
-	 */
-	public static final String PREDICATE_PROPERTY = GraphSail.PREDICATE_PROP;
-
-	public static final String CONTEXT_PREDICATE_PROPERTY = CONTEXT_PROPERTY + PREDICATE_PROPERTY;
-
 	private static final Logger logger = Logger.getLogger(GraphUtils.class.getName());
 
 	public static String asSailProperty(String context) {
-		if (GraphSail.NULL_CONTEXT_NATIVE.equals(context))
+		if (SemanticGraphConstants.NULL_CONTEXT_NATIVE.equals(context))
 			return context;
-		return GraphSail.URI_PREFIX + " " + context;
+		return SemanticGraphConstants.URI_PREFIX + " " + context;
 	}
 
 	/**
@@ -405,8 +366,8 @@ public class GraphUtils {
 
 	/**
 	 * Find all contexts in given edge by looking, in
-	 * {@link GraphUtils#CONTEXT_PROPERTY} property, what are the contexts. These
-	 * contexts are extracted by iteratively calling {@link #CONTEXTS_MATCHER}
+	 * {@link SemanticGraphConstants#CONTEXT_PROPERTY} property, what are the contexts. These
+	 * contexts are extracted by iteratively calling {@link SemanticGraphConstants#CONTEXTS_MATCHER}
 	 * and {@link Matcher#find(int)} method.
 	 *
 	 * @param edge
@@ -414,16 +375,16 @@ public class GraphUtils {
 	 * @return collection of declared contexts.
 	 */
 	public static Collection<String> getContextsOf(Edge edge) {
-		String contextsString = edge.getProperty(GraphUtils.CONTEXT_PROPERTY).toString();
-		Matcher matcher = CONTEXTS_MATCHER.matcher(contextsString);
+		String contextsString = edge.getProperty(SemanticGraphConstants.CONTEXT_PROPERTY).toString();
+		Matcher matcher = SemanticGraphConstants.CONTEXTS_MATCHER.matcher(contextsString);
 		Collection<String> output = new LinkedList<String>();
 		int character = 0;
 		while (matcher.find(character)) {
-			if (GraphSail.NULL_CONTEXT_NATIVE.equals(matcher.group(1))) {
+			if (SemanticGraphConstants.NULL_CONTEXT_NATIVE.equals(matcher.group(1))) {
 				// the null context is a low-level view. It should be associated
 				// with "no named graph" (that's to say an empty collection).
 				return output;
-			} else if (matcher.group(1).startsWith(GraphSail.URI_PREFIX + "")) {
+			} else if (matcher.group(1).startsWith(SemanticGraphConstants.URI_PREFIX + "")) {
 				output.add(matcher.group(2));
 			}
 			character = matcher.end();

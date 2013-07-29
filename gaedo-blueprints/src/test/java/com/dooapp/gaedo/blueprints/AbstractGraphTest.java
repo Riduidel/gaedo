@@ -2,7 +2,6 @@ package com.dooapp.gaedo.blueprints;
 
 import org.junit.After;
 import org.junit.Before;
-import org.openrdf.repository.sail.SailRepository;
 
 import com.dooapp.gaedo.blueprints.beans.PostSubClass;
 import com.dooapp.gaedo.blueprints.beans.PostSubClassInformer;
@@ -15,7 +14,7 @@ import com.dooapp.gaedo.test.beans.User;
 import com.dooapp.gaedo.test.beans.UserInformer;
 
 public class AbstractGraphTest  {
-	
+
 	protected final AbstractGraphEnvironment<?> environment;
 
 	public AbstractGraphTest(AbstractGraphEnvironment<?> environment) {
@@ -79,11 +78,6 @@ public class AbstractGraphTest  {
 	 */
 	public FinderCrudService<User, UserInformer> getUserService() {
 		return environment.getUserService();
-	}
-
-
-	protected SailRepository getRepository() {
-		return environment.getSailRepository();
 	}
 
 }

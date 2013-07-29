@@ -2,8 +2,6 @@ package com.dooapp.gaedo.blueprints.indexable;
 
 import java.util.SortedSet;
 
-import org.openrdf.repository.sail.SailRepository;
-
 import com.dooapp.gaedo.blueprints.AbstractGraphEnvironment;
 import com.dooapp.gaedo.blueprints.GraphProvider;
 import com.dooapp.gaedo.blueprints.TestUtils;
@@ -25,23 +23,17 @@ public class IndexableGraphEnvironment extends AbstractGraphEnvironment<Indexabl
 
 	@Override
 	public <Type, InformerType extends Informer<Type>> InViewService<Type, InformerType, SortedSet<String>> doCreateServiceFor(
-					Class<Type> beanClass, 
-					Class<InformerType> informerClass, 
+					Class<Type> beanClass,
+					Class<InformerType> informerClass,
 					StrategyType strategy)  {
 		return new IndexableGraphBackedFinderService<Type, InformerType>(
-						getGraph(), 
+						getGraph(),
 						beanClass,
 						informerClass,
-						getInformerFactory(), 
+						getInformerFactory(),
 						getServiceRrepository(),
 						getProvider(),
 						strategy);
-	}
-
-	@Override
-	public SailRepository getSailRepository() {
-		return null;
-//		return new SailRepository(new GraphSail<IndexableGraph>(getGraph()));
 	}
 
 	@Override

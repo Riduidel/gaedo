@@ -25,7 +25,6 @@ import com.dooapp.gaedo.test.beans.State;
 import com.tinkerpop.blueprints.Direction;
 import com.tinkerpop.blueprints.Edge;
 import com.tinkerpop.blueprints.Vertex;
-import com.tinkerpop.blueprints.oupls.sail.GraphSail;
 
 import static com.dooapp.gaedo.blueprints.TestUtils.simpleTest;
 
@@ -139,11 +138,11 @@ public class GraphPostSubClassFinderServiceTest extends AbstractGraphPostSubClas
 
 		Edge edgeToURI = environment.getGraph().addEdge(textPropertyName, postVertex, valueVertex, textPropertyName);
 		String predicateProperty = GraphUtils.asSailProperty(textPropertyName);
-		GraphUtils.setIndexedProperty(postSubService.getDatabase(), edgeToURI,GraphUtils.PREDICATE_PROPERTY, predicateProperty, IndexNames.EDGES);
-		GraphUtils.setIndexedProperty(postSubService.getDatabase(), edgeToURI,GraphUtils.CONTEXT_PROPERTY, "U "+GraphUtils.GAEDO_CONTEXT, IndexNames.EDGES);
-		GraphUtils.setIndexedProperty(postSubService.getDatabase(), edgeToURI,GraphUtils.CONTEXT_PREDICATE_PROPERTY,
-						edgeToURI.getProperty(GraphUtils.CONTEXT_PROPERTY).toString()+" "+
-						edgeToURI.getProperty(GraphUtils.PREDICATE_PROPERTY).toString(), IndexNames.EDGES);
+		GraphUtils.setIndexedProperty(postSubService.getDatabase(), edgeToURI,SemanticGraphConstants.PREDICATE_PROPERTY, predicateProperty, IndexNames.EDGES);
+		GraphUtils.setIndexedProperty(postSubService.getDatabase(), edgeToURI,SemanticGraphConstants.CONTEXT_PROPERTY, "U "+GraphUtils.GAEDO_CONTEXT, IndexNames.EDGES);
+		GraphUtils.setIndexedProperty(postSubService.getDatabase(), edgeToURI,SemanticGraphConstants.CONTEXT_PREDICATE_PROPERTY,
+						edgeToURI.getProperty(SemanticGraphConstants.CONTEXT_PROPERTY).toString()+" "+
+						edgeToURI.getProperty(SemanticGraphConstants.PREDICATE_PROPERTY).toString(), IndexNames.EDGES);
 
 
 		Post loaded = postSubService.findById(newOne.id);

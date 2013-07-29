@@ -13,6 +13,7 @@ import com.dooapp.gaedo.blueprints.AbstractBluePrintsBackedFinderService;
 import com.dooapp.gaedo.blueprints.GraphUtils;
 import com.dooapp.gaedo.blueprints.Kind;
 import com.dooapp.gaedo.blueprints.Properties;
+import com.dooapp.gaedo.blueprints.SemanticGraphConstants;
 import com.dooapp.gaedo.blueprints.strategies.GraphMappingStrategy;
 import com.dooapp.gaedo.blueprints.strategies.StrategyType;
 import com.dooapp.gaedo.blueprints.strategies.UnableToGetVertexTypeException;
@@ -32,7 +33,6 @@ import com.tinkerpop.blueprints.Element;
 import com.tinkerpop.blueprints.Index;
 import com.tinkerpop.blueprints.IndexableGraph;
 import com.tinkerpop.blueprints.Vertex;
-import com.tinkerpop.blueprints.oupls.sail.GraphSail;
 
 /**
  * Indexable graph backed version of finder service.
@@ -223,7 +223,7 @@ public class IndexableGraphBackedFinderService<DataType, InformerType extends In
 			 * context to a null value. Notice we COULD have stored literal type
 			 * as a property, instead of using
 			 */
-			setIndexedProperty(toType, GraphUtils.CONTEXT_PROPERTY, GraphUtils.asSailProperty(GraphUtils.GAEDO_CONTEXT), IndexNames.EDGES);
+			setIndexedProperty(toType, SemanticGraphConstants.CONTEXT_PROPERTY, GraphUtils.asSailProperty(GraphUtils.GAEDO_CONTEXT), IndexNames.EDGES);
 		}
 		// Yup, this if has no default else statement, and that's normal.
 		if (logger.isLoggable(Level.FINE)) {
@@ -253,11 +253,11 @@ public class IndexableGraphBackedFinderService<DataType, InformerType extends In
 		// Did you know labels are not edges properties ? Absolutely stunning discovery !
 //		database.getIndex(IndexNames.EDGES.getIndexName(), Edge.class).put("label", edgeNameFor, returned);
 		String predicateProperty = GraphUtils.asSailProperty(GraphUtils.getEdgeNameFor(property));
-		setIndexedProperty(returned, GraphUtils.PREDICATE_PROPERTY, predicateProperty, IndexNames.EDGES);
+		setIndexedProperty(returned, SemanticGraphConstants.PREDICATE_PROPERTY, predicateProperty, IndexNames.EDGES);
 		Collection<String> contexts = getLens();
 		StringBuilder contextPropertyBuilder = new StringBuilder();
 		if (contexts.size() == 0) {
-			contextPropertyBuilder.append(GraphUtils.asSailProperty(GraphSail.NULL_CONTEXT_NATIVE));
+			contextPropertyBuilder.append(GraphUtils.asSailProperty(SemanticGraphConstants.NULL_CONTEXT_NATIVE));
 		} else {
 			for (String context : contexts) {
 				if (contextPropertyBuilder.length() > 0)
@@ -267,9 +267,9 @@ public class IndexableGraphBackedFinderService<DataType, InformerType extends In
 			}
 		}
 		String contextProperty = contextPropertyBuilder.toString();
-		setIndexedProperty(returned, GraphUtils.CONTEXT_PROPERTY, contextProperty, IndexNames.EDGES);
+		setIndexedProperty(returned, SemanticGraphConstants.CONTEXT_PROPERTY, contextProperty, IndexNames.EDGES);
 		// Finally build the context-predicate property by concatenating both
-		setIndexedProperty(returned, GraphUtils.CONTEXT_PREDICATE_PROPERTY, contextProperty + " " + predicateProperty, IndexNames.EDGES);
+		setIndexedProperty(returned, SemanticGraphConstants.CONTEXT_PREDICATE_PROPERTY, contextProperty + " " + predicateProperty, IndexNames.EDGES);
 
 		if (logger.isLoggable(Level.FINE)) {
 			logger.log(Level.FINE, "created edge "+GraphUtils.toString(returned));

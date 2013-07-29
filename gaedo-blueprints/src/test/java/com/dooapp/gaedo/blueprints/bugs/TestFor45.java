@@ -14,6 +14,7 @@ import com.dooapp.gaedo.blueprints.AbstractBluePrintsBackedFinderService;
 import com.dooapp.gaedo.blueprints.AbstractGraphEnvironment;
 import com.dooapp.gaedo.blueprints.AbstractGraphPostTest;
 import com.dooapp.gaedo.blueprints.GraphUtils;
+import com.dooapp.gaedo.blueprints.SemanticGraphConstants;
 import com.dooapp.gaedo.blueprints.finders.FindPostByNote;
 import com.dooapp.gaedo.test.beans.Post;
 import com.dooapp.gaedo.test.beans.PostInformer;
@@ -23,7 +24,6 @@ import com.tinkerpop.blueprints.Edge;
 import com.tinkerpop.blueprints.TransactionalGraph;
 import com.tinkerpop.blueprints.TransactionalGraph.Conclusion;
 import com.tinkerpop.blueprints.Vertex;
-import com.tinkerpop.blueprints.oupls.sail.GraphSail;
 
 import static com.dooapp.gaedo.blueprints.TestUtils.simpleTest;
 
@@ -65,11 +65,11 @@ public class TestFor45 extends AbstractGraphPostTest {
 		String edgeNameFor = Post.class.getName()+":"+"tags";
 		String predicateProperty = METHOD_NAME+"#test Edge";
 		Edge edge = environment.getGraph().addEdge(predicateProperty, thirdVertex, tagVertex, edgeNameFor);
-		edge.setProperty(GraphUtils.PREDICATE_PROPERTY, predicateProperty);
+		edge.setProperty(SemanticGraphConstants.PREDICATE_PROPERTY, predicateProperty);
 		String contextProperty = GraphUtils.asSailProperty("https://github.com/Riduidel/gaedo/issues/45");
-		edge.setProperty(GraphUtils.CONTEXT_PROPERTY, contextProperty);
+		edge.setProperty(SemanticGraphConstants.CONTEXT_PROPERTY, contextProperty);
 		// Finally build the context-predicate property by concatenating both
-		edge.setProperty(GraphUtils.CONTEXT_PREDICATE_PROPERTY, contextProperty + " " + predicateProperty);
+		edge.setProperty(SemanticGraphConstants.CONTEXT_PREDICATE_PROPERTY, contextProperty + " " + predicateProperty);
 
 		if(environment.getGraph() instanceof TransactionalGraph) {
 			((TransactionalGraph) environment.getGraph()).stopTransaction(Conclusion.SUCCESS);

@@ -6,7 +6,6 @@ import java.util.SortedSet;
 
 import org.junit.After;
 import org.neo4j.kernel.impl.util.FileUtils;
-import org.openrdf.repository.sail.SailRepository;
 
 import com.dooapp.gaedo.blueprints.beans.PostSubClass;
 import com.dooapp.gaedo.blueprints.beans.PostSubClassInformer;
@@ -65,7 +64,7 @@ public abstract class AbstractGraphEnvironment<GraphType extends Graph> {
 		public void load() {
 			if(graph==null) {
 				graph = createGraph(graphProvider);
-				
+
 				serviceRrepository = new InheriterRepository();
 				provider = new FieldBackedPropertyProvider();
 				locator = new CumulativeFieldInformerLocator();
@@ -76,7 +75,7 @@ public abstract class AbstractGraphEnvironment<GraphType extends Graph> {
 						locator, provider);
 				proxyInformerFactory = new ProxyBackedInformerFactory(
 						reflectiveFactory);
-				
+
 				// Now add some services
 				tagService = createServiceFor(Tag.class, TagInformer.class, strategy );
 				postService = createServiceFor(Post.class, PostInformer.class, strategy);
@@ -97,7 +96,7 @@ public abstract class AbstractGraphEnvironment<GraphType extends Graph> {
 	protected final String name;
 	protected final GraphProvider graphProvider;
 	protected ThreadLocal<GaedoComponentBag> bag = new ThreadLocal<GaedoComponentBag>();
-	
+
 	private StrategyType strategy = StrategyType.beanBased;
 
 	public AbstractGraphEnvironment(GraphProvider graph) {
@@ -129,12 +128,12 @@ public abstract class AbstractGraphEnvironment<GraphType extends Graph> {
 	public final <Type, InformerType extends Informer<Type>> InViewService<Type, InformerType, SortedSet<String>> createServiceFor(Class<Type> beanClass, Class<InformerType> informerClass, StrategyType strategy) {
 		// It's an inheriterrepository ! so this call may return true even for a class which is not in repository (but which parent class is)
 //		if(!getBag().serviceRrepository.containsKey(beanClass)) {
-		
+
 		boolean serviceExists = false;
 		try {
 			serviceExists = getBag().serviceRrepository.get(beanClass).getContainedClass().equals(beanClass);
 		} catch(NoSuchServiceException e) {
-			
+
 		}
 		if(!serviceExists) {
 			FinderCrudService<Type, InformerType> created = doCreateServiceFor(beanClass, informerClass, strategy);
@@ -181,12 +180,6 @@ public abstract class AbstractGraphEnvironment<GraphType extends Graph> {
 		return getBag().userService;
 	}
 
-	/**
-	 * Create a sail repository out of given graph
-	 * @return
-	 */
-	public abstract SailRepository getSailRepository();
-	
 	/**
 	 * Get a path where test data can be stored
 	 */
