@@ -328,9 +328,9 @@ public class GraphUtils {
 	}
 
 	public static void toString(Element objectVertex, StringBuilder sOut) {
+		sOut.append("graph id=").append(objectVertex.getId().toString());
 		for (String s : objectVertex.getPropertyKeys()) {
-			if (sOut.length() > 1)
-				sOut.append("; ");
+			sOut.append("; ");
 			sOut.append(s).append("=").append(objectVertex.getProperty(s));
 		}
 	}
