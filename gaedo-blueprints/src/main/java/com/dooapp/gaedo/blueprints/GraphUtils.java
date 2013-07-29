@@ -67,7 +67,7 @@ public class GraphUtils {
 	 * Generate edge name from property infos. Notice generated edge name will
 	 * first be searched in property annotations, and only if none compatile
 	 * found by generating a basic property name
-	 * 
+	 *
 	 * @param p
 	 *            source property
 	 * @return an edge name (by default property container class name + "." +
@@ -95,7 +95,7 @@ public class GraphUtils {
 	/**
 	 * Create a vertex out of a basic object. if object is of a simple type,
 	 * we'll use value as id. Elsewhere, we will generate an id for object
-	 * 
+	 *
 	 * @param database
 	 *            database in which vertex will be stored
 	 * @param value
@@ -122,7 +122,7 @@ public class GraphUtils {
 	/**
 	 * Create an object instance from a literal vertex compatible with this
 	 * service contained class
-	 * 
+	 *
 	 * @param driver
 	 *            driver used to load data
 	 * @param strategy
@@ -204,7 +204,7 @@ public class GraphUtils {
 
 	/**
 	 * get an id value for the given object whatever the object is
-	 * 
+	 *
 	 * @param repository
 	 * @param value
 	 * @return
@@ -227,7 +227,7 @@ public class GraphUtils {
 
 	/**
 	 * Get the value of the vertex id for the given literal
-	 * 
+	 *
 	 * @param database
 	 *            used graph
 	 * @param declaredClass
@@ -252,7 +252,7 @@ public class GraphUtils {
 
 	/**
 	 * Get the value of the vertex id for the given object
-	 * 
+	 *
 	 * @param database
 	 *            used graph
 	 * @param declaredClass
@@ -273,7 +273,7 @@ public class GraphUtils {
 
 	/**
 	 * Generates a vertex for the given tuple
-	 * 
+	 *
 	 * @param bluePrintsBackedFinderService
 	 *            source service, some informations may be extracted from it
 	 * @param repository
@@ -317,7 +317,7 @@ public class GraphUtils {
 
 	/**
 	 * Converts a vertex to a string by outputing all its properties values
-	 * 
+	 *
 	 * @param objectVertex
 	 * @return
 	 */
@@ -351,7 +351,7 @@ public class GraphUtils {
 	 * {@link GraphSail#CONTEXT_PROP} property, what are the contexts. These
 	 * contexts are extracted by iteratively calling {@link #CONTEXTS_MATCHER}
 	 * and {@link Matcher#find(int)} method.
-	 * 
+	 *
 	 * @param edge
 	 *            input edge
 	 * @return collection of declared contexts.
@@ -376,23 +376,23 @@ public class GraphUtils {
 
 	/**
 	 * Compiled pattern used to match strings such as
-	 * 
+	 *
 	 * <pre>
 	 * U https://github.com/Riduidel/gaedo/visible  U http://purl.org/dc/elements/1.1/description
 	 * </pre>
-	 * 
+	 *
 	 * or
-	 * 
+	 *
 	 * <pre>
 	 * N U http://purl.org/dc/elements/1.1/description
 	 * </pre>
-	 * 
+	 *
 	 * or even
-	 * 
+	 *
 	 * <pre>
 	 * N
 	 * </pre>
-	 * 
+	 *
 	 * You know why I do such a pattern matching ? Because sail graph named
 	 * graph definintion goes by concatenating contexts URI in edges properties.
 	 * This is really douchebag code !
@@ -401,7 +401,7 @@ public class GraphUtils {
 
 	/**
 	 * Check if edge has the required named graphs list
-	 * 
+	 *
 	 * @param e
 	 *            edge to test
 	 * @param namedGraphs
@@ -423,7 +423,7 @@ public class GraphUtils {
 
 	/**
 	 * Remove an edge "safely". That's to say with prior existence check.
-	 * 
+	 *
 	 * @param database
 	 *            database from which edge should be removed
 	 * @param existing
@@ -456,6 +456,7 @@ public class GraphUtils {
 				logger.log(Level.WARNING, "We tried to remove non existing vertex " + toString(existing));
 			}
 		} else {
+			// don't forget to remove vertex from any index it may be in
 			database.removeVertex(toRemove);
 			if (logger.isLoggable(REMOVAL_LOG_LEVEL)) {
 				logger.log(REMOVAL_LOG_LEVEL, "REMOVED " + toRemove);
@@ -465,7 +466,7 @@ public class GraphUtils {
 
 	/**
 	 * Define if a vertex can be created when using the given cascade type
-	 * 
+	 *
 	 * @param cascade
 	 * @return true for PERSIST and MERGE, false otherwise
 	 */
@@ -489,7 +490,9 @@ public class GraphUtils {
 	 */
 	public static <ElementType extends Element> void setIndexedProperty(IndexableGraph graph, ElementType graphElement, String propertyName, Object propertyValue, IndexNames indexName) {
 		graphElement.setProperty(propertyName, propertyValue);
-		Index<ElementType> index = graph.getIndex(indexName.getIndexName(), (Class<ElementType>) indexName.getIndexed());
-		index.put(propertyName, propertyValue, graphElement);
+		if(IndexNames.usableIndices().contains(indexName)) {
+			Index<ElementType> index = graph.getIndex(indexName.getIndexName(), (Class<ElementType>) indexName.getIndexed());
+			index.put(propertyName, propertyValue, graphElement);
+		}
 	}
 }

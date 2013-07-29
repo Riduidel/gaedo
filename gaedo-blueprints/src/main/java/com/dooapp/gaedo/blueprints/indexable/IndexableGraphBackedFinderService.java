@@ -36,16 +36,16 @@ import com.tinkerpop.blueprints.oupls.sail.GraphSail;
 
 /**
  * Indexable graph backed version of finder service.
- * 
+ *
  * Notice we maintain {@link AbstractCooperantFinderService} infos about objects
  * being accessed as String containing, in fact, vertex ids.
- * 
+ *
  * Since Blueprints 2.*, there is a distinction between manual indices (provided by IndexableGraph) and automatic key indices, provided by KeyIndexableGraph. Why using the first ones ?
  * For queries, obviously : an {@link Index} can return the {@link Index#count(String, Object)} number of element, what a KeyIndexableGraph
  * do not yet provide. And, to have a good execution plan (without relying upon graph queries), this is invaluable.
- * 
+ *
  * @author ndx
- * 
+ *
  * @param <DataType>
  *            type of data managed by this service
  * @param <InformerType>
@@ -53,7 +53,7 @@ import com.tinkerpop.blueprints.oupls.sail.GraphSail;
  */
 public class IndexableGraphBackedFinderService<DataType, InformerType extends Informer<DataType>> extends
 				AbstractBluePrintsBackedFinderService<IndexableGraph, DataType, InformerType> {
-	
+
 	private static final Logger logger = Logger.getLogger(IndexableGraphBackedFinderService.class.getName());
 
 	public static final String TYPE_EDGE_NAME = GraphUtils.getEdgeNameFor(TypeProperty.INSTANCE);
@@ -63,7 +63,7 @@ public class IndexableGraphBackedFinderService<DataType, InformerType extends In
 	/**
 	 * Construct a default service, for which the mapping strategy is the
 	 * default one (that's to say {@link StrategyType#beanBased}
-	 * 
+	 *
 	 * @param containedClass
 	 *            contained data class
 	 * @param informerClass
@@ -95,7 +95,7 @@ public class IndexableGraphBackedFinderService<DataType, InformerType extends In
 
 	/**
 	 * Construct a gaedo servcie allowing reading/writing to an indexable graph
-	 * 
+	 *
 	 * @param graph
 	 *            graph we want to write/read to/from
 	 * @param containedClass
@@ -189,7 +189,7 @@ public class IndexableGraphBackedFinderService<DataType, InformerType extends In
 	/**
 	 * When creating an empty vertex, we immediatly link it to its associated
 	 * type vertex : a long will as a consequence be linked to the Long class
-	 * 
+	 *
 	 * @param vertexId
 	 * @param valueClass
 	 * @return
@@ -251,7 +251,7 @@ public class IndexableGraphBackedFinderService<DataType, InformerType extends In
 		String edgeNameFor = GraphUtils.getEdgeNameFor(property);
 		Edge returned = database.addEdge(getEdgeId(fromVertex, toVertex, property), fromVertex, toVertex, edgeNameFor);
 		// Did you know labels are not edges properties ? Absolutely stunning discovery !
-		database.getIndex(IndexNames.EDGES.getIndexName(), Edge.class).put("label", edgeNameFor, returned);
+//		database.getIndex(IndexNames.EDGES.getIndexName(), Edge.class).put("label", edgeNameFor, returned);
 		String predicateProperty = GraphUtils.asSailProperty(GraphUtils.getEdgeNameFor(property));
 		setIndexedProperty(returned, GraphSail.PREDICATE_PROP, predicateProperty, IndexNames.EDGES);
 		Collection<String> contexts = getLens();
@@ -270,7 +270,7 @@ public class IndexableGraphBackedFinderService<DataType, InformerType extends In
 		setIndexedProperty(returned, GraphSail.CONTEXT_PROP, contextProperty, IndexNames.EDGES);
 		// Finally build the context-predicate property by concatenating both
 		setIndexedProperty(returned, GraphSail.CONTEXT_PROP + GraphSail.PREDICATE_PROP, contextProperty + " " + predicateProperty, IndexNames.EDGES);
-		
+
 		if (logger.isLoggable(Level.FINE)) {
 			logger.log(Level.FINE, "created edge "+GraphUtils.toString(returned));
 		}
@@ -295,7 +295,7 @@ public class IndexableGraphBackedFinderService<DataType, InformerType extends In
 	@Override
 	public InViewService<DataType, InformerType, SortedSet<String>> focusOn(SortedSet<String> lens) {
 		AbstractBluePrintsBackedFinderService<IndexableGraph, DataType, InformerType> returned = new IndexableGraphBackedFinderService<DataType, InformerType>(
-						database, containedClass, informerClass, getInformerFactory(), repository, propertyProvider, 
+						database, containedClass, informerClass, getInformerFactory(), repository, propertyProvider,
 						/* strategy is local to service ! */ getStrategy().derive());
 		returned.setLens(lens);
 		return returned;
