@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>com.dooapp</groupId>
 	<artifactId>gaedo</artifactId>
@@ -227,8 +228,8 @@
 					<artifactId>maven-surefire-plugin</artifactId>
 					<version>2.12</version>
 				</plugin>
-				<!-- As default, maven-shade-plugin is used to generate an exceptions 
-					jar, containing all classes which names ends with Exception. This can be 
+				<!-- As default, maven-shade-plugin is used to generate an exceptions
+					jar, containing all classes which names ends with Exception. This can be
 					useful when gaedo is used over RMi, as an example. -->
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
@@ -284,6 +285,11 @@
 	</build>
 	<reporting>
 		<plugins>
+			<plugin>
+				<groupId>org.codehaus.mojo</groupId>
+				<artifactId>versions-maven-plugin</artifactId>
+				<version>2.1</version>
+			</plugin>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-javadoc-plugin</artifactId>
