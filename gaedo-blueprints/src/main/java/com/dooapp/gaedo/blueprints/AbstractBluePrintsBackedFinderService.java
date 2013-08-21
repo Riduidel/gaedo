@@ -44,16 +44,16 @@ import com.tinkerpop.blueprints.Vertex;
 
 /**
  * Base class for all finder service using blueprints graphs as storage
- * 
+ *
  * @author ndx
- * 
+ *
  * @param <GraphClass>
  * @param <DataType>
  * @param <InformerType>
  */
-public abstract class AbstractBluePrintsBackedFinderService<GraphClass extends Graph, DataType, InformerType extends Informer<DataType>> 
-	extends	AbstractFinderService<DataType, InformerType> 
-	implements InViewService<DataType, InformerType, SortedSet<String>>, 
+public abstract class AbstractBluePrintsBackedFinderService<GraphClass extends Graph, DataType, InformerType extends Informer<DataType>>
+	extends	AbstractFinderService<DataType, InformerType>
+	implements InViewService<DataType, InformerType, SortedSet<String>>,
 		IdBasedService<DataType> {
 
 	private class DelegatingDriver implements GraphDatabaseDriver {
@@ -155,7 +155,7 @@ public abstract class AbstractBluePrintsBackedFinderService<GraphClass extends G
 	 */
 	public AbstractBluePrintsBackedFinderService(GraphClass graph, Class<DataType> containedClass, Class<InformerType> informerClass, InformerFactory factory,
 					ServiceRepository repository, PropertyProvider provider, StrategyType strategy) {
-		this(graph, containedClass, informerClass, factory, repository, provider, 
+		this(graph, containedClass, informerClass, factory, repository, provider,
 						StrategyUtils.loadStrategyFor(strategy, containedClass, provider, VersionMigratorFactory.create(containedClass)));
 	}
 
@@ -180,7 +180,7 @@ public abstract class AbstractBluePrintsBackedFinderService<GraphClass extends G
 			logger.log(Level.FINE, "created graph service handling " + containedClass.getCanonicalName());
 		}
 	}
-	
+
 	@Override
 	public InformerFactory getInformerFactory() {
 		return super.getInformerFactory();
@@ -200,7 +200,7 @@ public abstract class AbstractBluePrintsBackedFinderService<GraphClass extends G
 	 * @return
 	 */
 	protected abstract String getIdOfVertex(Vertex objectVertex);
-	
+
 	/**
 	 * Creates an empty vertex with given vertex id and vertex contained value class
 	 * @param vertexId vertex id
@@ -216,7 +216,7 @@ public abstract class AbstractBluePrintsBackedFinderService<GraphClass extends G
 	 * {@link #doUpdate(Object, CascadeType, Map)}, just checking before that if
 	 * an id must be generated. If an id must be generated, then it is (and so
 	 * is associated vertex, to make sure no problem will arise later).
-	 * 
+	 *
 	 * @param toCreate
 	 * @return
 	 * @see com.dooapp.gaedo.AbstractCrudService#create(java.lang.Object)
@@ -227,14 +227,14 @@ public abstract class AbstractBluePrintsBackedFinderService<GraphClass extends G
 
 			@Override
 			protected DataType doPerform() {
-				return doUpdate(toCreate, CascadeType.PERSIST, new TreeMap<String, Object>());
+				return doUpdate(toCreate, CascadeType.PERSIST, ObjectCache.create(CascadeType.PERSIST));
 			}
 		}.perform();
 	}
 
 	/**
 	 * Delete id and all edges
-	 * 
+	 *
 	 * @param toDelete
 	 * @see com.dooapp.gaedo.AbstractCrudService#delete(java.lang.Object)
 	 */
@@ -245,7 +245,7 @@ public abstract class AbstractBluePrintsBackedFinderService<GraphClass extends G
 
 				@Override
 				protected Void doPerform() {
-					doDelete(toDelete, new TreeMap<String, Object>());
+					doDelete(toDelete, ObjectCache.create(CascadeType.REMOVE));
 					return null;
 				}
 			}.perform();
@@ -254,10 +254,10 @@ public abstract class AbstractBluePrintsBackedFinderService<GraphClass extends G
 
 	/**
 	 * Local delete implementation
-	 * 
+	 *
 	 * @param toDelete
 	 */
-	private void doDelete(DataType toDelete, Map<String, Object> objectsBeingAccessed) {
+	private void doDelete(DataType toDelete, ObjectCache objectsBeingAccessed) {
 		String vertexId = getIdVertexId(toDelete, false /*
 																	 * no id
 																	 * generation
@@ -273,7 +273,7 @@ public abstract class AbstractBluePrintsBackedFinderService<GraphClass extends G
 
 	/**
 	 * Delete an out edge vertex. Those are vertex corresponding to properties.
-	 * 
+	 *
 	 * @param objectVertex
 	 *            source object vertex, used for debugging purpose only
 	 * @param valueVertex
@@ -281,7 +281,7 @@ public abstract class AbstractBluePrintsBackedFinderService<GraphClass extends G
 	 * @param value
 	 *            object value
 	 */
-	<Type> void deleteOutEdgeVertex(Vertex objectVertex, Vertex valueVertex, Type value, Map<String, Object> objectsBeingUpdated) {
+	<Type> void deleteOutEdgeVertex(Vertex objectVertex, Vertex valueVertex, Type value, ObjectCache objectsBeingUpdated) {
 		// Delete vertex and other associated ones, only if they have no
 		// other input links (elsewhere delete is silently ignored)
 		if (valueVertex.getEdges(Direction.IN).iterator().hasNext()) {
@@ -311,7 +311,7 @@ public abstract class AbstractBluePrintsBackedFinderService<GraphClass extends G
 	/**
 	 * Gets the id vertex for the given object (if that object exists).
  	 * Method is made public to allow some tests to call it
-	 * 
+	 *
 	 * @param object
 	 *            object to get id vertex for
 	 * @param allowIdGeneration
@@ -325,7 +325,7 @@ public abstract class AbstractBluePrintsBackedFinderService<GraphClass extends G
 	/**
 	 * Notice it only works if id is a literal type.
 	 * Method is made public to allow some tests to call it
-	 * 
+	 *
 	 * @param object
 	 *            object for which we want the id vertex id property
 	 * @param requiresIdGeneration
@@ -344,7 +344,7 @@ public abstract class AbstractBluePrintsBackedFinderService<GraphClass extends G
 
 	/**
 	 * Get id of given object, provided of course it's an instance of this class
-	 * 
+	 *
 	 * @param data
 	 *            object to extract an id for
 	 * @return id of that object
@@ -359,7 +359,7 @@ public abstract class AbstractBluePrintsBackedFinderService<GraphClass extends G
 
 			@Override
 			protected DataType doPerform() {
-				return doUpdate(toUpdate, CascadeType.MERGE, new TreeMap<String, Object>());
+				return doUpdate(toUpdate, CascadeType.MERGE, ObjectCache.create(CascadeType.MERGE));
 			}
 		}.perform();
 	}
@@ -370,7 +370,7 @@ public abstract class AbstractBluePrintsBackedFinderService<GraphClass extends G
 	 * first call uses CascadeType.PERSIST and others uses CascadeType.MERGE, we
 	 * can use that indication to separate them. It has the unfortunate
 	 * inconvenient to force us to use only PERSIST during #create
-	 * 
+	 *
 	 * @param toUpdate
 	 *            object to update
 	 * @param cascade
@@ -378,7 +378,7 @@ public abstract class AbstractBluePrintsBackedFinderService<GraphClass extends G
 	 * @param treeMap
 	 *            map of objects already used
 	 */
-	private DataType doUpdate(DataType toUpdate, CascadeType cascade, Map<String, Object> treeMap) {
+	private DataType doUpdate(DataType toUpdate, CascadeType cascade, ObjectCache treeMap) {
 		boolean generatesId = strategy.isIdGenerationRequired() ? (CascadeType.PERSIST == cascade) : false;
 		String objectVertexId = getIdVertexId(toUpdate, generatesId);
 		Class<? extends Object> toUpdateClass = toUpdate.getClass();
@@ -391,7 +391,7 @@ public abstract class AbstractBluePrintsBackedFinderService<GraphClass extends G
 	/**
 	 * Get vertex associated to value. If object is managed by a service, we ask
 	 * this service the value
-	 * 
+	 *
 	 * @param value
 	 *            value we want the vertex for
 	 * @param cascade
@@ -402,7 +402,7 @@ public abstract class AbstractBluePrintsBackedFinderService<GraphClass extends G
 	 *            during update, but is absolutely NOT a persistent cache
 	 * @return vertex for given value. May be null in some rare cases (typically obtaining a vertex that doesn't exist yet for deleting it)
 	 */
-	public Vertex getVertexFor(Object value, CascadeType cascade, Map<String, Object> objectsBeingUpdated) {
+	public Vertex getVertexFor(Object value, CascadeType cascade, ObjectCache objectsBeingUpdated) {
 		boolean allowIdGeneration = CascadeType.PERSIST.equals(cascade) || CascadeType.MERGE.equals(cascade);
 		// Here we suppose the service is the right one for the job (which may
 		// not be the case)
@@ -446,7 +446,7 @@ public abstract class AbstractBluePrintsBackedFinderService<GraphClass extends G
 	 * @param allowIdGeneration true if null id should be replaced by a new one
 	 * @return a vertex for an instance of the given object. Under some rare circumstances, this vertex may be null.
 	 */
-	protected Vertex getVertexForInstanceOfDataType(Object value, CascadeType cascade, Map<String, Object> objectsBeingUpdated, boolean allowIdGeneration) {
+	protected Vertex getVertexForInstanceOfDataType(Object value, CascadeType cascade, ObjectCache objectsBeingUpdated, boolean allowIdGeneration) {
 		// was there any vertex prior to that call ? (don't worry, it will be used later)
 		Vertex existing = getIdVertexFor(containedClass.cast(value), false);
 		Vertex returned = null;
@@ -464,7 +464,7 @@ public abstract class AbstractBluePrintsBackedFinderService<GraphClass extends G
 			}
 			returned = getIdVertexFor(containedClass.cast(value), allowIdGeneration);
 		} else {
-			/* 
+			/*
 			 * vertex already exist, but maybe object needs an update.
 			 * This can happen if MERGE has been set (directly or not), but also when cascading creations with @GeneratedValue set.
 			 * Indeed, in such a case, previous call to #getIdVertexFor will create a vertex with a "good" id, which will put us in this very case.
@@ -478,7 +478,7 @@ public abstract class AbstractBluePrintsBackedFinderService<GraphClass extends G
 		return returned;
 	}
 
-	protected Vertex getVertexForTuple(Object value, CascadeType cascade, Map<String, Object> objectsBeingUpdated) {
+	protected Vertex getVertexForTuple(Object value, CascadeType cascade, ObjectCache objectsBeingUpdated) {
 		return GraphUtils.getVertexForTuple(this, repository, value, cascade, objectsBeingUpdated);
 	}
 
@@ -496,7 +496,7 @@ public abstract class AbstractBluePrintsBackedFinderService<GraphClass extends G
 	/**
 	 * Object query is done by simply looking up all objects of that class using
 	 * a standard query
-	 * 
+	 *
 	 * @return an iterable over all objects of that class
 	 * @see com.dooapp.gaedo.finders.FinderCrudService#findAll()
 	 */
@@ -509,7 +509,7 @@ public abstract class AbstractBluePrintsBackedFinderService<GraphClass extends G
 			 * it for each failure. So creating an empty and() is like creating
 			 * a "true" statement, which in turn results into searching all
 			 * objects of that class.
-			 * 
+			 *
 			 * @param informer
 			 * @return an empty or matching all objects
 			 * @see com.dooapp.gaedo.finders.QueryBuilder#createMatchingExpression(com.dooapp.gaedo.finders.Informer)
@@ -525,16 +525,16 @@ public abstract class AbstractBluePrintsBackedFinderService<GraphClass extends G
 	 * Load object starting with the given vertex root. Notice object is added
 	 * to the accessed set with a weak key, this way, it should be faster to
 	 * load it and to maintain instance unicity
-	 * 
+	 *
 	 * @param objectVertex
-	 * 
+	 *
 	 * @return loaded object
 	 * @param objectsBeingAccessed
 	 *            map of objects currently being accessed, it avoid some loops
 	 *            during loading, but is absolutely NOT a persistent cache
 	 * @see #loadObject(String, Vertex, Map)
 	 */
-	public DataType loadObject(String objectVertexId, Map<String, Object> objectsBeingAccessed) {
+	public DataType loadObject(String objectVertexId, ObjectCache objectsBeingAccessed) {
 		// If cast fails, well, that's some fuckin mess, no ?
 		Vertex objectVertex = loadVertexFor(objectVertexId, containedClass.getName());
 		return persister.loadObject(this, objectVertexId, objectVertex, objectsBeingAccessed);
@@ -542,7 +542,7 @@ public abstract class AbstractBluePrintsBackedFinderService<GraphClass extends G
 
 	/**
 	 * Load veretx associated to given object id.
-	 * 
+	 *
 	 * @param objectVertexId
 	 *            vertex id for which we want a vertex
 	 * @param className class name used for value. This parameter is mainly useful to disambiguate values.
@@ -552,7 +552,7 @@ public abstract class AbstractBluePrintsBackedFinderService<GraphClass extends G
 
 	/**
 	 * Load object from a vertex
-	 * 
+	 *
 	 * @param objectVertex
 	 * @param objectsBeingAccessed
 	 *            map of objects currently being accessed, it avoid some loops
@@ -560,13 +560,13 @@ public abstract class AbstractBluePrintsBackedFinderService<GraphClass extends G
 	 * @return loaded object
 	 * @see #loadObject(String, Vertex, Map)
 	 */
-	public DataType loadObject(Vertex objectVertex, Map<String, Object> objectsBeingAccessed) {
+	public DataType loadObject(Vertex objectVertex, ObjectCache objectsBeingAccessed) {
 		return persister.loadObject(this, objectVertex, objectsBeingAccessed);
 	}
 
 	/**
 	 * we only consider first id element
-	 * 
+	 *
 	 * @param id
 	 *            collection of id
 	 * @return object which has as vertexId the given property
@@ -595,7 +595,7 @@ public abstract class AbstractBluePrintsBackedFinderService<GraphClass extends G
             }).getFirst();
 		} else {
 			// root vertex can be directly found ! so load it immediatly
-			return loadObject(vertexIdValue, new TreeMap<String, Object>());
+			return loadObject(vertexIdValue, ObjectCache.create(CascadeType.REFRESH));
 		}
 	}
 
@@ -608,12 +608,12 @@ public abstract class AbstractBluePrintsBackedFinderService<GraphClass extends G
 	 * Get object associated to given key. Notice this method uses internal
 	 * cache ({@link #objectsBeingAccessed}) before to resolve call on
 	 * datastore.
-	 * 
+	 *
 	 * @param key
 	 * @return
 	 */
 	public DataType getObjectFromKey(String key) {
-		return loadObject(key, new TreeMap<String, Object>());
+		return loadObject(key, ObjectCache.create(CascadeType.REFRESH));
 	}
 
 	/**
@@ -636,7 +636,7 @@ public abstract class AbstractBluePrintsBackedFinderService<GraphClass extends G
 
 	/**
 	 * Set id of object, and try to assign that object a vertex.
-	 * 
+	 *
 	 * @param value
 	 * @param id
 	 * @return
@@ -691,7 +691,7 @@ public abstract class AbstractBluePrintsBackedFinderService<GraphClass extends G
 	 * Provides driver view to database. This driver is a way for us to expose
 	 * low-level infos to graph without breaking huigh-level abstraction of a
 	 * FinderService.
-	 * 
+	 *
 	 * @return
 	 */
 	public GraphDatabaseDriver getDriver() {
@@ -728,7 +728,7 @@ public abstract class AbstractBluePrintsBackedFinderService<GraphClass extends G
 		this.lens = Collections.unmodifiableSortedSet(usedLens);
 		this.strategy.reloadWith(this);
 	}
-	
+
 	/**
 	 * Informer factory has been made public to allow use of lens in finders
 	 * @param informerFactory

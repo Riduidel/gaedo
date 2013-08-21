@@ -15,20 +15,20 @@ public abstract class AbstractLazyLoader {
 	protected transient ServiceRepository repository;
 	protected boolean loaded = false;
 	protected ClassLoader classLoader;
-	protected Map<String, Object> objectsBeingAccessed;
+	protected ObjectCache objectsBeingAccessed;
 	/**
 	 * Edge name is eagerly determined from known elements to fasten lazy loading (and avoid some service unavailability issues
 	 */
 	protected String edgeName;
 	protected GraphDatabaseDriver driver;
 	protected transient GraphMappingStrategy<?> strategy;
-	
+
 	public AbstractLazyLoader() {
-		
+
 	}
 
 	public AbstractLazyLoader(GraphDatabaseDriver driver, GraphMappingStrategy strategy, Property property, Vertex rootVertex, ServiceRepository repository,
-					ClassLoader classLoader, Map<String, Object> objectsBeingAccessed) {
+					ClassLoader classLoader, ObjectCache objectsBeingAccessed) {
 		super();
 		this.driver = driver;
 		this.strategy = strategy;
