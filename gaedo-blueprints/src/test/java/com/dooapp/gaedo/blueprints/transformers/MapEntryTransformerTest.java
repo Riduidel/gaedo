@@ -12,6 +12,7 @@ import java.util.Map.Entry;
 import javax.persistence.CascadeType;
 
 import org.hamcrest.core.Is;
+import org.hamcrest.core.IsInstanceOf;
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
@@ -36,7 +37,7 @@ public class MapEntryTransformerTest {
 		public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
 			return method.invoke(entry, args);
 		}
-		
+
 	}
 
 	private static final String VALUE = "value";
@@ -57,9 +58,9 @@ public class MapEntryTransformerTest {
 		used.setValue(VALUE);
 		for(Property p : testedProps.keySet()) {
 			if(p.getName().equals("key")) {
-				assertThat(p.get(used), Is.is((Object) KEY)); 
+				assertThat(p.get(used), Is.is((Object) KEY));
 			} else if(p.getName().equals("value")) {
-				assertThat(p.get(used), Is.is((Object) VALUE)); 
+				assertThat(p.get(used), Is.is((Object) VALUE));
 			}
 		}
 	}
@@ -74,8 +75,8 @@ public class MapEntryTransformerTest {
 				p.set(used, VALUE);
 			}
 		}
-		assertThat(used.getKey(), Is.is((Object) KEY)); 
-		assertThat(used.getValue(), Is.is((Object) VALUE)); 
+		assertThat(used.getKey(), Is.is((Object) KEY));
+		assertThat(used.getValue(), Is.is((Object) VALUE));
 	}
 
 	@Test(expected=UnableToSetPropertyException.class)
@@ -91,7 +92,7 @@ public class MapEntryTransformerTest {
 			}
 			fail("shouldn't reach that point, as we're unable to write key");
 		} catch(UnableToSetPropertyException e) {
-			assertThat(e.getCause(), Is.is(IllegalArgumentException.class));
+			assertThat(e.getCause(), IsInstanceOf.instanceOf(IllegalArgumentException.class));
 			throw e;
 		}
 	}
@@ -106,9 +107,9 @@ public class MapEntryTransformerTest {
 		for(Property p : testedProps.keySet()) {
 			if(p.getName().equals("key")) {
 				// rebuild property without a setter for key
-				Class<Map.Entry> interfaceClass = Map.Entry.class; 
+				Class<Map.Entry> interfaceClass = Map.Entry.class;
 				Class<WriteableKeyEntry> implementationClass = WriteableKeyEntry.class;
-				PropertyDescriptor keyProperty = new PropertyDescriptor("key", interfaceClass.getDeclaredMethod("getKey"), 
+				PropertyDescriptor keyProperty = new PropertyDescriptor("key", interfaceClass.getDeclaredMethod("getKey"),
 								null);
 				p = new DescribedProperty(keyProperty, Map.Entry.class);
 				p.set(used, KEY);
