@@ -1,10 +1,10 @@
 package com.dooapp.gaedo.finders.root;
 
+import org.hamcrest.core.IsCollectionContaining;
 import org.hamcrest.core.IsInstanceOf;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
-import org.junit.internal.matchers.IsCollectionContaining;
 
 import com.dooapp.gaedo.finders.FieldInformer;
 import com.dooapp.gaedo.finders.Informer;
@@ -13,7 +13,6 @@ import com.dooapp.gaedo.properties.FieldBackedPropertyProvider;
 import com.dooapp.gaedo.properties.LeafBean;
 import com.dooapp.gaedo.properties.Property;
 import com.dooapp.gaedo.properties.PropertyProvider;
-import com.dooapp.gaedo.properties.RootBean;
 import com.dooapp.gaedo.properties.RootBeanIncludingLeaf;
 
 /**
@@ -22,11 +21,11 @@ import com.dooapp.gaedo.properties.RootBeanIncludingLeaf;
  *
  */
 public class BouncingCallsFailTest {
-	
+
 	public static interface LeafBeanInformer extends Informer<LeafBean> {
 		StringFieldInformer getName();
 	}
-	
+
 	public static interface BaseBeanInformer extends Informer<RootBeanIncludingLeaf> {
 		LeafBeanInformer getLeef();
 	}
@@ -35,7 +34,7 @@ public class BouncingCallsFailTest {
 	 * Tested object
 	 */
 	private InformerFactory tested;
-	
+
 	@Before
 	public void prepare() throws SecurityException, NoSuchFieldException {
 		// default property provider
@@ -46,10 +45,10 @@ public class BouncingCallsFailTest {
 		InformerFieldLocator informers = new InformerFieldLocator();
 		locator.add(informers);
 		// reflection source
-		ReflectionBackedInformerFactory reflective = new ReflectionBackedInformerFactory(locator, provider); 
+		ReflectionBackedInformerFactory reflective = new ReflectionBackedInformerFactory(locator, provider);
 		tested = informers.masquerade(new ProxyBackedInformerFactory(reflective));
 	}
-	
+
 	/**
 	 * Test that all is correctly working when trying to use bean informer with I interface (which do not rely upon unknown class)
 	 */
@@ -61,7 +60,7 @@ public class BouncingCallsFailTest {
 		Property name = beanInformer.getName().getField();
 		Assert.assertThat(beanInformer.getName().getFieldPath(), IsCollectionContaining.hasItems(name));
 	}
-	
+
 	/**
 	 * Test that all is correctly working when trying to use bean informer with I interface (which do not rely upon unknown class)
 	 */

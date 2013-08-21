@@ -5,6 +5,7 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 
 import org.hamcrest.core.Is;
+import org.hamcrest.core.IsInstanceOf;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -23,7 +24,7 @@ public class RestServiceFacadeWhiteBoxTest {
 		tested = new RestServiceFacade();
 		repository = TestEnvironmentProvider.create();
 	}
-	
+
 	/**
 	 * Test that finding works correctly with some input maps
 	 */
@@ -37,10 +38,10 @@ public class RestServiceFacadeWhiteBoxTest {
 		returnData.put(RestServiceParams.RETURN.getPrefix()+"[mode]", "findOneWith");
 
 		Object returned = tested.find(repository.get(Post.class), filterData, Collections.EMPTY_MAP, returnData);
-		
-		Assert.assertThat(returned, Is.is(Post.class));
+
+		Assert.assertThat(returned, IsInstanceOf.instanceOf(Post.class));
 	}
-	
+
 	@Test
 	public void testOpenCreate() throws Exception {
 		Map<String, Object> objectData = new LinkedHashMap<String, Object>();
@@ -50,8 +51,8 @@ public class RestServiceFacadeWhiteBoxTest {
 		objectData.put(RestServiceParams.OBJECT.getPrefix()+"[note]", postNote+"");
 
 		Object returned = tested.create(repository.get(Post.class), objectData);
-		
-		Assert.assertThat(returned, Is.is(Post.class));
+
+		Assert.assertThat(returned, IsInstanceOf.instanceOf(Post.class));
 		Post p = (Post) returned;
 		Assert.assertThat(p.text, Is.is(postText));
 		Assert.assertThat(p.note, Is.is(postNote));

@@ -5,8 +5,8 @@ import java.util.Collection;
 import java.util.logging.Logger;
 
 import org.hamcrest.core.Is;
+import org.hamcrest.core.IsCollectionContaining;
 import org.junit.Test;
-import org.junit.internal.matchers.IsCollectionContaining;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 import org.junit.runners.Parameterized.Parameters;

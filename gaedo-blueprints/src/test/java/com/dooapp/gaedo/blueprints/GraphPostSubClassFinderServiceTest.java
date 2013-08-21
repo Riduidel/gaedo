@@ -1,12 +1,12 @@
 package com.dooapp.gaedo.blueprints;
 
 import java.util.Collection;
-import java.util.TreeMap;
 import java.util.logging.Logger;
 
 import javax.persistence.CascadeType;
 
 import org.hamcrest.core.Is;
+import org.hamcrest.core.IsInstanceOf;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
@@ -51,7 +51,7 @@ public class GraphPostSubClassFinderServiceTest extends AbstractGraphPostSubClas
 		PostSubClass newOne = new PostSubClass(0, METHOD_NAME,1.0f, State.PUBLIC, author);
 		Post saved = getPostSubService().create(newOne);
 		final long postId = saved.id;
-		assertThat(saved, Is.is(PostSubClass.class));
+		assertThat(saved, IsInstanceOf.instanceOf(PostSubClass.class));
 		Post loaded = getPostService().find().matching(new QueryBuilder<PostInformer>() {
 
 			@Override
@@ -59,10 +59,10 @@ public class GraphPostSubClassFinderServiceTest extends AbstractGraphPostSubClas
 				return informer.getText().equalsTo(METHOD_NAME);
 			}
 		}).getFirst();
-		assertThat(loaded, Is.is(PostSubClass.class));
+		assertThat(loaded, IsInstanceOf.instanceOf(PostSubClass.class));
 		if(getPostService() instanceof IdBasedService) {
 			Post fromId = ((IdBasedService<Post>) getPostService()).findById(loaded.id);
-			assertThat(fromId, Is.is(PostSubClass.class));
+			assertThat(fromId, IsInstanceOf.instanceOf(PostSubClass.class));
 		}
 		// Now make sure post can be updated and obtained
 		loaded.text = "updated text : "+loaded.text;
@@ -85,7 +85,7 @@ public class GraphPostSubClassFinderServiceTest extends AbstractGraphPostSubClas
 		PostSubClass newOne = new PostSubClass(0, METHOD_NAME,1.0f, State.PUBLIC, author);
 		Post saved = getPostSubService().create(newOne);
 		final long postId = saved.id;
-		assertThat(saved, Is.is(PostSubClass.class));
+		assertThat(saved, IsInstanceOf.instanceOf(PostSubClass.class));
 		Post loaded = getPostService().find().matching(new QueryBuilder<PostInformer>() {
 
 			@Override
@@ -115,7 +115,7 @@ public class GraphPostSubClassFinderServiceTest extends AbstractGraphPostSubClas
 		newOne.state = State.PUBLIC;
 		newOne.anotherState = PostSubClass.AnotherStateForBug26.PUBLIC;
 		Post saved = getPostSubService().create(newOne);
-		assertThat(saved, Is.is(PostSubClass.class));
+		assertThat(saved, IsInstanceOf.instanceOf(PostSubClass.class));
 
 		// Directly manipulating vertex to link it to a raw uri node (used as ... text)
 		IndexableGraphBackedFinderService<PostSubClass, PostSubClassInformer> postSubService = (IndexableGraphBackedFinderService<PostSubClass, PostSubClassInformer>) getPostSubService();

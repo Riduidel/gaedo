@@ -1,7 +1,5 @@
 package com.dooapp.gaedo.informer;
 
-import static org.junit.Assert.assertThat;
-
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.LinkedList;
@@ -14,9 +12,9 @@ import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 import org.junit.runners.Parameterized.Parameters;
 
-import com.dooapp.gaedo.finders.FieldInformer;
-import com.dooapp.gaedo.finders.informers.StringFieldInformer;
 import com.dooapp.gaedo.finders.root.BasicFieldInformerLocator;
+
+import static org.junit.Assert.assertThat;
 
 @RunWith(Parameterized.class)
 public class InformerTypeFinderTest {

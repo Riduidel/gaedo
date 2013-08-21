@@ -4,6 +4,7 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 
 import org.hamcrest.core.Is;
+import org.hamcrest.core.IsInstanceOf;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -131,7 +132,7 @@ public class QueryTranscripterTest {
 
 		QueryBuilder<Informer<User>> built =  tested.buildQuery(repository.get(User.class), testData);
 		QueryExpression expression = built.createMatchingExpression(repository.get(User.class).getInformer());
-		Assert.assertThat(expression, Is.is(AndQueryExpression.class));
+		Assert.assertThat(expression, IsInstanceOf.instanceOf(AndQueryExpression.class));
 		AndQueryExpression and = (AndQueryExpression) expression;
 		and.accept(new FailingTestVisitor() {
 			@Override
@@ -139,17 +140,17 @@ public class QueryTranscripterTest {
 				Assert.assertThat(endsWithExpression.getEnd(), Is.is("d"));
 				Assert.assertThat(endsWithExpression.getField(), Is.is(repository.get(User.class).getInformer().get("password").getField()));
 			}
-			
+
 			@Override
 			public void visit(StartsWithExpression startsWithExpression) {
 				Assert.assertThat(startsWithExpression.getStart(), Is.is("fi"));
 				Assert.assertThat(startsWithExpression.getField(), Is.is(repository.get(User.class).getInformer().get("login").getField()));
 			}
-			
+
 			@Override
 			public void startVisit(AndQueryExpression andQueryExpression) {
 			}
-			
+
 			@Override
 			public void endVisit(AndQueryExpression andQueryExpression) {
 			}
@@ -164,7 +165,7 @@ public class QueryTranscripterTest {
 
 		QueryBuilder<Informer<Post>> built =  tested.buildQuery(repository.get(Post.class), testData);
 		QueryExpression expression = built.createMatchingExpression(repository.get(Post.class).getInformer());
-		Assert.assertThat(expression, Is.is(AndQueryExpression.class));
+		Assert.assertThat(expression, IsInstanceOf.instanceOf(AndQueryExpression.class));
 		AndQueryExpression and = (AndQueryExpression) expression;
 		and.accept(new FailingTestVisitor() {
 			@Override
@@ -172,7 +173,7 @@ public class QueryTranscripterTest {
 				Assert.assertThat(containsStringExpression.getContained(), Is.is("text"));
 				Assert.assertThat(containsStringExpression.getField(), Is.is(repository.get(Post.class).getInformer().get("text").getField()));
 			}
-			
+
 			@Override
 			public <ComparableType extends Comparable<ComparableType>> void visit(GreaterThanExpression<ComparableType> greaterThanExpression) {
 				Assert.assertThat(((Number) greaterThanExpression.getValue()).intValue(), Is.is(5));
@@ -181,13 +182,13 @@ public class QueryTranscripterTest {
 			@Override
 			public void startVisit(AndQueryExpression andQueryExpression) {
 			}
-			
+
 			@Override
 			public void endVisit(AndQueryExpression andQueryExpression) {
 			}
 		});
 	}
-	
+
 
 	@Test
 	public void testBuildQueryForPostWithIncorrectField() {
@@ -198,7 +199,7 @@ public class QueryTranscripterTest {
 
 		QueryBuilder<Informer<Post>> built =  tested.buildQuery(repository.get(Post.class), testData);
 		QueryExpression expression = built.createMatchingExpression(repository.get(Post.class).getInformer());
-		Assert.assertThat(expression, Is.is(AndQueryExpression.class));
+		Assert.assertThat(expression, IsInstanceOf.instanceOf(AndQueryExpression.class));
 		AndQueryExpression and = (AndQueryExpression) expression;
 		and.accept(new FailingTestVisitor() {
 			@Override
@@ -209,7 +210,7 @@ public class QueryTranscripterTest {
 			@Override
 			public void startVisit(AndQueryExpression andQueryExpression) {
 			}
-			
+
 			@Override
 			public void endVisit(AndQueryExpression andQueryExpression) {
 			}
@@ -224,7 +225,7 @@ public class QueryTranscripterTest {
 
 		QueryBuilder<Informer<Post>> built =  tested.buildQuery(repository.get(Post.class), testData);
 		QueryExpression expression = built.createMatchingExpression(repository.get(Post.class).getInformer());
-		Assert.assertThat(expression, Is.is(AndQueryExpression.class));
+		Assert.assertThat(expression, IsInstanceOf.instanceOf(AndQueryExpression.class));
 		AndQueryExpression and = (AndQueryExpression) expression;
 		and.accept(new FailingTestVisitor() {
 			@Override
@@ -240,15 +241,15 @@ public class QueryTranscripterTest {
 			@Override
 			public void startVisit(AndQueryExpression andQueryExpression) {
 			}
-			
+
 			@Override
 			public void endVisit(AndQueryExpression andQueryExpression) {
 			}
-			
+
 			@Override
 			public void startVisit(OrQueryExpression orQueryExpression) {
 			}
-			
+
 			@Override
 			public void endVisit(OrQueryExpression orQueryExpression) {
 			}

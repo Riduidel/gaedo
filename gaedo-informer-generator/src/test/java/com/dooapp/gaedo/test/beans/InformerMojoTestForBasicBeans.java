@@ -1,7 +1,5 @@
 package com.dooapp.gaedo.test.beans;
 
-import static com.dooapp.gaedo.informer.InformerTypeFinderTest.these;
-import static org.junit.Assert.assertThat;
 import japa.parser.ast.CompilationUnit;
 import japa.parser.ast.ImportDeclaration;
 
@@ -16,17 +14,21 @@ import javax.inject.Named;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.project.MavenProject;
 import org.hamcrest.core.Is;
+import org.hamcrest.core.IsCollectionContaining;
 import org.hamcrest.core.IsNot;
 import org.hamcrest.core.IsNull;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
-import org.junit.internal.matchers.IsCollectionContaining;
 
 import com.dooapp.gaedo.finders.informers.DateFieldInformer;
 import com.dooapp.gaedo.informer.InformerInfos;
 import com.dooapp.gaedo.informer.InformerMojo;
 import com.dooapp.gaedo.informer.InformerTypeFinder;
+
+import static com.dooapp.gaedo.informer.InformerTypeFinderTest.these;
+
+import static org.junit.Assert.assertThat;
 
 /**
  * Location of this test is a quick hack to obtain the right package name without relying upon a basic string

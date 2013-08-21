@@ -1,11 +1,8 @@
 package com.dooapp.gaedo.informer;
 
-import static com.dooapp.gaedo.informer.InformerTypeFinderTest.these;
-import static org.junit.Assert.assertThat;
 import japa.parser.ast.CompilationUnit;
 
 import java.io.File;
-import java.io.IOException;
 import java.io.Serializable;
 import java.util.Arrays;
 import java.util.Collection;
@@ -16,11 +13,15 @@ import javax.inject.Named;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.project.MavenProject;
 import org.hamcrest.core.Is;
+import org.hamcrest.core.IsCollectionContaining;
 import org.hamcrest.core.IsNot;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
-import org.junit.internal.matchers.IsCollectionContaining;
+
+import static com.dooapp.gaedo.informer.InformerTypeFinderTest.these;
+
+import static org.junit.Assert.assertThat;
 
 public class InformerMojoBasicTest {
 

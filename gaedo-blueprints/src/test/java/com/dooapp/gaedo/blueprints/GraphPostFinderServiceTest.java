@@ -12,6 +12,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.hamcrest.core.Is;
+import org.hamcrest.core.IsInstanceOf;
 import org.hamcrest.core.IsNot;
 import org.hamcrest.core.IsNull;
 import org.junit.Assert;
@@ -176,7 +177,7 @@ public class GraphPostFinderServiceTest extends AbstractGraphPostTest {
 	public void ensureLoadCascadesWell() {
 		User u1 = getUserService().find().matching(new FindFirstUserByLogin()).getFirst();
 		assertThat(u1.about, IsNull.notNullValue());
-		assertThat(u1.about, Is.is(Post.class));
+		assertThat(u1.about, IsInstanceOf.instanceOf(Post.class));
 		assertThat(((Post) u1.about).text, IsNull.notNullValue());
 	}
 

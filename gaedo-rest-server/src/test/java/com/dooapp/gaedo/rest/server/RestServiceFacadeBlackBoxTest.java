@@ -5,6 +5,7 @@ import java.util.Collection;
 import java.util.Iterator;
 
 import org.hamcrest.core.Is;
+import org.hamcrest.core.IsInstanceOf;
 import org.junit.Assert;
 import org.junit.Test;
 import org.restlet.data.MediaType;
@@ -31,17 +32,17 @@ public class RestServiceFacadeBlackBoxTest extends AbstractGaedoResourceApplicat
 		Assert.assertThat(representation.getMediaType(), Is.is(MediaType.APPLICATION_JAVA_OBJECT));
 		ObjectRepresentation<Serializable> client = new ObjectRepresentation<Serializable>(representation);
 		Serializable content = client.getObject();
-		Assert.assertThat(content, Is.is(Collection.class));
+		Assert.assertThat(content, IsInstanceOf.instanceOf(Collection.class));
 		Collection contentCollection = (Collection) content;
 		Assert.assertThat(contentCollection.size(), Is.is(2));
 		Iterator iterator = contentCollection.iterator();
 		Object first = iterator.next();
-		Assert.assertThat(first, Is.is(User.class));
+		Assert.assertThat(first, IsInstanceOf.instanceOf(User.class));
 		// Which is first user
 		User firstUser = (User) first;
 		Assert.assertThat(firstUser.getLogin(), Is.is("first"));
 		Object second = iterator.next();
-		Assert.assertThat(second, Is.is(User.class));
+		Assert.assertThat(second, IsInstanceOf.instanceOf(User.class));
 		// Which is first user
 		User secondUser = (User) second;
 		Assert.assertThat(secondUser.getLogin(), Is.is("second"));

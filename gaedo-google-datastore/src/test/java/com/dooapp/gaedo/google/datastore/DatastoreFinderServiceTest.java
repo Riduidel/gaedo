@@ -6,6 +6,7 @@ import java.util.LinkedList;
 
 import org.hamcrest.core.AllOf;
 import org.hamcrest.core.Is;
+import org.hamcrest.core.IsCollectionContaining;
 import org.hamcrest.core.IsNot;
 import org.hamcrest.core.IsNull;
 import org.hamcrest.core.IsSame;
@@ -14,7 +15,6 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
-import org.junit.internal.matchers.IsCollectionContaining;
 
 import com.dooapp.gaedo.finders.FinderCrudService;
 import com.dooapp.gaedo.finders.Informer;
@@ -88,7 +88,7 @@ public class DatastoreFinderServiceTest {
 
 	/**
 	 * Full test for a user with three associated posts
-	 * 
+	 *
 	 * @throws IllegalAccessException
 	 */
 	@Test
@@ -240,7 +240,7 @@ public class DatastoreFinderServiceTest {
 	/**
 	 * Full test for a user with three associated posts. Test created to ensure
 	 * bug #23 is correctly corrected
-	 * 
+	 *
 	 * @throws IllegalAccessException
 	 */
 	@Test
@@ -290,7 +290,7 @@ public class DatastoreFinderServiceTest {
 	/**
 	 * Full test for a user with three associated posts. Test created to ensure
 	 * bug #23 is correctly corrected
-	 * 
+	 *
 	 * @throws IllegalAccessException
 	 */
 	@Test
@@ -401,8 +401,8 @@ public class DatastoreFinderServiceTest {
 			}
 		}).count(), Is.is(5));
 		userService.delete(savedFirst);
-		
-		
+
+
 		Assert.assertThat(userService.find().matching(new QueryBuilder<UserInformer>() {
 
 			@Override
@@ -411,7 +411,7 @@ public class DatastoreFinderServiceTest {
 				return informer.getLogin().isAnything();
 			}
 		}).count(), Is.is(1));
-		
+
 		Assert.assertThat(postService.find().matching(new QueryBuilder<PostInformer>() {
 
 			@Override

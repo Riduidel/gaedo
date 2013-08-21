@@ -4,6 +4,7 @@ import java.util.Collection;
 import java.util.logging.Logger;
 
 import org.hamcrest.core.Is;
+import org.hamcrest.core.IsInstanceOf;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
@@ -28,7 +29,7 @@ public class TestFor26 extends AbstractGraphPostSubClassTest {
 	private static interface InformerTester<InformerType extends Informer<?>> {
 
 		void test(InformerType informer);
-		
+
 	}
 	private static final Logger logger = Logger.getLogger(TestFor26.class.getName());
 
@@ -41,16 +42,16 @@ public class TestFor26 extends AbstractGraphPostSubClassTest {
 		super(environment);
 	}
 
-	@Test 
+	@Test
 	public void ensureBug26IsSolved() {
 		final String METHOD_NAME = "ensureBug26IsSolved";
 		PostSubClass newOne = new PostSubClass(0, METHOD_NAME,1.0f, State.PUBLIC, author);
 		newOne.state = State.PUBLIC;
 		newOne.anotherState = PostSubClass.AnotherStateForBug26.PUBLIC;
 		Post saved = getPostSubService().create(newOne);
-		assertThat(saved, Is.is(PostSubClass.class));
+		assertThat(saved, IsInstanceOf.instanceOf(PostSubClass.class));
 		Post loaded = getPostService().find().matching(new QueryBuilder<PostInformer>() {
-			
+
 			@Override
 			public QueryExpression createMatchingExpression(PostInformer informer) {
 				return informer.getText().equalsTo(METHOD_NAME);
