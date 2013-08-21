@@ -1,7 +1,9 @@
 package com.dooapp.gaedo.blueprints;
 
+import java.lang.ref.Reference;
+import java.lang.ref.WeakReference;
 import java.util.Map;
-import java.util.TreeMap;
+import java.util.WeakHashMap;
 
 import javax.persistence.CascadeType;
 
@@ -11,7 +13,7 @@ import javax.persistence.CascadeType;
  *
  */
 public class ObjectCache {
-	private Map<String, Object> cache = new TreeMap<String, Object>();
+	private Map<String, Reference<Object>> cache = new WeakHashMap<String, Reference<Object>>();
 
 	/**
 	 * Create objet cache for the given cascade type
@@ -24,19 +26,23 @@ public class ObjectCache {
 	}
 
 	public Object get(String objectVertexId) {
-		return cache.get(objectVertexId);
+		Reference<Object> reference = cache.get(objectVertexId);
+		if(reference!=null) {
+			Object returned = reference.get();
+			if(returned==null) {
+				cache.remove(objectVertexId);
+			}
+			return returned;
+		} else {
+			return null;
+		}
 	}
 
 	public void put(String objectVertexId, Object toUpdate) {
-		cache.put(objectVertexId, toUpdate);
+		cache.put(objectVertexId, new WeakReference<Object>(toUpdate));
 	}
 
 	public void remove(String objectVertexId) {
 		cache.remove(objectVertexId);
 	}
-
-	public boolean containsKey(String objectVertexId) {
-		return cache.containsKey(objectVertexId);
-	}
-
 }
