@@ -71,11 +71,12 @@ public class DataTypeIterable<DataType> implements Iterable<DataType>, WriteRepl
 	 * Construct the iterable by giving it both the service and the list of vertices.
 	 * @param service service used to laod vertices
 	 * @param asIterable vertices to navigate. That vertices list MUST be ordered before being given to this object.
+	 * @param objectsBeingAccessed cache of objects being accessed. This cache may already contain objects provided by search
 	 */
-	public DataTypeIterable(AbstractBluePrintsBackedFinderService<?, DataType, ?> service, Iterable<Vertex> asIterable) {
+	public DataTypeIterable(AbstractBluePrintsBackedFinderService<?, DataType, ?> service, Iterable<Vertex> asIterable, ObjectCache objectsBeingAccessed) {
 		this.service = service;
 		this.vertices = asIterable;
-		this.objectsBeingAccessed = ObjectCache.create(CascadeType.REFRESH);
+		this.objectsBeingAccessed = objectsBeingAccessed;
 	}
 
 	@Override
