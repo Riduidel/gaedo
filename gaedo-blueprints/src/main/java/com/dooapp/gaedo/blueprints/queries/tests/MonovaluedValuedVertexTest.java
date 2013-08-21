@@ -2,8 +2,11 @@ package com.dooapp.gaedo.blueprints.queries.tests;
 
 import java.util.Iterator;
 
+import javax.persistence.CascadeType;
+
 import com.dooapp.gaedo.blueprints.AbstractBluePrintsBackedFinderService;
 import com.dooapp.gaedo.blueprints.GraphDatabaseDriver;
+import com.dooapp.gaedo.blueprints.ObjectCache;
 import com.dooapp.gaedo.blueprints.indexable.IndexableGraphBackedFinderService;
 import com.dooapp.gaedo.blueprints.strategies.GraphMappingStrategy;
 import com.dooapp.gaedo.properties.Property;
@@ -17,7 +20,7 @@ import com.tinkerpop.blueprints.Vertex;
  * Base class for all simple tests (like contains, greater than, ...).
  * Notice {@link #expected} is used for both direct value comparison (for literals) and id check (for managed objects).
  * This is done by asking the {@link TargettedVertexTest#serviceRrepository} if {@link #expected} is a managed value
- * 
+ *
  * @author ndx
  *
  * @param <ValueType> current value type
@@ -92,7 +95,7 @@ public abstract class MonovaluedValuedVertexTest<ValueType extends Object> exten
 	}
 
 	/**
-	 * Check vertex corresponding to given final property matches with a managed object (that's to say an object 
+	 * Check vertex corresponding to given final property matches with a managed object (that's to say an object
 	 * for which exist a {@link IndexableGraphBackedFinderService}
 	 * @param currentVertex vertex corresponding to finalProperty in property path
 	 * @param finalProperty property giving infos on class to use to read vertex value (when needed)
@@ -112,7 +115,7 @@ public abstract class MonovaluedValuedVertexTest<ValueType extends Object> exten
 	/**
 	 * Obtain service associated to expected value. BEWARE ! This service corresponds to {@link #expected}, which may be a literal (in which case obtained service will only be an exception).
 	 * Usage iof this method should be restricted to cases where user is sure value is a serviceable one.
-	 * @return 
+	 * @return
 	 */
 	protected AbstractBluePrintsBackedFinderService getService() {
 		return (AbstractBluePrintsBackedFinderService) getRepository().get(expected.getClass());
@@ -126,7 +129,7 @@ public abstract class MonovaluedValuedVertexTest<ValueType extends Object> exten
 	public ValueType getExpected() {
 		return expected;
 	}
-	
+
 	public Object getExpectedAsValue() {
 		return getExpectedAsValueOf(getEndProperty(), getExpected());
 	}

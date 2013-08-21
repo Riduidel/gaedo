@@ -32,7 +32,7 @@ public class MapLazyLoader extends AbstractLazyLoader implements InvocationHandl
 	}
 
 	public MapLazyLoader(GraphDatabaseDriver driver, GraphMappingStrategy strategy, ClassLoader classLoader, ServiceRepository repository, Property p, Vertex objectVertex,
-					Map<Object, Object> targetMap, Map<String, Object> objectsBeingAccessed) {
+					Map<Object, Object> targetMap, ObjectCache objectsBeingAccessed) {
 		super(driver, strategy, p, objectVertex, repository, classLoader, objectsBeingAccessed);
 		this.map = targetMap;
 	}
@@ -49,7 +49,7 @@ public class MapLazyLoader extends AbstractLazyLoader implements InvocationHandl
 		return method.invoke(map, args);
 	}
 
-	public void loadMap(Map map, Map<String, Object> objectsBeingAccessed) {
+	public void loadMap(Map map, ObjectCache objectsBeingAccessed) {
 		try {
 			for (Edge e : strategy.getOutEdgesFor(rootVertex, property)) {
 				Vertex value = e.getVertex(Direction.IN);

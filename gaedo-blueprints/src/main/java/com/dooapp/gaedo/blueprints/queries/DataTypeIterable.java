@@ -2,10 +2,11 @@ package com.dooapp.gaedo.blueprints.queries;
 
 import java.io.ObjectStreamException;
 import java.util.Iterator;
-import java.util.Map;
-import java.util.TreeMap;
+
+import javax.persistence.CascadeType;
 
 import com.dooapp.gaedo.blueprints.AbstractBluePrintsBackedFinderService;
+import com.dooapp.gaedo.blueprints.ObjectCache;
 import com.dooapp.gaedo.patterns.WriteReplaceable;
 import com.dooapp.gaedo.utils.CollectionUtils;
 import com.tinkerpop.blueprints.Vertex;
@@ -25,11 +26,7 @@ public class DataTypeIterable<DataType> implements Iterable<DataType>, WriteRepl
 	 */
 	private class DataTypeIterator implements Iterator<DataType> {
 		private Iterator<Vertex> verticesIterator = vertices.iterator();
-		
-		/**
-		 * Cache-like map allowing a little faster iteration mechanism
-		 */
-		private Map<String, Object> objectsBeingAccessed = new TreeMap<String, Object>();
+
 
 		/**
 		 * @return
@@ -50,14 +47,14 @@ public class DataTypeIterable<DataType> implements Iterable<DataType>, WriteRepl
 		}
 
 		/**
-		 * 
+		 *
 		 * @see java.util.Iterator#remove()
 		 * @category delegate
 		 */
 		public void remove() {
 			verticesIterator.remove();
 		}
-		
+
 	}
 
 	/**
@@ -68,6 +65,7 @@ public class DataTypeIterable<DataType> implements Iterable<DataType>, WriteRepl
 	 * Sorted list of vertices from which objects are to be loaded.
 	 */
 	private Iterable<Vertex> vertices;
+	private ObjectCache objectsBeingAccessed;
 
 	/**
 	 * Construct the iterable by giving it both the service and the list of vertices.
@@ -77,6 +75,7 @@ public class DataTypeIterable<DataType> implements Iterable<DataType>, WriteRepl
 	public DataTypeIterable(AbstractBluePrintsBackedFinderService<?, DataType, ?> service, Iterable<Vertex> asIterable) {
 		this.service = service;
 		this.vertices = asIterable;
+		this.objectsBeingAccessed = ObjectCache.create(CascadeType.REFRESH);
 	}
 
 	@Override

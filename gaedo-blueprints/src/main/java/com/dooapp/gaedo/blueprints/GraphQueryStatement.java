@@ -5,6 +5,8 @@ import java.util.TreeMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import javax.persistence.CascadeType;
+
 import com.dooapp.gaedo.blueprints.queries.BluePrintsQueryBuilder;
 import com.dooapp.gaedo.blueprints.queries.DataTypeIterable;
 import com.dooapp.gaedo.blueprints.queries.executable.GraphExecutableQuery;
@@ -22,23 +24,23 @@ import com.dooapp.gaedo.finders.sort.SortingExpressionImpl;
 import com.tinkerpop.blueprints.Vertex;
 
 public class GraphQueryStatement<
-		DataType, 
-		InformerType extends Informer<DataType>> 
+		DataType,
+		InformerType extends Informer<DataType>>
 	implements QueryStatement<DataType, InformerType> {
-	
+
 	protected QueryBuilder<InformerType> query;
 	protected AbstractBluePrintsBackedFinderService<?, DataType, InformerType> service;
 	protected ServiceRepository repository;
-	
+
 	public GraphQueryStatement(QueryBuilder<InformerType> query,
-					AbstractBluePrintsBackedFinderService<?, DataType, InformerType> service, 
+					AbstractBluePrintsBackedFinderService<?, DataType, InformerType> service,
 					ServiceRepository repository) {
 		this.query = query;
 		this.service = service;
 		this.repository = repository;
 		this.state = State.INITIAL;
 	}
-	
+
 	/**
 	 * Query id, can be used for debugging
 	 */
@@ -121,7 +123,7 @@ public class GraphQueryStatement<
 			Vertex result = prepareQuery().getVertex();
 			if (result == null)
 				throw new NoReturnableVertexException(filterExpression);
-			return service.loadObject(result, new TreeMap<String, Object>());
+			return service.loadObject(result, ObjectCache.create(CascadeType.REFRESH));
 		} finally {
 			setState(State.EXECUTED);
 		}

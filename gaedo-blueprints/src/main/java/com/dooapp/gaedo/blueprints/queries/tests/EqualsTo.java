@@ -14,7 +14,7 @@ public class EqualsTo extends MonovaluedValuedVertexTest<Object> implements Vert
 
 	/**
 	 * This one is quite simple : load object, then call equals on it
-	 * 
+	 *
 	 * @param currentVertex
 	 * @param finalProperty
 	 * @return
@@ -24,7 +24,7 @@ public class EqualsTo extends MonovaluedValuedVertexTest<Object> implements Vert
 	@Override
 	protected boolean callMatchManaged(Vertex currentVertex, Property finalProperty) {
 		// First check if id is the same
-		return isVertexEqualsTo(currentVertex, getService(), expected, false);
+		return isVertexEqualsTo(currentVertex, getService(), expected, false, objectsBeingAccessed);
 	}
 
 	@Override

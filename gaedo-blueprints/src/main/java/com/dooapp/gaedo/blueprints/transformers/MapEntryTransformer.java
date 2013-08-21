@@ -12,6 +12,7 @@ import javax.persistence.CascadeType;
 import com.dooapp.gaedo.blueprints.AbstractBluePrintsBackedFinderService;
 import com.dooapp.gaedo.blueprints.BluePrintsCrudServiceException;
 import com.dooapp.gaedo.blueprints.GraphUtils;
+import com.dooapp.gaedo.blueprints.ObjectCache;
 import com.dooapp.gaedo.properties.DescribedProperty;
 import com.dooapp.gaedo.properties.Property;
 import com.tinkerpop.blueprints.Graph;
@@ -23,36 +24,36 @@ public class MapEntryTransformer extends AbstractTupleTransformer<Map.Entry> imp
 			super(e);
 		}
 	}
-	
+
 	/**
-	 * Beware : order of elements is signifiant here (as it is used to build id), as a consequence we use a LinkedHashMap 
+	 * Beware : order of elements is signifiant here (as it is used to build id), as a consequence we use a LinkedHashMap
 	 */
 	private final Map<Property, Collection<CascadeType>> containedProperties = new LinkedHashMap<Property, Collection<CascadeType>>();
 	private DescribedProperty KEY_PROPERTY;
 	private DescribedProperty VALUE_PROPERTY;
-	
+
 	public MapEntryTransformer() {
 		Collection<CascadeType> cascade = GraphUtils.extractCascadeOf(new CascadeType[] {CascadeType.ALL});
 		try {
-			Class<Map.Entry> interfaceClass = Map.Entry.class; 
+			Class<Map.Entry> interfaceClass = Map.Entry.class;
 			Class<WriteableKeyEntry> implementationClass = WriteableKeyEntry.class;
 			PropertyDescriptor keyProperty = new PropertyDescriptor("key", interfaceClass.getDeclaredMethod("getKey"), implementationClass.getDeclaredMethod("setKey", Object.class));
 			PropertyDescriptor valueProperty = new PropertyDescriptor("value", interfaceClass.getDeclaredMethod("getValue"), interfaceClass.getDeclaredMethod("setValue", Object.class));
-			
+
 			KEY_PROPERTY = new DescribedProperty(keyProperty, Map.Entry.class);
-			VALUE_PROPERTY = new DescribedProperty(valueProperty, Map.Entry.class); 
-			
+			VALUE_PROPERTY = new DescribedProperty(valueProperty, Map.Entry.class);
+
 			containedProperties.put(
-							KEY_PROPERTY, 
+							KEY_PROPERTY,
 							cascade);
 			containedProperties.put(
-							VALUE_PROPERTY, 
+							VALUE_PROPERTY,
 							cascade);
 		} catch(Exception e) {
 			throw new UnableToGetKeyOrValueProperty(e);
 		}
 	}
-	
+
 	/**
 	 * Should return one property for key, and one for value. ethod is made public for making sure https://github.com/Riduidel/gaedo/issues/5 is behind us
 	 * @return
@@ -60,7 +61,7 @@ public class MapEntryTransformer extends AbstractTupleTransformer<Map.Entry> imp
 	public Map<Property, Collection<CascadeType>> getContainedProperties() {
 		return containedProperties;
 	}
-	
+
 	/**
 	 * Before to persist, we make sure entry is a {@link WriteableKeyEntry} instance
 	 * @param service
@@ -70,7 +71,7 @@ public class MapEntryTransformer extends AbstractTupleTransformer<Map.Entry> imp
 	 */
 	@Override
 	public <DataType> Vertex getVertexFor(AbstractBluePrintsBackedFinderService<? extends Graph, DataType, ?> service, Entry cast, CascadeType cascade,
-					Map<String, Object> objectsBeingUpdated) {
+					ObjectCache objectsBeingUpdated) {
 		if(!(cast instanceof WriteableKeyEntry)) {
 			cast = new WriteableKeyEntry(cast.getKey(), cast.getValue());
 		}
@@ -88,7 +89,7 @@ public class MapEntryTransformer extends AbstractTupleTransformer<Map.Entry> imp
 	}
 
 	/**
-	 * 
+	 *
 	 * @return
 	 * @see com.dooapp.gaedo.blueprints.transformers.AbstractTupleTransformer#getContainedClass()
 	 */

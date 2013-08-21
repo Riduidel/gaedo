@@ -7,6 +7,7 @@ import javax.persistence.CascadeType;
 import com.dooapp.gaedo.blueprints.AbstractBluePrintsBackedFinderService;
 import com.dooapp.gaedo.blueprints.GraphDatabaseDriver;
 import com.dooapp.gaedo.blueprints.Kind;
+import com.dooapp.gaedo.blueprints.ObjectCache;
 import com.dooapp.gaedo.blueprints.strategies.GraphMappingStrategy;
 import com.dooapp.gaedo.finders.repository.ServiceRepository;
 import com.tinkerpop.blueprints.Graph;
@@ -22,8 +23,8 @@ public interface TupleTransformer<Type> extends Transformer {
 	 * @param objectsBeingUpdated map of already accessed objects
 	 * @return
 	 */
-	public <DataType> com.tinkerpop.blueprints.Vertex getVertexFor(AbstractBluePrintsBackedFinderService<? extends Graph, DataType, ?> service, Type cast, CascadeType cascade, Map<String, Object> objectsBeingUpdated);
-	
+	public <DataType> com.tinkerpop.blueprints.Vertex getVertexFor(AbstractBluePrintsBackedFinderService<? extends Graph, DataType, ?> service, Type cast, CascadeType cascade, ObjectCache objectsBeingUpdated);
+
 	/**
 	 * Create an identifier for tuple value, which can be done in any fashion
 	 */
@@ -39,7 +40,7 @@ public interface TupleTransformer<Type> extends Transformer {
 	 * @param objectsBeingAccessed
 	 * @return
 	 */
-	public Object loadObject(GraphDatabaseDriver driver, GraphMappingStrategy strategy, ClassLoader classLoader, Class effectiveClass, Vertex key, ServiceRepository repository, Map<String, Object> objectsBeingAccessed);
+	public Object loadObject(GraphDatabaseDriver driver, GraphMappingStrategy strategy, ClassLoader classLoader, Class effectiveClass, Vertex key, ServiceRepository repository, ObjectCache objectsBeingAccessed);
 
 
 	/**
@@ -52,7 +53,7 @@ public interface TupleTransformer<Type> extends Transformer {
 	 * @param effectiveClass
 	 * @return
 	 */
-	public Object loadObject(GraphDatabaseDriver driver, GraphMappingStrategy strategy, ClassLoader classLoader, String effectiveType, Vertex key, ServiceRepository repository, Map<String, Object> objectsBeingAccessed);
+	public Object loadObject(GraphDatabaseDriver driver, GraphMappingStrategy strategy, ClassLoader classLoader, String effectiveType, Vertex key, ServiceRepository repository, ObjectCache objectsBeingAccessed);
 
 	public Kind getKind();
 

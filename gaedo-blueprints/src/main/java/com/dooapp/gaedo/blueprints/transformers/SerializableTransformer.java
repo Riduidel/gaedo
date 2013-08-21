@@ -6,7 +6,6 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.Serializable;
-import java.util.Map;
 
 import javax.persistence.CascadeType;
 
@@ -14,13 +13,14 @@ import com.dooapp.gaedo.blueprints.AbstractBluePrintsBackedFinderService;
 import com.dooapp.gaedo.blueprints.GraphDatabaseDriver;
 import com.dooapp.gaedo.blueprints.GraphUtils;
 import com.dooapp.gaedo.blueprints.Kind;
+import com.dooapp.gaedo.blueprints.ObjectCache;
 import com.dooapp.gaedo.blueprints.strategies.GraphMappingStrategy;
 import com.dooapp.gaedo.finders.repository.ServiceRepository;
 import com.tinkerpop.blueprints.Graph;
 import com.tinkerpop.blueprints.Vertex;
 
 /**
- * Serializable handling is quite particular. Instead of saving a simple node type, this transformer checks the contained value and try to save it according to its inner type 
+ * Serializable handling is quite particular. Instead of saving a simple node type, this transformer checks the contained value and try to save it according to its inner type
  * (using {@link LiteralTransformer}, others {@link TupleTransformer} and services). This provide compact DB with good performances, at the cost of a complex class ... this one.
  * @author ndx
  *
@@ -56,7 +56,7 @@ public class SerializableTransformer implements TupleTransformer<Serializable> {
 	 */
 	@Override
 	public <DataType> Vertex getVertexFor(AbstractBluePrintsBackedFinderService<? extends Graph, DataType, ?> service, Serializable cast, CascadeType cascade,
-					Map<String, Object> objectsBeingUpdated) {
+					ObjectCache objectsBeingUpdated) {
 		ServiceRepository repository = service.getRepository();
 		// some first-level check to see if someone else than this transformer has any knowledge of value (because, well, this id will be longer than hell)
 		Class<? extends Serializable> valueClass = cast.getClass();
@@ -69,7 +69,7 @@ public class SerializableTransformer implements TupleTransformer<Serializable> {
 		return service.getVertexFor(cast, CascadeType.REFRESH, objectsBeingUpdated);
 	}
 
-	
+
 	private Vertex getVertextForUnknownSerializable(GraphDatabaseDriver database, ServiceRepository repository, Serializable value) {
 		String serialized = writeSerializable(value);
 		// Then indexed vertex id (for neo4j, typically)
@@ -108,12 +108,12 @@ public class SerializableTransformer implements TupleTransformer<Serializable> {
 	 * @see com.dooapp.gaedo.blueprints.transformers.TupleTransformer#loadObject(java.lang.ClassLoader, java.lang.Class, com.tinkerpop.blueprints.pgm.Vertex, com.dooapp.gaedo.finders.repository.ServiceRepository, java.util.Map)
 	 */
 	@Override
-	public Object loadObject(GraphDatabaseDriver driver, GraphMappingStrategy strategy, ClassLoader classLoader, Class effectiveClass, Vertex key, ServiceRepository repository, Map<String, Object> objectsBeingAccessed) {
+	public Object loadObject(GraphDatabaseDriver driver, GraphMappingStrategy strategy, ClassLoader classLoader, Class effectiveClass, Vertex key, ServiceRepository repository, ObjectCache objectsBeingAccessed) {
 		return readSerializable(driver.getValue(key).toString());
 	}
 
 	@Override
-	public Object loadObject(GraphDatabaseDriver driver, GraphMappingStrategy strategy, ClassLoader classLoader, String effectiveType, Vertex key, ServiceRepository repository, Map<String, Object> objectsBeingAccessed) {
+	public Object loadObject(GraphDatabaseDriver driver, GraphMappingStrategy strategy, ClassLoader classLoader, String effectiveType, Vertex key, ServiceRepository repository, ObjectCache objectsBeingAccessed) {
 		return readSerializable(driver.getValue(key).toString());
 	}
 

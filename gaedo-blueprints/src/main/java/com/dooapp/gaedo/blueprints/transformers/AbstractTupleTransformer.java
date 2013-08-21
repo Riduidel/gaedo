@@ -10,6 +10,7 @@ import com.dooapp.gaedo.blueprints.BluePrintsPersister;
 import com.dooapp.gaedo.blueprints.GraphDatabaseDriver;
 import com.dooapp.gaedo.blueprints.GraphUtils;
 import com.dooapp.gaedo.blueprints.Kind;
+import com.dooapp.gaedo.blueprints.ObjectCache;
 import com.dooapp.gaedo.blueprints.strategies.GraphMappingStrategy;
 import com.dooapp.gaedo.finders.repository.ServiceRepository;
 import com.dooapp.gaedo.properties.Property;
@@ -21,7 +22,7 @@ public abstract class AbstractTupleTransformer<TupleType> {
 	protected final BluePrintsPersister persister = new BluePrintsPersister(Kind.uri);
 
 	public <DataType> Vertex getVertexFor(AbstractBluePrintsBackedFinderService<? extends Graph, DataType, ?> service, TupleType cast, CascadeType cascade,
-					Map<String, Object> objectsBeingUpdated) {
+					ObjectCache objectsBeingUpdated) {
 		// First step is to build an id for given tuple by concatenating key and value id (which is hopefully done separately)
 		String entryVertexId = getIdOfTuple(service.getRepository(), cast);
 		// No need to memorize updated version
@@ -57,13 +58,13 @@ public abstract class AbstractTupleTransformer<TupleType> {
 		return sOut.toString();
 	}
 
-	public Object loadObject(GraphDatabaseDriver driver, GraphMappingStrategy strategy, ClassLoader classLoader, String effectiveType, Vertex key, ServiceRepository repository, Map<String, Object> objectsBeingAccessed) {
+	public Object loadObject(GraphDatabaseDriver driver, GraphMappingStrategy strategy, ClassLoader classLoader, String effectiveType, Vertex key, ServiceRepository repository, ObjectCache objectsBeingAccessed) {
 		TupleType tuple = instanciateTupleFor(classLoader, key);
 		persister.loadObjectProperties(driver, strategy, classLoader, repository, key, tuple, getContainedProperties(), objectsBeingAccessed);
 		return tuple;
 	}
 
-	public TupleType loadObject(GraphDatabaseDriver driver, GraphMappingStrategy strategy, ClassLoader classLoader, Class effectiveClass, Vertex key, ServiceRepository repository, Map<String, Object> objectsBeingAccessed) {
+	public TupleType loadObject(GraphDatabaseDriver driver, GraphMappingStrategy strategy, ClassLoader classLoader, Class effectiveClass, Vertex key, ServiceRepository repository, ObjectCache objectsBeingAccessed) {
 		TupleType tuple = instanciateTupleFor(classLoader, key);
 		persister.loadObjectProperties(driver, strategy, classLoader, repository, key, tuple, getContainedProperties(), objectsBeingAccessed);
 		return tuple;
@@ -76,7 +77,7 @@ public abstract class AbstractTupleTransformer<TupleType> {
 		throw new UnsupportedOperationException("method "+Transformer.class.getName()+"#canHandle has not yet been implemented AT ALL");
 	}
 
-	public Kind getKind() { 
+	public Kind getKind() {
 		return Kind.bnode;
 	}
 }

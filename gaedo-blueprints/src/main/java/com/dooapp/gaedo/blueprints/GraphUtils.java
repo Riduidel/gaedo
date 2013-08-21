@@ -135,7 +135,7 @@ public class GraphUtils {
 	 * @return a fresh instance, with only id set
 	 */
 	public static Object createInstance(GraphDatabaseDriver driver, GraphMappingStrategy strategy, ClassLoader classLoader, Vertex key, Class<?> defaultType,
-					ServiceRepository repository, Map<String, Object> objectsBeingAccessed) {
+					ServiceRepository repository, ObjectCache objectsBeingAccessed) {
 		String effectiveType = null;
 		Kind kind = getKindOf(key);
 		/*
@@ -300,7 +300,7 @@ public class GraphUtils {
 	 * @return the
 	 */
 	public static Vertex getVertexForTuple(AbstractBluePrintsBackedFinderService<? extends Graph, ?, ?> service, ServiceRepository repository, Object value,
-					CascadeType cascade, Map<String, Object> objectsBeingUpdated) {
+					CascadeType cascade, ObjectCache objectsBeingUpdated) {
 		Vertex returned = null;
 		// Now distinct behaviour between known objects and unknown ones
 		Class<? extends Object> valueClass = value.getClass();

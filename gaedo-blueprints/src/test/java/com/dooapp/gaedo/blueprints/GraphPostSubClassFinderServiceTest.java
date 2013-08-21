@@ -119,7 +119,7 @@ public class GraphPostSubClassFinderServiceTest extends AbstractGraphPostSubClas
 
 		// Directly manipulating vertex to link it to a raw uri node (used as ... text)
 		IndexableGraphBackedFinderService<PostSubClass, PostSubClassInformer> postSubService = (IndexableGraphBackedFinderService<PostSubClass, PostSubClassInformer>) getPostSubService();
-		Vertex postVertex = postSubService.getVertexFor(newOne, CascadeType.REFRESH, new TreeMap<String, Object>());
+		Vertex postVertex = postSubService.getVertexFor(newOne, CascadeType.REFRESH, ObjectCache.create(CascadeType.REFRESH));
 
 //		if(environment.getGraph() instanceof TransactionalGraph)
 //			((TransactionalGraph) environment.getGraph()).startTransaction();

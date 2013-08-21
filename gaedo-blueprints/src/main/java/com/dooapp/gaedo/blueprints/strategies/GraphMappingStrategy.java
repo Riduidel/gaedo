@@ -6,6 +6,7 @@ import java.util.Map;
 import javax.persistence.CascadeType;
 
 import com.dooapp.gaedo.blueprints.AbstractBluePrintsBackedFinderService;
+import com.dooapp.gaedo.blueprints.ObjectCache;
 import com.dooapp.gaedo.blueprints.queries.tests.CompoundVertexTest;
 import com.dooapp.gaedo.properties.Property;
 import com.tinkerpop.blueprints.Edge;
@@ -28,12 +29,12 @@ public interface GraphMappingStrategy<DataType> {
 	 * @return a map associating each property to its cascade type (useful for persistence operation, but will have to be slightly updated for load operations).
 	 */
 	public Map<Property, Collection<CascadeType>> getContainedProperties(DataType object, Vertex vertex, CascadeType cascadeType);
-	
-	
+
+
 	public void assignId(final DataType value, final Object... id);
 
 	public void generateValidIdFor(DataType toCreate);
-	
+
 	/**
 	 * Get an id string for the given object
 	 * @param object
@@ -50,9 +51,9 @@ public interface GraphMappingStrategy<DataType> {
 
 
 	public Collection<Property> getIdProperties();
-	
+
 	public boolean isIdGenerationRequired();
-	
+
 	/**
 	 * Initialization method allowing strategy to load some infos built during service init (like, as an example, the GraphDatabaseDriver or the service itself).
 	 * @param service
@@ -74,7 +75,7 @@ public interface GraphMappingStrategy<DataType> {
 	 * @throws UnableToGetVertexTypeException if no vertex type info can be found
 	 */
 	public String getEffectiveType(Vertex vertex);
-	
+
 	/**
 	 * Method invoked when vertex has been loaded in object. Allows strategy to perform any customization.
 	 * @param fromId TODO
@@ -82,7 +83,7 @@ public interface GraphMappingStrategy<DataType> {
 	 * @param into
 	 * @param objectsBeingAccessed TODO
 	 */
-	public void loaded(String fromId, Vertex from, DataType into, Map<String, Object> objectsBeingAccessed);
+	public void loaded(String fromId, Vertex from, DataType into, ObjectCache objectsBeingAccessed);
 
 
 	/**
@@ -100,7 +101,7 @@ public interface GraphMappingStrategy<DataType> {
 	 * @param objectsBeingAccessed already loaded vertices ids and associated objects
 	 * @return
 	 */
-	public boolean shouldLoadPropertiesOf(String objectVertexId, Vertex objectVertex, Map<String, Object> objectsBeingAccessed);
+	public boolean shouldLoadPropertiesOf(String objectVertexId, Vertex objectVertex, ObjectCache objectsBeingAccessed);
 
 	/**
 	 * Clone service for a new service to use a derived version of this one

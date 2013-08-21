@@ -28,7 +28,7 @@ public class CollectionLazyLoader extends AbstractLazyLoader implements Invocati
 
 	// Internal storage collection (not to be confused with external visible collection)
 	private Collection collection;
-	
+
 	/**
 	 * Comparator used to sort the Edges linking an object with the the elements of a Collection.
 	 * This is used to maintain order in ordered Collections like List.
@@ -42,28 +42,28 @@ public class CollectionLazyLoader extends AbstractLazyLoader implements Invocati
 		public int compare(Edge o1, Edge o2) {
 			Integer o1Idx = (Integer) o1.getProperty(Properties.collection_index.name());
 			Integer o2Idx = (Integer) o2.getProperty(Properties.collection_index.name());
-			
+
 			if(null == o1Idx && null == o2Idx)
 				return 0;
-			
+
 			if(null == o1Idx)
 				return -1;
-			
+
 			if(null == o2Idx)
 				return 1;
-			
+
 			return o1Idx.compareTo(o2Idx);
 		}
 	};
-	
+
 	/**
 	 * Serialization constructor
 	 */
 	public CollectionLazyLoader() {
-		
+
 	}
 
-	public CollectionLazyLoader(GraphDatabaseDriver driver, GraphMappingStrategy strategy, ClassLoader classLoader, ServiceRepository repository, Property p, Vertex objectVertex, Collection<Object> targetCollection, Map<String, Object> objectsBeingAccessed) {
+	public CollectionLazyLoader(GraphDatabaseDriver driver, GraphMappingStrategy strategy, ClassLoader classLoader, ServiceRepository repository, Property p, Vertex objectVertex, Collection<Object> targetCollection, ObjectCache objectsBeingAccessed) {
 		super(driver, strategy, p, objectVertex, repository, classLoader, objectsBeingAccessed);
 		this.collection = targetCollection;
 	}
@@ -81,7 +81,7 @@ public class CollectionLazyLoader extends AbstractLazyLoader implements Invocati
 	}
 
 	@SuppressWarnings("unchecked")
-	public void loadCollection(Collection collection, Map<String, Object> objectsBeingAccessed) {
+	public void loadCollection(Collection collection, ObjectCache objectsBeingAccessed) {
 		try {
 			// Use the magic order property to try to put the elements in the correct order (if the property is there)
 			List<Edge> edges = new LinkedList<Edge>();
@@ -93,7 +93,7 @@ public class CollectionLazyLoader extends AbstractLazyLoader implements Invocati
 			}
 			if(needToSort)
 				Collections.sort(edges, COLLECTION_EDGE_COMPARATOR);
-			
+
 			// Now that everything is in order, we can load the real collection
 			for(Edge e : edges) {
 				Vertex value = e.getVertex(Direction.IN);

@@ -3,8 +3,11 @@ package com.dooapp.gaedo.blueprints.queries.tests;
 import java.util.Iterator;
 import java.util.TreeMap;
 
+import javax.persistence.CascadeType;
+
 import com.dooapp.gaedo.blueprints.AbstractBluePrintsBackedFinderService;
 import com.dooapp.gaedo.blueprints.GraphDatabaseDriver;
+import com.dooapp.gaedo.blueprints.ObjectCache;
 import com.dooapp.gaedo.blueprints.strategies.GraphMappingStrategy;
 import com.dooapp.gaedo.finders.repository.ServiceRepository;
 import com.dooapp.gaedo.properties.Property;
@@ -16,7 +19,7 @@ import com.tinkerpop.blueprints.Vertex;
  *
  */
 public class TargettedVertexTest {
-	
+
 	/**
 	 * Check if vertex is the one associated to the given object
 	 * @param currentVertex examined vertex
@@ -25,18 +28,20 @@ public class TargettedVertexTest {
 	 * @param deepInspect should we perform deep object inspection to check equaality ? This requires object loading and is as a consequence by far slower
 	 * @return true if object is equals to vertex associated object
 	 */
-	protected static boolean isVertexEqualsTo(Vertex currentVertex, AbstractBluePrintsBackedFinderService service, Object expected, boolean deepInspect) {
+	protected static boolean isVertexEqualsTo(Vertex currentVertex, AbstractBluePrintsBackedFinderService service, Object expected, boolean deepInspect, ObjectCache objectsBeingAccessed) {
 		GraphDatabaseDriver driver = service.getDriver();
 		Object expectedId = service.getIdOf(expected);
 		if (expectedId.equals(driver.getIdOf(currentVertex))) {
 			return true;
 		} else if(deepInspect) {
-			Object value = service.loadObject(currentVertex, new TreeMap<String, Object>());
+			Object value = service.loadObject(currentVertex, objectsBeingAccessed);
 			return ((expected == null && value == null) || (expected != null && expected.equals(value)));
 		} else {
 			return false;
 		}
 	}
+
+	protected ObjectCache objectsBeingAccessed = ObjectCache.create(CascadeType.REFRESH);
 
 	/**
 	 * Path used to navigate from source node to inspected one
@@ -107,7 +112,7 @@ public class TargettedVertexTest {
 	public GraphDatabaseDriver getDriver() {
 		return driver;
 	}
-	
+
 	protected StringBuilder toString(int deepness, StringBuilder builder) {
 		for(int i=0;i<deepness;i++) {
 			builder.append("\t");
@@ -125,7 +130,7 @@ public class TargettedVertexTest {
 		builder.append(" ").append(getClass().getSimpleName()).append(" ");
 		return builder;
 	}
-	
+
 	public String toString() {
 		return toString(0, new StringBuilder()).toString();
 	}

@@ -11,6 +11,7 @@ import java.util.TreeMap;
 import javax.persistence.CascadeType;
 
 import com.dooapp.gaedo.blueprints.AbstractBluePrintsBackedFinderService;
+import com.dooapp.gaedo.blueprints.ObjectCache;
 import com.dooapp.gaedo.blueprints.indexable.IndexNames;
 import com.dooapp.gaedo.blueprints.queries.tests.CollectionContains;
 import com.dooapp.gaedo.blueprints.queries.tests.EqualsTo;
@@ -28,7 +29,7 @@ import com.tinkerpop.blueprints.IndexableGraph;
 import com.tinkerpop.blueprints.Vertex;
 
 /**
- * Class visiting vertex test to grab possible query roots. What are query roots ? 
+ * Class visiting vertex test to grab possible query roots. What are query roots ?
  * Well, they are the vertices a query can use to navigate the graph and find matching nodes.
  * Suppose, as a canonical example, we want to find the following objects
  * <pre>
@@ -38,12 +39,12 @@ import com.tinkerpop.blueprints.Vertex;
  *	  Object.classes contains Post.class
  * </pre>
  *
- * It is obvious we can start by navigating the class vertex (the one holding the Post.class value) and scan all objects linked to that 
+ * It is obvious we can start by navigating the class vertex (the one holding the Post.class value) and scan all objects linked to that
  * class through the Object.classes relationship. But, is it the optimal path ? Maybe we have only two or three articles written by that given author ...
  * and only one having as note 4.0.
- * As a consequence, this class tries to give some answer elements by visiting the query, and providing a map linking root vertices to 
+ * As a consequence, this class tries to give some answer elements by visiting the query, and providing a map linking root vertices to
  * the properties path used to find them.
- * 
+ *
  * Fo the given query, and after having visited the object containing that query, this method will as a consequence return, through the {@link #getResult()}
  * method call, a map linking one vertex to each navigable query predicate.
  * For now, the usable predicates are
@@ -60,13 +61,13 @@ public class VertexRootsCollector extends VertexTestVisitorAdapter implements Ve
 	 * We use a {@link LinkedHashMap} to keep test ordering, as it allows us to avoid loading all object values (usuall the class test will be set as last one)
 	 */
 	private Map<Iterable<Vertex>, Iterable<Property>> result = new LinkedHashMap<Iterable<Vertex>, Iterable<Property>>();
-	
+
 	private final AbstractBluePrintsBackedFinderService<? extends Graph, ?, ?> service;
 
 	/**
 	 * Cache of objects being loaded during roots collection building
 	 */
-	private transient Map<String, Object> objectsBeingAccessed = new TreeMap<String, Object>();
+	private transient ObjectCache objectsBeingAccessed = ObjectCache.create(CascadeType.REFRESH);
 
 	public VertexRootsCollector(AbstractBluePrintsBackedFinderService<?, ?, ?> service) {
 		super();
@@ -87,7 +88,7 @@ public class VertexRootsCollector extends VertexTestVisitorAdapter implements Ve
 	public boolean startVisit(NotVertexTest notVertexTest) {
 		return false;
 	}
-	
+
 	/**
 	 * We should of course support OR queries, but for now we don't, as it implies concatenating result lists and having a very specific behaviour during the search for the best matching vertex
 	 * @param orVertexTest
@@ -98,7 +99,7 @@ public class VertexRootsCollector extends VertexTestVisitorAdapter implements Ve
 	public boolean startVisit(OrVertexTest orVertexTest) {
 		return false;
 	}
-	
+
 	@Override
 	public void visit(CollectionContains collectionContains) {
 		result.put(load(collectionContains.getExpectedAsValue()), collectionContains.getPath());
@@ -116,25 +117,25 @@ public class VertexRootsCollector extends VertexTestVisitorAdapter implements Ve
 		else
 			return Arrays.asList(vertexFor);
 	}
-	
+
 	@Override
 	public void visit(EqualsTo equalsTo) {
 		if(equalsTo.getExpected()!=null)
 			result.put(load(equalsTo.getExpectedAsValue()), equalsTo.getPath());
 	}
-	
+
 	@Override
 	public void visit(MapContainsKey mapContainsKey) {
 		// TODO Auto-generated method stub
 		throw new UnsupportedOperationException("method "+VertexRootsCollector.class.getName()+"#visit has not yet been implemented AT ALL");
 	}
-	
+
 	@Override
 	public void visit(MapContainsValue mapContainsValue) {
 		// TODO Auto-generated method stub
 		throw new UnsupportedOperationException("method "+VertexRootsCollector.class.getName()+"#visit has not yet been implemented AT ALL");
 	}
-	
+
 	/**
 	 * Add all vertices with the given path
 	 * @param vertexPropertyTest
@@ -149,7 +150,7 @@ public class VertexRootsCollector extends VertexTestVisitorAdapter implements Ve
 			final Index<Vertex> vertices = indexable
 							.getIndex(IndexNames.VERTICES.getIndexName(), Vertex.class);
 			result.put(new Iterable<Vertex>() {
-				
+
 				@Override
 				public Iterator<Vertex> iterator() {
 					Iterable<Vertex> matching = vertices.get(vertexPropertyTest.getPropertyName(), vertexPropertyTest.getExpected());

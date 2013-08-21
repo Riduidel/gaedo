@@ -16,6 +16,7 @@ import javax.persistence.ManyToOne;
 
 import com.dooapp.gaedo.blueprints.GraphUtils;
 import com.dooapp.gaedo.blueprints.Kind;
+import com.dooapp.gaedo.blueprints.ObjectCache;
 import com.dooapp.gaedo.blueprints.Properties;
 import com.dooapp.gaedo.blueprints.indexable.IndexableGraphBackedFinderService;
 import com.dooapp.gaedo.blueprints.queries.tests.AndVertexTest;
@@ -173,7 +174,7 @@ public class BeanBasedMappingStrategy<DataType> extends AbstractMappingStrategy<
 	}
 
 	@Override
-	public void loaded(String fromId, Vertex from, DataType into, Map<String, Object> objectsBeingAccessed) {
+	public void loaded(String fromId, Vertex from, DataType into, ObjectCache objectsBeingAccessed) {
 	}
 
 	/**
@@ -182,10 +183,10 @@ public class BeanBasedMappingStrategy<DataType> extends AbstractMappingStrategy<
 	 * @param objectVertex
 	 * @param objectsBeingAccessed
 	 * @return
-	 * @see com.dooapp.gaedo.blueprints.strategies.GraphMappingStrategy#shouldLoadPropertiesOf(java.lang.String, com.tinkerpop.blueprints.pgm.Vertex, java.util.Map)
+	 * @see com.dooapp.gaedo.blueprints.strategies.GraphMappingStrategy#shouldLoadPropertiesOf(java.lang.String, com.tinkerpop.blueprints.pgm.Vertex, ObjectCache)
 	 */
 	@Override
-	public boolean shouldLoadPropertiesOf(String objectVertexId, Vertex objectVertex, Map<String, Object> objectsBeingAccessed) {
+	public boolean shouldLoadPropertiesOf(String objectVertexId, Vertex objectVertex, ObjectCache objectsBeingAccessed) {
 		return true;
 	}
 	

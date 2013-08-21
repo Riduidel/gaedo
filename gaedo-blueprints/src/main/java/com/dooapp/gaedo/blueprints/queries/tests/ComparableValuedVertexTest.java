@@ -2,8 +2,11 @@ package com.dooapp.gaedo.blueprints.queries.tests;
 
 import java.util.TreeMap;
 
+import javax.persistence.CascadeType;
+
 import com.dooapp.gaedo.blueprints.AbstractBluePrintsBackedFinderService;
 import com.dooapp.gaedo.blueprints.GraphDatabaseDriver;
+import com.dooapp.gaedo.blueprints.ObjectCache;
 import com.dooapp.gaedo.blueprints.strategies.GraphMappingStrategy;
 import com.dooapp.gaedo.blueprints.transformers.Literals;
 import com.dooapp.gaedo.properties.Property;
@@ -26,7 +29,7 @@ public abstract class ComparableValuedVertexTest<ComparableType extends Comparab
 	@Override
 	protected boolean callMatchManaged(Vertex currentVertex, Property finalProperty) {
 		AbstractBluePrintsBackedFinderService service = getService();
-		Object value = service.loadObject(currentVertex, new TreeMap<String, Object>());
+		Object value = service.loadObject(currentVertex, objectsBeingAccessed);
 		return doCompare((ComparableType) value);
 	}
 
