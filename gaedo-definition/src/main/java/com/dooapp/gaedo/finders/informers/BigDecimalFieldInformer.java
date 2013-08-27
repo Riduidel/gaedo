@@ -7,7 +7,7 @@ import com.dooapp.gaedo.finders.FieldInformer;
 import com.dooapp.gaedo.properties.Property;
 
 public class BigDecimalFieldInformer extends
-		ComparableFieldInformer<BigDecimal> implements FieldInformer {
+		ComparableFieldInformer<BigDecimal> {
 
 	public BigDecimalFieldInformer(Property source) {
 		super(source);

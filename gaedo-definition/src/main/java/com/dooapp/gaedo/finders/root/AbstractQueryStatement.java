@@ -1,31 +1,32 @@
 /**
- * 
+ *
  */
 package com.dooapp.gaedo.finders.root;
 
 import java.beans.PropertyChangeEvent;
 
 import com.dooapp.gaedo.finders.Informer;
+import com.dooapp.gaedo.finders.QueryBrowser;
 import com.dooapp.gaedo.finders.QueryBuilder;
 import com.dooapp.gaedo.finders.QueryExpression;
-import com.dooapp.gaedo.finders.QueryStatement;
 import com.dooapp.gaedo.finders.QueryExpressionContainerVisitor;
+import com.dooapp.gaedo.finders.QueryStatement;
 import com.dooapp.gaedo.finders.SortingBuilder;
 import com.dooapp.gaedo.finders.SortingExpression;
-import com.dooapp.gaedo.finders.repository.ServiceRepository;
+import com.dooapp.gaedo.finders.projection.ProjectionBuilder;
 import com.dooapp.gaedo.finders.sort.SortingExpressionImpl;
 import com.dooapp.gaedo.utils.PropertyChangeEmitter;
 
 /**
  * base class for query executable statements. This class simply provides common behaviour, like {@link #buildQueryExpression()} or a default implementation
- * of {@link #sortBy(SortingExpression)} 
+ * of {@link #sortBy(SortingExpression)}
  * @author ndx
  *
  * @param <DataType>
  * @param <InformerType>
  */
-public abstract class AbstractQueryStatement<DataType, InformerType extends Informer<DataType>>
-		implements QueryStatement<DataType, InformerType> {
+public abstract class AbstractQueryStatement<ValueType, DataType, InformerType extends Informer<DataType>>
+		implements QueryStatement<ValueType, DataType, InformerType> {
 	private State state = State.INITIAL;
 	/**
 	 * Used query builder
@@ -34,7 +35,7 @@ public abstract class AbstractQueryStatement<DataType, InformerType extends Info
 	/**
 	 * Class informer used to build query
 	 */
-	private InformerType informer;
+	protected final InformerType informer;
 	/**
 	 * Used sorting expression
 	 */
@@ -46,7 +47,9 @@ public abstract class AbstractQueryStatement<DataType, InformerType extends Info
 	/**
 	 * Emitter used to fire events
 	 */
-	private PropertyChangeEmitter emitter;
+	protected final PropertyChangeEmitter emitter;
+
+	protected ProjectionBuilder<ValueType, DataType, Informer<DataType>> projector;
 	/**
 	 * Query id, should be set as soon as possible
 	 */
@@ -64,7 +67,7 @@ public abstract class AbstractQueryStatement<DataType, InformerType extends Info
 	 * Lazy build query expression from informations about service managed class and
 	 * input query.
 	 * Once built, it is memorized in {@link #queryExpression}. As a consequence, one may not modify the source query expression
-	 * 
+	 *
 	 * @return
 	 */
 	protected QueryExpression buildQueryExpression() {
@@ -76,7 +79,7 @@ public abstract class AbstractQueryStatement<DataType, InformerType extends Info
 	}
 
 	@Override
-	public QueryStatement<DataType, InformerType> sortBy(SortingBuilder<InformerType> expression) {
+	public QueryStatement<ValueType, DataType, InformerType> sortBy(SortingBuilder<InformerType> expression) {
 		this.sortingExpression = expression.createSortingExpression(informer);
 		setState(State.SORTING);
 		return this;

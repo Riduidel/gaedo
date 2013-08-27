@@ -3,6 +3,7 @@ package com.dooapp.gaedo.tag;
 import java.util.List;
 
 import org.hamcrest.core.Is;
+import org.hamcrest.core.IsCollectionContaining;
 import org.hamcrest.core.IsInstanceOf;
 import org.junit.Assert;
 import org.junit.Before;
@@ -14,9 +15,14 @@ import com.dooapp.gaedo.finders.QueryBuilder;
 import com.dooapp.gaedo.finders.QueryExpression;
 import com.dooapp.gaedo.finders.expressions.Expressions;
 import com.dooapp.gaedo.finders.informers.StringFieldInformer;
+import com.dooapp.gaedo.finders.projection.ProjectionBuilder;
+import com.dooapp.gaedo.finders.projection.ValueFetcher;
 import com.dooapp.gaedo.finders.repository.ServiceRepository;
 import com.dooapp.gaedo.test.beans.Tag;
 import com.dooapp.gaedo.test.beans.TagInformer;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertThat;
 
 public class CollectionBackedTagFinderServiceTest {
 	private static final String A = "A";
@@ -34,7 +40,7 @@ public class CollectionBackedTagFinderServiceTest {
 	public void testCreate() {
 		Tag input = new Tag(A);
 		Tag returned = tagService.create(input);
-		Assert.assertEquals(returned.getText(), input.getText());
+		assertEquals(returned.getText(), input.getText());
 	}
 
 	@Test
@@ -51,10 +57,10 @@ public class CollectionBackedTagFinderServiceTest {
 						return object.get("text").equalsTo(A);
 					}
 				}).getAll();
-		Assert.assertThat(values, IsInstanceOf.instanceOf(List.class));
+		assertThat(values, IsInstanceOf.instanceOf(List.class));
 		List<Tag> valuesAscollection = (List<Tag>) values;
-		Assert.assertThat(valuesAscollection.size(), Is.is(1));
-		Assert.assertThat(valuesAscollection.get(0), Is.is(a));
+		assertThat(valuesAscollection.size(), Is.is(1));
+		assertThat(valuesAscollection.get(0), Is.is(a));
 	}
 
 	@Test
@@ -71,10 +77,10 @@ public class CollectionBackedTagFinderServiceTest {
 						return object.equalsTo(a);
 					}
 				}).getAll();
-		Assert.assertThat(values, IsInstanceOf.instanceOf(List.class));
+		assertThat(values, IsInstanceOf.instanceOf(List.class));
 		List<Tag> valuesAscollection = (List<Tag>) values;
-		Assert.assertThat(valuesAscollection.size(), Is.is(1));
-		Assert.assertThat(valuesAscollection.get(0), Is.is(a));
+		assertThat(valuesAscollection.size(), Is.is(1));
+		assertThat(valuesAscollection.get(0), Is.is(a));
 	}
 
 	@Test
@@ -93,12 +99,12 @@ public class CollectionBackedTagFinderServiceTest {
 								.equalsTo(B));
 					}
 				}).getAll();
-		Assert.assertThat(values, IsInstanceOf.instanceOf(List.class));
+		assertThat(values, IsInstanceOf.instanceOf(List.class));
 		List<Tag> valuesAscollection = (List<Tag>) values;
-		Assert.assertThat(valuesAscollection.size(), Is.is(2));
+		assertThat(valuesAscollection.size(), Is.is(2));
 		// Here, beware to elements insertion order, due to collection class
-		Assert.assertThat(valuesAscollection.get(0), Is.is(a));
-		Assert.assertThat(valuesAscollection.get(1), Is.is(b));
+		assertThat(valuesAscollection.get(0), Is.is(a));
+		assertThat(valuesAscollection.get(1), Is.is(b));
 	}
 
 	/**
@@ -121,11 +127,65 @@ public class CollectionBackedTagFinderServiceTest {
 								.equalsTo(B));
 					}
 				}).getAll();
-		Assert.assertThat(values, IsInstanceOf.instanceOf(List.class));
+		assertThat(values, IsInstanceOf.instanceOf(List.class));
 		List<Tag> valuesAscollection = (List<Tag>) values;
-		Assert.assertThat(valuesAscollection.size(), Is.is(2));
+		assertThat(valuesAscollection.size(), Is.is(2));
 		// Here, beware to elements insertion order, due to collection class
-		Assert.assertThat(valuesAscollection.get(0), Is.is(a));
-		Assert.assertThat(valuesAscollection.get(1), Is.is(b));
+		assertThat(valuesAscollection.get(0), Is.is(a));
+		assertThat(valuesAscollection.get(1), Is.is(b));
+	}
+
+	/**
+	 * This is the deadly test that check that synthetic getter calls work
+	 * correctly
+	 */
+	@Test
+	public void testFindAndProject() {
+		Tag a = new Tag(A);
+		tagService.create(a);
+		Tag b = tagService.create(new Tag(B));
+		Tag c = tagService.create(new Tag(C));
+		Iterable<String> values = tagService.find().matching(
+				new QueryBuilder<TagInformer>() {
+
+					public QueryExpression createMatchingExpression(
+							TagInformer object) {
+						return object.getText().differentFrom(null);
+					}
+				}).projectOn(new ProjectionBuilder<String, Tag, TagInformer>() {
+
+					@Override
+					public String project(TagInformer informer, ValueFetcher fetcher) {
+						return fetcher.getValue(informer.getText());
+					}
+				}).getAll();
+		assertThat(values, IsCollectionContaining.hasItems(A, B, C));
+	}
+
+	/**
+	 * This is the deadly test that check that synthetic getter calls work
+	 * correctly
+	 */
+	@Test
+	public void testNoopProject() {
+		Tag a = new Tag(A);
+		tagService.create(a);
+		Tag b = tagService.create(new Tag(B));
+		Tag c = tagService.create(new Tag(C));
+		Iterable<Tag> values = tagService.find().matching(
+				new QueryBuilder<TagInformer>() {
+
+					public QueryExpression createMatchingExpression(
+							TagInformer object) {
+						return object.getText().differentFrom(null);
+					}
+				}).projectOn(new ProjectionBuilder<Tag, Tag, TagInformer>() {
+
+					@Override
+					public Tag project(TagInformer informer, ValueFetcher fetcher) {
+						return fetcher.getValue(informer);
+					}
+				}).getAll();
+		assertThat(values, IsCollectionContaining.hasItems(a, b, c));
 	}
 }

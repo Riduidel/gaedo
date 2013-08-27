@@ -2,9 +2,9 @@ package com.dooapp.gaedo.finders;
 
 /**
  * A finder has the ability to return one or more objects of the given type
- * 
+ *
  * @author ndx
- * 
+ *
  * @param <DataType>
  */
 public interface Finder<DataType, InformerType extends Informer<DataType>> {
@@ -13,5 +13,5 @@ public interface Finder<DataType, InformerType extends Informer<DataType>> {
 	 * @param query input query builder
 	 * @return output query statement
 	 */
-	public QueryStatement<DataType, InformerType> matching(QueryBuilder<InformerType> query);
+	public QueryStatement<DataType, DataType, InformerType> matching(QueryBuilder<InformerType> query);
 }

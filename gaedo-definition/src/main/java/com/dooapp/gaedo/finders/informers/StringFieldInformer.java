@@ -12,13 +12,12 @@ import com.dooapp.gaedo.properties.Property;
  * @author ndx
  *
  */
-public class StringFieldInformer extends ObjectFieldInformer implements
-		FieldInformer {
+public class StringFieldInformer extends ObjectFieldInformer<String>{
 
 	public StringFieldInformer(Property source) {
 		super(source);
 	}
-	
+
 	/**
 	 * Create an expression checking this field contains the given String
 	 * @param contained string that field should contain
@@ -27,7 +26,7 @@ public class StringFieldInformer extends ObjectFieldInformer implements
 	public QueryExpression contains(String contained) {
 		return new ContainsStringExpression(source, getFieldPath(), contained);
 	}
-	
+
 	/**
 	 * Creates an expression checking this field starts with the given string
 	 * @param start text that should be at start of this field
@@ -36,7 +35,7 @@ public class StringFieldInformer extends ObjectFieldInformer implements
 	public QueryExpression startsWith(String start) {
 		return new StartsWithExpression(source, getFieldPath(), start);
 	}
-	
+
 	/**
 	 * Creates an expression checking this field ends with the given string
 	 * @param end text that should be at end of this field
@@ -45,7 +44,7 @@ public class StringFieldInformer extends ObjectFieldInformer implements
 	public QueryExpression endsWith(String end) {
 		return new EndsWithExpression(source, getFieldPath(), end);
 	}
-	
+
 	@Override
 	protected StringFieldInformer clone() {
 		return new StringFieldInformer(source);

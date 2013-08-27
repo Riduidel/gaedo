@@ -1,6 +1,7 @@
 package com.dooapp.gaedo.finders.collections;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Comparator;
 import java.util.List;
 import java.util.TreeSet;
@@ -8,20 +9,22 @@ import java.util.TreeSet;
 import com.dooapp.gaedo.exceptions.range.BadRangeDefinitionException;
 import com.dooapp.gaedo.exceptions.range.BadStartIndexException;
 import com.dooapp.gaedo.finders.Informer;
+import com.dooapp.gaedo.finders.QueryBrowser;
 import com.dooapp.gaedo.finders.QueryBuilder;
 import com.dooapp.gaedo.finders.QueryExpression;
+import com.dooapp.gaedo.finders.projection.ProjectionBuilder;
 import com.dooapp.gaedo.finders.root.AbstractQueryStatement;
 import com.dooapp.gaedo.finders.sort.SortingBackedComparator;
 import com.dooapp.gaedo.utils.PropertyChangeEmitter;
 
 /**
  * Build a query statement backed by the collection this service relies upon
- * 
+ *
  * @author ndx
- * 
+ *
  */
-public class CollectionQueryStatement<DataType, InformerType extends Informer<DataType>>
-		extends AbstractQueryStatement<DataType, InformerType> {
+public class CollectionQueryStatement<ValueType, DataType, InformerType extends Informer<DataType>>
+		extends AbstractQueryStatement<ValueType, DataType, InformerType> {
 	/**
 	 * Collection used for tests
 	 */
@@ -45,7 +48,7 @@ public class CollectionQueryStatement<DataType, InformerType extends Informer<Da
 		}
 	}
 
-	public Iterable<DataType> get(int start, int end) {
+	public Iterable<ValueType> get(int start, int end) {
 		try {
 			if (start < 0) {
 				throw new BadStartIndexException(start);
@@ -58,13 +61,9 @@ public class CollectionQueryStatement<DataType, InformerType extends Informer<Da
 		}
 	}
 
-	public Iterable<DataType> getAll() {
+	public Iterable<ValueType> getAll() {
 		try {
-			Iterable<DataType> returned = selectAll();
-			if (getSortingExpression() != null && getSortingExpression().iterator().hasNext()) {
-				returned = new TreeSet<DataType>(createComparator());
-			}
-			return returned;
+			return selectAll();
 		} finally {
 			setState(State.EXECUTED);
 		}
@@ -72,7 +71,7 @@ public class CollectionQueryStatement<DataType, InformerType extends Informer<Da
 
 	/**
 	 * Creates a comparator from the sorting expression
-	 * 
+	 *
 	 * @return
 	 */
 	private Comparator<? super DataType> createComparator() {
@@ -83,12 +82,29 @@ public class CollectionQueryStatement<DataType, InformerType extends Informer<Da
 	 * For getting all data, we build a matcher by calling
 	 * {@link #createMatcher()} then use it against all elements of collection
 	 */
-	private List<DataType> selectAll() {
-		List<DataType> returned = new ArrayList<DataType>();
+	private List<ValueType> selectAll() {
+		Collection<DataType> matching = null;
+		if (getSortingExpression() != null && getSortingExpression().iterator().hasNext()) {
+			matching = new TreeSet<DataType>(createComparator());
+		} else {
+			matching = new ArrayList<DataType>();
+		}
 		Matcher<DataType> expression = createMatcher();
 		for (DataType element : data) {
+			// select
 			if (expression.matches(element)) {
-				returned.add(element);
+				// add (sorting is done here, but not projection, which is done in second time - yup, it's sub-optimal)
+				matching.add(element);
+			}
+		}
+		// Typical use case for guava ? Sure man !
+		// but I don't want to rely on that behemoth lib here
+		List<ValueType> returned = new ArrayList<ValueType>();
+		for(DataType element : matching) {
+			if(projector==null) {
+				returned.add((ValueType) element);
+			} else {
+				returned.add(projector.project(informer, new CollectionValueFetcher<DataType>(element)));
 			}
 		}
 		return returned;
@@ -96,7 +112,7 @@ public class CollectionQueryStatement<DataType, InformerType extends Informer<Da
 
 	/**
 	 * Creates a matcher by visiting the QueryExpression
-	 * 
+	 *
 	 * @return
 	 */
 	private Matcher<DataType> createMatcher() {
@@ -108,11 +124,27 @@ public class CollectionQueryStatement<DataType, InformerType extends Informer<Da
 		return matcher;
 	}
 
-	public DataType getFirst() {
+	public ValueType getFirst() {
 		try {
 			return selectAll().get(0);
 		} finally {
 			setState(State.EXECUTED);
 		}
+	}
+
+	/**
+	 * For the sake of simplicity, we simply set value and cast.
+	 * This is obviously not optimal, theoretically speaking, but the usage pattern of query builders is to create one for each call
+	 * so there is no big deal with that ... excepted if someone, somehow, abuse the system
+	 * @param projector
+	 * @return
+	 * @see com.dooapp.gaedo.finders.QueryStatement#projectOn(com.dooapp.gaedo.finders.projection.ProjectionBuilder)
+	 */
+	@Override
+	@SuppressWarnings("unchecked")
+	public <ProjectedValueType> QueryBrowser<ProjectedValueType> projectOn(ProjectionBuilder<ProjectedValueType, DataType, InformerType> projector) {
+		this.projector = (ProjectionBuilder<ValueType, DataType, Informer<DataType>>) projector;
+		setState(State.PROJECTING);
+		return (QueryBrowser<ProjectedValueType>) this;
 	}
 }

@@ -40,9 +40,10 @@ import com.dooapp.gaedo.finders.sort.SortingExpressionImpl;
 import com.tinkerpop.blueprints.Vertex;
 
 public class GraphQueryStatement<
+		ValueType,
 		DataType,
 		InformerType extends Informer<DataType>>
-	implements QueryStatement<DataType, InformerType> {
+	implements QueryStatement<ValueType, DataType, InformerType> {
 
 	protected QueryBuilder<InformerType> query;
 	protected AbstractBluePrintsBackedFinderService<?, DataType, InformerType> service;
@@ -102,7 +103,7 @@ public class GraphQueryStatement<
 	}
 
 	@Override
-	public Iterable<DataType> get(int start, int end) {
+	public Iterable<ValueType> get(int start, int end) {
 		try {
 			if (start < 0) {
 				throw new BadStartIndexException(start);
@@ -160,7 +161,7 @@ public class GraphQueryStatement<
 	}
 
 	@Override
-	public Iterable<DataType> getAll() {
+	public Iterable<ValueType> getAll() {
 		try {
 			return createResultsIterable(prepareQuery().getAll());
 		} finally {
@@ -169,7 +170,7 @@ public class GraphQueryStatement<
 	}
 
 	@Override
-	public DataType getFirst() {
+	public ValueType getFirst() {
 		try {
 			Vertex result = prepareQuery().getVertex();
 			if (result == null)

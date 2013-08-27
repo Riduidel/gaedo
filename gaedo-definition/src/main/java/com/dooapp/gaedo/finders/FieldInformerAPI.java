@@ -10,13 +10,12 @@ import com.dooapp.gaedo.properties.Property;
  * @author ndx
  *
  */
-public interface FieldInformerAPI extends FieldInformer {
+public interface FieldInformerAPI<InformedType> extends FieldInformer<InformedType> {
 
 	/**
 	 * Create a usable version of this object. In fact, source object should never be directly return, as effectively used one
 	 * will have a fieldPath set, which make it non-reusable.
 	 * @param propertyPath TODO
-	 * @return usually an {@link Object#clone()} call is enough
 	 */
 	FieldInformer with(Collection<Property> propertyPath);
 

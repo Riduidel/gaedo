@@ -11,13 +11,13 @@ import com.dooapp.gaedo.properties.Property;
 /**
  * Base class for all comparable objects fields informers. It provides
  * comparison methods for all kinds of comparisons.
- * 
+ *
  * @author ndx
- * 
+ *
  * @param <ComparableType>
  */
 public abstract class ComparableFieldInformer<ComparableType extends Comparable<ComparableType>>
-		extends ObjectFieldInformer implements FieldInformer {
+		extends ObjectFieldInformer<ComparableType> implements FieldInformer<ComparableType> {
 
 	public ComparableFieldInformer(Property source) {
 		super(source);
@@ -25,7 +25,7 @@ public abstract class ComparableFieldInformer<ComparableType extends Comparable<
 
 	/**
 	 * Check that number is lower than given value
-	 * 
+	 *
 	 * @param other
 	 *            value to compare to
 	 * @return a {@link LowerThanExpression}
@@ -36,7 +36,7 @@ public abstract class ComparableFieldInformer<ComparableType extends Comparable<
 
 	/**
 	 * Check that number is greater than value
-	 * 
+	 *
 	 * @param other
 	 *            value compared to
 	 * @return a {@link GreaterThanExpression}

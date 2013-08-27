@@ -19,9 +19,9 @@ import com.dooapp.gaedo.utils.PropertyChangeEmitterImpl;
 /**
  * Base class for all class implementing {@link FinderCrudService} as
  * {@link Collection} data elements
- * 
+ *
  * @author ndx
- * 
+ *
  * @param <DataType>
  * @param <InformerType>
  */
@@ -50,7 +50,7 @@ public class CollectionBackedFinderService<DataType, InformerType extends Inform
 
 	/**
 	 * Build a collection backed finder
-	 * 
+	 *
 	 * @param containedClass
 	 * @param informerClass
 	 * @see AbstractFinderService
@@ -82,9 +82,9 @@ public class CollectionBackedFinderService<DataType, InformerType extends Inform
 	 * consequence, long calls may result in inaccurate data set.
 	 */
 	@Override
-	protected QueryStatement<DataType, InformerType> createQueryStatement(
+	protected QueryStatement<DataType, DataType, InformerType> createQueryStatement(
 			QueryBuilder<InformerType> query) {
-		return new CollectionQueryStatement<DataType, InformerType>(query,
+		return new CollectionQueryStatement<DataType, DataType, InformerType>(query,
 				getInformer(), new LinkedList<DataType>(data), support);
 	}
 

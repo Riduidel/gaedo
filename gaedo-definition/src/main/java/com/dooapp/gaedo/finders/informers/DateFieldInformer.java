@@ -6,13 +6,12 @@ import java.util.Date;
 import com.dooapp.gaedo.finders.FieldInformer;
 import com.dooapp.gaedo.properties.Property;
 
-public class DateFieldInformer extends ComparableFieldInformer<Date> implements
-		FieldInformer {
+public class DateFieldInformer extends ComparableFieldInformer<Date>{
 
 	public DateFieldInformer(Property source) {
 		super(source);
 	}
-	
+
 	@Override
 	protected DateFieldInformer clone() {
 		return new DateFieldInformer(source);

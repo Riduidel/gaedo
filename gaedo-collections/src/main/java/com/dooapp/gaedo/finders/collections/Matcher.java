@@ -1,6 +1,3 @@
-/**
- * 
- */
 package com.dooapp.gaedo.finders.collections;
 
 import java.util.Stack;
@@ -31,7 +28,7 @@ public class Matcher<DataType> implements QueryExpressionVisitor {
 	 * A stack is maintained during visiting elements, but ony its 0 element is interesting
 	 */
 	private Stack<Evaluator<DataType>> evaluators = new Stack<Evaluator<DataType>>();
-	
+
 	public Matcher() {
 		evaluators.push(new AndEvaluator<DataType>());
 	}
@@ -49,7 +46,7 @@ public class Matcher<DataType> implements QueryExpressionVisitor {
 	}
 
 	/**
-	 * Check if this matcher matches the given object. For that, all inner matchers are used. The root matcher will be used to start evaluating. 
+	 * Check if this matcher matches the given object. For that, all inner matchers are used. The root matcher will be used to start evaluating.
 	 * Hopefully, this root matcher is a And one
 	 * @param element
 	 */
@@ -82,7 +79,7 @@ public class Matcher<DataType> implements QueryExpressionVisitor {
 	public void visit(AnythingExpression expression) {
 		evaluators.peek().add(new AnythingEvaluator<DataType>(expression.getField()));
 	}
-	
+
 	public void visit(EqualsExpression expression) {
 		evaluators.peek().add(new EqualsEvaluator<DataType>(expression.getField(), expression.getValue()));
 	}
@@ -94,7 +91,7 @@ public class Matcher<DataType> implements QueryExpressionVisitor {
 
 	public <ComparableType extends Comparable<ComparableType>> void visit(GreaterThanExpression<ComparableType> expression) {
 		evaluators.peek().add(new GreaterThanEvaluator<DataType>(expression.getField(), expression.isStrictly(), expression.getValue()));
-		
+
 	}
 
 	public <ComparableType extends Comparable<ComparableType>> void visit(LowerThanExpression<ComparableType> expression) {
@@ -119,7 +116,7 @@ public class Matcher<DataType> implements QueryExpressionVisitor {
 	@Override
 	public void visit(CollectionContaingExpression expression) {
 		evaluators.peek().add(new CollectionContainingEvaluator<DataType>(expression.getField(), expression.getContained()));
-		
+
 	}
 
 	@Override

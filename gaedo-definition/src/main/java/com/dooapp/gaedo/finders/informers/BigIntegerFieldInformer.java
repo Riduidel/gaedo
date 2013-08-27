@@ -7,12 +7,12 @@ import com.dooapp.gaedo.finders.FieldInformer;
 import com.dooapp.gaedo.properties.Property;
 
 public class BigIntegerFieldInformer extends
-		ComparableFieldInformer<BigInteger> implements FieldInformer {
+		ComparableFieldInformer<BigInteger> {
 
 	public BigIntegerFieldInformer(Property source) {
 		super(source);
 	}
-	
+
 	@Override
 	protected BigIntegerFieldInformer clone() {
 		return new BigIntegerFieldInformer(source);

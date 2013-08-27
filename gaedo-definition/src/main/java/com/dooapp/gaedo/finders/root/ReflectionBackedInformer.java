@@ -39,7 +39,7 @@ public class ReflectionBackedInformer<DataType> implements Informer<DataType> {
 			this.field = field;
 			this.parentPath = parentPath;
 		}
-		
+
 		public AsFieldInformer(Property field) {
 			this.field = field;
 		}
@@ -93,11 +93,6 @@ public class ReflectionBackedInformer<DataType> implements Informer<DataType> {
 			return returned;
 		}
 
-		@Override
-		public FieldInformer with(Collection<Property> propertyPath) {
-			return new AsFieldInformer(field, new LinkedList<Property>(propertyPath));
-		}
-
 		/**
 		 * @return
 		 * @see java.lang.Object#hashCode()
@@ -138,23 +133,28 @@ public class ReflectionBackedInformer<DataType> implements Informer<DataType> {
 		private ReflectionBackedInformer getOuterType() {
 			return ReflectionBackedInformer.this;
 		}
+
+		@Override
+		public FieldInformer with(Collection propertyPath) {
+			return new AsFieldInformer(field, new LinkedList<Property>(propertyPath));
+		}
 	}
-	
+
 	/**
 	 * Informer for super class
 	 */
 	private Informer<? super DataType> parent;
-	
+
 	/**
 	 * Local class, used for getting fields and properties
 	 */
 	private final Class<DataType> informedClass;
-	
+
 	/**
 	 * Map linking known properties to effective informers. Notice this map is to be lazily loaded by {@link #loadFieldsInformers(ReflectionBackedInformerFactory)}
 	 */
 	private Map<Property, FieldInformer> fields;
-	
+
 	private PropertyProvider propertyProvider;
 
 	/**
@@ -230,7 +230,7 @@ public class ReflectionBackedInformer<DataType> implements Informer<DataType> {
 	public FieldInformer get(String string) {
 		return get(string, new LinkedList<Property>());
 	}
-	
+
 
 	/**
 	 * Obtain entry by performing an informed lookup consisting into first looking up field name then field name qualified with class simple name, and finally by performing
@@ -310,14 +310,18 @@ public class ReflectionBackedInformer<DataType> implements Informer<DataType> {
 		return toReturn;
 	}
 
+	/**
+	 * As itself, that class has an empty field path
+	 * @return
+	 * @see com.dooapp.gaedo.finders.FieldInformer#getFieldPath()
+	 */
 	@Override
 	public Iterable<Property> getFieldPath() {
-		// TODO Auto-generated method stub
-		throw new UnsupportedOperationException("method "+FieldInformer.class.getName()+"#getFieldPath has not yet been implemented AT ALL");
+		return Collections.emptyList();
 	}
 
 	@Override
-	public FieldInformer with(Collection<Property> propertyPath) {
+	public FieldInformer with(Collection propertyPath) {
 		// TODO Auto-generated method stub
 		throw new UnsupportedOperationException("method "+FieldInformerAPI.class.getName()+"#use has not yet been implemented AT ALL");
 	}

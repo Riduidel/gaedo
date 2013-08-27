@@ -7,9 +7,9 @@ import com.dooapp.gaedo.finders.QueryStatement;
 
 /**
  * Ultra-simple finder class
- * 
+ *
  * @author ndx
- * 
+ *
  */
 class SimpleFinder<DataType, InformerType extends Informer<DataType>>
 		implements Finder<DataType, InformerType> {
@@ -30,8 +30,8 @@ class SimpleFinder<DataType, InformerType extends Informer<DataType>>
 	/**
 	 * Build a query statement from the input query builder provided. Notice that we provide the query a maybe not unique id
 	 */
-	public QueryStatement<DataType, InformerType> matching(QueryBuilder<InformerType> query) {
-		QueryStatement<DataType, InformerType> returned = service.createQueryStatement(query);
+	public QueryStatement<DataType, DataType, InformerType> matching(QueryBuilder<InformerType> query) {
+		QueryStatement<DataType, DataType, InformerType> returned = service.createQueryStatement(query);
 		StackTraceElement creator = new Throwable().getStackTrace()[1];
 		returned.setId(creator.getClassName()+" "+creator.getMethodName());
 		return returned;

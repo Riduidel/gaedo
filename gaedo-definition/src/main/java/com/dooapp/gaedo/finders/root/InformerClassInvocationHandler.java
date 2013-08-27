@@ -19,10 +19,10 @@ import com.dooapp.gaedo.utils.MethodResolver;
 import com.dooapp.gaedo.utils.VirtualMethodCreationException;
 
 /**
- * This invocation handler will transform calls to synthetic informers getters into calls to the {@link #realInformer}'s {@link Informer#get(String)} method. 
- * 
+ * This invocation handler will transform calls to synthetic informers getters into calls to the {@link #realInformer}'s {@link Informer#get(String)} method.
+ *
  * @author Nicolas
- * 
+ *
  */
 public class InformerClassInvocationHandler<InformerType extends Informer<ContainedType>, ContainedType> extends BasicInvocationHandler<InformerType, MethodResolver>
 		implements InvocationHandler, Proxied, Validable {
@@ -92,7 +92,7 @@ public class InformerClassInvocationHandler<InformerType extends Informer<Contai
 	 * field, I don't really know why it's here)
 	 */
 	protected final Class<ContainedType> containedType;
-	
+
 	/**
 	 * This field is used when trying to project this informer as another class's field (you know, for some method chainings)
 	 */
@@ -104,7 +104,7 @@ public class InformerClassInvocationHandler<InformerType extends Informer<Contai
 	protected final Informer<ContainedType> realInformer;
 
 	/**
-	 * This class used to eager load all methods, but this generates failures in case when a class refers to 
+	 * This class used to eager load all methods, but this generates failures in case when a class refers to
 	 * itself as member (see Tag test bean for an example of such a configuration).
 	 * @param informerClass
 	 * @param containedType
@@ -127,7 +127,7 @@ public class InformerClassInvocationHandler<InformerType extends Informer<Contai
 		if(declaringClass.equals(FieldProjector.class)) {
 			// Oh my god ! The dread projector method
 			return new CallMethodResolver(method) {
-				
+
 				@Override
 				protected Object callMethod(Method method, Object[] invokedArgs) throws Throwable{
 					return invokeProjectorMethod(method, invokedArgs);
@@ -164,7 +164,7 @@ public class InformerClassInvocationHandler<InformerType extends Informer<Contai
 		} else  {
 			return createSubInformerResolvers(method);
 		}
-		
+
 
 	}
 
@@ -218,9 +218,9 @@ public class InformerClassInvocationHandler<InformerType extends Informer<Contai
 	public Informer<ContainedType> getRealInformer() {
 		return realInformer;
 	}
-	
+
 	/**
-	 * Invoke an informer method on {@link #realInformer} 
+	 * Invoke an informer method on {@link #realInformer}
 	 * @category invoke
 	 * @param invokedMethod
 	 * @param invokedArgs
@@ -236,13 +236,13 @@ public class InformerClassInvocationHandler<InformerType extends Informer<Contai
 	}
 
 	/**
-	 * Invoked when user calls a methosd from the FieldInformerAPI interface on that proxy. It allows us to mimic some behaviours 
+	 * Invoked when user calls a method from the FieldInformerAPI interface on that proxy. It allows us to mimic some behaviours
 	 * (typically the {@link FieldInformerAPI#with(Collection)} method will be abused)
 	 * @param method
 	 * @param invokedArgs
 	 * @return
 	 * @category invoke
-	 * @throws Throwable 
+	 * @throws Throwable
 	 */
 	protected Object invokeAPIMethod(Method method, Object[] invokedArgs) throws Throwable {
 		return invokeProjectorMethod(method, invokedArgs);
@@ -258,7 +258,7 @@ public class InformerClassInvocationHandler<InformerType extends Informer<Contai
 	private Object invokeProjectorMethod(Method invokedMethod,
 			Object[] invokedArgs) throws Throwable {
 		Informer asField = (Informer) invokedMethod.invoke(realInformer, invokedArgs);
-		return Proxy.newProxyInstance(informerClass.getClassLoader(), new Class<?>[] {informerClass}, 
+		return Proxy.newProxyInstance(informerClass.getClassLoader(), new Class<?>[] {informerClass},
 				new InformerClassInvocationHandler(informerClass, containedType, asField));
 	}
 
