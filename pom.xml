@@ -4,7 +4,7 @@
 	<groupId>com.dooapp</groupId>
 	<artifactId>gaedo</artifactId>
 	<name>Gaedo</name>
-	<version>0.6.0</version>
+	<version>0.6.1-SNAPSHOT</version>
 	<description>Google App Engine Data Object Library</description>
 	<url>https://github.com/Riduidel/gaedo/</url>
 	<packaging>pom</packaging>
