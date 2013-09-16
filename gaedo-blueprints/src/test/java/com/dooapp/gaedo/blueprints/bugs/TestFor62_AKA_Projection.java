@@ -3,6 +3,8 @@ package com.dooapp.gaedo.blueprints.bugs;
 import java.util.Collection;
 import java.util.logging.Logger;
 
+import org.hamcrest.core.Is;
+import org.hamcrest.core.IsNot;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -18,10 +20,13 @@ import com.dooapp.gaedo.finders.projection.ProjectionBuilder;
 import com.dooapp.gaedo.finders.projection.ValueFetcher;
 import com.dooapp.gaedo.test.beans.User;
 import com.dooapp.gaedo.test.beans.UserInformer;
+import com.dooapp.gaedo.utils.CollectionUtils;
 
 import static com.dooapp.gaedo.blueprints.TestUtils.simpleTest;
 
-@RunWith(Parameterized.class) @Ignore
+import static org.junit.Assert.assertThat;
+
+@RunWith(Parameterized.class)
 public class TestFor62_AKA_Projection extends AbstractGraphPostSubClassTest {
 	private static interface InformerTester<InformerType extends Informer<?>> {
 
@@ -45,12 +50,16 @@ public class TestFor62_AKA_Projection extends AbstractGraphPostSubClassTest {
 
 			@Override
 			public QueryExpression createMatchingExpression(UserInformer informer) {
-				return informer.getLogin().startsWith("t");
+				return informer.getLogin().startsWith("u");
 			}
 		}).projectOn(new ProjectionBuilder<String, User, UserInformer>() {
 			public String project(UserInformer informer, ValueFetcher fetcher) {
 				return fetcher.getValue(informer.getLogin());
 			}
 		}).getAll();
+		assertThat(CollectionUtils.asList(result).size(), IsNot.not(0));
+		for(String s : result) {
+			assertThat(s.startsWith("u"), Is.is(true));
+		}
 	}
 }

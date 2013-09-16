@@ -17,6 +17,7 @@
 			<item name="kudos to all of you" href="8_kudos_to_all_of_you.html" />
 			<item name="gaedo bug in bouncing queries" href="9_gaedo_bug_in_bouncing_queries.html" />
 			<item name="gaedo does graphs" href="10_gaedo_does_graphs.html" />
+			<item name="gaedo can project results" href="11_gaedo_can_project_results.html" />
 		</menu>
 		<menu name="other infos">
 			<item name="easy release with maven" href="easy_release_with_maven.html" />
