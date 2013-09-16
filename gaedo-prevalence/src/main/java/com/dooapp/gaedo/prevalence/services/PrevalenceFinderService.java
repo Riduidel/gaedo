@@ -24,9 +24,9 @@ import com.dooapp.gaedo.utils.PropertyChangeEmitterImpl;
 
 /**
  * A finder service backed by a prevalence layer
- * 
+ *
  * @author ndx
- * 
+ *
  * @param <DataType> notice that, as an added constraint to normal ones, here DataType MUST implement {@link Serializable}
  * @param <InformerType>
  */
@@ -114,8 +114,8 @@ public class PrevalenceFinderService<DataType extends Serializable, InformerType
 	}
 
 	@Override
-	protected QueryStatement<DataType, InformerType> createQueryStatement(
+	protected QueryStatement<DataType, DataType, InformerType> createQueryStatement(
 			QueryBuilder<InformerType> query) {
-		return new CollectionQueryStatement<DataType, InformerType>(query, getInformer(), findAll(), support);
+		return new CollectionQueryStatement<DataType, DataType, InformerType>(query, getInformer(), findAll(), support);
 	}
 }

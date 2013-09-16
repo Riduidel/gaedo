@@ -10,9 +10,13 @@ import javax.persistence.CascadeType;
 import com.dooapp.gaedo.blueprints.queries.BluePrintsQueryBuilder;
 import com.dooapp.gaedo.blueprints.queries.DataTypeIterable;
 import com.dooapp.gaedo.blueprints.queries.executable.GraphExecutableQuery;
+import com.dooapp.gaedo.blueprints.utils.VertexPathNavigator;
+import com.dooapp.gaedo.blueprints.utils.VertexPathNavigator.VertexLocation;
 import com.dooapp.gaedo.exceptions.range.BadRangeDefinitionException;
 import com.dooapp.gaedo.exceptions.range.BadStartIndexException;
+import com.dooapp.gaedo.finders.FieldInformer;
 import com.dooapp.gaedo.finders.Informer;
+import com.dooapp.gaedo.finders.QueryBrowser;
 import com.dooapp.gaedo.finders.QueryBuilder;
 import com.dooapp.gaedo.finders.QueryExpression;
 import com.dooapp.gaedo.finders.QueryExpressionContainerVisitor;
@@ -35,6 +39,9 @@ import com.dooapp.gaedo.finders.expressions.QueryExpressionVisitor;
 import com.dooapp.gaedo.finders.expressions.QueryExpressionVisitorAdapter;
 import com.dooapp.gaedo.finders.expressions.StartsWithExpression;
 import com.dooapp.gaedo.finders.informers.MapContainingValueExpression;
+import com.dooapp.gaedo.finders.projection.NoopProjectionBuilder;
+import com.dooapp.gaedo.finders.projection.ProjectionBuilder;
+import com.dooapp.gaedo.finders.projection.ValueFetcher;
 import com.dooapp.gaedo.finders.repository.ServiceRepository;
 import com.dooapp.gaedo.finders.sort.SortingExpressionImpl;
 import com.tinkerpop.blueprints.Vertex;
@@ -44,6 +51,46 @@ public class GraphQueryStatement<
 		DataType,
 		InformerType extends Informer<DataType>>
 	implements QueryStatement<ValueType, DataType, InformerType> {
+
+	/**
+	 * Object allowing execution of a projection from an input vertex to the given result.
+	 * @author ndx
+	 *
+	 */
+	public class ProjectionExecutor {
+		/**
+		 * Fetches values for properties from given vertex
+		 * @author ndx
+		 *
+		 */
+		private class GraphValueFetcher implements ValueFetcher {
+
+			private Vertex input;
+
+			public GraphValueFetcher(Vertex input) {
+				this.input = input;
+			}
+
+			@Override
+			public <Type> Type getValue(FieldInformer<Type> propertyDescriptor) {
+				VertexPathNavigator navigator = new VertexPathNavigator(service.getStrategy(), input);
+				VertexLocation destination = navigator.navigateOn(propertyDescriptor.getFieldPath());
+				return (Type) service.loadObject(destination.vertex(), cache);
+			}
+
+		}
+
+		private ObjectCache cache = createPrepopulatedCache();
+
+		public ValueType get(Vertex input) {
+			return projector.project(service.getInformer(), getFetcherFor(input));
+		}
+
+		private ValueFetcher getFetcherFor(Vertex input) {
+			return new GraphValueFetcher(input);
+		}
+
+	}
 
 	protected QueryBuilder<InformerType> query;
 	protected AbstractBluePrintsBackedFinderService<?, DataType, InformerType> service;
@@ -71,6 +118,10 @@ public class GraphQueryStatement<
 	 */
 	private SortingExpression sortingExpression = new SortingExpressionImpl();
 	private QueryExpression filterExpression;
+	/**
+	 * Projector used to transform browsed vertices into a meaningful result. Notice default value is always the noop projection builder
+	 */
+	private ProjectionBuilder<ValueType, DataType, InformerType> projector = new NoopProjectionBuilder();
 
 	private GraphExecutableQuery prepareQuery() {
 		try {
@@ -110,7 +161,8 @@ public class GraphQueryStatement<
 			} else if (end < start) {
 				throw new BadRangeDefinitionException(start, end);
 			}
-			return createResultsIterable(prepareQuery().get(start, end));
+			Iterable<Vertex> vertices = prepareQuery().get(start, end);
+			return createResultsIterable(vertices);
 		} finally {
 			setState(State.EXECUTED);
 		}
@@ -121,8 +173,8 @@ public class GraphQueryStatement<
 	 * @param iterable list of vertex to navigate
 	 * @return
 	 */
-	private DataTypeIterable<DataType> createResultsIterable(Iterable<Vertex> iterable) {
-		return new DataTypeIterable<DataType>(service, iterable, createPrepopulatedCache());
+	private DataTypeIterable<ValueType> createResultsIterable(Iterable<Vertex> iterable) {
+		return new DataTypeIterable<ValueType>(iterable, new ProjectionExecutor());
 	}
 
 	private ObjectCache createPrepopulatedCache() {
@@ -163,7 +215,8 @@ public class GraphQueryStatement<
 	@Override
 	public Iterable<ValueType> getAll() {
 		try {
-			return createResultsIterable(prepareQuery().getAll());
+			Iterable<Vertex> vertices = prepareQuery().getAll();
+			return createResultsIterable(vertices);
 		} finally {
 			setState(State.EXECUTED);
 		}
@@ -175,14 +228,14 @@ public class GraphQueryStatement<
 			Vertex result = prepareQuery().getVertex();
 			if (result == null)
 				throw new NoReturnableVertexException(filterExpression);
-			return service.loadObject(result, createPrepopulatedCache());
+			return new ProjectionExecutor().get(result);
 		} finally {
 			setState(State.EXECUTED);
 		}
 	}
 
 	@Override
-	public QueryStatement<DataType, InformerType> sortBy(SortingBuilder<InformerType> expression) {
+	public QueryStatement<ValueType, DataType, InformerType> sortBy(SortingBuilder<InformerType> expression) {
 		try {
 			this.sortingExpression = expression.createSortingExpression(service
 					.getInformer());
@@ -229,6 +282,13 @@ public class GraphQueryStatement<
 					new PropertyChangeEvent(this, QueryStatement.STATE_PROPERTY,
 							old, state));
 		}
+	}
+
+	@Override
+	public <ProjectedValueType> QueryBrowser<ProjectedValueType> projectOn(ProjectionBuilder<ProjectedValueType, DataType, InformerType> projector) {
+		GraphQueryStatement<ProjectedValueType, DataType, Informer<DataType>> returned = new GraphQueryStatement(query, service, repository);
+		returned.projector = (ProjectionBuilder<ProjectedValueType, DataType, Informer<DataType>>) projector;
+		return returned;
 	}
 
 }

@@ -28,12 +28,12 @@ public class SortingComparator implements Comparator<Vertex> {
 		 * Map linking FieldInformer to values loaded by navigating from initial {@link #vertex}
 		 */
 		private Map<FieldInformer, Object> fieldValues = new HashMap<FieldInformer, Object>();
-		
+
 		public SortedPropertiesSubGraph(Vertex vertex) {
 			this.vertex = vertex;
 		}
 
-		public Object get(FieldInformer key) {
+		public Object get(FieldInformer<?> key) {
 			if(!fieldValues.containsKey(key)) {
 				Vertex currentVertex = vertex;
 				Object value = null;
@@ -53,14 +53,14 @@ public class SortingComparator implements Comparator<Vertex> {
 			}
 			return fieldValues.get(key);
 		}
-		
+
 	}
-	
+
 	private class ComparatorVisitor implements SortingExpressionVisitor {
 
 		private SortedPropertiesSubGraph firstSubGraph;
 		private SortedPropertiesSubGraph secondSubGraph;
-		
+
 		/**
 		 * Final comparison result. The whole goal here is to find that result.
 		 */
@@ -99,25 +99,25 @@ public class SortingComparator implements Comparator<Vertex> {
 				try {
 					result = entry.getValue().compareTo(firstValue, secondValue);
 				} catch(UncomparableObjectsInSortingException e) {
-					
+
 				}
 			}
 		}
-		
+
 	}
 
 	private AbstractBluePrintsBackedFinderService<?, ?, ?> service;
-	
+
 	/**
 	 * A very complicated object associating a vertex to an object that contains properties, sorted in order defined by {@link SortingExpression}
-	 * and allowing easy test in compare by simply 
+	 * and allowing easy test in compare by simply
 	 */
 	private Map<Vertex, SortedPropertiesSubGraph> sortedProperties = new LinkedHashMap<Vertex, SortedPropertiesSubGraph>();
 
 	/**
 	 * Sorting expression used to visit {@link SortedPropertiesSubGraph} associated to vertices
 	 */
-	private SortingExpression sort; 
+	private SortingExpression sort;
 
 	/**
 	 * Construct the good comparator

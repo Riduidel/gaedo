@@ -147,11 +147,6 @@ public abstract class AbstractMappingStrategy<DataType> implements GraphMappingS
 	@Override
 	public Iterable<Edge> getOutEdgesFor(Vertex rootVertex, Property p) {
 		String edgeNameFor = GraphUtils.getEdgeNameFor(p);
-		Iterable<Edge> allEdges = rootVertex.getEdges(Direction.OUT, edgeNameFor);
-		Collection<Edge> returned = new LinkedList<Edge>();
-		for(Edge e : allEdges) {
-			returned.add(e);
-		}
-		return returned;
+		return rootVertex.getEdges(Direction.OUT, edgeNameFor);
 	}
 }

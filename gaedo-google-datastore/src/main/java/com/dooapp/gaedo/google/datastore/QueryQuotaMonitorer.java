@@ -14,9 +14,9 @@ import com.google.appengine.api.quota.QuotaServiceFactory;
 /**
  * This property change listener records some time statistics for queries being
  * executed on datastore.
- * 
+ *
  * @author ndx
- * 
+ *
  */
 public class QueryQuotaMonitorer implements PropertyChangeListener {
 	private static final Logger logger = Logger.getLogger("quotas");
@@ -35,11 +35,11 @@ public class QueryQuotaMonitorer implements PropertyChangeListener {
 			return queryId+" execution time : "+duration+" MegaCycles, or "+quotaService.convertMegacyclesToCpuSeconds(duration)+ " seconds";
 		}
 	}
-	
+
 	/**
 	 * Map of inspected queries
 	 */
-	private Map<QueryStatement<?, ?>, QueryInfos> queries = new WeakHashMap<QueryStatement<?,?>, QueryInfos>();
+	private Map<QueryStatement<?, ?, ?>, QueryInfos> queries = new WeakHashMap<QueryStatement<?, ?,?>, QueryInfos>();
 
     QuotaService quotaService = QuotaServiceFactory.getQuotaService();
 	/**
@@ -53,26 +53,26 @@ public class QueryQuotaMonitorer implements PropertyChangeListener {
 				switch (newState) {
 				case INITIAL:
 				case MATCHING:
-					addQuery((QueryStatement<?, ?>) evt.getSource());
+					addQuery((QueryStatement<?, ?, ?>) evt.getSource());
 					break;
 				case SORTING:
 					break;
 				case EXECUTED:
-					removeQuery((QueryStatement<?, ?>) evt.getSource());
+					removeQuery((QueryStatement<?, ?, ?>) evt.getSource());
 				}
 			}
 		}
 
 	}
 
-	private void removeQuery(QueryStatement<?, ?> source) {
+	private void removeQuery(QueryStatement<?, ?, ?> source) {
 		QueryInfos infos = queries.remove(source);
 		if(infos!=null) {
 			logger.info(infos.terminate());
 		}
 	}
 
-	private void addQuery(QueryStatement<?, ?> query) {
+	private void addQuery(QueryStatement<?, ?, ?> query) {
 		queries.put(query, new QueryInfos(query.getId()));
 	}
 }

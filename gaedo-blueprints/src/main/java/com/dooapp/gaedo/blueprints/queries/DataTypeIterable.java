@@ -6,6 +6,7 @@ import java.util.Iterator;
 import javax.persistence.CascadeType;
 
 import com.dooapp.gaedo.blueprints.AbstractBluePrintsBackedFinderService;
+import com.dooapp.gaedo.blueprints.GraphQueryStatement.ProjectionExecutor;
 import com.dooapp.gaedo.blueprints.ObjectCache;
 import com.dooapp.gaedo.patterns.WriteReplaceable;
 import com.dooapp.gaedo.utils.CollectionUtils;
@@ -42,8 +43,10 @@ public class DataTypeIterable<DataType> implements Iterable<DataType>, WriteRepl
 		 * @see java.util.Iterator#next()
 		 * @category delegate
 		 */
+		@SuppressWarnings("unchecked")
 		public DataType next() {
-			return service.loadObject(verticesIterator.next(), objectsBeingAccessed);
+			// due to the fact that projection executor is an inner class, some of the typing info is lost
+			return (DataType) projectionExecutor.get(verticesIterator.next());
 		}
 
 		/**
@@ -56,27 +59,21 @@ public class DataTypeIterable<DataType> implements Iterable<DataType>, WriteRepl
 		}
 
 	}
-
-	/**
-	 * Service used to load the objects
-	 */
-	private AbstractBluePrintsBackedFinderService<?, DataType, ?> service;
 	/**
 	 * Sorted list of vertices from which objects are to be loaded.
 	 */
 	private Iterable<Vertex> vertices;
-	private ObjectCache objectsBeingAccessed;
+	private ProjectionExecutor projectionExecutor;
 
 	/**
 	 * Construct the iterable by giving it both the service and the list of vertices.
 	 * @param service service used to laod vertices
 	 * @param asIterable vertices to navigate. That vertices list MUST be ordered before being given to this object.
-	 * @param objectsBeingAccessed cache of objects being accessed. This cache may already contain objects provided by search
+	 * @param projectionExecutor object allowing transformation from vertices into ValueType objects.
 	 */
-	public DataTypeIterable(AbstractBluePrintsBackedFinderService<?, DataType, ?> service, Iterable<Vertex> asIterable, ObjectCache objectsBeingAccessed) {
-		this.service = service;
+	public DataTypeIterable(Iterable<Vertex> asIterable, ProjectionExecutor projectionExecutor) {
 		this.vertices = asIterable;
-		this.objectsBeingAccessed = objectsBeingAccessed;
+		this.projectionExecutor = projectionExecutor;
 	}
 
 	@Override

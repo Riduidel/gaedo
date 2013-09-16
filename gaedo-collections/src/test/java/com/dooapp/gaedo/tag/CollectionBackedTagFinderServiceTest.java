@@ -15,6 +15,7 @@ import com.dooapp.gaedo.finders.QueryBuilder;
 import com.dooapp.gaedo.finders.QueryExpression;
 import com.dooapp.gaedo.finders.expressions.Expressions;
 import com.dooapp.gaedo.finders.informers.StringFieldInformer;
+import com.dooapp.gaedo.finders.projection.NoopProjectionBuilder;
 import com.dooapp.gaedo.finders.projection.ProjectionBuilder;
 import com.dooapp.gaedo.finders.projection.ValueFetcher;
 import com.dooapp.gaedo.finders.repository.ServiceRepository;
@@ -179,13 +180,7 @@ public class CollectionBackedTagFinderServiceTest {
 							TagInformer object) {
 						return object.getText().differentFrom(null);
 					}
-				}).projectOn(new ProjectionBuilder<Tag, Tag, TagInformer>() {
-
-					@Override
-					public Tag project(TagInformer informer, ValueFetcher fetcher) {
-						return fetcher.getValue(informer);
-					}
-				}).getAll();
+				}).projectOn(new NoopProjectionBuilder<Tag, TagInformer>()).getAll();
 		assertThat(values, IsCollectionContaining.hasItems(a, b, c));
 	}
 }

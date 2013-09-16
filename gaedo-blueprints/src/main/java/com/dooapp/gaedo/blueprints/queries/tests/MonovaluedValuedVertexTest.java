@@ -9,6 +9,8 @@ import com.dooapp.gaedo.blueprints.GraphDatabaseDriver;
 import com.dooapp.gaedo.blueprints.ObjectCache;
 import com.dooapp.gaedo.blueprints.indexable.IndexableGraphBackedFinderService;
 import com.dooapp.gaedo.blueprints.strategies.GraphMappingStrategy;
+import com.dooapp.gaedo.blueprints.utils.VertexPathNavigator;
+import com.dooapp.gaedo.blueprints.utils.VertexPathNavigator.VertexLocation;
 import com.dooapp.gaedo.properties.Property;
 import com.dooapp.gaedo.utils.PrimitiveUtils;
 import com.dooapp.gaedo.utils.Utils;
@@ -45,26 +47,14 @@ public abstract class MonovaluedValuedVertexTest<ValueType extends Object> exten
 	 */
 	@Override
 	public boolean matches(Vertex examined) {
-		// Navigates to the first target edge and perform etest when reached
-		Vertex currentVertex = examined;
-		Property finalProperty = null;
-		// Counting path length allows us to check if we expect a null value
-		int currentPathLength = 0;
-		for(Property currentProperty : path) {
-			Iterator<Edge> edges = strategy.getOutEdgesFor(currentVertex, currentProperty).iterator();
-			if(edges.hasNext()) {
-				currentVertex = edges.next().getVertex(Direction.IN);
-			} else {
-				return false;
-			}
-			finalProperty = currentProperty;
-			currentPathLength++;
-		}
+		// Navigates to the first target edge and perform test when reached
+		VertexPathNavigator navigator = new VertexPathNavigator(strategy, examined);
+		VertexLocation destination = navigator.navigateOn(path);
 		// null final property indicates object has no value for that property
-		if(finalProperty==null) {
+		if(!destination.isNavigationSuccessfull()) {
 			return matchesNull();
 		} else {
-			return matchesVertex(currentVertex, finalProperty);
+			return matchesVertex(destination.vertex(), destination.property());
 		}
 	}
 

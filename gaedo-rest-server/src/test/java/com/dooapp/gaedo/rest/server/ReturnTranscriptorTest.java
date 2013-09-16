@@ -30,7 +30,7 @@ public class ReturnTranscriptorTest {
 
 	@Test
 	public void testCountUserWithLogin() {
-		QueryStatement<User, Informer<User>> toExecute = repository.get(User.class).find().matching(new QueryBuilder<Informer<User>>() {
+		QueryStatement<User, User, Informer<User>> toExecute = repository.get(User.class).find().matching(new QueryBuilder<Informer<User>>() {
 
 			@Override
 			public QueryExpression createMatchingExpression(Informer<User> informer) {
@@ -47,7 +47,7 @@ public class ReturnTranscriptorTest {
 
 	@Test
 	public void testFindFirstUserWithLogin() {
-		QueryStatement<User, Informer<User>> toExecute = repository.get(User.class).find().matching(new QueryBuilder<Informer<User>>() {
+		QueryStatement<User, User, Informer<User>> toExecute = repository.get(User.class).find().matching(new QueryBuilder<Informer<User>>() {
 
 			@Override
 			public QueryExpression createMatchingExpression(Informer<User> informer) {
@@ -66,7 +66,7 @@ public class ReturnTranscriptorTest {
 
 	@Test(expected=UnsupportedModeException.class)
 	public void testFindUserWithBadReturnData() {
-		QueryStatement<User, Informer<User>> toExecute = repository.get(User.class).find().matching(new QueryBuilder<Informer<User>>() {
+		QueryStatement<User, User, Informer<User>> toExecute = repository.get(User.class).find().matching(new QueryBuilder<Informer<User>>() {
 
 			@Override
 			public QueryExpression createMatchingExpression(Informer<User> informer) {
@@ -81,7 +81,7 @@ public class ReturnTranscriptorTest {
 
 	@Test
 	public void testFindUserRangeFailingDueToMissingParameters() {
-		QueryStatement<User, Informer<User>> toExecute = repository.get(User.class).find().matching(new QueryBuilder<Informer<User>>() {
+		QueryStatement<User, User, Informer<User>> toExecute = repository.get(User.class).find().matching(new QueryBuilder<Informer<User>>() {
 
 			@Override
 			public QueryExpression createMatchingExpression(Informer<User> informer) {
@@ -104,7 +104,7 @@ public class ReturnTranscriptorTest {
 
 	@Test
 	public void testFindAllUsers() {
-		QueryStatement<User, Informer<User>> toExecute = repository.get(User.class).find().matching(new QueryBuilder<Informer<User>>() {
+		QueryStatement<User, User, Informer<User>> toExecute = repository.get(User.class).find().matching(new QueryBuilder<Informer<User>>() {
 
 			@Override
 			public QueryExpression createMatchingExpression(Informer<User> informer) {

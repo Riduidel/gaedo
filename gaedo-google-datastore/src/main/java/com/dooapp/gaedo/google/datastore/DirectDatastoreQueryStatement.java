@@ -5,19 +5,21 @@ import java.beans.PropertyChangeEvent;
 import com.dooapp.gaedo.exceptions.range.BadRangeDefinitionException;
 import com.dooapp.gaedo.exceptions.range.BadStartIndexException;
 import com.dooapp.gaedo.finders.Informer;
+import com.dooapp.gaedo.finders.QueryBrowser;
 import com.dooapp.gaedo.finders.QueryBuilder;
 import com.dooapp.gaedo.finders.QueryExpression;
 import com.dooapp.gaedo.finders.QueryExpressionContainerVisitor;
 import com.dooapp.gaedo.finders.QueryStatement;
 import com.dooapp.gaedo.finders.SortingBuilder;
 import com.dooapp.gaedo.finders.SortingExpression;
+import com.dooapp.gaedo.finders.projection.ProjectionBuilder;
 import com.dooapp.gaedo.finders.repository.ServiceRepository;
 import com.dooapp.gaedo.finders.sort.SortingExpressionImpl;
 import com.google.appengine.api.datastore.DatastoreService;
 import com.google.appengine.api.datastore.Entity;
 
 public class DirectDatastoreQueryStatement<DataType, InformerType extends Informer<DataType>>
-		implements QueryStatement<DataType, InformerType> {
+		implements QueryStatement<DataType, DataType, InformerType> {
 	/**
 	 * Current state
 	 */
@@ -111,7 +113,7 @@ public class DirectDatastoreQueryStatement<DataType, InformerType extends Inform
 	/**
 	 * Creates an iterable of hydrated DataType from the Iterable of GAE
 	 * entities
-	 * 
+	 *
 	 * @param asIterable
 	 *            input entity iterable
 	 * @return a DataTypeiterable
@@ -133,7 +135,7 @@ public class DirectDatastoreQueryStatement<DataType, InformerType extends Inform
 	}
 
 	@Override
-	public QueryStatement<DataType, InformerType> sortBy(
+	public QueryStatement<DataType, DataType, InformerType> sortBy(
 			SortingBuilder<InformerType> expression) {
 		try {
 			this.sortingExpression = expression.createSortingExpression(service
@@ -172,5 +174,11 @@ public class DirectDatastoreQueryStatement<DataType, InformerType extends Inform
 
 	public void setId(String id) {
 		this.id = id;
+	}
+
+	@Override
+	public <ProjectedValueType> QueryBrowser<ProjectedValueType> projectOn(ProjectionBuilder<ProjectedValueType, DataType, InformerType> projector) {
+		// TODO Auto-generated method stub
+		throw new UnsupportedOperationException("method "+QueryStatement.class.getName()+"#projectOn has not yet been implemented AT ALL");
 	}
 }

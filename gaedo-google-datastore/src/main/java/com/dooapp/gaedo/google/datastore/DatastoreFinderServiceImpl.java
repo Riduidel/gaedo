@@ -48,9 +48,9 @@ import com.google.appengine.api.datastore.Query;
  * Base class for services connecting to google datastore without any
  * sophisticated API. Notice this class is a cache listener to receive objects
  * invalidation for local cache
- * 
+ *
  * @author ndx
- * 
+ *
  * @param <DataType>
  * @param <InformerType>
  */
@@ -145,7 +145,7 @@ public class DatastoreFinderServiceImpl<DataType, InformerType extends Informer<
 			Class<InformerType> informerClass,
 			ProxyBackedInformerFactory proxyInformerFactory,
 			ServiceRepository repository,
-			PropertyProvider provider, 
+			PropertyProvider provider,
 			HierarchyManager hierarchyManager, IdManager idManager) {
 		super(containedClass, informerClass, proxyInformerFactory);
 		this.repository = repository;
@@ -214,7 +214,7 @@ public class DatastoreFinderServiceImpl<DataType, InformerType extends Informer<
 	}
 
 	@Override
-	protected QueryStatement<DataType, InformerType> createQueryStatement(
+	protected QueryStatement<DataType, DataType, InformerType> createQueryStatement(
 			QueryBuilder<InformerType> query) {
 		return new DirectDatastoreQueryStatement<DataType, InformerType>(query,
 				this, datastore, repository);
@@ -266,7 +266,7 @@ public class DatastoreFinderServiceImpl<DataType, InformerType extends Informer<
 	/**
 	 * Create an entity from the input object data. Notice that if the associated data class has defined a parent element,
 	 * we will first ensure this parent key exist in order to use it to create entity
-	 * 
+	 *
 	 * @param data
 	 * @param withKey
 	 *            when set to true, the key value will be rebuilt. Elsewhere, it
@@ -322,7 +322,7 @@ public class DatastoreFinderServiceImpl<DataType, InformerType extends Informer<
 
 	/**
 	 * get this service very specific key to evict
-	 * 
+	 *
 	 * @return
 	 */
 	public String getKeyToEvict() {
@@ -331,7 +331,7 @@ public class DatastoreFinderServiceImpl<DataType, InformerType extends Informer<
 
 	/**
 	 * Get the kind identifier for keys built by this service
-	 * 
+	 *
 	 * @return
 	 */
 	public String getKind() {
@@ -340,7 +340,7 @@ public class DatastoreFinderServiceImpl<DataType, InformerType extends Informer<
 
 	/**
 	 * Get object associated to given entity
-	 * 
+	 *
 	 * @param entity
 	 * @return
 	 */
@@ -411,7 +411,7 @@ public class DatastoreFinderServiceImpl<DataType, InformerType extends Informer<
 
 	/**
 	 * Faster loop mechanism
-	 * 
+	 *
 	 * @param entity
 	 * @param object
 	 * @param mapper
@@ -426,7 +426,7 @@ public class DatastoreFinderServiceImpl<DataType, InformerType extends Informer<
 
 	/**
 	 * Create the fields map used to store infos from this class.
-	 * 
+	 *
 	 * @param clazz
 	 *            class for which we want to have all fields
 	 * @return a Map linking unique-made names for fields to the Field objects
@@ -580,7 +580,7 @@ public class DatastoreFinderServiceImpl<DataType, InformerType extends Informer<
 	 * Get object associated to given key. Notice this method uses internal
 	 * cache ({@link #objectsBeingAccessed}) before to resolve call on
 	 * datastore.
-	 * 
+	 *
 	 * @param key
 	 * @return
 	 */
