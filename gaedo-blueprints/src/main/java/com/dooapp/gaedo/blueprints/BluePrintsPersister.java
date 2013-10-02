@@ -32,13 +32,8 @@ import com.tinkerpop.blueprints.Vertex;
 
 public class BluePrintsPersister {
     private static final Logger logger = Logger.getLogger(BluePrintsPersister.class.getName());
-    /**
-     * Node kind used by this updater
-     */
-    private Kind nodeKind;
 
     public BluePrintsPersister(Kind node) {
-        nodeKind = node;
     }
 
 
@@ -332,31 +327,35 @@ public class BluePrintsPersister {
         // As a convention, null values are never stored
         if (value != null /* && value.size()>0 that case precisely created https://github.com/Riduidel/gaedo/issues/13 */) {
             // Get previously existing vertices
-            Iterable<Edge> existingIterator = service.getStrategy().getOutEdgesFor(rootVertex, p);
-            // Do not change previously existing vertices if they correspond to new ones
-            // Which is done in that call : as vertex is always looked up before creation, there is little duplication risk
-            // or at elast that risk should be covered by selected Blueprints implementation
-            Collection<Vertex> newVertices = createCollectionVerticesFor(service, value, cascade, objectsBeingAccessed);
-            Map<Vertex, Edge> oldVertices = new HashMap<Vertex, Edge>();
-            for (Edge e : existingIterator) {
+            Iterable<Edge> previousEdges = service.getStrategy().getOutEdgesFor(rootVertex, p);
+            // Get the new, updated Collection of vertices
+            Collection<Vertex> allVertices = createCollectionVerticesFor(service, value, cascade, objectsBeingAccessed);
+            // Keep track of the edges that correspond to the vertices (for later ordering)
+            Map<Vertex, Edge> savedEdges = new HashMap<Vertex, Edge>();
+            // ...and put the old, invalid vertices aside for later
+            Set<Edge> edgesToRemove = new HashSet<Edge>();
+
+            for (Edge e : previousEdges) {
                 Vertex inVertex = e.getVertex(Direction.IN);
-                if (newVertices.contains(inVertex)) {
-                    newVertices.remove(inVertex);
+                if (allVertices.contains(inVertex)) {
+                    savedEdges.put(inVertex, e);
                 } else {
-                    oldVertices.put(inVertex, e);
+                    edgesToRemove.add(e);
                 }
             }
-            // Now the have been collected, remove all old vertices
-            for (Map.Entry<Vertex, Edge> entry : oldVertices.entrySet()) {
-                GraphUtils.removeSafely(database, entry.getValue());
+
+            // First, delete the old ones
+            for (Edge edge : edgesToRemove) {
+            	GraphUtils.removeSafely(database, edge);
             }
-            // And finally add new vertices
+
+            // Then, go through the updated Vertices. Create edges if necessary, then always set the order property.
+            // this is possible due to #createCollectionVerticesFor order consistency
             int order = 0;
-            for (Vertex newVertex : newVertices) {
-                Edge createdEdge = service.getDriver().createEdgeFor(rootVertex, newVertex, p);
+            for (Vertex vertex : allVertices) {
+            	Edge edgeForVertex = savedEdges.containsKey(vertex) ? savedEdges.get(vertex) : service.getDriver().createEdgeFor(rootVertex, vertex, p);
                 // Add a fancy-schmancy property to maintain order in this town
-                // This property is not indexed, as it would have absolutely no meaning to query that index
-                createdEdge.setProperty(Properties.collection_index.name(), order++);
+                edgeForVertex.setProperty(Properties.collection_index.name(), order++);
             }
         }
     }
@@ -366,7 +365,7 @@ public class BluePrintsPersister {
      *
      * @param value   collection of values to create vertices for
      * @param cascade used cascade type, can be either {@link CascadeType#PERSIST} or {@link CascadeType#MERGE}
-     * @return collection of vertices created by {@link #getVertexFor(Object)}
+     * @return collection of vertices created by {@link #getVertexFor(Object)}. order of vertices is guaranteed to be the same as input value one.
      */
     private Collection<Vertex> createCollectionVerticesFor(AbstractBluePrintsBackedFinderService<? extends Graph, ?, ?> service, Collection<?> value, CascadeType cascade, ObjectCache objectsBeingAccessed) {
         Collection<Vertex> returned = new java.util.LinkedList<Vertex>();

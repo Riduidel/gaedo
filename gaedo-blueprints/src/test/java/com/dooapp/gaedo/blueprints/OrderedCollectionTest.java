@@ -84,13 +84,11 @@ public class OrderedCollectionTest extends AbstractGraphTest {
 		User user = getACopyOfTheAuthor();
 
 		// ...and make sure that the posts are in the correct order
-		assertThat("Make sure we got the right number of posts", user.posts.size(), is(6));
-		assertThat("First post is in correct position", user.posts.get(0), is(posts.get(5)));
-		assertThat("Second post is in correct position", user.posts.get(1), is(posts.get(4)));
-		assertThat("Third post is in correct position", user.posts.get(2), is(posts.get(3)));
-		assertThat("Fourth post is in correct position", user.posts.get(3), is(posts.get(2)));
-		assertThat("Fifth post is in correct position", user.posts.get(4), is(posts.get(1)));
-		assertThat("Sixth post is in correct position", user.posts.get(5), is(posts.get(0)));
+		final int NUM_POSTS = 6;
+		assertThat("Make sure we got the right number of posts", user.posts.size(), is(NUM_POSTS));
+		for(int i=0; i<NUM_POSTS; i++) {
+			assertThat("Post " + i + " is in correct position", user.posts.get(i), is(posts.get(NUM_POSTS - i - 1)));
+		}
 	}
 
 	@Test
@@ -119,6 +117,10 @@ public class OrderedCollectionTest extends AbstractGraphTest {
 		assertThat("fourth post is in correct position", user.posts.get(3), is(posts.get(0)));
 	}
 
+	/**
+	 * Load this.author fresh from the database, by building a query to fetch it.
+	 * @return
+	 */
 	private User getACopyOfTheAuthor() {
 		User user = getUserService().find().matching(new QueryBuilder<UserInformer>() {
 
@@ -188,5 +190,25 @@ public class OrderedCollectionTest extends AbstractGraphTest {
 		assertThat("Fourth post is in correct position", user.posts.get(3), is(posts.get(3)));
 		assertThat("Fifth post is in correct position", user.posts.get(4), is(posts.get(4)));
 		assertThat("Sixth post is in correct position", user.posts.get(5), is(posts.get(5)));
+	}
+
+	@Test
+	public void testReorderingListOnUpdateIsCorrectlySaved() {
+		// Just setup the author with all the posts
+		for(Post p : posts)
+			author.posts.add(p);
+		getUserService().update(author);
+
+		// Now, switch the order of the first and second post...
+		author.posts.clear();
+		author.posts.add(posts.get(1));
+		author.posts.add(posts.get(0));
+		for(int i=2; i<posts.size(); i++)
+			author.posts.add(posts.get(i));
+		getUserService().update(author);
+
+		// ...and make sure that it actually worked.
+		User authorCopy = getACopyOfTheAuthor();
+		assertThat("Successfully re-ordered the list of posts", authorCopy.posts, is(author.posts));
 	}
 }
