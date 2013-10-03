@@ -26,7 +26,7 @@ import com.dooapp.gaedo.utils.VirtualMethodCreationException;
 
 /**
  * A dynamic finder handler is the class that will transform methods declared in provided interface into calls to back end.
- * 
+ *
  * @author ndx
  *
  * @param <DataType>
@@ -63,12 +63,12 @@ public class DynamicFinderHandler<DataType> extends BasicInvocationHandler<DataT
 		}
 	}
 	private static final Logger logger  = Logger.getLogger(DynamicFinderHandler.class.getName());
-	
+
 	/**
 	 * Backend which will receive forwarded calls
 	 */
-	protected final FinderCrudService<DataType, ? extends Informer<DataType>> backEnd;  
-	
+	protected final FinderCrudService<DataType, ? extends Informer<DataType>> backEnd;
+
 	/**
 	 * Used property provider
 	 */
@@ -140,7 +140,8 @@ public class DynamicFinderHandler<DataType> extends BasicInvocationHandler<DataT
 				}
 				// TODO insert here code for call chaining
 				if(!found) {
-					throw new UnableToBuildDueToMissingQueryExpressionException(consumableText, methodString, fieldEntry.getKey(), queries.keySet());
+					throw new UnableToBuildDueToMissingQueryExpressionException(consumableText, methodString, fieldEntry.getKey(),
+									Utils.getUppercasedMap(Utils.removeGaedoInternalMethodsFrom(informer.getClass().getMethods())).keySet());
 				}
 				for(Combinator c: Combinator.values()) {
 					if(consumableText.startsWith(c.getText())) {
@@ -182,7 +183,7 @@ public class DynamicFinderHandler<DataType> extends BasicInvocationHandler<DataT
 	private DynamicFinderMethodResolver createResolverForDynamicMethod(String methodName, Object[] methodArgs) {
 		boolean found = false;
 		String consumableText = methodName;
-		
+
 		ParametersConstructionMode mode = ParametersConstructionMode.FILTER;
 		DynamicFinderMethodResolver created = new DynamicFinderMethodResolver(backEnd, methodName, Object.class);
 		for(Mode m : Mode.values()) {

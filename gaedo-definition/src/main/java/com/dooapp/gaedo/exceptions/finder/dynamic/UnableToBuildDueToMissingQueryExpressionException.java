@@ -13,10 +13,10 @@ import com.dooapp.gaedo.exceptions.DynamicFinderException;
  */
 public class UnableToBuildDueToMissingQueryExpressionException extends DynamicFinderException {
 
-	public UnableToBuildDueToMissingQueryExpressionException(String consumableText, String methodString, 
+	public UnableToBuildDueToMissingQueryExpressionException(String consumableText, String methodString,
 			String key, Set<String> keySet) {
 		super("a part \""+consumableText+"\" of the method name you wrote \""+methodString+"\" cannot be bound to any existing query expression.\n" +
-				"assumed usable expression for field \""+key+"\" names are "+keySet.toString());
+				"assumed usable query expression for field \""+key+"\" names are "+keySet.toString());
 	}
-	
+
 }

@@ -5,6 +5,7 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -21,6 +22,7 @@ import java.util.TreeSet;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 
+import com.dooapp.gaedo.finders.Informer;
 import com.dooapp.gaedo.properties.Property;
 
 public class Utils {
@@ -46,7 +48,7 @@ public class Utils {
 	/**
 	 * Generate an instance of one of the concrete types corresponding to input
 	 * type (if input type is not cocnrete)
-	 * 
+	 *
 	 * @param rawContainerType
 	 * @param property
 	 * @return
@@ -86,7 +88,7 @@ public class Utils {
 		}
 		return property;
 	}
-	
+
 	/**
 	 * Maybe transform type in object one. if type is not a primitive, nothing is done
 	 * @param toObjectify
@@ -287,7 +289,7 @@ public class Utils {
 			}
 		}
 	}
-	
+
 	/**
 	 * Try to load given type class
 	 * @param value
@@ -342,5 +344,26 @@ public class Utils {
 			}
 		}
 		return returned;
+	}
+
+	/**
+	 * Remove from the given list of methods all methods declared in gaedo packages
+	 * @param methods
+	 * @return
+	 */
+	public static Method[] removeGaedoInternalMethodsFrom(Method[] methods) {
+		String gaedoBasePackage = "com.dooapp.gaedo";
+		Collection<Method> filtered = new ArrayList<Method>();
+		for(Method m : methods) {
+			if(m.getDeclaringClass().isAssignableFrom(Informer.class)) {
+				// this is Informer#get(String) method
+				if(m.getName().equals("get") && m.getParameterTypes().length==1)
+					filtered.add(m);
+			} else {
+				// method not declared in informer superinterfaces, so it can be added
+				filtered.add(m);
+			}
+		}
+		return filtered.toArray(new Method[filtered.size()]);
 	}
 }
