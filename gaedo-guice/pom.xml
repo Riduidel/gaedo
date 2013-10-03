@@ -3,7 +3,7 @@
 	<parent>
 		<artifactId>gaedo</artifactId>
 		<groupId>com.dooapp</groupId>
-		<version>0.6.2</version>
+		<version>0.6.3-SNAPSHOT</version>
 	</parent>
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>com.dooapp</groupId>
@@ -35,6 +35,6 @@
 		<connection>scm:svn:https://svn.origo.ethz.ch/gaedo/gaedo-guice/trunk</connection>
 		<developerConnection>scm:svn:https://svn.origo.ethz.ch/gaedo/guice/trunk</developerConnection>
 		<url>https://svn.origo.ethz.ch/gaedo/guice/trunk</url>
-	  <tag>gaedo-0.6.2</tag>
+	  <tag>HEAD</tag>
   </scm>
 </project>
