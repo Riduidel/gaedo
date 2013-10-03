@@ -22,9 +22,11 @@ import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 import org.junit.runners.Parameterized.Parameters;
 
-import com.dooapp.gaedo.blueprints.finders.FindFirstUserByLogin;
+import com.dooapp.gaedo.blueprints.finders.FindPostByAuthor;
+import com.dooapp.gaedo.blueprints.finders.FindPostByAuthorLogin;
 import com.dooapp.gaedo.blueprints.finders.FindPostByNote;
 import com.dooapp.gaedo.blueprints.finders.FindPostByText;
+import com.dooapp.gaedo.blueprints.finders.FindUserByLogin;
 import com.dooapp.gaedo.finders.QueryBuilder;
 import com.dooapp.gaedo.finders.QueryExpression;
 import com.dooapp.gaedo.finders.id.IdBasedService;
@@ -43,7 +45,6 @@ import static com.dooapp.gaedo.blueprints.TestUtils.ID_POST_1;
 import static com.dooapp.gaedo.blueprints.TestUtils.LOGIN_FOR_UPDATE_ON_CREATE;
 import static com.dooapp.gaedo.blueprints.TestUtils.SOME_NEW_TEXT;
 import static com.dooapp.gaedo.blueprints.TestUtils.TEST_TAG_FOR_CREATE_ON_UPDATE;
-import static com.dooapp.gaedo.blueprints.TestUtils.USER_LOGIN;
 import static com.dooapp.gaedo.blueprints.TestUtils.simpleTest;
 
 import static org.junit.Assert.assertThat;
@@ -62,43 +63,14 @@ public class GraphPostFinderServiceTest extends AbstractGraphPostTest {
 
 	@Test
 	public void searchPostByNote() {
-		Post noted2 = getPostService().find().matching(new QueryBuilder<PostInformer>() {
-
-			@Override
-			public QueryExpression createMatchingExpression(PostInformer informer) {
-				return informer.getNote().equalsTo(2.0);
-			}
-		}).getFirst();
+		Post noted2 = getPostService().find().matching(new FindPostByNote(2.0)).getFirst();
 
 		assertThat(noted2.id, Is.is(post2.id));
 	}
 
 	@Test
 	public void searchPostByAuthorLogin() {
-		int postsOf  = getPostService().find().matching(new QueryBuilder<PostInformer>() {
-
-			@Override
-			public QueryExpression createMatchingExpression(PostInformer informer) {
-				return informer.getAuthor().getLogin().equalsTo(USER_LOGIN);
-			}
-		}).count();
-		// All posts are from the same author
-		// notice there are the 3 main posts, AND the about page (which is a post)
-		assertThat(postsOf, Is.is(4));
-	}
-
-	/**
-	 * Test for http://gaedo.origo.ethz.ch/issues/55
-	 */
-	@Test
-	public void searchPostByAuthorObject() {
-		int postsOf  = getPostService().find().matching(new QueryBuilder<PostInformer>() {
-
-			@Override
-			public QueryExpression createMatchingExpression(PostInformer informer) {
-				return informer.getAuthor().equalsTo(author);
-			}
-		}).count();
+		int postsOf  = getPostService().find().matching(new FindPostByAuthorLogin(TestUtils.USER_LOGIN)).count();
 		// All posts are from the same author
 		// notice there are the 3 main posts, AND the about page (which is a post)
 		assertThat(postsOf, Is.is(4));
@@ -114,17 +86,6 @@ public class GraphPostFinderServiceTest extends AbstractGraphPostTest {
 		Post about = ((IdBasedService<Post>) getPostService()).findById(ABOUT_ID);
 		assertThat(about, IsNull.notNullValue());
 		assertThat(about.text, Is.is(aboutText));
-	}
-
-	@Test
-	public void ensureAuthorHasWrittenThosePosts() {
-		assertThat(getPostService().find().matching(new QueryBuilder<PostInformer>() {
-
-			@Override
-			public QueryExpression createMatchingExpression(PostInformer informer) {
-				return informer.getAuthor().equalsTo(author);
-			}
-		}).count(), IsNot.not(0));
 	}
 
 	@Test
@@ -175,7 +136,7 @@ public class GraphPostFinderServiceTest extends AbstractGraphPostTest {
 
 	@Test
 	public void ensureLoadCascadesWell() {
-		User u1 = getUserService().find().matching(new FindFirstUserByLogin()).getFirst();
+		User u1 = getUserService().find().matching(new FindUserByLogin()).getFirst();
 		assertThat(u1.about, IsNull.notNullValue());
 		assertThat(u1.about, IsInstanceOf.instanceOf(Post.class));
 		assertThat(((Post) u1.about).text, IsNull.notNullValue());
@@ -183,12 +144,12 @@ public class GraphPostFinderServiceTest extends AbstractGraphPostTest {
 
 	@Test
 	public void serializeAuthorAndPosts() throws IOException, ClassNotFoundException {
-		User u1 = getUserService().find().matching(new FindFirstUserByLogin()).getFirst();
+		User u1 = getUserService().find().matching(new FindUserByLogin()).getFirst();
 		assertThat(u1, IsNull.notNullValue());
 		assertThat(u1.posts.size(), IsNot.not(0));
 
 		// Now serialize and deserialize a second version of author
-		User u2 = getUserService().find().matching(new FindFirstUserByLogin()).getFirst();
+		User u2 = getUserService().find().matching(new FindUserByLogin()).getFirst();
 
 		// Serialize it
 		ByteArrayOutputStream bos = new ByteArrayOutputStream();
@@ -255,7 +216,7 @@ public class GraphPostFinderServiceTest extends AbstractGraphPostTest {
 	@Test
 	public void ensureSerializableIsWellLoadedWithPost() throws IOException, ClassNotFoundException {
 		Post first = getPostService().find().matching(new FindPostByNote(1)).getFirst();
-		User user = getUserService().find().matching(new FindFirstUserByLogin()).getFirst();
+		User user = getUserService().find().matching(new FindUserByLogin()).getFirst();
 
 		first.associatedData = user;
 		first = getPostService().update(first);
@@ -268,7 +229,7 @@ public class GraphPostFinderServiceTest extends AbstractGraphPostTest {
 	@Test
 	public void ensureSerializableIsWellLoadedWithUnknownSerializable() throws IOException, ClassNotFoundException {
 		Post first = getPostService().find().matching(new FindPostByNote(1)).getFirst();
-		User user = getUserService().find().matching(new FindFirstUserByLogin()).getFirst();
+		User user = getUserService().find().matching(new FindUserByLogin()).getFirst();
 
 		UnknownSerializable value = new UnknownSerializable().withText("a string");
 		first.associatedData = value;
