@@ -65,10 +65,4 @@
 			<url>http://maven-gae-plugin.googlecode.com/svn/repository/</url>
 		</repository>
 	</repositories>
-	<scm>
-		<connection>scm:svn:https://svn.origo.ethz.ch/gaedo/gaedo-google-datastore/trunk</connection>
-		<developerConnection>scm:svn:https://svn.origo.ethz.ch/gaedo/gaedo-google-datastore/trunk</developerConnection>
-		<url>https://svn.origo.ethz.ch/gaedo/gaedo-google-datastore/trunk</url>
-	  <tag>HEAD</tag>
-  </scm>
 </project>
