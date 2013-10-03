@@ -12,6 +12,7 @@ import com.dooapp.gaedo.blueprints.AbstractBluePrintsBackedFinderService;
 import com.dooapp.gaedo.blueprints.GraphUtils;
 import com.dooapp.gaedo.blueprints.Kind;
 import com.dooapp.gaedo.blueprints.Properties;
+import com.dooapp.gaedo.blueprints.VertexHasNoPropertyException;
 import com.dooapp.gaedo.blueprints.strategies.GraphMappingStrategy;
 import com.dooapp.gaedo.blueprints.strategies.StrategyType;
 import com.dooapp.gaedo.blueprints.strategies.UnableToGetVertexTypeException;
@@ -38,9 +39,12 @@ import com.tinkerpop.blueprints.Vertex;
  * Notice we maintain {@link AbstractCooperantFinderService} infos about objects
  * being accessed as String containing, in fact, vertex ids.
  *
- * Since Blueprints 2.*, there is a distinction between manual indices (provided by IndexableGraph) and automatic key indices, provided by KeyIndexableGraph. Why using the first ones ?
- * For queries, obviously : an {@link Index} can return the {@link Index#count(String, Object)} number of element, what a KeyIndexableGraph
- * do not yet provide. And, to have a good execution plan (without relying upon graph queries), this is invaluable.
+ * Since Blueprints 2.*, there is a distinction between manual indices (provided
+ * by IndexableGraph) and automatic key indices, provided by KeyIndexableGraph.
+ * Why using the first ones ? For queries, obviously : an {@link Index} can
+ * return the {@link Index#count(String, Object)} number of element, what a
+ * KeyIndexableGraph do not yet provide. And, to have a good execution plan
+ * (without relying upon graph queries), this is invaluable.
  *
  * @author ndx
  *
@@ -124,20 +128,20 @@ public class IndexableGraphBackedFinderService<DataType, InformerType extends In
 	}
 
 	/**
-	 * There is no automatic index creation !
-	 * No worry, we will add them by hand
+	 * There is no automatic index creation ! No worry, we will add them by hand
+	 *
 	 * @param graph
 	 */
 	private void loadIndices(IndexableGraph graph) {
-		for(IndexNames index : IndexNames.values()) {
+		for (IndexNames index : IndexNames.values()) {
 			Index<? extends Element> associatedIndex = graph.getIndex(index.getIndexName(), index.getIndexed());
-			if(associatedIndex==null) {
+			if (associatedIndex == null) {
 				if (logger.isLoggable(Level.FINE)) {
-					logger.log(Level.FINE, "There were no indice "+index.describe()+". Creating it");
+					logger.log(Level.FINE, "There were no indice " + index.describe() + ". Creating it");
 				}
 				graph.createIndex(index.getIndexName(), index.getIndexed());
 				if (logger.isLoggable(Level.FINE)) {
-					logger.log(Level.FINE, "index "+index.describe()+" has been created");
+					logger.log(Level.FINE, "index " + index.describe() + " has been created");
 				}
 			}
 		}
@@ -146,42 +150,61 @@ public class IndexableGraphBackedFinderService<DataType, InformerType extends In
 	@Override
 	public Vertex loadVertexFor(String objectVertexId, String className) {
 		Vertex defaultVertex = null;
-		CloseableIterable<Vertex> matchingIterable = database.getIndex(IndexNames.VERTICES.getIndexName(), Vertex.class).get(Properties.value.name(), objectVertexId);
+		CloseableIterable<Vertex> matchingIterable = database.getIndex(IndexNames.VERTICES.getIndexName(), Vertex.class).get(Properties.value.name(),
+						objectVertexId);
 		Iterator<Vertex> matching = matchingIterable.iterator();
 		if (matching.hasNext()) {
 			while (matching.hasNext()) {
 				Vertex vertex = matching.next();
 				String vertexTypeName = null;
+				Kind vertexKind = null;
+				String vertexId = null;
 				try {
+					/// BEWARE : order is signifiant here : read id then kind then type for catch clauses to work correctly
+					vertexId = getIdOfVertex(vertex);
+					vertexKind = GraphUtils.getKindOf(vertex);
 					vertexTypeName = getEffectiveType(vertex);
-					switch (GraphUtils.getKindOf(vertex)) {
-					case literal:
-					case bnode:
-					case uri:
-						if (className.equals(vertexTypeName)) {
+					// this slow-down is a direct consequence of https://github.com/Riduidel/gaedo/issues/66
+					if (objectVertexId.equals(vertexId)) {
+						switch (vertexKind) {
+						case literal:
+						case bnode:
+						case uri:
+							if (className.equals(vertexTypeName)) {
+								return vertex;
+							}
+							break;
+						default:
 							return vertex;
 						}
-						break;
-					default:
-						return vertex;
 					}
-				} catch(UnableToGetVertexTypeException e) {
-					if(GraphMappingStrategy.STRING_TYPE.equals(className)) {
-						/* in that very case, we can use a type-less vertex as our result */
+				} catch (VertexHasNoPropertyException e) {
+					// vertex is clearly not the match we expected so just navigate to next in index
+					if (logger.isLoggable(Level.WARNING)) {
+						logger.log(Level.WARNING,
+										"your index may be corrupted...\nWhen looking for value=\"" + objectVertexId + "\", that vertex loaded badly", e);
+					}
+				} catch (UnableToGetVertexTypeException e) {
+					if (GraphMappingStrategy.STRING_TYPE.equals(className)) {
+						// in that very case, we can use a type-less vertex as our result
 						defaultVertex = vertex;
 					} else {
-						if(Kind.uri==GraphUtils.getKindOf(vertex))
+						if (Kind.uri == vertexKind && objectVertexId.equals(vertexId))
 							defaultVertex = vertex;
 					}
 				}
 			}
 		}
-        return defaultVertex;
+		return defaultVertex;
 	}
 
 	@Override
 	public String getIdOfVertex(Vertex objectVertex) {
-		return objectVertex.getProperty(Properties.value.name()).toString();
+		Object value = objectVertex.getProperty(Properties.value.name());
+		if (value == null) {
+			throw new VertexHasNoPropertyException("vertex " + GraphUtils.toString(objectVertex) + " has no " + Properties.value + " property defined.");
+		}
+		return value.toString();
 	}
 
 	/**
@@ -219,7 +242,7 @@ public class IndexableGraphBackedFinderService<DataType, InformerType extends In
 		}
 		// Yup, this if has no default else statement, and that's normal.
 		if (logger.isLoggable(Level.FINE)) {
-			logger.log(Level.FINE, "created vertex "+GraphUtils.toString(returned));
+			logger.log(Level.FINE, "created vertex " + GraphUtils.toString(returned));
 		}
 		return returned;
 	}
@@ -242,17 +265,21 @@ public class IndexableGraphBackedFinderService<DataType, InformerType extends In
 	public Edge createEdgeFor(Vertex fromVertex, Vertex toVertex, Property property) {
 		String edgeNameFor = GraphUtils.getEdgeNameFor(property);
 		Edge returned = database.addEdge(getEdgeId(fromVertex, toVertex, property), fromVertex, toVertex, edgeNameFor);
-		// Did you know labels are not edges properties ? Absolutely stunning discovery !
-//		database.getIndex(IndexNames.EDGES.getIndexName(), Edge.class).put("label", edgeNameFor, returned);
+		// Did you know labels are not edges properties ? Absolutely stunning
+		// discovery !
+		// database.getIndex(IndexNames.EDGES.getIndexName(),
+		// Edge.class).put("label", edgeNameFor, returned);
 
 		if (logger.isLoggable(Level.FINE)) {
-			logger.log(Level.FINE, "created edge "+GraphUtils.toString(returned));
+			logger.log(Level.FINE, "created edge " + GraphUtils.toString(returned));
 		}
 		return returned;
 	}
 
 	/**
-	 * Set an indexed property on any graph element, updating the given list of indices
+	 * Set an indexed property on any graph element, updating the given list of
+	 * indices
+	 *
 	 * @param graphElement
 	 * @param propertyName
 	 * @param propertyValue
@@ -270,7 +297,7 @@ public class IndexableGraphBackedFinderService<DataType, InformerType extends In
 	public InViewService<DataType, InformerType, SortedSet<String>> focusOn(SortedSet<String> lens) {
 		AbstractBluePrintsBackedFinderService<IndexableGraph, DataType, InformerType> returned = new IndexableGraphBackedFinderService<DataType, InformerType>(
 						database, containedClass, informerClass, getInformerFactory(), repository, propertyProvider,
-						/* strategy is local to service ! */ getStrategy().derive());
+						/* strategy is local to service ! */getStrategy().derive());
 		returned.setLens(lens);
 		return returned;
 	}

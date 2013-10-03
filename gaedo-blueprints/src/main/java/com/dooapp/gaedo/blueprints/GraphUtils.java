@@ -209,7 +209,11 @@ public class GraphUtils {
 	}
 
 	public static Kind getKindOf(Vertex key) {
-		String kindName = key.getProperty(Properties.kind.name()).toString();
+		Object kindObject = key.getProperty(Properties.kind.name());
+		if(kindObject==null) {
+			throw new VertexHasNoPropertyException("vertex "+toString(key)+" has no "+Properties.kind+" property defined.");
+		}
+		String kindName = kindObject.toString();
 		Kind kind = Kind.valueOf(kindName);
 		return kind;
 	}

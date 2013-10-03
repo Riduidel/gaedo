@@ -91,7 +91,7 @@ public class BeanBasedMappingStrategy<DataType> extends AbstractMappingStrategy<
 		public boolean isClassTested() {
 			return classTested;
 		}
-		
+
 		@Override
 		public void visit(CollectionContains collectionContains) {
 			List<Property> propertyPath = CollectionUtils.asList(collectionContains.getPath());
@@ -109,7 +109,7 @@ public class BeanBasedMappingStrategy<DataType> extends AbstractMappingStrategy<
 	public BeanBasedMappingStrategy(Class<DataType> serviceContainedClass, PropertyProvider propertyProvider, Migrator migrator) {
 		super(serviceContainedClass, propertyProvider, migrator);
 	}
-	
+
 	@Override
 	public Map<Property, Collection<CascadeType>> getContainedProperties(DataType object, Vertex vertex, CascadeType cascadeType) {
 		Class<? extends Object> objectClass = object.getClass();
@@ -170,7 +170,7 @@ public class BeanBasedMappingStrategy<DataType> extends AbstractMappingStrategy<
                 }
             }
 		}
-    	throw new UnableToGetVertexTypeException();
+    	throw new UnableToGetVertexTypeException("vertex "+GraphUtils.toString(vertex)+" provides no way to get its type (through either type property or "+IndexableGraphBackedFinderService.TYPE_EDGE_NAME+" edge");
 	}
 
 	@Override
@@ -189,7 +189,7 @@ public class BeanBasedMappingStrategy<DataType> extends AbstractMappingStrategy<
 	public boolean shouldLoadPropertiesOf(String objectVertexId, Vertex objectVertex, ObjectCache objectsBeingAccessed) {
 		return true;
 	}
-	
+
 	@Override
 	public BeanBasedMappingStrategy derive() {
 		return new BeanBasedMappingStrategy<DataType>(serviceContainedClass, propertyProvider, migrator);
