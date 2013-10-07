@@ -7,6 +7,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
@@ -23,6 +24,7 @@ import com.dooapp.gaedo.finders.id.AnnotationsFinder.Annotations;
 import com.dooapp.gaedo.finders.repository.ServiceRepository;
 import com.dooapp.gaedo.patterns.WriteReplaceable;
 import com.dooapp.gaedo.properties.Property;
+import com.dooapp.gaedo.utils.CollectionUtils;
 import com.dooapp.gaedo.utils.Utils;
 import com.tinkerpop.blueprints.Direction;
 import com.tinkerpop.blueprints.Edge;
@@ -417,11 +419,11 @@ public class BluePrintsPersister {
          */
         Edge link = null;
         // Get previously existing vertex
-        Iterator<Edge> existingIterator = service.getStrategy().getOutEdgesFor(rootVertex, p).iterator();
+        List<Edge> matching = CollectionUtils.asList(service.getStrategy().getOutEdgesFor(rootVertex, p));
         // property is single-valued, so iteration can be done at most one
-        if (existingIterator.hasNext()) {
+        if (matching.size()==1) {
             // There is an existing edge, change its target and maybe delete previous one
-            Edge existing = existingIterator.next();
+            Edge existing = matching.get(0);
             if (valueVertex != null && existing.getVertex(Direction.IN).equals(valueVertex)) {
                 // Nothing to do
                 link = existing;
@@ -431,23 +433,22 @@ public class BluePrintsPersister {
                 if (value != null)
                     link = service.getDriver().createEdgeFor(rootVertex, valueVertex, p);
             }
-        }
-        if (existingIterator.hasNext()) {
+        } else if (matching.size()>1) {
             if (logger.isLoggable(Level.SEVERE)) {
                 // There is some incoherent data in graph .. log it !
                 StringBuilder sOut = new StringBuilder("An object with the following monovalued property\n").append(p.toGenericString()).append(" is linked to more than one vertex :");
-                while (existingIterator.hasNext()) {
-                    sOut.append("\n\t").append(existingIterator.next().getVertex(Direction.IN).toString());
+                for(Edge e : matching) {
+                    sOut.append("\n\t").append(e.getVertex(Direction.IN).toString());
                 }
                 logger.log(Level.SEVERE, "Graph contains some incoherence :" + sOut.toString());
             }
-            while (existingIterator.hasNext()) {
-            	GraphUtils.removeSafely(database, existingIterator.next());
+            // absolutly all edges are removed, including the first one. As a consequence, initial edge will have to be re-created
+            for(Edge e : matching) {
+            	GraphUtils.removeSafely(database, e);
             }
-        } else {
-            if (link == null && value != null)
-                link = service.getDriver().createEdgeFor(rootVertex, valueVertex, p);
         }
+        if (link == null && value != null)
+            link = service.getDriver().createEdgeFor(rootVertex, valueVertex, p);
     }
 
     public <DataType> DataType loadObject(AbstractBluePrintsBackedFinderService<? extends Graph, DataType, ?> service, Vertex objectVertex, ObjectCache objectsBeingAccessed) {

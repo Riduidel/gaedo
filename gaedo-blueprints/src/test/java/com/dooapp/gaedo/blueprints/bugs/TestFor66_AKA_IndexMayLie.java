@@ -1,10 +1,13 @@
 package com.dooapp.gaedo.blueprints.bugs;
 
 import java.util.Collection;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.hamcrest.core.Is;
 import org.hamcrest.core.IsCollectionContaining;
+import org.junit.AfterClass;
+import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
@@ -17,6 +20,7 @@ import com.dooapp.gaedo.blueprints.Properties;
 import com.dooapp.gaedo.blueprints.finders.FindPostById;
 import com.dooapp.gaedo.blueprints.finders.FindPostByNote;
 import com.dooapp.gaedo.blueprints.indexable.IndexNames;
+import com.dooapp.gaedo.blueprints.indexable.IndexableGraphBackedFinderService;
 import com.dooapp.gaedo.test.beans.Post;
 import com.tinkerpop.blueprints.Graph;
 import com.tinkerpop.blueprints.Index;
@@ -38,8 +42,26 @@ public class TestFor66_AKA_IndexMayLie extends AbstractGraphPostTest {
 	private static final String VALUE = "some data, indeed";
 	private static final String KEY = "data";
 	private static String POLLUTION_KEY = "key:"+String.class.getName()+":"+KEY+"-value:"+String.class.getName()+":"+VALUE+"-";
+	private static Level previousLevel;
 
 	private static final Logger logger = Logger.getLogger(TestFor66_AKA_IndexMayLie.class.getName());
+
+	/**
+	 * to avoid log pollution, logging of IdnexableGraphBackedFinderService is totally disabled during that very test
+	 */
+	@BeforeClass
+	public static void disableLoggingDuringThatTest() {
+		Logger indexableLogger = Logger.getLogger(IndexableGraphBackedFinderService.class.getName());
+		previousLevel = indexableLogger.getLevel();
+		indexableLogger.setLevel(Level.OFF);
+	}
+
+	@AfterClass
+	public static void enableLoggingDuringThatTest() {
+		Logger indexableLogger = Logger.getLogger(IndexableGraphBackedFinderService.class.getName());
+		indexableLogger.setLevel(previousLevel);
+	}
+
 
 	@Parameters
 	public static Collection<Object[]> parameters() {

@@ -51,6 +51,7 @@ import static org.junit.Assert.assertThat;
 
 @RunWith(Parameterized.class)
 public class GraphPostFinderServiceTest extends AbstractGraphPostTest {
+	private static final int DELETABLE_POST = 55;
 	private static final Logger logger = Logger.getLogger(GraphPostFinderServiceTest.class.getName());
 
 	@Parameters
@@ -91,7 +92,7 @@ public class GraphPostFinderServiceTest extends AbstractGraphPostTest {
 	@Test
 	public void ensureDeletCascadesWell() {
 		User other = new User().withId(2).withLogin("other login").withPassword("other password");
-		long id = 55;
+		long id = DELETABLE_POST;
 		other.about = new Post(id, "a post about another user", 2, State.PUBLIC, other);
 		getUserService().create(other);
 		Post about = ((IdBasedService<Post>) getPostService()).findById(id);
@@ -112,7 +113,7 @@ public class GraphPostFinderServiceTest extends AbstractGraphPostTest {
 	@Test
 	public void ensureUpdateCascadesWell() {
 		User other = new User().withId(2).withLogin("other login").withPassword("other password");
-		long id = 55;
+		long id = DELETABLE_POST;
 		String POST_TEXT = "a post about another user";
 		other.about = new Post(id, POST_TEXT, 2, State.PUBLIC, other);
 		getUserService().create(other);
