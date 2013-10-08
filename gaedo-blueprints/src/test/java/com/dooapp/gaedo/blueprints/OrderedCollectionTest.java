@@ -211,4 +211,28 @@ public class OrderedCollectionTest extends AbstractGraphTest {
 		User authorCopy = getACopyOfTheAuthor();
 		assertThat("Successfully re-ordered the list of posts", authorCopy.posts, is(author.posts));
 	}
+	
+	/**
+	 * This time, the list has doubles of some elements!
+	 */
+	@Test
+	public void testReorderingListWithDoubles() {
+		// Setup: add each post TWICE!
+		for(Post p : posts) {
+			author.posts.add(p);
+			author.posts.add(p);
+		}
+		getUserService().update(author);
+		
+		// Now, reorder. Instead of 112233, make it 123123.
+		author.posts.clear();
+		for(int i=0; i<2; i++)
+			for(Post p : posts)
+				author.posts.add(p);
+		getUserService().update(author);
+		
+		// And finally, make sure that it worked.
+		User authorCopy = getACopyOfTheAuthor();
+		assertThat("Successfully re-ordered the list of posts (with doubles!)", authorCopy.posts, is(author.posts));
+	}
 }
