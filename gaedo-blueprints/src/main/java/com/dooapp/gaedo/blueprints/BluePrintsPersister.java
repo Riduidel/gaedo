@@ -7,6 +7,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -330,35 +331,50 @@ public class BluePrintsPersister {
         if (value != null /* && value.size()>0 that case precisely created https://github.com/Riduidel/gaedo/issues/13 */) {
             // Get previously existing vertices
             Iterable<Edge> previousEdges = service.getStrategy().getOutEdgesFor(rootVertex, p);
-            // Get the new, updated Collection of vertices
+            // Get the new, updated Collection of vertices (which is already sorted).
             Collection<Vertex> allVertices = createCollectionVerticesFor(service, value, cascade, objectsBeingAccessed);
-            // Keep track of the edges that correspond to the vertices (for later ordering)
-            Map<Vertex, Edge> savedEdges = new HashMap<Vertex, Edge>();
-            // ...and put the old, invalid vertices aside for later
+            // Keep track of the edges that correspond to each vertex (for later ordering)...
+            Map<Vertex, List<Edge>> savedEdges = new HashMap<Vertex, List<Edge>>();
+            // ...and put the old, invalid vertices aside for later deletion.
             Set<Edge> edgesToRemove = new HashSet<Edge>();
 
             for (Edge e : previousEdges) {
-                Vertex inVertex = e.getVertex(Direction.IN);
+            	Vertex inVertex = e.getVertex(Direction.IN);
                 if (allVertices.contains(inVertex)) {
-                    savedEdges.put(inVertex, e);
+                	if(!savedEdges.containsKey(inVertex))
+                		savedEdges.put(inVertex, new LinkedList<Edge>());
+                    savedEdges.get(inVertex).add(e);
                 } else {
                     edgesToRemove.add(e);
                 }
             }
 
-            // First, delete the old ones
+            // Delete the edges that we don't need anymore.
             for (Edge edge : edgesToRemove) {
             	GraphUtils.removeSafely(database, edge);
             }
 
             // Then, go through the updated Vertices. Create edges if necessary, then always set the order property.
-            // this is possible due to #createCollectionVerticesFor order consistency
+            // This is possible since #createCollectionVerticesFor maintains the ordering.
             int order = 0;
             for (Vertex vertex : allVertices) {
-            	Edge edgeForVertex = savedEdges.containsKey(vertex) ? savedEdges.get(vertex) : service.getDriver().createEdgeFor(rootVertex, vertex, p);
+            	Edge edgeForVertex;
+            	if(savedEdges.containsKey(vertex)) {
+            		List<Edge> edges = savedEdges.get(vertex);
+            		edgeForVertex = edges.remove(0);
+            		if(edges.size() == 0)
+            			savedEdges.remove(vertex);
+            	} else
+            		edgeForVertex = service.getDriver().createEdgeFor(rootVertex, vertex, p);
+            	
                 // Add a fancy-schmancy property to maintain order in this town
                 edgeForVertex.setProperty(Properties.collection_index.name(), order++);
             }
+            
+            // Finally, delete any remaining edges.
+            for(Vertex vertex : savedEdges.keySet())
+            	for(Edge edge : savedEdges.get(vertex))
+            		GraphUtils.removeSafely(database, edge);
         }
     }
 
