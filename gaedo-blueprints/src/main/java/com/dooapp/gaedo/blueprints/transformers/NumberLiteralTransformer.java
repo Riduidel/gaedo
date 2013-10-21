@@ -1,5 +1,8 @@
 package com.dooapp.gaedo.blueprints.transformers;
 
+import java.util.Map;
+import java.util.TreeMap;
+
 import com.dooapp.gaedo.utils.Utils;
 
 public class NumberLiteralTransformer extends AbstractLiteralTransformer<Number> implements LiteralTransformer<Number> {
@@ -19,6 +22,17 @@ public class NumberLiteralTransformer extends AbstractLiteralTransformer<Number>
 		Double.TYPE
 	};
 
+	/**
+	 * An optimizer to solve https://github.com/Riduidel/gaedo/issues/70
+	 */
+	private static Map<String, Class> lookupOptimizer = new TreeMap<String, Class>();
+
+	static {
+		for(Class<?> clazz : NUMBER_CLASSES) {
+			lookupOptimizer.put(clazz.getName(), clazz);
+		}
+	}
+
 	@Override
 	protected Object getVertexValue(Number value) {
 		return value==null ? "0" : value.toString();
@@ -37,22 +51,16 @@ public class NumberLiteralTransformer extends AbstractLiteralTransformer<Number>
 	 */
 	@Override
 	protected String resolveType(String effectiveType) {
-		for(Class<?> c : NUMBER_CLASSES) {
-			if(c.getName().equals(effectiveType))  {	
-				if(c.isPrimitive()) {
-					return Utils.maybeObjectify(c).getName();
-				}
-			}
-		}
+		Class<?> used = lookupOptimizer.get(effectiveType);
+		if(used==null)
+			return effectiveType;
+		if(used.isPrimitive())
+			return Utils.maybeObjectify(used).getName();
 		return effectiveType;
 	}
 
 	@Override
 	public boolean canHandle(ClassLoader classLoader, String effectiveType) {
-		for(Class<?> c : NUMBER_CLASSES) {
-			if(c.getName().equals(effectiveType))
-				return true;
-		}
-		return false;
+		return lookupOptimizer.containsKey(effectiveType);
 	}
 }
