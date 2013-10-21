@@ -5,6 +5,9 @@ import java.util.logging.Logger;
 
 import com.dooapp.gaedo.blueprints.GraphUtils;
 import com.dooapp.gaedo.blueprints.Kind;
+import com.dooapp.gaedo.blueprints.ObjectCache;
+import com.dooapp.gaedo.blueprints.ObjectCache.ValueLoader;
+import com.tinkerpop.blueprints.Vertex;
 
 public class EnumLiteralTransformer extends AbstractLiteralTransformer<Enum> implements LiteralTransformer<Enum> {
 	private static final Logger logger = Logger.getLogger(EnumLiteralTransformer.class.getName());

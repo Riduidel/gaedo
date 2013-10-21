@@ -7,6 +7,7 @@ import java.util.TreeMap;
 import java.util.WeakHashMap;
 
 import com.dooapp.gaedo.blueprints.GraphDatabaseDriver;
+import com.dooapp.gaedo.blueprints.ObjectCache;
 import com.dooapp.gaedo.blueprints.Properties;
 import com.dooapp.gaedo.utils.date.DateFormatThreadedLoader;
 import com.tinkerpop.blueprints.Vertex;
@@ -16,42 +17,42 @@ import com.tinkerpop.blueprints.Vertex;
  * (http:
  * //www.jmdoudoux.fr/java/dej/chap-utilisation_dates.htm#utilisation_dates-3)
  * for the why of this pattern
- * 
+ *
  * Furthermore, used pattern is ISO standard (see there : http://www.fileformat.info/tip/java/simpledateformat.htm)
- * 
+ *
  * @author ndx
- * 
+ *
  */
 public class DateLiteralTransformer extends AbstractSimpleLiteralTransformer<Date> implements LiteralTransformer<Date> {
-	
+
 	/**
 	 * Map linking date format specification (a uri like xsd:date or http://www.w3.org/2001/XMLSchema#date) to the format string used to parse it.
 	 */
 	private static final Map<String, String> FORMATS = new TreeMap<String, String>();
-	
+
 	static {
 		FORMATS.put("xsd:date", "yyyy-MM-dd'T'HH:mm:ssz");
 		FORMATS.put("http://www.w3.org/2001/XMLSchema#date", "yyy-MM-dd");
 	}
-					
-	
+
+
 	/**
 	 * A map allowing lazy loading of those inconvenient threaded loaders.
 	 */
 	private static final Map<String, DateFormatThreadedLoader> loaders = new TreeMap<String, DateFormatThreadedLoader>();
-	
+
 	/**
 	 * Cache linking dates to toeir associated format definition.
 	 * As the dates are in memory, and the formats are constants, this weak hash map should have very low memory impact.
 	 */
 	private static Map<Date, String> dateCache = new WeakHashMap<Date, String>();
-	
+
 	public static DateFormatThreadedLoader getLoader(String format) {
 		if(!loaders.containsKey(format))
 			loaders.put(format, new DateFormatThreadedLoader(format));
 		return loaders.get(format);
 	}
-	
+
 	public DateLiteralTransformer() {
 		super(Date.class);
 	}
@@ -63,7 +64,8 @@ public class DateLiteralTransformer extends AbstractSimpleLiteralTransformer<Dat
 		return getLoader(FORMATS.get(format)).format(value);
 	}
 
-	public Date loadObject(GraphDatabaseDriver driver, Class valueClass, Vertex key) {
+	@Override
+	public Date internalLoadObject(GraphDatabaseDriver driver, Class valueClass, Vertex key, ObjectCache objectCache) {
 		String property = driver.getValue(key).toString();
 		String type = key.getProperty(Properties.type.name()).toString();
 		try {
@@ -74,7 +76,7 @@ public class DateLiteralTransformer extends AbstractSimpleLiteralTransformer<Dat
 			throw new BadLiteralException("\"" + property + "\" can't be efficiently parsed from a \""+type+"\" supposed to contain a date");
 		}
 	}
-	
+
 	/**
 	 * Type of date depends upon the date
 	 * @param value

@@ -13,6 +13,19 @@ import javax.persistence.CascadeType;
  *
  */
 public class ObjectCache {
+	/**
+	 * Interface used to load value on cache miss.
+	 * @author ndx
+	 *
+	 */
+	public static interface ValueLoader {
+		/**
+		 * Get the value to load
+		 * @return
+		 */
+		Object get();
+
+	}
 	private Map<String, Reference<Object>> cache = new WeakHashMap<String, Reference<Object>>();
 
 	/**
@@ -23,6 +36,22 @@ public class ObjectCache {
 	 */
 	public static ObjectCache create(CascadeType merge) {
 		return new ObjectCache();
+	}
+
+	/**
+	 * Get loaded value.
+	 * This method get value from cache and, if none is found, load it using the provided {@link ValueLoader}
+	 * @param objectVertexId
+	 * @param valueLoader
+	 * @return
+	 */
+	public Object get(String objectVertexId, ValueLoader valueLoader) {
+		Object returned = get(objectVertexId);
+		if(returned==null) {
+			returned = valueLoader.get();
+			put(objectVertexId, returned);
+		}
+		return returned;
 	}
 
 	public Object get(String objectVertexId) {

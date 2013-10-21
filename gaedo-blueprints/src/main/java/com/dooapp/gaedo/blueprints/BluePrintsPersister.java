@@ -20,6 +20,7 @@ import javax.persistence.FetchType;
 import javax.persistence.ManyToMany;
 import javax.persistence.OneToMany;
 
+import com.dooapp.gaedo.blueprints.ObjectCache.ValueLoader;
 import com.dooapp.gaedo.blueprints.strategies.GraphMappingStrategy;
 import com.dooapp.gaedo.finders.id.AnnotationsFinder.Annotations;
 import com.dooapp.gaedo.finders.repository.ServiceRepository;
@@ -366,11 +367,11 @@ public class BluePrintsPersister {
             			savedEdges.remove(vertex);
             	} else
             		edgeForVertex = service.getDriver().createEdgeFor(rootVertex, vertex, p);
-            	
+
                 // Add a fancy-schmancy property to maintain order in this town
                 edgeForVertex.setProperty(Properties.collection_index.name(), order++);
             }
-            
+
             // Finally, delete any remaining edges.
             for(Vertex vertex : savedEdges.keySet())
             	for(Edge edge : savedEdges.get(vertex))
@@ -480,31 +481,36 @@ public class BluePrintsPersister {
      * @param objectsBeingAccessed map of objects currently being accessed, it avoid some loops during loading, but is absolutely NOT a persistent cache
      * @return loaded object
      */
-    public <DataType> DataType loadObject(AbstractBluePrintsBackedFinderService<? extends Graph, DataType, ?> service, String objectVertexId, Vertex objectVertex, ObjectCache objectsBeingAccessed) {
-    	DataType cached = (DataType) objectsBeingAccessed.get(objectVertexId);
-    	if(cached!=null)
-    		return cached;
-        // Shortcut
-        if (objectVertex == null) {
-            objectsBeingAccessed.put(objectVertexId, null);
-            return null;
-        } else {
-            ClassLoader classLoader = service.getContainedClass().getClassLoader();
-            ServiceRepository repository = service.getRepository();
-            DataType returned = (DataType) GraphUtils.createInstance(service.getDriver(), service.getStrategy(), classLoader, objectVertex, Object.class /* we use object here, as this default type should not be used */, repository, objectsBeingAccessed);
-            try {
-                if (service.getStrategy().shouldLoadPropertiesOf(objectVertexId, objectVertex, objectsBeingAccessed)) {
-                    Map<Property, Collection<CascadeType>> containedProperties = service.getStrategy().getContainedProperties(returned, objectVertex, CascadeType.MERGE);
-                    objectsBeingAccessed.put(objectVertexId, returned);
-                    loadObjectProperties(service.getDriver(), service.getStrategy(), classLoader, repository, objectVertex, returned, containedProperties, objectsBeingAccessed);
-                }
-                return returned;
-            } finally {
-                // make sure loading call is always called, even if something failed during loading
-                service.getStrategy().loaded(objectVertexId, objectVertex, returned, objectsBeingAccessed);
-//				objectsBeingAccessed.remove(objectVertexId);
-            }
-        }
+    public <DataType> DataType loadObject(final AbstractBluePrintsBackedFinderService<? extends Graph, DataType, ?> service, final String objectVertexId, final Vertex objectVertex, final ObjectCache objectsBeingAccessed) {
+    	ValueLoader loader = new ValueLoader() {
+
+			@Override
+			public Object get() {
+		        // Shortcut
+		        if (objectVertex == null) {
+		            objectsBeingAccessed.put(objectVertexId, null);
+		            return null;
+		        } else {
+		            ClassLoader classLoader = service.getContainedClass().getClassLoader();
+		            ServiceRepository repository = service.getRepository();
+		            DataType returned = (DataType) GraphUtils.createInstance(service.getDriver(), service.getStrategy(), classLoader, objectVertex, Object.class /* we use object here, as this default type should not be used */, repository, objectsBeingAccessed);
+		            try {
+		                if (service.getStrategy().shouldLoadPropertiesOf(objectVertexId, objectVertex, objectsBeingAccessed)) {
+		                    Map<Property, Collection<CascadeType>> containedProperties = service.getStrategy().getContainedProperties(returned, objectVertex, CascadeType.MERGE);
+		                    objectsBeingAccessed.put(objectVertexId, returned);
+		                    loadObjectProperties(service.getDriver(), service.getStrategy(), classLoader, repository, objectVertex, returned, containedProperties, objectsBeingAccessed);
+		                }
+		                return returned;
+		            } finally {
+		                // make sure loading call is always called, even if something failed during loading
+		                service.getStrategy().loaded(objectVertexId, objectVertex, returned, objectsBeingAccessed);
+//						objectsBeingAccessed.remove(objectVertexId);
+		            }
+		        }
+			}
+
+    	};
+    	return (DataType) objectsBeingAccessed.get(objectVertexId, loader);
     }
 
 

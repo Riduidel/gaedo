@@ -29,9 +29,9 @@ public class Utils {
 
 	/**
 	 * From an input container type, and a possibly null input value, generates a Map corresponding to the container interface kind
-	 * @param rawContainerClass
-	 * @param property
-	 * @return
+	 * @param rawContainerClass this is the expected type of the map (TreeMap, HashMap, anymap)
+	 * @param property this is the current map value. it can be null
+	 * @return property if non null, an instance of rawContainerClass elsewhere
 	 */
 	@SuppressWarnings("rawtypes")
 	public static Map<?, ?> generateMap(Class<?> rawContainerClass, Map<?, ?> property) {

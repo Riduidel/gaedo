@@ -4,6 +4,7 @@ import javax.persistence.CascadeType;
 
 import com.dooapp.gaedo.blueprints.GraphDatabaseDriver;
 import com.dooapp.gaedo.blueprints.Kind;
+import com.dooapp.gaedo.blueprints.ObjectCache;
 import com.tinkerpop.blueprints.Vertex;
 
 /**
@@ -23,37 +24,30 @@ public interface LiteralTransformer<Type> extends Transformer {
 	 * Get vertex for given object. This vertex may be simple or the root of a sub-graph
 	 * @param database
 	 * @param cascade cascade type. if nor PERSIST neither MERGE and vertex doesn't exist, null may be returned
-	 * @param cascade 
+	 * @param cascade
 	 * @return
 	 */
 	Vertex getVertexFor(GraphDatabaseDriver database, Type value, CascadeType cascade);
-	
+
 	/**
-	 * Load given vertex into an object
+	 * Load given vertex into an object. Notice this method is mainly to be used during search (and particularly to identify matching vertices)
 	 * @param key
 	 * @return
 	 */
 	public Type loadObject(GraphDatabaseDriver driver, Vertex key);
-	/**
-	 * Load given key into an object, with added bonus of known type
-	 * @param driver TODO
-	 * @param effectiveClass
-	 * @param key
-	 * @return
-	 */
-	public Type loadObject(GraphDatabaseDriver driver, Class effectiveClass, Vertex key);
-	
+
 	/**
 	 * Method loading class in given classloader and the loading given object
 	 * @param driver TODO
 	 * @param classLoader used classloader
 	 * @param effectiveType type name
 	 * @param key vertex associated to value
+	 * @param objectsBeingAccessed
 	 * @return loaded object
 	 * @see #loadObject(GraphDatabaseDriver, Class, Vertex)
 	 */
-	public Object loadObject(GraphDatabaseDriver driver, ClassLoader classLoader, String effectiveType, Vertex key);
-	
+	public Object loadObject(GraphDatabaseDriver driver, ClassLoader classLoader, String effectiveType, Vertex key, ObjectCache objectsBeingAccessed);
+
 	/**
 	 * Check if vertex content is equals to provided object
 	 * @param driver TODO
@@ -66,7 +60,7 @@ public interface LiteralTransformer<Type> extends Transformer {
 	 * @return Kind of object to associate to the literals managed by this transformer. Used to separate Classes (which are fake literals) from others
 	 */
 	public Kind getKind();
-	
+
 	/**
 	 * Get graph type of the vertex associated to that value
 	 * @param value value to get type of

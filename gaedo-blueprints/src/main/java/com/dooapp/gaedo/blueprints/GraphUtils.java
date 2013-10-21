@@ -126,7 +126,8 @@ public class GraphUtils {
 	 * @param repository
 	 *            service repository, used to disambiguate subclass of literal
 	 *            and managed class
-	 * @param objectsBeingAccessed
+	 * @param objectsBeingAccessed cache of objects, allowing faster operations sometimes ..
+	 * @param defaultType default type for that vertex if none better was found
 	 * @param property
 	 *            property used to navigate to this value. it allows
 	 *            disambiguation for literal values (which may be linked to more
@@ -137,13 +138,42 @@ public class GraphUtils {
 	public static Object createInstance(GraphDatabaseDriver driver, GraphMappingStrategy strategy, ClassLoader classLoader, Vertex key, Class<?> defaultType,
 					ServiceRepository repository, ObjectCache objectsBeingAccessed) {
 		String effectiveType = null;
-		Kind kind = getKindOf(key);
-		/*
-		 * One literal node may be used according to different types. To
-		 * disambiguate, we check if effective type matches default one. If not
-		 * (typically type returns string and user wants number), prefer default
-		 * type.
-		 */
+		effectiveType = disambiguateEffectiveType(driver, key, defaultType, effectiveType);
+		if (classLoader == null) {
+			throw new UnspecifiedClassLoader();
+		}
+		try {
+			if (Literals.containsKey(classLoader, effectiveType) && !repository.containsKey(effectiveType)) {
+				LiteralTransformer transformer = Literals.get(classLoader, effectiveType);
+				return transformer.loadObject(driver, classLoader, effectiveType, key, objectsBeingAccessed);
+			} else {
+				Class<?> type = loadClass(classLoader, effectiveType);
+				if (Tuples.containsKey(type) && !repository.containsKey(type)) {
+					// Tuples are handled the object way (easier, but more
+					// dangerous
+					TupleTransformer transformer = Tuples.get(type);
+					return transformer.loadObject(driver, strategy, classLoader, type, key, repository, objectsBeingAccessed);
+				} else {
+					return type.newInstance();
+				}
+			}
+		} catch (Exception e) {
+			throw UnableToCreateException.dueTo(key, effectiveType, e);
+		}
+	}
+
+	/**
+	 * One literal node may be used according to different types. To
+	 * disambiguate, we check if effective type matches default one. If not
+	 * (typically type returns string and user wants number), prefer default
+	 * type.
+	 * @param driver
+	 *            driver used to load data
+	 * @param key
+	 *            vertex containing object id
+	 * @return resolved effective type for vertex
+	 */
+	private static String disambiguateEffectiveType(GraphDatabaseDriver driver, Vertex key, Class<?> defaultType, String effectiveType) {
 		try {
 			effectiveType = driver.getEffectiveType(key);
 		} catch (UnableToGetVertexTypeException untypedVertex) {
@@ -165,27 +195,7 @@ public class GraphUtils {
 
 			}
 		}
-		if (classLoader == null) {
-			throw new UnspecifiedClassLoader();
-		}
-		try {
-			if (Literals.containsKey(classLoader, effectiveType) && !repository.containsKey(effectiveType)) {
-				LiteralTransformer transformer = Literals.get(classLoader, effectiveType);
-				return transformer.loadObject(driver, classLoader, effectiveType, key);
-			} else {
-				Class<?> type = loadClass(classLoader, effectiveType);
-				if (Tuples.containsKey(type) && !repository.containsKey(type)) {
-					// Tuples are handled the object way (easier, but more
-					// dangerous
-					TupleTransformer transformer = Tuples.get(type);
-					return transformer.loadObject(driver, strategy, classLoader, type, key, repository, objectsBeingAccessed);
-				} else {
-					return type.newInstance();
-				}
-			}
-		} catch (Exception e) {
-			throw UnableToCreateException.dueTo(key, effectiveType, e);
-		}
+		return effectiveType;
 	}
 
 	/**
