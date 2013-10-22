@@ -1,4 +1,5 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 	<parent>
 		<artifactId>gaedo</artifactId>
 		<groupId>com.dooapp</groupId>
@@ -9,6 +10,9 @@
 	<artifactId>gaedo-rest-server</artifactId>
 	<name>Gaedo rest server</name>
 	<description>Provides a rest view over all services availables</description>
+	<properties>
+		<restlet.version>2.0.1</restlet.version>
+	</properties>
 	<repositories>
 		<repository>
 			<id>maven-restlet</id>
@@ -35,24 +39,6 @@
 			<scope>test</scope>
 		</dependency>
 		<dependency>
-			<groupId>${restlet.distribution}</groupId>
-			<artifactId>org.restlet</artifactId>
-			<version>${restlet.version}</version>
-			<scope>provided</scope>
-		</dependency>
-		<dependency>
-			<groupId>${restlet.distribution}</groupId>
-			<artifactId>org.restlet.ext.xml</artifactId>
-			<version>${restlet.version}</version>
-			<scope>provided</scope>
-		</dependency>
-		<dependency>
-			<groupId>${restlet.distribution}</groupId>
-			<artifactId>org.restlet.ext.json</artifactId>
-			<version>${restlet.version}</version>
-			<scope>provided</scope>
-		</dependency>
-		<dependency>
 			<groupId>junit</groupId>
 			<artifactId>junit</artifactId>
 		</dependency>
@@ -63,8 +49,33 @@
 			<scope>test</scope>
 		</dependency>
 	</dependencies>
-	<properties>
-		<restlet.version>2.0.1</restlet.version>
-		<restlet.distribution>org.restlet.jse</restlet.distribution>
-	</properties>
+	<profiles>
+		<!-- those profiles replace standard restlet choice (which used to use maven properties) as it doesn't fit well with maven versions plugin -->
+		<profile>
+			<id>restlet-jse</id>
+			<activation>
+				<activeByDefault>true</activeByDefault>
+			</activation>
+			<dependencies>
+				<dependency>
+					<groupId>org.restlet.jse</groupId>
+					<artifactId>org.restlet</artifactId>
+					<version>${restlet.version}</version>
+					<scope>provided</scope>
+				</dependency>
+				<dependency>
+					<groupId>org.restlet.jse</groupId>
+					<artifactId>org.restlet.ext.xml</artifactId>
+					<version>${restlet.version}</version>
+					<scope>provided</scope>
+				</dependency>
+				<dependency>
+					<groupId>org.restlet.jse</groupId>
+					<artifactId>org.restlet.ext.json</artifactId>
+					<version>${restlet.version}</version>
+					<scope>provided</scope>
+				</dependency>
+			</dependencies>
+		</profile>
+	</profiles>
 </project>
