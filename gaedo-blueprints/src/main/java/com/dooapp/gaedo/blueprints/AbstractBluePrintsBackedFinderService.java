@@ -278,7 +278,7 @@ public abstract class AbstractBluePrintsBackedFinderService<GraphClass extends G
         Vertex objectVertex = loadVertexFor(vertexId, toDeleteClass.getName());
         if (objectVertex != null) {
             Map<Property, Collection<CascadeType>> containedProperties = strategy.getContainedProperties(toDelete, objectVertex, CascadeType.REMOVE);
-            persister.performDelete(this, new LocalizedDriver(new DelegatingDriver(), objectVertex), vertexId, objectVertex, toDeleteClass, containedProperties, toDelete, CascadeType.REMOVE, objectsBeingAccessed);
+            persister.performDelete(this, new VertexCachingDriver(new DelegatingDriver()), vertexId, objectVertex, toDeleteClass, containedProperties, toDelete, CascadeType.REMOVE, objectsBeingAccessed);
         }
     }
 
@@ -395,7 +395,7 @@ public abstract class AbstractBluePrintsBackedFinderService<GraphClass extends G
         Class<? extends Object> toUpdateClass = toUpdate.getClass();
         Vertex objectVertex = loadVertexFor(objectVertexId, toUpdateClass.getName());
         Map<Property, Collection<CascadeType>> containedProperties = strategy.getContainedProperties(toUpdate, objectVertex, cascade);
-        return (DataType) persister.performUpdate(this, new LocalizedDriver(getDriver(), objectVertex), objectVertexId, objectVertex, toUpdateClass, containedProperties, toUpdate,
+        return (DataType) persister.performUpdate(this, new VertexCachingDriver(getDriver()), objectVertexId, objectVertex, toUpdateClass, containedProperties, toUpdate,
                         cascade, treeMap);
     }
 
@@ -431,7 +431,7 @@ public abstract class AbstractBluePrintsBackedFinderService<GraphClass extends G
         } else if (Literals.containsKey(valueClass)) {
             return getVertexForLiteral(value, cascade);
         } else if (Tuples.containsKey(valueClass)) {
-            return getVertexForTuple(new LocalizedDriver(getDriver()), value, cascade, objectsBeingUpdated);
+            return getVertexForTuple(new VertexCachingDriver(getDriver()), value, cascade, objectsBeingUpdated);
         } else {
             /*
              * // OK, we will persist this object by ourselves, which is really
@@ -548,7 +548,7 @@ public abstract class AbstractBluePrintsBackedFinderService<GraphClass extends G
     public DataType loadObject(String objectVertexId, ObjectCache objectsBeingAccessed) {
         // If cast fails, well, that's some fuckin mess, no ?
         Vertex objectVertex = loadVertexFor(objectVertexId, containedClass.getName());
-        return persister.loadObject(this, new LocalizedDriver(getDriver(), objectVertex), objectVertexId, objectVertex, objectsBeingAccessed);
+        return persister.loadObject(this, new VertexCachingDriver(getDriver()), objectVertexId, objectVertex, objectsBeingAccessed);
     }
 
     /**

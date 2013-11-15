@@ -15,39 +15,19 @@ import com.tinkerpop.blueprints.Vertex;
  * @author ndx
  *
  */
-public class LocalizedDriver implements GraphDatabaseDriver {
+public class VertexCachingDriver implements GraphDatabaseDriver {
 
 	private Map<String, Vertex> knownVertices = new TreeMap<String, Vertex>();
 	private GraphDatabaseDriver delegate;
 
-	public LocalizedDriver(GraphDatabaseDriver delegatingDriver, Vertex objectVertex) {
-		this.delegate = delegatingDriver;
-		knownVertices.putAll(loadNeighboursOf(objectVertex, 1));
-	}
-
-	public LocalizedDriver(GraphDatabaseDriver driver) {
+	public VertexCachingDriver(GraphDatabaseDriver driver) {
 		this.delegate = driver;
 	}
 
-	/**
-	 * Load neighbours of given vertice in the given neighborood depth. All loaded vertices are added to {@link #knownVertices} cache
-	 * @param objectVertex
-	 * @param i depth of neighborood
-	 */
-	private Map<String, Vertex> loadNeighboursOf(Vertex objectVertex, int i) {
-		Map<String, Vertex> returned = new TreeMap<String, Vertex>();
-		if(i>=0) {
-			if(objectVertex!=null) {
-				String value = valueOf(objectVertex);
-				if(!returned.containsKey(value)) {
-					returned.put(value, objectVertex);
-					for(Vertex neighbor : objectVertex.getVertices(Direction.BOTH)) {
-						loadNeighboursOf(neighbor, i-1);
-					}
-				}
-			}
-		}
-		return returned;
+	private Vertex cache(Vertex objectVertex) {
+		if(objectVertex!=null)
+			knownVertices.put(valueOf(objectVertex), objectVertex);
+		return objectVertex;
 	}
 
 	/**
@@ -58,13 +38,11 @@ public class LocalizedDriver implements GraphDatabaseDriver {
 	 * @category delegate
 	 */
 	public Vertex loadVertexFor(String objectVertexId, String className) {
-//		if(knownVertices.containsKey(objectVertexId)) {
-//			return knownVertices.get(objectVertexId);
-//		} else {
-			Vertex returned = delegate.loadVertexFor(objectVertexId, className);
-//			loadNeighboursOf(returned, 1);
-			return returned;
-//		}
+		if(knownVertices.containsKey(objectVertexId)) {
+			return knownVertices.get(objectVertexId);
+		} else {
+			return cache(delegate.loadVertexFor(objectVertexId, className));
+		}
 	}
 
 	/**
@@ -76,9 +54,7 @@ public class LocalizedDriver implements GraphDatabaseDriver {
 	 * @category delegate
 	 */
 	public Vertex createEmptyVertex(Class<? extends Object> valueClass, String vertexId, Object value) {
-		Vertex returned = delegate.createEmptyVertex(valueClass, vertexId, value);
-//		loadNeighboursOf(returned, 1);
-		return returned;
+		return cache(delegate.createEmptyVertex(valueClass, vertexId, value));
 	}
 
 	/**
@@ -108,9 +84,9 @@ public class LocalizedDriver implements GraphDatabaseDriver {
 	 * @category delegate
 	 */
 	public void setValue(Vertex vertex, Object value) {
-//		knownVertices.remove(valueOf(vertex));
+		knownVertices.remove(valueOf(vertex));
 		delegate.setValue(vertex, value);
-//		loadNeighboursOf(vertex, 1);
+		cache(vertex);
 	}
 
 	private String valueOf(Vertex vertex) {
