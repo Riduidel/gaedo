@@ -11,6 +11,7 @@ import javax.persistence.CascadeType;
 
 import com.dooapp.gaedo.blueprints.AbstractBluePrintsBackedFinderService;
 import com.dooapp.gaedo.blueprints.BluePrintsCrudServiceException;
+import com.dooapp.gaedo.blueprints.GraphDatabaseDriver;
 import com.dooapp.gaedo.blueprints.GraphUtils;
 import com.dooapp.gaedo.blueprints.ObjectCache;
 import com.dooapp.gaedo.properties.DescribedProperty;
@@ -70,12 +71,12 @@ public class MapEntryTransformer extends AbstractTupleTransformer<Map.Entry> imp
 	 * @return
 	 */
 	@Override
-	public <DataType> Vertex getVertexFor(AbstractBluePrintsBackedFinderService<? extends Graph, DataType, ?> service, Entry cast, CascadeType cascade,
+	public <DataType> Vertex getVertexFor(AbstractBluePrintsBackedFinderService<? extends Graph, DataType, ?> service, GraphDatabaseDriver driver, Entry cast, CascadeType cascade,
 					ObjectCache objectsBeingUpdated) {
 		if(!(cast instanceof WriteableKeyEntry)) {
 			cast = new WriteableKeyEntry(cast.getKey(), cast.getValue());
 		}
-		return super.getVertexFor(service, cast, cascade, objectsBeingUpdated);
+		return super.getVertexFor(service, driver, cast, cascade, objectsBeingUpdated);
 	}
 
 	@Override

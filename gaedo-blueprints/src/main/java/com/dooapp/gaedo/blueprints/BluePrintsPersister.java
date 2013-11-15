@@ -45,6 +45,7 @@ public class BluePrintsPersister {
      * Create or update given object
      *
      * @param service             source of modification
+     * @param driver TODO
      * @param objectVertexId      object expected vertex id
      * @param objectVertex        vertex corresponding to object to update
      * @param valueClass          class of the value to be updated here
@@ -54,23 +55,23 @@ public class BluePrintsPersister {
      * @param objectsBeingUpdated map containing subgraph of obejcts currently being updated, this is used to avoid loops, and NOT as a cache
      * @return updated object
      */
-    public <DataType> Object performUpdate(AbstractBluePrintsBackedFinderService<? extends Graph, DataType, ?> service, String objectVertexId, Vertex objectVertex, Class<?> valueClass, Map<Property, Collection<CascadeType>> containedProperties, Object toUpdate, CascadeType cascade, ObjectCache objectsBeingUpdated) {
+    public <DataType> Object performUpdate(AbstractBluePrintsBackedFinderService<? extends Graph, DataType, ?> service, GraphDatabaseDriver driver, String objectVertexId, Vertex objectVertex, Class<?> valueClass, Map<Property, Collection<CascadeType>> containedProperties, Object toUpdate, CascadeType cascade, ObjectCache objectsBeingUpdated) {
         Graph database = service.getDatabase();
         // it's in fact an object creation
         if (objectVertex == null) {
             if (logger.isLoggable(Level.FINER)) {
                 logger.log(Level.FINER, "object " + objectVertexId.toString() + " has never before been seen in graph, so create central node for it");
             }
-            objectVertex = service.getDriver().createEmptyVertex(valueClass, objectVertexId, toUpdate);
+            objectVertex = driver.createEmptyVertex(valueClass, objectVertexId, toUpdate);
             // Create a value for that node (useful for RDF export)
-            service.getDriver().setValue(objectVertex, objectVertexId);
+            driver.setValue(objectVertex, objectVertexId);
         }
         // Here come the caching !
         DataType updated = (DataType) objectsBeingUpdated.get(objectVertexId);
         if (updated == null) {
             try {
                 objectsBeingUpdated.put(objectVertexId, toUpdate);
-                updateProperties(service, database, toUpdate, objectVertex, containedProperties, cascade, objectsBeingUpdated);
+                updateProperties(service, driver, database, toUpdate, objectVertex, containedProperties, cascade, objectsBeingUpdated);
                 return toUpdate;
             } finally {
                 objectsBeingUpdated.remove(objectVertexId);
@@ -84,6 +85,7 @@ public class BluePrintsPersister {
      * Delete given object
      *
      * @param service              source of modification
+     * @param driver TODO
      * @param objectVertexId       object expected vertex id
      * @param objectVertex         vertex corresponding to object to delete
      * @param valueClass           class contained by service
@@ -92,7 +94,7 @@ public class BluePrintsPersister {
      * @param cascade              kind of cascade used for dependent properties
      * @param objectsBeingAccessed map containing subgraph of objects currently being delete, this is used to avoid loops, and NOT as a cache
      */
-    public <DataType> void performDelete(AbstractBluePrintsBackedFinderService<? extends Graph, DataType, ?> service, String objectVertexId, Vertex objectVertex, Class<?> valueClass, Map<Property, Collection<CascadeType>> containedProperties, DataType toDelete, CascadeType cascade, ObjectCache objectsBeingAccessed) {
+    public <DataType> void performDelete(AbstractBluePrintsBackedFinderService<? extends Graph, DataType, ?> service, GraphDatabaseDriver driver, String objectVertexId, Vertex objectVertex, Class<?> valueClass, Map<Property, Collection<CascadeType>> containedProperties, DataType toDelete, CascadeType cascade, ObjectCache objectsBeingAccessed) {
         Graph database = service.getDatabase();
         for (Map.Entry<Property, Collection<CascadeType>> entry : containedProperties.entrySet()) {
         	Property p = entry.getKey();
@@ -125,9 +127,9 @@ public class BluePrintsPersister {
             }
         }
         /* We try to locate vertex in graph before to delete it. Indeed, mainly due cascade delete, this vertex may have already been removed */
-        Vertex notYetDeleted = service.getDriver().loadVertexFor(objectVertexId, valueClass.getName());
+        Vertex notYetDeleted = driver.loadVertexFor(objectVertexId, valueClass.getName());
         if(notYetDeleted!=null)
-        	GraphUtils.removeSafely(database, notYetDeleted);
+        	driver.removeSafely(notYetDeleted);
     }
 
 
@@ -232,14 +234,14 @@ public class BluePrintsPersister {
 
     /**
      * Update all properties of given object
-     *
+     * @param driver TODO
      * @param toUpdate             object to update
      * @param objectVertex         object root vertex
      * @param containedProperties  map linking each object property to the cascade types associated to it (allows us to easily see if there is any cascade to perform on object)
      * @param cascade              cascade type used to perform this operation, depend if this method is called from a {@link #create(Object)} or an {@link #update(Object)}
      * @param objectsBeingAccessed cache of objects being accessed during that write
      */
-    private <DataType> void updateProperties(AbstractBluePrintsBackedFinderService<? extends Graph, DataType, ?> service, Graph database, Object toUpdate, Vertex objectVertex, Map<Property, Collection<CascadeType>> containedProperties, CascadeType cascade, ObjectCache objectsBeingAccessed) {
+    private <DataType> void updateProperties(AbstractBluePrintsBackedFinderService<? extends Graph, DataType, ?> service, GraphDatabaseDriver driver, Graph database, Object toUpdate, Vertex objectVertex, Map<Property, Collection<CascadeType>> containedProperties, CascadeType cascade, ObjectCache objectsBeingAccessed) {
         for (Map.Entry<Property, Collection<CascadeType>> entry : containedProperties.entrySet()) {
             Property p = entry.getKey();
             // Static properties are by design not written
@@ -257,15 +259,15 @@ public class BluePrintsPersister {
 	                    if (logger.isLoggable(Level.FINEST)) {
 	                        logger.log(Level.FINEST, "property " + p.getName() + " is considered a collection one");
 	                    }
-	                    updateCollection(service, database, p, toUpdate, objectVertex, used, objectsBeingAccessed);
+	                    updateCollection(service, driver, database, p, toUpdate, objectVertex, used, objectsBeingAccessed);
 	                    // each value should be written as an independant value
 	                } else if (Map.class.isAssignableFrom(rawPropertyType)) {
 	                    if (logger.isLoggable(Level.FINEST)) {
 	                        logger.log(Level.FINEST, "property " + p.getName() + " is considered a map one");
 	                    }
-	                    updateMap(service, database, p, toUpdate, objectVertex, used, objectsBeingAccessed);
+	                    updateMap(service, driver, database, p, toUpdate, objectVertex, used, objectsBeingAccessed);
 	                } else {
-	                    updateSingle(service, database, p, toUpdate, objectVertex, used, objectsBeingAccessed);
+	                    updateSingle(service, driver, database, p, toUpdate, objectVertex, used, objectsBeingAccessed);
 	                }
                 }
             }
@@ -278,13 +280,13 @@ public class BluePrintsPersister {
      * Persisting a map consist into considering each map entry as an object of the map entries collection, then associating each entry object to its contained key and value.
      * To make this association as easy (and readable as posisble) map entries keys are their keys objects ids (if managed) or values) elsewhere, and values are
      * their values ids (if managed) or values (elsewhere). Notice a link is always made between a map entry and both its key and value.
-     *
+     * @param driver TODO
      * @param p          property containing that map
      * @param toUpdate   map to update
      * @param rootVertex object root vertex
      * @param cascade    used cascade type, can be either {@link CascadeType#PERSIST} or {@link CascadeType#MERGE}
      */
-    private <DataType> void updateMap(AbstractBluePrintsBackedFinderService<? extends Graph, DataType, ?> service, Graph database, Property p, Object toUpdate, Vertex rootVertex, CascadeType cascade, ObjectCache objectsBeingAccessed) {
+    private <DataType> void updateMap(AbstractBluePrintsBackedFinderService<? extends Graph, DataType, ?> service, GraphDatabaseDriver driver, Graph database, Property p, Object toUpdate, Vertex rootVertex, CascadeType cascade, ObjectCache objectsBeingAccessed) {
         // Cast should work like a charm
         Map<?, ?> value = (Map<?, ?>) p.get(toUpdate);
         // As a convention, null values are never stored
@@ -307,25 +309,26 @@ public class BluePrintsPersister {
             // Now the have been collected, remove all old vertices
             for (Map.Entry<Vertex, Edge> entry : oldVertices.entrySet()) {
                 GraphUtils.removeSafely(database, entry.getValue());
-                // TODO also remove map entry vertex assocaited edges
+                // TODO also remove map entry vertex associated edges
             }
             // And finally add new vertices
             for (Vertex newVertex : newVertices) {
-                service.getDriver().createEdgeFor(rootVertex, newVertex, p);
+                driver.createEdgeFor(rootVertex, newVertex, p);
             }
         }
     }
 
     /**
      * Update given collection by creating a set of edges/vertices for each element
-     *
+     * @param driver TODO
      * @param p          properties to update associated vertices for
      * @param toUpdate   source object to update
      * @param rootVertex vertex associated to toUpdate
      * @param cascade    used cascade type, can be either {@link CascadeType#PERSIST} or {@link CascadeType#MERGE}
+     *
      * @category update
      */
-    private <DataType> void updateCollection(AbstractBluePrintsBackedFinderService<? extends Graph, DataType, ?> service, Graph database, Property p, Object toUpdate, Vertex rootVertex, CascadeType cascade, ObjectCache objectsBeingAccessed) {
+    private <DataType> void updateCollection(AbstractBluePrintsBackedFinderService<? extends Graph, DataType, ?> service, GraphDatabaseDriver driver, Graph database, Property p, Object toUpdate, Vertex rootVertex, CascadeType cascade, ObjectCache objectsBeingAccessed) {
         // Cast should work like a charm
         Collection<?> value = (Collection<?>) p.get(toUpdate);
         // As a convention, null values are never stored
@@ -366,7 +369,7 @@ public class BluePrintsPersister {
             		if(edges.size() == 0)
             			savedEdges.remove(vertex);
             	} else
-            		edgeForVertex = service.getDriver().createEdgeFor(rootVertex, vertex, p);
+            		edgeForVertex = driver.createEdgeFor(rootVertex, vertex, p);
 
                 // Add a fancy-schmancy property to maintain order in this town
                 edgeForVertex.setProperty(Properties.collection_index.name(), order++);
@@ -415,14 +418,15 @@ public class BluePrintsPersister {
 
     /**
      * Update single-valued property by changing target of edge used to represent the property
-     *
+     * @param driver TODO
      * @param p          updated property
      * @param toUpdate   updated object
      * @param rootVertex vertex representing the object
      * @param cascade    used cascade type, can be either {@link CascadeType#PERSIST} or {@link CascadeType#MERGE}
+     *
      * @category update
      */
-    private <DataType> void updateSingle(AbstractBluePrintsBackedFinderService<? extends Graph, DataType, ?> service, Graph database, Property p, Object toUpdate, Vertex rootVertex, CascadeType cascade, ObjectCache objectsBeingAccessed) {
+    private <DataType> void updateSingle(AbstractBluePrintsBackedFinderService<? extends Graph, DataType, ?> service, GraphDatabaseDriver driver, Graph database, Property p, Object toUpdate, Vertex rootVertex, CascadeType cascade, ObjectCache objectsBeingAccessed) {
         Object value = p.get(toUpdate);
         // As a convention, null values are never stored but they may replace existing ones, in which case previous values must be removed
         // as a consequenc,v alueVertex is loaded only for non null values
@@ -448,7 +452,7 @@ public class BluePrintsPersister {
                 // delete old edge (if it exists)
             	GraphUtils.removeSafely(database, existing);
                 if (value != null)
-                    link = service.getDriver().createEdgeFor(rootVertex, valueVertex, p);
+                    link = driver.createEdgeFor(rootVertex, valueVertex, p);
             }
         } else if (matching.size()>1) {
             if (logger.isLoggable(Level.SEVERE)) {
@@ -465,23 +469,34 @@ public class BluePrintsPersister {
             }
         }
         if (link == null && value != null)
-            link = service.getDriver().createEdgeFor(rootVertex, valueVertex, p);
+            link = driver.createEdgeFor(rootVertex, valueVertex, p);
     }
 
+    /**
+     * @deprecated due to {@link AbstractBluePrintsBackedFinderService#getDriver()} deprecation
+     * @see #loadObject(AbstractBluePrintsBackedFinderService, GraphDatabaseDriver, Vertex, ObjectCache)
+     */
+    @Deprecated
     public <DataType> DataType loadObject(AbstractBluePrintsBackedFinderService<? extends Graph, DataType, ?> service, Vertex objectVertex, ObjectCache objectsBeingAccessed) {
-        String objectVertexId = service.getDriver().getIdOf(objectVertex);
-        return loadObject(service, objectVertexId, objectVertex, objectsBeingAccessed);
+        return loadObject(service, service.getDriver(), objectVertex, objectsBeingAccessed);
+    }
+
+
+    public <DataType> DataType loadObject(AbstractBluePrintsBackedFinderService<? extends Graph, DataType, ?> service, GraphDatabaseDriver driver, Vertex objectVertex, ObjectCache objectsBeingAccessed) {
+        String objectVertexId = driver.getIdOf(objectVertex);
+        return loadObject(service, driver, objectVertexId, objectVertex, objectsBeingAccessed);
     }
 
     /**
      * Load object with given vertex id and vertex node
-     *
+     * @param driver TODO
      * @param objectVertexId
      * @param objectVertex
      * @param objectsBeingAccessed map of objects currently being accessed, it avoid some loops during loading, but is absolutely NOT a persistent cache
+     *
      * @return loaded object
      */
-    public <DataType> DataType loadObject(final AbstractBluePrintsBackedFinderService<? extends Graph, DataType, ?> service, final String objectVertexId, final Vertex objectVertex, final ObjectCache objectsBeingAccessed) {
+    public <DataType> DataType loadObject(final AbstractBluePrintsBackedFinderService<? extends Graph, DataType, ?> service, final GraphDatabaseDriver driver, final String objectVertexId, final Vertex objectVertex, final ObjectCache objectsBeingAccessed) {
     	ValueLoader loader = new ValueLoader() {
 
 			@Override
@@ -493,12 +508,12 @@ public class BluePrintsPersister {
 		        } else {
 		            ClassLoader classLoader = service.getContainedClass().getClassLoader();
 		            ServiceRepository repository = service.getRepository();
-		            DataType returned = (DataType) GraphUtils.createInstance(service.getDriver(), service.getStrategy(), classLoader, objectVertex, Object.class /* we use object here, as this default type should not be used */, repository, objectsBeingAccessed);
+		            DataType returned = (DataType) GraphUtils.createInstance(driver, service.getStrategy(), classLoader, objectVertex, Object.class /* we use object here, as this default type should not be used */, repository, objectsBeingAccessed);
 		            try {
 		                if (service.getStrategy().shouldLoadPropertiesOf(objectVertexId, objectVertex, objectsBeingAccessed)) {
 		                    Map<Property, Collection<CascadeType>> containedProperties = service.getStrategy().getContainedProperties(returned, objectVertex, CascadeType.MERGE);
 		                    objectsBeingAccessed.put(objectVertexId, returned);
-		                    loadObjectProperties(service.getDriver(), service.getStrategy(), classLoader, repository, objectVertex, returned, containedProperties, objectsBeingAccessed);
+		                    loadObjectProperties(driver, service.getStrategy(), classLoader, repository, objectVertex, returned, containedProperties, objectsBeingAccessed);
 		                }
 		                return returned;
 		            } finally {

@@ -299,9 +299,7 @@ public class GraphUtils {
 
 	/**
 	 * Generates a vertex for the given tuple
-	 *
-	 * @param bluePrintsBackedFinderService
-	 *            source service, some informations may be extracted from it
+	 * @param driver TODO
 	 * @param repository
 	 *            service repository for non literal values
 	 * @param value
@@ -311,16 +309,19 @@ public class GraphUtils {
 	 * @param objectsBeingUpdated
 	 *            map of objects already being accessed. Links object id to
 	 *            object
+	 * @param bluePrintsBackedFinderService
+	 *            source service, some informations may be extracted from it
+	 *
 	 * @return the
 	 */
-	public static Vertex getVertexForTuple(AbstractBluePrintsBackedFinderService<? extends Graph, ?, ?> service, ServiceRepository repository, Object value,
-					CascadeType cascade, ObjectCache objectsBeingUpdated) {
+	public static Vertex getVertexForTuple(AbstractBluePrintsBackedFinderService<? extends Graph, ?, ?> service, GraphDatabaseDriver driver, ServiceRepository repository,
+					Object value, CascadeType cascade, ObjectCache objectsBeingUpdated) {
 		Vertex returned = null;
 		// Now distinct behaviour between known objects and unknown ones
 		Class<? extends Object> valueClass = value.getClass();
 		if (Tuples.containsKey(valueClass)) {
 			TupleTransformer transformer = Tuples.get(valueClass);
-			returned = transformer.getVertexFor(service, valueClass.cast(value), cascade, objectsBeingUpdated);
+			returned = transformer.getVertexFor(service, driver, valueClass.cast(value), cascade, objectsBeingUpdated);
 		} else {
 			throw new ObjectIsNotARealTupleException(value, valueClass);
 			// TODO do not forget to set id property

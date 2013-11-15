@@ -21,14 +21,14 @@ public abstract class AbstractTupleTransformer<TupleType> {
 
 	protected final BluePrintsPersister persister = new BluePrintsPersister(Kind.uri);
 
-	public <DataType> Vertex getVertexFor(AbstractBluePrintsBackedFinderService<? extends Graph, DataType, ?> service, TupleType cast, CascadeType cascade,
+	public <DataType> Vertex getVertexFor(AbstractBluePrintsBackedFinderService<? extends Graph, DataType, ?> service, GraphDatabaseDriver driver, TupleType cast, CascadeType cascade,
 					ObjectCache objectsBeingUpdated) {
 		// First step is to build an id for given tuple by concatenating key and value id (which is hopefully done separately)
 		String entryVertexId = getIdOfTuple(service.getRepository(), cast);
 		// No need to memorize updated version
 		String className = cast.getClass().getName();
 		Vertex objectVertex = service.loadVertexFor(entryVertexId, className);
-		persister.performUpdate(service, entryVertexId, objectVertex, getContainedClass(), getContainedProperties(), cast, cascade, objectsBeingUpdated);
+		persister.performUpdate(service, driver, entryVertexId, objectVertex, getContainedClass(), getContainedProperties(), cast, cascade, objectsBeingUpdated);
 		if(objectVertex==null)
 			objectVertex = service.loadVertexFor(entryVertexId, className);
 		return objectVertex;

@@ -24,12 +24,12 @@ public class TargettedVertexTest {
 	 * Check if vertex is the one associated to the given object
 	 * @param currentVertex examined vertex
 	 * @param service service used to get stored object value
+	 * @param driver driver used to access vertices in the fastest way
 	 * @param expected expected object value
 	 * @param deepInspect should we perform deep object inspection to check equaality ? This requires object loading and is as a consequence by far slower
 	 * @return true if object is equals to vertex associated object
 	 */
-	protected static boolean isVertexEqualsTo(Vertex currentVertex, AbstractBluePrintsBackedFinderService service, Object expected, boolean deepInspect, ObjectCache objectsBeingAccessed) {
-		GraphDatabaseDriver driver = service.getDriver();
+	protected static boolean isVertexEqualsTo(Vertex currentVertex, AbstractBluePrintsBackedFinderService service, GraphDatabaseDriver driver, Object expected, boolean deepInspect, ObjectCache objectsBeingAccessed) {
 		Object expectedId = service.getIdOf(expected);
 		if (expectedId.equals(driver.getIdOf(currentVertex))) {
 			return true;
@@ -58,7 +58,7 @@ public class TargettedVertexTest {
 	/**
 	 * Driver used to start this query
 	 */
-	private final GraphDatabaseDriver driver;
+	protected final GraphDatabaseDriver driver;
 	/**
 	 * Strategy used to navigate the edges
 	 */

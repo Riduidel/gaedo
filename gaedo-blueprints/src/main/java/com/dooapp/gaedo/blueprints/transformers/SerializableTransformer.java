@@ -55,14 +55,14 @@ public class SerializableTransformer implements TupleTransformer<Serializable> {
 	 * @see com.dooapp.gaedo.blueprints.transformers.TupleTransformer#getVertexFor(AbstractBluePrintsBackedFinderService<? extends Graph, DataType, ?>, java.lang.Object, java.util.Map)
 	 */
 	@Override
-	public <DataType> Vertex getVertexFor(AbstractBluePrintsBackedFinderService<? extends Graph, DataType, ?> service, Serializable cast, CascadeType cascade,
+	public <DataType> Vertex getVertexFor(AbstractBluePrintsBackedFinderService<? extends Graph, DataType, ?> service, GraphDatabaseDriver driver, Serializable cast, CascadeType cascade,
 					ObjectCache objectsBeingUpdated) {
 		ServiceRepository repository = service.getRepository();
 		// some first-level check to see if someone else than this transformer has any knowledge of value (because, well, this id will be longer than hell)
 		Class<? extends Serializable> valueClass = cast.getClass();
 		if(Tuples.containsKey(valueClass)) {
 			if(Tuples.get(valueClass).equals(this)) {
-				return getVertextForUnknownSerializable(service.getDriver(), repository, cast);
+				return getVertextForUnknownSerializable(driver, repository, cast);
 			}
 		}
 		// Gently ask service for effective access to value

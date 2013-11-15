@@ -24,7 +24,7 @@ public class EqualsTo extends MonovaluedValuedVertexTest<Object> implements Vert
 	@Override
 	protected boolean callMatchManaged(Vertex currentVertex, Property finalProperty) {
 		// First check if id is the same
-		return isVertexEqualsTo(currentVertex, getService(), expected, false, objectsBeingAccessed);
+		return isVertexEqualsTo(currentVertex, getService(), driver, expected, false, objectsBeingAccessed);
 	}
 
 	@Override

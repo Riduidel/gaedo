@@ -26,7 +26,7 @@ public interface GraphDatabaseDriver {
 	 * @param valueClass the new value class
 	 * @param vertexId new vertex id
 	 * @param value TODO
-	 * @return a new vertex with no value, but a given id (and a relationship with that value class 
+	 * @return a new vertex with no value, but a given id (and a relationship with that value class
 	 */
 	Vertex createEmptyVertex(Class<? extends Object> valueClass, String vertexId, Object value);
 
@@ -57,7 +57,7 @@ public interface GraphDatabaseDriver {
 	 * @return
 	 */
 	public Object getValue(Vertex key);
-	
+
 	/**
 	 * Grant access to service repository
 	 * @return
@@ -65,4 +65,11 @@ public interface GraphDatabaseDriver {
 	public ServiceRepository getRepository();
 
 	public Edge createEdgeFor(Vertex fromVertex, Vertex toVertex, Property property);
+
+	/**
+	 * Delete safely the given vertex.
+	 * @param notYetDeleted
+	 * @see GraphUtils#removeSafely(com.tinkerpop.blueprints.Graph, Vertex)
+	 */
+	public void removeSafely(Vertex notYetDeleted);
 }

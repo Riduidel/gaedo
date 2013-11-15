@@ -18,12 +18,13 @@ public interface TupleTransformer<Type> extends Transformer {
 	/**
 	 * Build (or find) the vertex associated to the given tuple
 	 * @param service source service
+	 * @param driver TODO
 	 * @param cast casted value
 	 * @param cascade cascade to be used for that operation
 	 * @param objectsBeingUpdated map of already accessed objects
 	 * @return
 	 */
-	public <DataType> com.tinkerpop.blueprints.Vertex getVertexFor(AbstractBluePrintsBackedFinderService<? extends Graph, DataType, ?> service, Type cast, CascadeType cascade, ObjectCache objectsBeingUpdated);
+	public <DataType> Vertex getVertexFor(AbstractBluePrintsBackedFinderService<? extends Graph, DataType, ?> service, GraphDatabaseDriver driver, Type cast, CascadeType cascade, ObjectCache objectsBeingUpdated);
 
 	/**
 	 * Create an identifier for tuple value, which can be done in any fashion
