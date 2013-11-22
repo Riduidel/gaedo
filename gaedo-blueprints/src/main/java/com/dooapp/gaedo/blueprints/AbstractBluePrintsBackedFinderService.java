@@ -15,6 +15,7 @@ import java.util.logging.Logger;
 import javax.persistence.CascadeType;
 
 import com.dooapp.gaedo.blueprints.indexable.IndexableGraphBackedFinderService;
+import com.dooapp.gaedo.blueprints.queries.DataTypeIterable;
 import com.dooapp.gaedo.blueprints.strategies.GraphMappingStrategy;
 import com.dooapp.gaedo.blueprints.strategies.StrategyType;
 import com.dooapp.gaedo.blueprints.strategies.StrategyUtils;
@@ -30,6 +31,7 @@ import com.dooapp.gaedo.finders.QueryExpression;
 import com.dooapp.gaedo.finders.QueryStatement;
 import com.dooapp.gaedo.finders.expressions.Expressions;
 import com.dooapp.gaedo.finders.id.IdBasedService;
+import com.dooapp.gaedo.finders.projection.NoopProjectionBuilder;
 import com.dooapp.gaedo.finders.repository.ServiceRepository;
 import com.dooapp.gaedo.finders.root.AbstractFinderService;
 import com.dooapp.gaedo.finders.root.InformerFactory;
@@ -549,6 +551,18 @@ public abstract class AbstractBluePrintsBackedFinderService<GraphClass extends G
         // If cast fails, well, that's some fuckin mess, no ?
         Vertex objectVertex = loadVertexFor(objectVertexId, containedClass.getName());
         return persister.loadObject(this, new VertexCachingDriver(getDriver()), objectVertexId, objectVertex, objectsBeingAccessed);
+    }
+
+    /**
+     * Load each vertex from the iterable
+     *
+     * @param verticesIterables an iterable over a list of vertices we will load
+     *
+     * @return loaded object
+     * @see #loadObject(Vertex,ObjectCache)
+     */
+    public Iterable<DataType> loadObjects(Iterable<Vertex> verticesIterable) {
+    	return new VertexLoaderIterable<DataType>(this, verticesIterable);
     }
 
     /**
