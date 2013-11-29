@@ -36,11 +36,11 @@ import com.dooapp.gaedo.finders.informers.MapContainingValueExpression;
  */
 public class BluePrintsQueryBuilder<DataType, InformerType extends Informer<DataType>> implements QueryExpressionVisitor {
 
-	private AbstractBluePrintsBackedFinderService<?, DataType, InformerType> service;
+	protected final AbstractBluePrintsBackedFinderService<?, DataType, InformerType> service;
 	/**
 	 * This stack contains only the tests allowing tree building
 	 */
-	private Stack<CompoundVertexTest> tests = new Stack<CompoundVertexTest>();
+	protected final Stack<CompoundVertexTest> tests = new Stack<CompoundVertexTest>();
 
 	public BluePrintsQueryBuilder(AbstractBluePrintsBackedFinderService<?, DataType, InformerType> service) {
 		this.service = service;
@@ -58,7 +58,11 @@ public class BluePrintsQueryBuilder<DataType, InformerType extends Informer<Data
 		if(tests.size()!=1) {
 			throw new InvalidTestStructureException(tests);
 		}
-		return new OptimizedGraphExecutableQuery(service, tests.peek(), sortingExpression);
+		return createExecutableQuery(service, tests.peek(), sortingExpression);
+	}
+
+	protected OptimizedGraphExecutableQuery createExecutableQuery(AbstractBluePrintsBackedFinderService<?, DataType, InformerType> service, CompoundVertexTest vertextTest, SortingExpression sortingExpression) {
+		return new OptimizedGraphExecutableQuery(service, vertextTest, sortingExpression);
 //		return new BasicGraphExecutableQuery(service, tests.peek(), sortingExpression);
 	}
 

@@ -128,7 +128,7 @@ public class GraphQueryStatement<
 			if (QueryLog.logger.isLoggable(QueryLog.QUERY_LOGGING_LEVEL)) {
 				QueryLog.logger.log(QueryLog.QUERY_LOGGING_LEVEL, "preparing query "+id);
 			}
-			BluePrintsQueryBuilder<DataType, InformerType> builder = new BluePrintsQueryBuilder<DataType, InformerType>(service);
+			BluePrintsQueryBuilder<DataType, InformerType> builder = createQueryBuilder(service);
 			InformerType informer = service.getInformer();
 			filterExpression = query.createMatchingExpression(informer);
 			filterExpression.accept(builder);
@@ -142,6 +142,10 @@ public class GraphQueryStatement<
 			}
 			setState(State.MATCHING);
 		}
+	}
+
+	protected BluePrintsQueryBuilder<DataType, InformerType> createQueryBuilder(AbstractBluePrintsBackedFinderService<?, DataType, InformerType> service) {
+		return new BluePrintsQueryBuilder<DataType, InformerType>(service);
 	}
 
 	@Override

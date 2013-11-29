@@ -1,6 +1,5 @@
 package com.dooapp.gaedo.blueprints.queries.executable;
 
-import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.logging.Level;
@@ -34,7 +33,7 @@ public class BasicGraphExecutableQuery extends AbstractGraphExecutableQuery impl
 	 * Get the list of vertices to examine
 	 * @return
 	 */
-	protected Collection<Vertex> getVerticesToExamine() {
+	protected Iterable<Vertex> getVerticesToExamine() {
 		List<Vertex> returned = new LinkedList<Vertex>();
 		// First step is to locate the class node
 		Vertex classVertex = getClassVertex();

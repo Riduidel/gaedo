@@ -1,6 +1,5 @@
 package com.dooapp.gaedo.blueprints.queries.executable;
 
-import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -81,7 +80,7 @@ public class OptimizedGraphExecutableQuery extends AbstractGraphExecutableQuery 
 	 * @see com.dooapp.gaedo.blueprints.queries.executable.AbstractGraphExecutableQuery#getVerticesToExamine()
 	 */
 	@Override
-	protected Collection<Vertex> getVerticesToExamine() {
+	protected Iterable<Vertex> getVerticesToExamine() {
 		// First step is to get all possible query root vertices
 		Map<Iterable<Vertex>, Iterable<Property>> possibleRoots = getPossibleRootsOf(test);
 		VertexValueRange bestMatch = findBestRootIn(possibleRoots);

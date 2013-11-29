@@ -11,7 +11,7 @@ import com.dooapp.gaedo.finders.QueryStatement;
  * @author ndx
  *
  */
-class SimpleFinder<DataType, InformerType extends Informer<DataType>>
+public class SimpleFinder<DataType, InformerType extends Informer<DataType>>
 		implements Finder<DataType, InformerType> {
 	/**
 	 * Source service, used to generate the query statement

@@ -25,7 +25,7 @@ public abstract class AbstractGraphExecutableQuery implements GraphExecutableQue
 		this.sort = sortingExpression;
 	}
 
-	
+
 
 	/**
 	 * Get a collection of vertices matching the test criteria
@@ -37,9 +37,11 @@ public abstract class AbstractGraphExecutableQuery implements GraphExecutableQue
 			unsortedVertices = new LinkedList<Vertex>();
 		else
 			unsortedVertices = new TreeSet<Vertex>(new SortingComparator(service, sort));
-		Collection<Vertex> examinedVertices = getVerticesToExamine();
+		Iterable<Vertex> examinedVertices = getVerticesToExamine();
 		if (QueryLog.logger.isLoggable(QueryLog.QUERY_LOGGING_LEVEL)) {
-			QueryLog.logger.log(QueryLog.QUERY_LOGGING_LEVEL, "vertex test "+test+" returned a total of "+examinedVertices.size()+" vertices to examine");
+			if(examinedVertices instanceof Collection) {
+				QueryLog.logger.log(QueryLog.QUERY_LOGGING_LEVEL, "vertex test "+test+" returned a total of "+((Collection)examinedVertices).size()+" vertices to examine");
+			}
 		}
 		for(Vertex v : examinedVertices) {
 			if(test.matches(v)) {
@@ -60,7 +62,7 @@ public abstract class AbstractGraphExecutableQuery implements GraphExecutableQue
 	 * result a superset of all valid vertices. Obviously, the goal is to find fast the smaller superset.
 	 * @return an unordered superset of matching vertices.
 	 */
-	protected abstract Collection<Vertex> getVerticesToExamine();
+	protected abstract Iterable<Vertex> getVerticesToExamine();
 
 
 
@@ -87,7 +89,7 @@ public abstract class AbstractGraphExecutableQuery implements GraphExecutableQue
 			return vertices.get(0);
 		return null;
 	}
-	
+
 	protected Class getSearchedClass() {
 		return service.getContainedClass();
 	}
@@ -114,6 +116,6 @@ public abstract class AbstractGraphExecutableQuery implements GraphExecutableQue
 		builder.append("]");
 		return builder.toString();
 	}
-	
-	
+
+
 }
