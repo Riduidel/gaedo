@@ -30,7 +30,7 @@ public class SimpleFinder<DataType, InformerType extends Informer<DataType>>
 	/**
 	 * Build a query statement from the input query builder provided. Notice that we provide the query a maybe not unique id
 	 */
-	public QueryStatement<DataType, DataType, InformerType> matching(QueryBuilder<InformerType> query) {
+	public QueryStatement<DataType, DataType, InformerType> matching(QueryBuilder<? super InformerType> query) {
 		QueryStatement<DataType, DataType, InformerType> returned = service.createQueryStatement(query);
 		StackTraceElement creator = new Throwable().getStackTrace()[1];
 		returned.setId(creator.getClassName()+" "+creator.getMethodName());

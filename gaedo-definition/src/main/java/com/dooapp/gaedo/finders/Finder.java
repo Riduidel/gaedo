@@ -13,5 +13,5 @@ public interface Finder<DataType, InformerType extends Informer<DataType>> {
 	 * @param query input query builder
 	 * @return output query statement
 	 */
-	public QueryStatement<DataType, DataType, InformerType> matching(QueryBuilder<InformerType> query);
+	public QueryStatement<DataType, DataType, InformerType> matching(QueryBuilder<? super InformerType> query);
 }

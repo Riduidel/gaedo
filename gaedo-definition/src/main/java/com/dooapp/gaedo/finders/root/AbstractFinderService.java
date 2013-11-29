@@ -39,7 +39,7 @@ public abstract class AbstractFinderService<DataType, InformerType extends Infor
 	}
 
 	protected abstract QueryStatement<DataType, DataType, InformerType> createQueryStatement(
-			QueryBuilder<InformerType> query);
+			QueryBuilder<? super InformerType> query);
 
 	/**
 	 * Default find implementation

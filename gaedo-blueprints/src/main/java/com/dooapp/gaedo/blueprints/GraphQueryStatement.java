@@ -92,11 +92,11 @@ public class GraphQueryStatement<
 
 	}
 
-	protected QueryBuilder<InformerType> query;
+	protected QueryBuilder<? super InformerType> query;
 	protected AbstractBluePrintsBackedFinderService<?, DataType, InformerType> service;
 	protected ServiceRepository repository;
 
-	public GraphQueryStatement(QueryBuilder<InformerType> query,
+	public GraphQueryStatement(QueryBuilder<? super InformerType> query,
 					AbstractBluePrintsBackedFinderService<?, DataType, InformerType> service,
 					ServiceRepository repository) {
 		this.query = query;

@@ -727,7 +727,7 @@ public abstract class AbstractBluePrintsBackedFinderService<GraphClass extends G
 
 
     @Override
-    protected QueryStatement<DataType, DataType, InformerType> createQueryStatement(QueryBuilder<InformerType> query) {
+    protected QueryStatement<DataType, DataType, InformerType> createQueryStatement(QueryBuilder<? super InformerType> query) {
         return new GraphQueryStatement<DataType, DataType, InformerType>(query,
                         this, repository);
     }
