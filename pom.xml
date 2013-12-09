@@ -34,7 +34,6 @@
 		<module>gaedo-guice</module>
 		<module>gaedo-graphviz</module>
 		<module>gaedo-informer-generator</module>
-		<module>gaedo-rest-server</module>
 		<module>gaedo-test-beans</module>
 		<module>gaedo-prevalence</module>
 		<module>languages-bindings</module>
