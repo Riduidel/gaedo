@@ -30,7 +30,7 @@ public class CollectionQueryStatement<ValueType, DataType, InformerType extends 
 	 */
 	private Iterable<DataType> data;
 
-	public CollectionQueryStatement(QueryBuilder<InformerType> query,
+	public CollectionQueryStatement(QueryBuilder<? super InformerType> query,
 			InformerType informer, Iterable<DataType> data,
 			PropertyChangeEmitter emitter) {
 		super(query, informer, emitter);

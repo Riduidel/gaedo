@@ -215,7 +215,7 @@ public class DatastoreFinderServiceImpl<DataType, InformerType extends Informer<
 
 	@Override
 	protected QueryStatement<DataType, DataType, InformerType> createQueryStatement(
-			QueryBuilder<InformerType> query) {
+			QueryBuilder<? super InformerType> query) {
 		return new DirectDatastoreQueryStatement<DataType, InformerType>(query,
 				this, datastore, repository);
 	}

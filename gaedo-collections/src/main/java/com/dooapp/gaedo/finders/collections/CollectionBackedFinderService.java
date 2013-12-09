@@ -83,7 +83,7 @@ public class CollectionBackedFinderService<DataType, InformerType extends Inform
 	 */
 	@Override
 	protected QueryStatement<DataType, DataType, InformerType> createQueryStatement(
-			QueryBuilder<InformerType> query) {
+			QueryBuilder<? super InformerType> query) {
 		return new CollectionQueryStatement<DataType, DataType, InformerType>(query,
 				getInformer(), new LinkedList<DataType>(data), support);
 	}

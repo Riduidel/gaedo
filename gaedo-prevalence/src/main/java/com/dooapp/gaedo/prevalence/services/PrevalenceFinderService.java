@@ -115,7 +115,7 @@ public class PrevalenceFinderService<DataType extends Serializable, InformerType
 
 	@Override
 	protected QueryStatement<DataType, DataType, InformerType> createQueryStatement(
-			QueryBuilder<InformerType> query) {
+			QueryBuilder<? super InformerType> query) {
 		return new CollectionQueryStatement<DataType, DataType, InformerType>(query, getInformer(), findAll(), support);
 	}
 }

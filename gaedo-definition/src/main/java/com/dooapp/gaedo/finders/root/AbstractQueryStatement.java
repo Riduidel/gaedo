@@ -31,7 +31,7 @@ public abstract class AbstractQueryStatement<ValueType, DataType, InformerType e
 	/**
 	 * Used query builder
 	 */
-	protected final QueryBuilder<InformerType> query;
+	protected final QueryBuilder<? super InformerType> query;
 	/**
 	 * Class informer used to build query
 	 */
@@ -55,7 +55,7 @@ public abstract class AbstractQueryStatement<ValueType, DataType, InformerType e
 	 */
 	private String id;
 
-	public AbstractQueryStatement(QueryBuilder<InformerType> query,
+	public AbstractQueryStatement(QueryBuilder<? super InformerType> query,
 			InformerType informer, PropertyChangeEmitter emitter) {
 		super();
 		this.query = query;

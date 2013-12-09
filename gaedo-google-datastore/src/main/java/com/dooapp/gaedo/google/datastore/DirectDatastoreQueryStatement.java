@@ -28,7 +28,7 @@ public class DirectDatastoreQueryStatement<DataType, InformerType extends Inform
 	/**
 	 * Query used for this statement
 	 */
-	private QueryBuilder<InformerType> query;
+	private QueryBuilder<? super InformerType> query;
 	/**
 	 * Service ultimately used to perform query
 	 */
@@ -56,7 +56,7 @@ public class DirectDatastoreQueryStatement<DataType, InformerType extends Inform
 	private String id;
 
 	public DirectDatastoreQueryStatement(
-			QueryBuilder<InformerType> query,
+			QueryBuilder<? super InformerType> query,
 			DatastoreFinderService<DataType, InformerType> datastoreFinderService,
 			DatastoreService datastore, ServiceRepository repository) {
 		this.query = query;
