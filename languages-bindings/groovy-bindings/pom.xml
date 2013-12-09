@@ -3,7 +3,7 @@
 	<parent>
 		<artifactId>languages-bindings</artifactId>
 		<groupId>com.dooapp</groupId>
-		<version>0.6.8-SNAPSHOT</version>
+		<version>0.6.8</version>
 	</parent>
 	<groupId>com.dooapp</groupId>
 	<artifactId>groovy-bindings</artifactId>
