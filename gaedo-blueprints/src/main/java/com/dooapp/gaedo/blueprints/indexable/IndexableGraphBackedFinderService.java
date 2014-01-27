@@ -6,13 +6,13 @@ import java.util.UUID;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import javax.persistence.CascadeType;
-
 import com.dooapp.gaedo.blueprints.AbstractBluePrintsBackedFinderService;
+import com.dooapp.gaedo.blueprints.CantCreateAVertexForALiteralException;
 import com.dooapp.gaedo.blueprints.GraphUtils;
 import com.dooapp.gaedo.blueprints.Kind;
 import com.dooapp.gaedo.blueprints.Properties;
 import com.dooapp.gaedo.blueprints.VertexHasNoPropertyException;
+import com.dooapp.gaedo.blueprints.queries.tests.EqualsTo;
 import com.dooapp.gaedo.blueprints.strategies.GraphMappingStrategy;
 import com.dooapp.gaedo.blueprints.strategies.StrategyType;
 import com.dooapp.gaedo.blueprints.strategies.UnableToGetVertexTypeException;
@@ -32,6 +32,8 @@ import com.tinkerpop.blueprints.Element;
 import com.tinkerpop.blueprints.Index;
 import com.tinkerpop.blueprints.IndexableGraph;
 import com.tinkerpop.blueprints.Vertex;
+import com.tinkerpop.blueprints.util.wrappers.event.EventIndexableGraph;
+import com.tinkerpop.blueprints.util.wrappers.event.listener.GraphChangedListener;
 
 /**
  * Indexable graph backed version of finder service.
@@ -92,7 +94,7 @@ public class IndexableGraphBackedFinderService<DataType, InformerType extends In
 	public IndexableGraphBackedFinderService(IndexableGraph graph, Class<DataType> containedClass, Class<InformerType> informerClass, InformerFactory factory,
 					ServiceRepository repository, PropertyProvider provider, GraphMappingStrategy<DataType> strategy) {
 		super(graph, containedClass, informerClass, factory, repository, provider, strategy);
-		loadIndices(graph);
+		prepareGraph(getDatabase());
 	}
 
 	/**
@@ -118,13 +120,13 @@ public class IndexableGraphBackedFinderService<DataType, InformerType extends In
 	public IndexableGraphBackedFinderService(IndexableGraph graph, Class<DataType> containedClass, Class<InformerType> informerClass, InformerFactory factory,
 					ServiceRepository repository, PropertyProvider provider, StrategyType strategy) {
 		super(graph, containedClass, informerClass, factory, repository, provider, strategy);
-		loadIndices(graph);
+		prepareGraph(getDatabase());
 	}
 
 	public IndexableGraphBackedFinderService(IndexableGraph graph, Class<DataType> containedClass, Class<InformerType> informerClass, InformerFactory factory,
 					ServiceRepository repository, PropertyProvider provider) {
 		super(graph, containedClass, informerClass, factory, repository, provider);
-		loadIndices(graph);
+		prepareGraph(getDatabase());
 	}
 
 	/**
@@ -132,7 +134,8 @@ public class IndexableGraphBackedFinderService<DataType, InformerType extends In
 	 *
 	 * @param graph
 	 */
-	private void loadIndices(IndexableGraph graph) {
+	private void prepareGraph(IndexableGraph graph) {
+		// load indices
 		for (IndexNames index : IndexNames.values()) {
 			Index<? extends Element> associatedIndex = graph.getIndex(index.getIndexName(), index.getIndexed());
 			if (associatedIndex == null) {
@@ -170,7 +173,7 @@ public class IndexableGraphBackedFinderService<DataType, InformerType extends In
 						case literal:
 						case bnode:
 						case uri:
-							if (className.equals(vertexTypeName)) {
+							if (Literals.classes.getTransformer().areEquals(className, vertexTypeName)) {
 								return vertex;
 							}
 							break;
@@ -222,23 +225,18 @@ public class IndexableGraphBackedFinderService<DataType, InformerType extends In
 		// technical vertex id is no more used by gaedo which only rley upon the
 		// getIdOfVertex method !
 		Vertex returned = database.addVertex(valueClass.getName() + ":" + vertexId);
-		setIndexedProperty(returned, Properties.value.name(), vertexId, IndexNames.VERTICES);
+		GraphUtils.setIndexedProperty(database, returned, Properties.value.name(), vertexId);
 		if (Literals.containsKey(valueClass)) {
-			// some literals aren't so ... literal, as they can accept incoming
-			// connections (like classes)
-			setIndexedProperty(returned, Properties.kind.name(), Literals.get(valueClass).getKind().name(), IndexNames.VERTICES);
-			setIndexedProperty(returned, Properties.type.name(), Literals.get(valueClass).getTypeOf(value), IndexNames.VERTICES);
+			throw new CantCreateAVertexForALiteralException("Impossible to create a vertex for "+value);
 		} else {
 			if (repository.containsKey(valueClass)) {
-				setIndexedProperty(returned, Properties.kind.name(), Kind.uri.name(), IndexNames.VERTICES);
+				GraphUtils.setIndexedProperty(database, returned, Properties.kind.name(), Kind.uri.name());
 			} else if (Tuples.containsKey(valueClass)) {
 				// some literals aren't so ... literal, as they can accept
 				// incoming connections (like classes)
-				setIndexedProperty(returned, Properties.kind.name(), Tuples.get(valueClass).getKind().name(), IndexNames.VERTICES);
+				GraphUtils.setIndexedProperty(database, returned, Properties.kind.name(), Tuples.get(valueClass).getKind().name());
 			}
-			// obtain vertex for type
-			Vertex classVertex = classTransformer.getVertexFor(getDriver(), valueClass, CascadeType.PERSIST);
-			Edge toType = getDriver().createEdgeFor(returned, classVertex, TypeProperty.INSTANCE);
+			// no more edge to class creation : as TYPE and ClassCollectionProperty now are literals, one should rely upon classical index search
 		}
 		// Yup, this if has no default else statement, and that's normal.
 		if (logger.isLoggable(Level.FINE)) {
@@ -254,7 +252,7 @@ public class IndexableGraphBackedFinderService<DataType, InformerType extends In
 
 	@Override
 	protected void setValue(Vertex vertex, Object value) {
-		setIndexedProperty(vertex, Properties.value.name(), value, IndexNames.VERTICES);
+		GraphUtils.setIndexedProperty(database, vertex, Properties.value.name(), value);
 	}
 
 	@Override
@@ -276,19 +274,6 @@ public class IndexableGraphBackedFinderService<DataType, InformerType extends In
 		return returned;
 	}
 
-	/**
-	 * Set an indexed property on any graph element, updating the given list of
-	 * indices
-	 *
-	 * @param graphElement
-	 * @param propertyName
-	 * @param propertyValue
-	 * @param indexName
-	 */
-	public <ElementType extends Element> void setIndexedProperty(ElementType graphElement, String propertyName, Object propertyValue, IndexNames indexName) {
-		GraphUtils.setIndexedProperty(database, graphElement, propertyName, propertyValue, indexName);
-	}
-
 	public String getEdgeId(Vertex fromVertex, Vertex toVertex, Property property) {
 		return fromVertex.getId().toString() + "_to_" + toVertex.getId().toString() + "___" + UUID.randomUUID().toString();
 	}
@@ -296,10 +281,9 @@ public class IndexableGraphBackedFinderService<DataType, InformerType extends In
 	@Override
 	public InViewService<DataType, InformerType, SortedSet<String>> focusOn(SortedSet<String> lens) {
 		AbstractBluePrintsBackedFinderService<IndexableGraph, DataType, InformerType> returned = new IndexableGraphBackedFinderService<DataType, InformerType>(
-						database, containedClass, informerClass, getInformerFactory(), repository, propertyProvider,
+						getDatabase(), containedClass, informerClass, getInformerFactory(), repository, propertyProvider,
 						/* strategy is local to service ! */getStrategy().derive());
 		returned.setLens(lens);
 		return returned;
 	}
-
 }

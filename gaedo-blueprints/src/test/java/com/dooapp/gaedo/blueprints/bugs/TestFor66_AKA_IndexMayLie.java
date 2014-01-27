@@ -15,6 +15,7 @@ import org.junit.runners.Parameterized.Parameters;
 
 import com.dooapp.gaedo.blueprints.AbstractGraphEnvironment;
 import com.dooapp.gaedo.blueprints.AbstractGraphPostTest;
+import com.dooapp.gaedo.blueprints.GraphUtils;
 import com.dooapp.gaedo.blueprints.Kind;
 import com.dooapp.gaedo.blueprints.Properties;
 import com.dooapp.gaedo.blueprints.finders.FindPostById;
@@ -96,8 +97,8 @@ public class TestFor66_AKA_IndexMayLie extends AbstractGraphPostTest {
 			Index<Vertex> vertices = indexable.getIndex(IndexNames.VERTICES.getIndexName(), Vertex.class);
 			// pollution vertex has no property set ... on purpose or not
 			Vertex pollution = indexable.addVertex(getClass().getName());
-			pollution.setProperty(Properties.kind.name(), Kind.uri.name());
 			vertices.put(Properties.value.name(), POLLUTION_KEY, pollution);
+			GraphUtils.setIndexedProperty(g, pollution, Properties.kind.name(), Kind.uri.name());
 			assertThat(vertices.get(Properties.value.name(), POLLUTION_KEY).iterator().next(), Is.is(pollution));
 			corruptPostByUpdatingIt(KEY, VALUE, vertices, pollution, POLLUTION_KEY);
 		}

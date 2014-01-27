@@ -33,8 +33,9 @@ public class ContainsString extends MonovaluedValuedVertexTest<String> implement
 
 	@Override
 	protected boolean callMatchLiteral(Vertex currentVertex, Property finalProperty) {
-		String value = (String) Literals.get(String.class).loadObject(getDriver(), currentVertex);
-		return value.contains(getExpected());
+		throw new UnsupportedOperationException(getClass().getName()+"match literal is not yet re-implemented");
+//		String value = (String) Literals.get(String.class).loadObject(getDriver(), currentVertex);
+//		return value.contains(getExpected());
 	}
 
 }

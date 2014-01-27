@@ -24,7 +24,7 @@ import com.tinkerpop.blueprints.Vertex;
  */
 public class BasicGraphExecutableQuery extends AbstractGraphExecutableQuery implements GraphExecutableQuery {
 	private static final Logger logger = Logger.getLogger(BasicGraphExecutableQuery.class.getName());
-	
+
 	public BasicGraphExecutableQuery(AbstractBluePrintsBackedFinderService<IndexableGraph, ?, ?> service, CompoundVertexTest peek, SortingExpression sortingExpression) {
 		super(service, peek, sortingExpression);
 	}
@@ -34,26 +34,6 @@ public class BasicGraphExecutableQuery extends AbstractGraphExecutableQuery impl
 	 * @return
 	 */
 	protected Iterable<Vertex> getVerticesToExamine() {
-		List<Vertex> returned = new LinkedList<Vertex>();
-		// First step is to locate the class node
-		Vertex classVertex = getClassVertex();
-		ClassCollectionProperty classes = new ClassCollectionProperty(getSearchedClass());
-		if(classVertex==null) {
-			if (logger.isLoggable(Level.WARNING)) {
-				logger.log(Level.WARNING, "graph doesn't seem to know source class "+getSearchedClass().getCanonicalName());
-			}
-			return returned;
-		}
-		// Now iterate on all instances and perform test on each one
-		Iterable<Edge> objectsClassEdges = classVertex.getEdges(Direction.IN, GraphUtils.getEdgeNameFor(classes));
-		for(Edge e : objectsClassEdges) {
-			returned.add(e.getVertex(Direction.OUT));
-		}
-		return returned;
-	}
-
-	protected Vertex getClassVertex() {
-		LiteralTransformer<Class> transformer = Literals.classes.getTransformer();
-		return service.loadVertexFor(transformer.getVertexId(getSearchedClass()), Class.class.getName());
+		throw new UnsupportedOperationException("not yet rewritten, as I don't yet know how to serialize literal collections ... and classes ARE literals");
 	}
 }

@@ -8,7 +8,7 @@ public class StringLiteralTransformer extends AbstractSimpleLiteralTransformer<S
 	}
 
 	@Override
-	protected Object getVertexValue(String value) {
+	public String valueToString(String value) {
 		return value==null ? "null" : value;
 	}
 }

@@ -11,23 +11,23 @@ import com.dooapp.gaedo.test.beans.State;
 import com.dooapp.gaedo.test.beans.User;
 
 public class PostSubClass extends Post {
-	
+
 	public static enum AnotherStateForBug26 {
 		PUBLIC, FAMILY
-		
+
 	}
 
 	public AnotherStateForBug26 anotherState;
-	
+
 	/**
 	 * A list of pages for multipages messages
 	 */
 	private Map<Integer, PostSubClass> postPages = new TreeMap<Integer, PostSubClass>();
-	
-	@ManyToOne(cascade={CascadeType.PERSIST})
+
+	@ManyToOne(cascade={CascadeType.PERSIST, CascadeType.REFRESH})
 	public User creator;
 
-	
+
 	public PostSubClass() {
 		super();
 	}
@@ -57,6 +57,6 @@ public class PostSubClass extends Post {
 	public void setPostPages(Map<Integer, PostSubClass> postPages) {
 		this.postPages = postPages;
 	}
-	
-	
+
+
 }

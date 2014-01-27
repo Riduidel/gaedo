@@ -1,6 +1,8 @@
 package com.dooapp.gaedo.blueprints;
 
 import java.util.Collection;
+import java.util.logging.Handler;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import javax.persistence.CascadeType;
@@ -14,8 +16,8 @@ import org.junit.runners.Parameterized.Parameters;
 
 import com.dooapp.gaedo.blueprints.beans.PostSubClass;
 import com.dooapp.gaedo.blueprints.beans.PostSubClassInformer;
-import com.dooapp.gaedo.blueprints.indexable.IndexNames;
 import com.dooapp.gaedo.blueprints.indexable.IndexableGraphBackedFinderService;
+import com.dooapp.gaedo.blueprints.operations.Loader;
 import com.dooapp.gaedo.finders.QueryBuilder;
 import com.dooapp.gaedo.finders.QueryExpression;
 import com.dooapp.gaedo.finders.id.IdBasedService;
@@ -125,9 +127,9 @@ public class GraphPostSubClassFinderServiceTest extends AbstractGraphPostSubClas
 //			((TransactionalGraph) environment.getGraph()).startTransaction();
 		Vertex valueVertex = environment.getGraph().addVertex("new-text-vertex");
 		// using the service method, as it allows us to add properties to indices with ease
-		GraphUtils.setIndexedProperty(postSubService.getDatabase(), valueVertex, Properties.kind.name(), Kind.uri.name(), IndexNames.VERTICES);
+		GraphUtils.setIndexedProperty(environment.getGraph(), valueVertex, Properties.kind.name(), Kind.uri.name());
 		String BUG_31_URI = "https://github.com/Riduidel/gaedo/issues/31";
-		GraphUtils.setIndexedProperty(postSubService.getDatabase(), valueVertex, Properties.value.name(), BUG_31_URI, IndexNames.VERTICES);
+		GraphUtils.setIndexedProperty(environment.getGraph(), valueVertex, Properties.value.name(), BUG_31_URI);
 
 		// Have you notice this property is annotated ?
 		String textPropertyName = "post:text";
@@ -156,6 +158,11 @@ public class GraphPostSubClassFinderServiceTest extends AbstractGraphPostSubClas
 
 		saved.creator = null;
 		getPostSubService().update(saved);
+		// little log manipulation added to make sure refresh WAS present on graph
+		Logger.getLogger(Loader.LoadProperties.class.getName()).setLevel(Level.ALL);
+		for(Handler handler : Logger.getLogger("").getHandlers()) {
+			handler.setLevel(Level.FINE);
+		}
 		PostSubClass loaded = ((IdBasedService<PostSubClass>) getPostSubService()).findById(saved.id);
 
 		assertThat(loaded.creator, Is.is(author));

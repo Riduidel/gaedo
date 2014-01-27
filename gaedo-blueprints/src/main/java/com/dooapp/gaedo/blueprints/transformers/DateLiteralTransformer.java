@@ -58,14 +58,14 @@ public class DateLiteralTransformer extends AbstractSimpleLiteralTransformer<Dat
 	}
 
 	@Override
-	protected Object getVertexValue(Date value) {
+	public String valueToString(Date value) {
 		// fallback value
 		String format = getTypeOf(value);
 		return getLoader(FORMATS.get(format)).format(value);
 	}
 
 	@Override
-	public Date internalLoadObject(GraphDatabaseDriver driver, Class valueClass, Vertex key, ObjectCache objectCache) {
+	public Date loadObjectFromVertex(GraphDatabaseDriver driver, Class valueClass, Vertex key, ObjectCache objectCache) {
 		String property = driver.getValue(key).toString();
 		String type = key.getProperty(Properties.type.name()).toString();
 		try {
@@ -91,5 +91,24 @@ public class DateLiteralTransformer extends AbstractSimpleLiteralTransformer<Dat
 		}
 		dateCache.put((Date) value, format);
 		return format;
+	}
+
+	/**
+	 * Load value using the first format that may work. This is unfortunatly not optimal.
+	 * @param valueClass
+	 * @param valueString
+	 * @return
+	 * @see com.dooapp.gaedo.blueprints.transformers.AbstractLiteralTransformer#loadValueFromString(java.lang.Class, java.lang.String)
+	 */
+	@Override
+	protected Date loadValueFromString(Class valueClass, String valueString) {
+		for(String format : FORMATS.values()) {
+			try {
+				return getLoader(format).parse(valueString);
+			} catch(ParseException e) {
+			}
+		}
+		// if value can't be loaded, well, delegate to superclass (it will fail for sure)
+		return super.loadValueFromString(valueClass, valueString);
 	}
 }

@@ -264,6 +264,8 @@ public class Utils {
 			return (Type) value.toString();
 		} else if(type.isPrimitive()) {
 			return (Type) fromString(value, objectify(type));
+		} else if(Object.class.equals(type)) {
+			return (Type) value;
 		} else if(URI.class.equals(type)) {
 			try {
 				return (Type) new URI(value);

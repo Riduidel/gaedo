@@ -36,7 +36,7 @@ public class DescribedProperty implements Property {
 	private final String descriptorString;
 
 	/**
-	 * Known declaring class of property. 
+	 * Known declaring class of property.
 	 * @param descriptor Property descriptor used to provide infos on which methods to call.
 	 * Due to the very nature of PropertyDescriptor and its Soft/Weak references to write and read methods, all infos are copied here (we hope PropertyDescriptor is fresh enough
 	 * to not have been GCed).
@@ -49,7 +49,7 @@ public class DescribedProperty implements Property {
 		this.methods = new Method[] {readMethod, writeMethod};
 		type = descriptor.getPropertyType();
 		name = descriptor.getName();
-		descriptorString = descriptor.toString();
+		descriptorString = declaringClass.getName()+"#"+name+" ("+type.toString()+")";
 	}
 
 	@Override
@@ -182,5 +182,14 @@ public class DescribedProperty implements Property {
 		} else if (!writeMethod.equals(other.writeMethod))
 			return false;
 		return true;
+	}
+
+	/**
+	 * @return
+	 * @see java.lang.Object#toString()
+	 */
+	@Override
+	public String toString() {
+		return toGenericString();
 	}
 }

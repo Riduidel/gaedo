@@ -34,13 +34,8 @@ public class NumberLiteralTransformer extends AbstractLiteralTransformer<Number>
 	}
 
 	@Override
-	protected Object getVertexValue(Number value) {
+	public String valueToString(Number value) {
 		return value==null ? "0" : value.toString();
-	}
-
-	@Override
-	protected Class getValueClass(Number value) {
-		return value==null ? Number.class : value.getClass();
 	}
 
 	/**
@@ -62,5 +57,22 @@ public class NumberLiteralTransformer extends AbstractLiteralTransformer<Number>
 	@Override
 	public boolean canHandle(ClassLoader classLoader, String effectiveType) {
 		return lookupOptimizer.containsKey(effectiveType);
+	}
+
+	@Override
+	protected String typeToString(Class<? extends Number> numberClass) {
+		return numberClass.getName();
+	}
+
+	@Override
+	public boolean areEquals(Object expected, String effectiveGraphValue) {
+		if(expected instanceof Number) {
+			Number expectedNumber = (Number) expected;
+			String prefix = Literals.getTypePrefix(effectiveGraphValue);
+			Number value = loadValueFromString(lookupOptimizer.get(prefix), Literals.getValueIn(effectiveGraphValue));
+			return expectedNumber.doubleValue()==value.doubleValue();
+		} else {
+			return false;
+		}
 	}
 }

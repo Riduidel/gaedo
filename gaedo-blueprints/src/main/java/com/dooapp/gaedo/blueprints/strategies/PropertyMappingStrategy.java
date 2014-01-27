@@ -18,9 +18,9 @@ public enum PropertyMappingStrategy {
 		if(this==prefixed)
 			sOut.append(declaredClass.getCanonicalName()).append(":");
 		if(idProperty==null) {
-			sOut.append(Literals.get(declaredClass).getVertexId(objectId));
+			sOut.append(Literals.get(declaredClass).toString(objectId));
 		} else {
-			sOut.append(Literals.get(idProperty.getType()).getVertexId(objectId));
+			sOut.append(Literals.get(idProperty.getType()).toString(objectId));
 		}
 		return sOut.toString();
 	}

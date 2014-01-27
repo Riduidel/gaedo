@@ -25,6 +25,7 @@ import com.dooapp.gaedo.finders.expressions.OrQueryExpression;
 import com.dooapp.gaedo.finders.expressions.QueryExpressionVisitor;
 import com.dooapp.gaedo.finders.expressions.StartsWithExpression;
 import com.dooapp.gaedo.finders.informers.MapContainingValueExpression;
+import com.tinkerpop.blueprints.IndexableGraph;
 
 /**
  * Visitor transforming the abstract {@link QueryExpression} into a more concrete and usable {@link GraphExecutableQuery}.
@@ -35,13 +36,13 @@ import com.dooapp.gaedo.finders.informers.MapContainingValueExpression;
  */
 public class BluePrintsQueryBuilder<DataType, InformerType extends Informer<DataType>> implements QueryExpressionVisitor {
 
-	protected final AbstractBluePrintsBackedFinderService<?, DataType, InformerType> service;
+	protected final AbstractBluePrintsBackedFinderService<? extends IndexableGraph, DataType, InformerType> service;
 	/**
 	 * This stack contains only the tests allowing tree building
 	 */
 	protected final Stack<CompoundVertexTest> tests = new Stack<CompoundVertexTest>();
 
-	public BluePrintsQueryBuilder(AbstractBluePrintsBackedFinderService<?, DataType, InformerType> service) {
+	public BluePrintsQueryBuilder(AbstractBluePrintsBackedFinderService<? extends IndexableGraph, DataType, InformerType> service) {
 		this.service = service;
 		/* Base test is always a AND one, associated to a test on class (will be used for optimized query building) */
 		this.tests.push(new AndVertexTest(service.getStrategy(), service.getDriver(), null /* null indicates no property is navigated */));
@@ -60,7 +61,7 @@ public class BluePrintsQueryBuilder<DataType, InformerType extends Informer<Data
 		return createExecutableQuery(service, tests.peek(), sortingExpression);
 	}
 
-	protected OptimizedGraphExecutableQuery createExecutableQuery(AbstractBluePrintsBackedFinderService<?, DataType, InformerType> service, CompoundVertexTest vertextTest, SortingExpression sortingExpression) {
+	protected OptimizedGraphExecutableQuery createExecutableQuery(AbstractBluePrintsBackedFinderService<? extends IndexableGraph, DataType, InformerType> service, CompoundVertexTest vertextTest, SortingExpression sortingExpression) {
 		return new OptimizedGraphExecutableQuery(service, vertextTest, sortingExpression);
 //		return new BasicGraphExecutableQuery(service, tests.peek(), sortingExpression);
 	}

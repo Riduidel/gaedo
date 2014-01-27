@@ -5,6 +5,7 @@ import java.util.List;
 
 import com.dooapp.gaedo.blueprints.GraphDatabaseDriver;
 import com.dooapp.gaedo.blueprints.strategies.GraphMappingStrategy;
+import com.dooapp.gaedo.blueprints.transformers.Literals;
 import com.dooapp.gaedo.properties.Property;
 import com.dooapp.gaedo.utils.CollectionUtils;
 import com.tinkerpop.blueprints.Direction;
@@ -48,7 +49,7 @@ public abstract class CollectionTargettedVertexTest extends TargettedVertexTest 
 	private boolean matchesCollection(Vertex examined, List<Property> path, Property last) {
 		boolean returned = getInitialReturned();
 		if(path.size()==0) {
-			// we've reeached the end
+			// we've reached the end
 			return matchesVertex(examined, last);
 		} else {
 			Property evaluated = path.get(0);
@@ -56,6 +57,11 @@ public abstract class CollectionTargettedVertexTest extends TargettedVertexTest 
 			Iterable<Edge> edges = strategy.getOutEdgesFor(examined, evaluated);
 			for(Edge e : edges) {
 				returned = combineReturnedWith(matchesCollection(e.getVertex(Direction.IN), remaining, evaluated), returned);
+			}
+			// Also test if property uses on literal value (but this only can have meaning if we're at the last property on path,
+			// that's to say when remaining path length is zero)
+			if(remaining.size()==0) {
+				returned = combineReturnedWith(matchesCollection(examined, remaining, evaluated), returned);
 			}
 		}
 		return returned;

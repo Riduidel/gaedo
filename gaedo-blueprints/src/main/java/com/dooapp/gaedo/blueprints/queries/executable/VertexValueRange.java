@@ -9,6 +9,7 @@ import java.util.concurrent.atomic.AtomicLong;
 
 import com.dooapp.gaedo.blueprints.GraphUtils;
 import com.dooapp.gaedo.properties.Property;
+import com.dooapp.gaedo.utils.CollectionUtils;
 import com.tinkerpop.blueprints.Direction;
 import com.tinkerpop.blueprints.Edge;
 import com.tinkerpop.blueprints.Vertex;
@@ -21,11 +22,11 @@ import com.tinkerpop.blueprints.Vertex;
 public class VertexValueRange {
 	Entry<Iterable<Vertex>, Iterable<Property>> entry = null;
 	private long edgesCount = Long.MAX_VALUE;
-	
+
 	public VertexValueRange() {
-		
+
 	}
-	
+
 	/**
 	 * While the {@link #findBestMatch(Entry)} focus on checking if this entry has the smallest value range, this one simply return the while value range
 	 * @return
@@ -36,7 +37,7 @@ public class VertexValueRange {
 		getValues(entry, pathIterator, arrayList);
 		return arrayList;
 	}
-	
+
 	private void getValues(Entry<Iterable<Vertex>, Iterable<Property>> entry, Iterator<Property> pathIterator, List<Vertex> vertexAccumulator) {
 		if(pathIterator.hasNext()) {
 			Property current = pathIterator.next();
@@ -68,10 +69,10 @@ public class VertexValueRange {
 	}
 
 	/**
-	 * Recursive method computing, using all the possible paths, the edge count linking 
+	 * Recursive method computing, using all the possible paths, the edge count linking
 	 * @param entry evaluated entry
 	 * @param edgesCount current value of edges count, an atomic long is used to not use primitive type (which is immutable) while guaranteeing that value will be safely changed.
-	 * @param verticesToCountEdgesIn 
+	 * @param verticesToCountEdgesIn
 	 * @param pathIterator that iterator browses the path and at each path element calls this very method to recurse over path
 	 * @param usingProperty property that should be used to find the vertex in the graph (instead of simply relying upon valye type (which is especially useful for numbers). This property can be null
 	 * @return
@@ -107,12 +108,14 @@ public class VertexValueRange {
 			}
 		} else {
 			// the vertices to scan consist only in entry key
-			for(Vertex v : entry.getKey()) {
-				verticesToCountEdgesIn.add(v);
-			}
+			verticesToCountEdgesIn.addAll(CollectionUtils.asList(entry.getKey()));
 			edgesCount.set(verticesToCountEdgesIn.size());
-			// End of the path, no ? then return supposed best match (which is, up to now, a new EntryScore)
-			return new VertexValueRange().withEntry(entry).withEdgesCount(edgesCount.get());
+			if(edgesCount.get()<this.edgesCount) {
+				// End of the path, no ? then return supposed best match (which is, up to now, a new EntryScore)
+				return new VertexValueRange().withEntry(entry).withEdgesCount(edgesCount.get());
+			} else {
+				return this;
+			}
 		}
 	}
 
@@ -151,7 +154,7 @@ public class VertexValueRange {
 	public void setEdgesCount(long edgesCount) {
 		this.edgesCount = edgesCount;
 	}
-	
+
 	/**
 	 * @param edgesCount new value for #edgesCount
 	 * @category fluent
@@ -163,7 +166,7 @@ public class VertexValueRange {
 		this.setEdgesCount(edgesCount);
 		return this;
 	}
-	
+
 	/**
 	 * @param entry new value for #entry
 	 * @category fluent
@@ -174,5 +177,24 @@ public class VertexValueRange {
 	public VertexValueRange withEntry(Entry<Iterable<Vertex>, Iterable<Property>> entry) {
 		this.setEntry(entry);
 		return this;
+	}
+
+	/**
+	 * @return
+	 * @see java.lang.Object#toString()
+	 */
+	@Override
+	public String toString() {
+		StringBuilder builder = new StringBuilder();
+		builder.append("VertexValueRange [");
+		if (entry != null) {
+			builder.append("entry=");
+			builder.append(entry);
+			builder.append(", ");
+		}
+		builder.append("edgesCount=");
+		builder.append(edgesCount);
+		builder.append("]");
+		return builder.toString();
 	}
 }

@@ -24,6 +24,7 @@ import com.dooapp.gaedo.blueprints.queries.tests.CollectionContains;
 import com.dooapp.gaedo.blueprints.queries.tests.CompoundVertexTest;
 import com.dooapp.gaedo.blueprints.queries.tests.VertexTestVisitor;
 import com.dooapp.gaedo.blueprints.queries.tests.VertexTestVisitorAdapter;
+import com.dooapp.gaedo.blueprints.transformers.Literals;
 import com.dooapp.gaedo.blueprints.transformers.TypeUtils;
 import com.dooapp.gaedo.extensions.migrable.Migrator;
 import com.dooapp.gaedo.properties.ClassCollectionProperty;
@@ -157,7 +158,11 @@ public class BeanBasedMappingStrategy<DataType> extends AbstractMappingStrategy<
 	public String getEffectiveType(Vertex vertex) {
 		if(vertex.getProperty(Properties.type.name())!=null) {
 			return TypeUtils.getClass(vertex.getProperty(Properties.type.name()).toString());
+		} else if(vertex.getProperty(GraphUtils.getEdgeNameFor(TypeProperty.INSTANCE))!=null) {
+			String typePropertyText = vertex.getProperty(GraphUtils.getEdgeNameFor(TypeProperty.INSTANCE));
+			return TypeUtils.getClass(Literals.getValueIn(typePropertyText));
 		} else {
+			// This part of code is totally deprecated, but kept for .. well, no good reason
             if(Kind.literal.equals(GraphUtils.getKindOf(vertex))) {
                 // a literal with no type information should always been considered a string literal
             } else {
@@ -166,7 +171,8 @@ public class BeanBasedMappingStrategy<DataType> extends AbstractMappingStrategy<
                     Edge toType = typeIterator.next();
                     Vertex type = toType.getVertex(Direction.IN);
                     // Do not use ClassLiteral here as this method must be blazing fast
-                    return IndexableGraphBackedFinderService.classTransformer.extractClassIn(service.getDriver().getValue(type).toString());
+                    String value = type.getProperty(Properties.value.name());
+                    return Literals.getValueIn(value);
                 }
             }
 		}

@@ -8,104 +8,151 @@ import com.dooapp.gaedo.blueprints.Kind;
 import com.dooapp.gaedo.blueprints.ObjectCache;
 import com.dooapp.gaedo.blueprints.ObjectCache.ValueLoader;
 import com.dooapp.gaedo.blueprints.UnableToCreateException;
+import com.dooapp.gaedo.properties.Property;
 import com.dooapp.gaedo.utils.Utils;
 import com.tinkerpop.blueprints.Vertex;
 
 /**
  * Helper class for literal transformer
+ *
  * @author ndx
  *
  */
 public abstract class AbstractLiteralTransformer<Type> {
 
-    /**
-     * Get vertex for the given value.
-     * Vertex is first searched using its id (an id which really looks like vertex value - disambiguated by its type
-     * @param driver
-     * @param value
-     * @return
-     */
-    public Vertex getVertexFor(GraphDatabaseDriver driver, Type value, CascadeType cascade) {
-        String vertexId = getVertexId(value);
-        Vertex returned = driver.loadVertexFor(vertexId, value.getClass().getName());
-        // If vertex doesn't exist (and cascade allow its creation) ... load it !
-        if(returned==null && GraphUtils.canCreateVertex(cascade)) {
-            returned = driver.createEmptyVertex(value.getClass(), vertexId, value);
-            driver.setValue(returned, getVertexValue(value));
-        }
-        return returned;
-    }
+	/**
+	 * Get vertex for the given value. Vertex is first searched using its id (an
+	 * id which really looks like vertex value - disambiguated by its type
+	 *
+	 * @param driver
+	 * @param value
+	 * @return
+	 * @category vertex
+	 * @deprecated this was useful in version 0.* of gaedo, but has been
+	 *             replaced by
+	 *             {@link #setPropertyFor(Object, Vertex, Property, Object)}
+	 */
+	public Vertex getVertexFor(GraphDatabaseDriver driver, Type value, CascadeType cascade) {
+		String vertexId = toString(value);
+		Vertex returned = driver.loadVertexFor(vertexId, value.getClass().getName());
+		// If vertex doesn't exist (and cascade allow its creation) ... load it
+		// !
+		if (returned == null && GraphUtils.canCreateVertex(cascade)) {
+			returned = driver.createEmptyVertex(value.getClass(), vertexId, value);
+			driver.setValue(returned, toString(value));
+		}
+		return returned;
+	}
 
-    /**
-     * Load object from vertex
-     * @param driver database driver
-     * @param key vertex in which value is stored
-     * @return loaded object
-     * @see #internalLoadObject(GraphDatabaseDriver, Class, Vertex)
-     */
-    public Type loadObject(GraphDatabaseDriver driver, Vertex key) {
-        String effectiveType = driver.getEffectiveType(key);
-        try {
-            Class valueClass = Class.forName(effectiveType);
-            return internalLoadObject(driver, valueClass, key, null);
-        } catch (ClassNotFoundException e) {
-            throw UnableToCreateException.dueTo(key, effectiveType, e);
-        }
-    }
+	/**
+	 * Get property value for the given property and vertex
+	 *
+	 * @param objectVertex
+	 * @param valueClass
+	 * @param classloader
+	 * @param objectCache
+	 *            TODO
+	 * @return
+	 */
+	public Type fromString(String propertyValue, Class valueClass, ClassLoader classloader, ObjectCache objectCache) {
+		if(propertyValue.startsWith(valueClass.getName())) {
+			return internalLoadObject(valueClass, Literals.getValueIn(propertyValue), objectCache);
+		} else {
+			return internalLoadObject(valueClass, propertyValue, objectCache);
+		}
+	}
 
-    public Object loadObject(GraphDatabaseDriver driver, ClassLoader classLoader, String effectiveType, Vertex key, ObjectCache objectCache) {
-        try {
-            Class<?> loadedClass = GraphUtils.loadClass(classLoader, effectiveType);
-            return internalLoadObject(driver, loadedClass, key, objectCache);
-        } catch (ClassNotFoundException e) {
-            throw UnableToCreateException.dueTo(key, effectiveType, e);
-        }
-    }
+	/**
+	 * Load object from vertex
+	 *
+	 * @param driver
+	 *            database driver
+	 * @param key
+	 *            vertex in which value is stored
+	 * @return loaded object
+	 * @see #internalLoadObject(GraphDatabaseDriver, Class, Vertex)
+	 * @category vertex
+	 * @deprecated this was useful in version 0.* of gaedo, but has been
+	 *             replaced by
+	 *             {@link #getPropertyFor(Vertex, Property, ClassLoader, ObjectCache)}
+	 */
+	public Type loadObject(GraphDatabaseDriver driver, Vertex key) {
+		String effectiveType = driver.getEffectiveType(key);
+		try {
+			Class valueClass = Class.forName(effectiveType);
+			return loadObjectFromVertex(driver, valueClass, key, null);
+		} catch (ClassNotFoundException e) {
+			throw UnableToCreateException.dueTo(key, effectiveType, e);
+		}
+	}
 
-    /**
-     * Resolve type to a loadable one
-     * @param effectiveType
-     * @return
-     */
-    protected abstract String resolveType(String effectiveType);
+	public Object loadObject(GraphDatabaseDriver driver, ClassLoader classLoader, String effectiveType, Vertex key, ObjectCache objectCache) {
+		try {
+			Class<?> loadedClass = GraphUtils.loadClass(classLoader, effectiveType);
+			return loadObjectFromVertex(driver, loadedClass, key, objectCache);
+		} catch (ClassNotFoundException e) {
+			throw UnableToCreateException.dueTo(key, effectiveType, e);
+		}
+	}
 
-    /**
-     * Load object of given class
-     * @param driver database driver
-     * @param valueClass class this object should be an instance of
-     * @param key vertex in which value is stored
-     * @param objectCache used cache. THIS FIELD MAY BE NULL
-     * @return loaded object
-     * @see #internalLoadObject(Class, Vertex, String)
-     */
-    protected Type internalLoadObject(GraphDatabaseDriver driver, Class valueClass, Vertex key, ObjectCache objectCache) {
-        String valueString = driver.getValue(key).toString();
-        return internalLoadObject(valueClass, key, valueString, objectCache);
-    }
+	/**
+	 * Resolve type to a loadable one
+	 *
+	 * @param effectiveType
+	 * @return
+	 */
+	protected abstract String resolveType(String effectiveType);
 
-    /**
-     * Load object from given informations
-     * @param valueClass class this object should be an instance of
-     * @param key vertex in which value is stored
-     * @param valueString value representing the object to load
-     * @param objectCache used cache. THIS FIELD MAY BE NULL
-     * @return loaded object
-     */
-    protected Type internalLoadObject(final Class valueClass, Vertex key, final String valueString, ObjectCache objectCache) {
-    	ValueLoader loader = createValueLoader(valueClass, valueString);
-		if(objectCache==null)
+	/**
+	 * Load object of given class
+	 *
+	 * @param driver
+	 *            database driver
+	 * @param valueClass
+	 *            class this object should be an instance of
+	 * @param key
+	 *            vertex in which value is stored
+	 * @param objectCache
+	 *            used cache. THIS FIELD MAY BE NULL
+	 * @return loaded object
+	 * @see #internalLoadObject(Class, Vertex, String)
+	 * @category vertex
+	 * @deprecated this was useful in version 0.* of gaedo, but has been
+	 *             replaced by
+	 *             {@link #getPropertyFor(Vertex, Property, ClassLoader, ObjectCache)}
+	 */
+	protected Type loadObjectFromVertex(GraphDatabaseDriver driver, Class valueClass, Vertex key, ObjectCache objectCache) {
+		String valueString = driver.getValue(key).toString();
+		return internalLoadObject(valueClass, valueString, objectCache);
+	}
+
+	/**
+	 * Load object from given informations
+	 *
+	 * @param valueClass
+	 *            class this object should be an instance of
+	 * @param valueString
+	 *            value representing the object to load
+	 * @param objectCache
+	 *            used cache. THIS FIELD MAY BE NULL
+	 * @return loaded object
+	 */
+	protected Type internalLoadObject(final Class valueClass, final String valueString, ObjectCache objectCache) {
+		ValueLoader loader = createValueLoader(valueClass, valueString);
+		if (objectCache == null)
 			return (Type) loader.get();
-    	return (Type) objectCache.get(getObjectCacheId(valueClass, valueString), loader);
-    }
+		return (Type) objectCache.get(getObjectCacheId(valueClass, valueString), loader);
+	}
 
-    /**
-     * Get cache id for this value
-     * @param valueClass
-     * @param valueString
-     * @return
-     */
+	/**
+	 * Get cache id for this value
+	 *
+	 * @param valueClass
+	 * @param valueString
+	 * @return
+	 */
 	protected String getObjectCacheId(final Class valueClass, final String valueString) {
-		return valueClass.getName()+":"+valueString;
+		return valueClass.getName() + ":" + valueString;
 	}
 
 	protected ValueLoader createValueLoader(final Class valueClass, final String valueString) {
@@ -113,44 +160,40 @@ public abstract class AbstractLiteralTransformer<Type> {
 
 			@Override
 			public Object get() {
-	    		return (Type) Utils.fromString(valueString, valueClass);
+				return loadValueFromString(valueClass, valueString);
 			}
 		};
 	}
 
-    /**
-     * Get vertex value for object. notice it is better to get it as a string than anything else
-     * @param value
-     * @return a value for that vertex. Again, null is NOT allowed.
-     */
-    protected abstract Object getVertexValue(Type value);
+	/**
+	 * Load value from the given string. This method should be the only one allowed to load value for a literal.
+	 * @param valueClass
+	 * @param valueString
+	 * @return loaded value
+	 * @see Utils#fromString(String, Class) default implementation delegates work to this method
+	 */
+	protected Type loadValueFromString(final Class valueClass, final String valueString) {
+		return (Type) Utils.fromString(valueString, valueClass);
+	}
 
-    /**
-     * Creates an id out of an object
-     * @param value
-     * @return
-     */
-    public String getVertexId(Type value) {
-        return /* getValueClass(value).getCanonicalName()+":"+*/ getVertexValue(value).toString();
-    }
+	/**
+	 * Get vertex value for object. It's this value that will be used in graph.
+	 * Notice this value MUST include a class prefix, as it is possible the value is refered using an Objet or Serializable or Number generic class.
+	 *
+	 * @param value
+	 * @return a value for that vertex. Again, null is NOT allowed.
+	 */
+	public final String toString(Type value) {
+		return typeToString((Class<? extends Type>) value.getClass())+Literals.CLASS_VALUE_SEPARATOR+valueToString(value);
+	}
 
-    /**
-     * Get value class name for this literal
-     * @param value
-     * @return usually should return value.getClass(). The main thing to understand is that null is NOT allowed
-     */
-    protected abstract Class getValueClass(Type value);
+	protected String typeToString(Class<? extends Type> valueClass) {
+		return valueClass.getName();
+	}
 
-    public boolean isVertexEqualsTo(GraphDatabaseDriver driver, Vertex currentVertex, Type expected) {
-        return ((expected==null && currentVertex==null) ||
-                        (expected!=null && getVertexValue(expected).equals(driver.getValue(currentVertex))));
-    }
+	protected abstract String valueToString(Type value);
 
-    public Kind getKind() {
-        return Kind.literal;
-    }
-
-    public String getTypeOf(Object value) {
-        return TypeUtils.getType(value.getClass());
-    }
+	public String getTypeOf(Object value) {
+		return TypeUtils.getType(value.getClass());
+	}
 }

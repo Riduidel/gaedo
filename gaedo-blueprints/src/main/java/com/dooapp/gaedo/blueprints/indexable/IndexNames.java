@@ -69,6 +69,14 @@ public enum IndexNames {
 		return returned;
 	}
 
+	public static <Type extends Element> IndexNames forElement(Type element) {
+		if(element instanceof Vertex)
+			return VERTICES;
+		else if(element instanceof Edge)
+			return EDGES;
+		throw new UnsupportedElementTypeException("we have no index for elements of type "+element.getClass().getName());
+	}
+
 	/**
 	 * @return the usable
 	 * @category getter

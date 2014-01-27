@@ -1,6 +1,7 @@
 package com.dooapp.gaedo.blueprints.transformers;
 
 import java.beans.PropertyDescriptor;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
@@ -14,8 +15,11 @@ import com.dooapp.gaedo.blueprints.BluePrintsCrudServiceException;
 import com.dooapp.gaedo.blueprints.GraphDatabaseDriver;
 import com.dooapp.gaedo.blueprints.GraphUtils;
 import com.dooapp.gaedo.blueprints.ObjectCache;
+import com.dooapp.gaedo.finders.repository.ServiceRepository;
+import com.dooapp.gaedo.properties.ClassCollectionProperty;
 import com.dooapp.gaedo.properties.DescribedProperty;
 import com.dooapp.gaedo.properties.Property;
+import com.dooapp.gaedo.properties.TypeProperty;
 import com.tinkerpop.blueprints.Graph;
 import com.tinkerpop.blueprints.Vertex;
 
@@ -30,8 +34,8 @@ public class MapEntryTransformer extends AbstractTupleTransformer<Map.Entry> imp
 	 * Beware : order of elements is signifiant here (as it is used to build id), as a consequence we use a LinkedHashMap
 	 */
 	private final Map<Property, Collection<CascadeType>> containedProperties = new LinkedHashMap<Property, Collection<CascadeType>>();
-	private DescribedProperty KEY_PROPERTY;
-	private DescribedProperty VALUE_PROPERTY;
+	private Property KEY_PROPERTY;
+	private Property VALUE_PROPERTY;
 
 	public MapEntryTransformer() {
 		Collection<CascadeType> cascade = GraphUtils.extractCascadeOf(new CascadeType[] {CascadeType.ALL});
@@ -50,6 +54,9 @@ public class MapEntryTransformer extends AbstractTupleTransformer<Map.Entry> imp
 			containedProperties.put(
 							VALUE_PROPERTY,
 							cascade);
+			// Adding the class collection property to this class to make sure we can get it back
+			containedProperties.put(new ClassCollectionProperty(Map.Entry.class), cascade);
+			containedProperties.put(new TypeProperty(Map.Entry.class), cascade);
 		} catch(Exception e) {
 			throw new UnableToGetKeyOrValueProperty(e);
 		}
@@ -125,6 +132,17 @@ public class MapEntryTransformer extends AbstractTupleTransformer<Map.Entry> imp
 		}
 		returned.add(VALUE_PROPERTY);
 		return returned;
+	}
+
+	/**
+	 * @param repository
+	 * @param value
+	 * @return
+	 * @see com.dooapp.gaedo.blueprints.transformers.AbstractTupleTransformer#getIdOfTuple(com.dooapp.gaedo.finders.repository.ServiceRepository, java.lang.Object)
+	 */
+	@Override
+	public String getIdOfTuple(ServiceRepository repository, Entry value) {
+		return getIdOfTuple(repository, value, Arrays.asList(KEY_PROPERTY, VALUE_PROPERTY));
 	}
 
 }

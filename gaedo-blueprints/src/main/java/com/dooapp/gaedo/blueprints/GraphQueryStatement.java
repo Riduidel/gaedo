@@ -1,12 +1,11 @@
 package com.dooapp.gaedo.blueprints;
 
 import java.beans.PropertyChangeEvent;
-import java.util.TreeMap;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import java.util.EmptyStackException;
 
 import javax.persistence.CascadeType;
 
+import com.dooapp.gaedo.blueprints.operations.Loader;
 import com.dooapp.gaedo.blueprints.queries.BluePrintsQueryBuilder;
 import com.dooapp.gaedo.blueprints.queries.DataTypeIterable;
 import com.dooapp.gaedo.blueprints.queries.executable.GraphExecutableQuery;
@@ -24,26 +23,14 @@ import com.dooapp.gaedo.finders.QueryExpressionContainerVisitorAdapter;
 import com.dooapp.gaedo.finders.QueryStatement;
 import com.dooapp.gaedo.finders.SortingBuilder;
 import com.dooapp.gaedo.finders.SortingExpression;
-import com.dooapp.gaedo.finders.expressions.AndQueryExpression;
-import com.dooapp.gaedo.finders.expressions.AnythingExpression;
-import com.dooapp.gaedo.finders.expressions.CollectionContaingExpression;
-import com.dooapp.gaedo.finders.expressions.ContainsStringExpression;
-import com.dooapp.gaedo.finders.expressions.EndsWithExpression;
 import com.dooapp.gaedo.finders.expressions.EqualsExpression;
-import com.dooapp.gaedo.finders.expressions.GreaterThanExpression;
-import com.dooapp.gaedo.finders.expressions.LowerThanExpression;
-import com.dooapp.gaedo.finders.expressions.MapContainingKeyExpression;
-import com.dooapp.gaedo.finders.expressions.NotQueryExpression;
-import com.dooapp.gaedo.finders.expressions.OrQueryExpression;
-import com.dooapp.gaedo.finders.expressions.QueryExpressionVisitor;
-import com.dooapp.gaedo.finders.expressions.QueryExpressionVisitorAdapter;
-import com.dooapp.gaedo.finders.expressions.StartsWithExpression;
-import com.dooapp.gaedo.finders.informers.MapContainingValueExpression;
 import com.dooapp.gaedo.finders.projection.NoopProjectionBuilder;
 import com.dooapp.gaedo.finders.projection.ProjectionBuilder;
 import com.dooapp.gaedo.finders.projection.ValueFetcher;
 import com.dooapp.gaedo.finders.repository.ServiceRepository;
 import com.dooapp.gaedo.finders.sort.SortingExpressionImpl;
+import com.dooapp.gaedo.properties.Property;
+import com.tinkerpop.blueprints.IndexableGraph;
 import com.tinkerpop.blueprints.Vertex;
 
 public class GraphQueryStatement<
@@ -75,7 +62,19 @@ public class GraphQueryStatement<
 			public <Type> Type getValue(FieldInformer<Type> propertyDescriptor) {
 				VertexPathNavigator navigator = new VertexPathNavigator(service.getStrategy(), input);
 				VertexLocation destination = navigator.navigateOn(propertyDescriptor.getFieldPath());
-				return (Type) service.loadObject(destination.vertex(), cache);
+
+				Vertex destinationVertex = destination.vertex();
+				try {
+					// There may remain one unevaluated property - in which case it's a literal one
+					Property destinationProperty = destination.property();
+					Loader loader = new Loader();
+					if(loader.hasLiteralProperty(destinationProperty, destinationVertex)) {
+						return (Type) loader.loadSingleLiteral(getClass().getClassLoader(), destinationProperty, destinationVertex, cache);
+					}
+				} catch(EmptyStackException e) {
+
+				}
+				return (Type) service.loadObject(destinationVertex, cache);
 			}
 
 		}
@@ -93,11 +92,11 @@ public class GraphQueryStatement<
 	}
 
 	protected QueryBuilder<? super InformerType> query;
-	protected AbstractBluePrintsBackedFinderService<?, DataType, InformerType> service;
+	protected AbstractBluePrintsBackedFinderService<? extends IndexableGraph, DataType, InformerType> service;
 	protected ServiceRepository repository;
 
 	public GraphQueryStatement(QueryBuilder<? super InformerType> query,
-					AbstractBluePrintsBackedFinderService<?, DataType, InformerType> service,
+					AbstractBluePrintsBackedFinderService<? extends IndexableGraph, DataType, InformerType> service,
 					ServiceRepository repository) {
 		this.query = query;
 		this.service = service;
@@ -144,7 +143,7 @@ public class GraphQueryStatement<
 		}
 	}
 
-	protected BluePrintsQueryBuilder<DataType, InformerType> createQueryBuilder(AbstractBluePrintsBackedFinderService<?, DataType, InformerType> service) {
+	protected BluePrintsQueryBuilder<DataType, InformerType> createQueryBuilder(AbstractBluePrintsBackedFinderService<? extends IndexableGraph, DataType, InformerType> service) {
 		return new BluePrintsQueryBuilder<DataType, InformerType>(service);
 	}
 

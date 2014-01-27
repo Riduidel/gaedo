@@ -11,15 +11,16 @@ import com.dooapp.gaedo.blueprints.queries.tests.CompoundVertexTest;
 import com.dooapp.gaedo.blueprints.queries.tests.VertexTest;
 import com.dooapp.gaedo.finders.SortingExpression;
 import com.dooapp.gaedo.utils.CollectionUtils;
+import com.tinkerpop.blueprints.IndexableGraph;
 import com.tinkerpop.blueprints.Vertex;
 
-public abstract class AbstractGraphExecutableQuery implements GraphExecutableQuery {
+public abstract class AbstractGraphExecutableQuery<GraphType extends IndexableGraph> implements GraphExecutableQuery {
 
 	protected final VertexTest test;
 	protected final SortingExpression sort;
-	protected final AbstractBluePrintsBackedFinderService<?, ?, ?> service;
+	protected final AbstractBluePrintsBackedFinderService<GraphType, ?, ?> service;
 
-	public AbstractGraphExecutableQuery(AbstractBluePrintsBackedFinderService<?, ?, ?> service, CompoundVertexTest vertexTest, SortingExpression sortingExpression) {
+	public AbstractGraphExecutableQuery(AbstractBluePrintsBackedFinderService<GraphType, ?, ?> service, CompoundVertexTest vertexTest, SortingExpression sortingExpression) {
 		this.service = service;
 		this.test = vertexTest;
 		this.sort = sortingExpression;

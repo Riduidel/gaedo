@@ -4,6 +4,10 @@ import java.lang.reflect.Type;
 import java.net.URI;
 import java.util.Date;
 
+import com.dooapp.gaedo.blueprints.ObjectCache;
+import com.dooapp.gaedo.properties.Property;
+import com.tinkerpop.blueprints.Vertex;
+
 /**
  * An helper class allowing easy literal transformer lookup
  * @author ndx
@@ -17,7 +21,8 @@ public enum Literals implements TransformerAssociation<LiteralTransformer> {
 	enums(Enum.class, new EnumLiteralTransformer()),
 	dates(Date.class, new DateLiteralTransformer()),
 	classes(Class.class, new ClassLiteralTransformer());
-	
+
+	public static final char CLASS_VALUE_SEPARATOR = ':';
 	/**
 	 * Source dataclass
 	 */
@@ -26,24 +31,24 @@ public enum Literals implements TransformerAssociation<LiteralTransformer> {
 	 * Associated transformer
 	 */
 	private LiteralTransformer transformer;
-	
+
 	Literals(Class dataClass, LiteralTransformer transformer) {
 		this.dataClass = dataClass;
 		this.transformer = transformer;
 	}
-	
+
 	public static LiteralTransformer get(ClassLoader classLoader, String effectiveType) {
 		return Transformers.get(Literals.values(), classLoader, effectiveType);
 	}
-	
+
 	public static LiteralTransformer get(Class dataClass) {
 		return Transformers.get(Literals.values(), dataClass);
 	}
-	
+
 	public static LiteralTransformer get(Type genericType) {
 		return Transformers.get(Literals.values(), genericType);
 	}
-	
+
 	public static boolean containsKey(ClassLoader classLoader, String effectiveType) {
 		return Transformers.containsKey(Literals.values(), classLoader, effectiveType);
 	}
@@ -65,5 +70,31 @@ public enum Literals implements TransformerAssociation<LiteralTransformer> {
 	@Override
 	public boolean canHandle(ClassLoader classLoader, String effectiveType) {
 		return transformer.canHandle(classLoader, effectiveType);
+	}
+
+	/**
+	 * Load given value by analyzing property value prefix then using the literal transformer associated with that prefix
+	 * @param objectVertex
+	 * @param p
+	 * @param classloader
+	 * @param objectsBeingAccessed
+	 * @return
+	 */
+	public static Object load(Vertex objectVertex, Property p, ClassLoader classloader, ObjectCache objectsBeingAccessed) {
+		// TODO Auto-generated method stub
+		throw new UnsupportedOperationException("method "+Literals.class.getName()+"#load has not yet been implemented AT ALL");
+	}
+
+	/**
+	 * Get type prefix of the given literal transformer for later loading it
+	 * @param propertyValue a value in which we want to extract type prefix
+	 * @return the value before ":"
+	 */
+	public static String getTypePrefix(String propertyValue) {
+		return propertyValue.substring(0, propertyValue.indexOf(CLASS_VALUE_SEPARATOR));
+	}
+
+	public static String getValueIn(String propertyValue) {
+		return propertyValue.substring(propertyValue.indexOf(CLASS_VALUE_SEPARATOR)+1);
 	}
 }

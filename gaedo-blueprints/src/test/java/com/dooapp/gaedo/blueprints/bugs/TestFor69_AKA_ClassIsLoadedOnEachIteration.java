@@ -3,6 +3,7 @@ package com.dooapp.gaedo.blueprints.bugs;
 import java.util.Collection;
 
 import org.hamcrest.core.IsInstanceOf;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
@@ -24,6 +25,12 @@ import static org.hamcrest.core.IsNull.notNullValue;
 
 import static org.junit.Assert.assertThat;
 
+/**
+ * As classes are no more separated vertices, this test has no more meaning
+ * @author ndx
+ *
+ */
+@Ignore
 @RunWith(Parameterized.class)
 public class TestFor69_AKA_ClassIsLoadedOnEachIteration extends AbstractGraphPostTest {
 	private static ClassLiteralTransformer classTransformer = (ClassLiteralTransformer) Literals.classes.getTransformer();
@@ -50,8 +57,5 @@ public class TestFor69_AKA_ClassIsLoadedOnEachIteration extends AbstractGraphPos
 		userGraphService.loadObject(authorId, testedCache);
 		// simple test ensuring cache worked ok
 		assertThat(testedCache.get(authorId), notNullValue());
-		// now make sure classes are cached as well
-		assertThat(testedCache.get(classTransformer.getVertexId(User.class)), notNullValue());
-		assertThat(testedCache.get(classTransformer.getVertexId(Post.class)), notNullValue());
 	}
 }

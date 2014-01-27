@@ -8,6 +8,8 @@ import java.util.Map;
 import java.util.Map.Entry;
 
 import com.dooapp.gaedo.blueprints.AbstractBluePrintsBackedFinderService;
+import com.dooapp.gaedo.blueprints.ObjectCache;
+import com.dooapp.gaedo.blueprints.operations.Loader;
 import com.dooapp.gaedo.exceptions.UncomparableObjectsInSortingException;
 import com.dooapp.gaedo.finders.FieldInformer;
 import com.dooapp.gaedo.finders.SortingExpression;
@@ -35,6 +37,7 @@ public class SortingComparator implements Comparator<Vertex> {
 
 		public Object get(FieldInformer<?> key) {
 			if(!fieldValues.containsKey(key)) {
+				Loader loader = new Loader();
 				Vertex currentVertex = vertex;
 				Object value = null;
 				for(Property currentProperty : key.getFieldPath()) {
@@ -42,11 +45,17 @@ public class SortingComparator implements Comparator<Vertex> {
 					if(edges.hasNext()) {
 						currentVertex = edges.next().getVertex(com.tinkerpop.blueprints.Direction.IN);
 					} else {
-						// no navigable value ? Then null is the bad result we're looking for
-						currentVertex = null;
+						// maybe it's a literal value (valid only when on last property, but this is
+						// theoretically guaranteed by informers)
+						if(loader.hasLiteralProperty(currentProperty, currentVertex)) {
+							value = loader.loadSingleLiteral(getClass().getClassLoader(), currentProperty, currentVertex, new ObjectCache());
+						} else {
+							// but, if not, well, consider result as a failure
+							currentVertex = null;
+						}
 					}
 				}
-				if(currentVertex!=null) {
+				if(value==null && currentVertex!=null) {
 					value = service.getDriver().getValue(currentVertex);
 				}
 				fieldValues.put(key, value);

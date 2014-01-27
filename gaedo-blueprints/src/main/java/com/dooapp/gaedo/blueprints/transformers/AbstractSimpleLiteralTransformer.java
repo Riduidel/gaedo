@@ -1,20 +1,15 @@
 package com.dooapp.gaedo.blueprints.transformers;
 
 public abstract class AbstractSimpleLiteralTransformer<Type> extends AbstractLiteralTransformer<Type>{
-	private final Class type;
+	protected final Class<Type> type;
 	private final String typeName;
 
-	public AbstractSimpleLiteralTransformer(Class<?> type) {
+	public AbstractSimpleLiteralTransformer(Class<Type> type) {
 		super();
 		this.type = type;
 		this.typeName = type.getName();
 	}
 
-
-	@Override
-	protected Class getValueClass(Type value) {
-		return type;
-	}
 
 	@Override
 	protected String resolveType(String effectiveType) {
@@ -23,5 +18,16 @@ public abstract class AbstractSimpleLiteralTransformer<Type> extends AbstractLit
 
 	public boolean canHandle(ClassLoader classLoader, String effectiveType) {
 		return typeName.equals(effectiveType);
+	}
+
+	@Override
+	protected String typeToString(Class<? extends Type> valueClass) {
+		return typeName;
+	}
+
+	public boolean areEquals(Object expected, String effectiveGraphValue) {
+		if(type.isAssignableFrom(expected.getClass()))
+			return toString(type.cast(expected)).equals(effectiveGraphValue);
+		return false;
 	}
 }

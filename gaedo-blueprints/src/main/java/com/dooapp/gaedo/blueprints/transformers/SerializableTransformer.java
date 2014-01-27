@@ -14,8 +14,10 @@ import com.dooapp.gaedo.blueprints.GraphDatabaseDriver;
 import com.dooapp.gaedo.blueprints.GraphUtils;
 import com.dooapp.gaedo.blueprints.Kind;
 import com.dooapp.gaedo.blueprints.ObjectCache;
+import com.dooapp.gaedo.blueprints.operations.Updater;
 import com.dooapp.gaedo.blueprints.strategies.GraphMappingStrategy;
 import com.dooapp.gaedo.finders.repository.ServiceRepository;
+import com.dooapp.gaedo.properties.TypeProperty;
 import com.tinkerpop.blueprints.Graph;
 import com.tinkerpop.blueprints.Vertex;
 
@@ -62,7 +64,7 @@ public class SerializableTransformer implements TupleTransformer<Serializable> {
 		Class<? extends Serializable> valueClass = cast.getClass();
 		if(Tuples.containsKey(valueClass)) {
 			if(Tuples.get(valueClass).equals(this)) {
-				return getVertextForUnknownSerializable(driver, repository, cast);
+				return getVertextForUnknownSerializable(service, repository, cast);
 			}
 		}
 		// Gently ask service for effective access to value
@@ -70,15 +72,17 @@ public class SerializableTransformer implements TupleTransformer<Serializable> {
 	}
 
 
-	private Vertex getVertextForUnknownSerializable(GraphDatabaseDriver database, ServiceRepository repository, Serializable value) {
+	private Vertex getVertextForUnknownSerializable(AbstractBluePrintsBackedFinderService<? extends Graph, ?, ?> service, ServiceRepository repository, Serializable value) {
 		String serialized = writeSerializable(value);
 		// Then indexed vertex id (for neo4j, typically)
-		Vertex returned = database.loadVertexFor(serialized, value.getClass().getName());
+		Class<? extends Serializable> valueClass = value.getClass();
+		Vertex returned = service.loadVertexFor(serialized, valueClass.getName());
 		// Finally create vertex
 		if(returned==null) {
-			returned = database.createEmptyVertex(Serializable.class, serialized, value);
-			database.setValue(returned, serialized);
+			returned = service.getDriver().createEmptyVertex(Serializable.class, serialized, value);
+			service.getDriver().setValue(returned, serialized);
 		}
+		new Updater().updateLiteralPropertyIn(service.getDatabase(), serialized, returned, new TypeProperty(valueClass), valueClass);
 		return returned;
 	}
 

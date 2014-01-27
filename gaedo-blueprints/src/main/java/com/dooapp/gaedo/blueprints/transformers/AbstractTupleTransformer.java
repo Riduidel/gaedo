@@ -6,20 +6,20 @@ import java.util.Map;
 import javax.persistence.CascadeType;
 
 import com.dooapp.gaedo.blueprints.AbstractBluePrintsBackedFinderService;
-import com.dooapp.gaedo.blueprints.BluePrintsPersister;
 import com.dooapp.gaedo.blueprints.GraphDatabaseDriver;
 import com.dooapp.gaedo.blueprints.GraphUtils;
 import com.dooapp.gaedo.blueprints.Kind;
 import com.dooapp.gaedo.blueprints.ObjectCache;
+import com.dooapp.gaedo.blueprints.operations.Loader;
+import com.dooapp.gaedo.blueprints.operations.Updater;
 import com.dooapp.gaedo.blueprints.strategies.GraphMappingStrategy;
+import com.dooapp.gaedo.finders.FinderCrudService;
 import com.dooapp.gaedo.finders.repository.ServiceRepository;
 import com.dooapp.gaedo.properties.Property;
 import com.tinkerpop.blueprints.Graph;
 import com.tinkerpop.blueprints.Vertex;
 
 public abstract class AbstractTupleTransformer<TupleType> {
-
-	protected final BluePrintsPersister persister = new BluePrintsPersister(Kind.uri);
 
 	public <DataType> Vertex getVertexFor(AbstractBluePrintsBackedFinderService<? extends Graph, DataType, ?> service, GraphDatabaseDriver driver, TupleType cast, CascadeType cascade,
 					ObjectCache objectsBeingUpdated) {
@@ -28,7 +28,7 @@ public abstract class AbstractTupleTransformer<TupleType> {
 		// No need to memorize updated version
 		String className = cast.getClass().getName();
 		Vertex objectVertex = service.loadVertexFor(entryVertexId, className);
-		persister.performUpdate(service, driver, entryVertexId, objectVertex, getContainedClass(), getContainedProperties(), cast, cascade, objectsBeingUpdated);
+		new Updater().performUpdate(service, driver, entryVertexId, objectVertex, getContainedClass(), getContainedProperties(), cast, cascade, objectsBeingUpdated);
 		if(objectVertex==null)
 			objectVertex = service.loadVertexFor(entryVertexId, className);
 		return objectVertex;
@@ -47,8 +47,19 @@ public abstract class AbstractTupleTransformer<TupleType> {
 	 * Create a long string id by concatenating all contained properties ones
 	 */
 	public String getIdOfTuple(ServiceRepository repository, TupleType value) {
+		return getIdOfTuple(repository, value, getContainedProperties().keySet());
+	}
+
+	/**
+	 * Utility method allowing specific tuple transformers to provide more "optimized" versions of id building
+	 * @param repository
+	 * @param value
+	 * @param idProperties
+	 * @return
+	 */
+	protected String getIdOfTuple(ServiceRepository repository, TupleType value, Iterable<Property> idProperties) {
 		StringBuilder sOut = new StringBuilder();
-		for(Property p : getContainedProperties().keySet()) {
+		for(Property p : idProperties) {
 			Object propertyValue = p.get(value);
 			if(propertyValue!=null) {
 				String id = GraphUtils.getIdOf(repository, propertyValue);
@@ -60,13 +71,13 @@ public abstract class AbstractTupleTransformer<TupleType> {
 
 	public Object loadObject(GraphDatabaseDriver driver, GraphMappingStrategy strategy, ClassLoader classLoader, String effectiveType, Vertex key, ServiceRepository repository, ObjectCache objectsBeingAccessed) {
 		TupleType tuple = instanciateTupleFor(classLoader, key);
-		persister.loadObjectProperties(driver, strategy, classLoader, repository, key, tuple, getContainedProperties(), objectsBeingAccessed);
+		new Loader().loadObjectProperties(driver, strategy, classLoader, repository, key, tuple, getContainedProperties(), objectsBeingAccessed);
 		return tuple;
 	}
 
 	public TupleType loadObject(GraphDatabaseDriver driver, GraphMappingStrategy strategy, ClassLoader classLoader, Class effectiveClass, Vertex key, ServiceRepository repository, ObjectCache objectsBeingAccessed) {
 		TupleType tuple = instanciateTupleFor(classLoader, key);
-		persister.loadObjectProperties(driver, strategy, classLoader, repository, key, tuple, getContainedProperties(), objectsBeingAccessed);
+		new Loader().loadObjectProperties(driver, strategy, classLoader, repository, key, tuple, getContainedProperties(), objectsBeingAccessed);
 		return tuple;
 	}
 

@@ -12,6 +12,7 @@ import com.dooapp.gaedo.blueprints.queries.tests.VertexTest;
 import com.dooapp.gaedo.blueprints.strategies.GraphMappingStrategy;
 import com.dooapp.gaedo.finders.SortingExpression;
 import com.dooapp.gaedo.properties.Property;
+import com.tinkerpop.blueprints.IndexableGraph;
 import com.tinkerpop.blueprints.Vertex;
 
 /**
@@ -19,7 +20,7 @@ import com.tinkerpop.blueprints.Vertex;
  * How is it optimized ? Instead of simply searching through all vertices linked to class vertex (which always exist) through
  * Object.classes edge, this one tries to find the vertex linked to the smallest solution space. How ?
  * As an example, suppose one want to find, using our test beans, elements matching that query :
- * <pre> 
+ * <pre>
  *  AND
  *	  Posts.note ==? 4.0
  *	  Posts.author.login ==? "user login"
@@ -27,7 +28,7 @@ import com.tinkerpop.blueprints.Vertex;
  * </pre>
  * This class will start by extracting query roots (vertices to which solutions of this query MUST be linked) by calling {@link #getPossibleRootsOf(VertexTest)}
  * In this example, this method call will return
- * <pre> 
+ * <pre>
  * 4.0:long => { Property[note] }
  * "user login":string => { Property[author], Property[login] }
  * Post:class => { Property[class] }
@@ -35,16 +36,16 @@ import com.tinkerpop.blueprints.Vertex;
  * One question remain : from these three vertices, which one will be linked (through the given property path) to the smallest number of vertices ?
  * To answer this question, the {@link #findBestRootIn(Map)} method creates a {@link VertexValueRange} object which can back-navigate the edges representing these properties
  * and directly give us the best query root.
- * 
+ *
  * @author ndx
- * 
+ *
  */
-public class OptimizedGraphExecutableQuery extends AbstractGraphExecutableQuery implements GraphExecutableQuery {
+public class OptimizedGraphExecutableQuery<GraphType extends IndexableGraph> extends AbstractGraphExecutableQuery<GraphType> implements GraphExecutableQuery {
 	/**
 	 * Construct search query, and make sure vertex tests include a test on
 	 * object classes, by calling
 	 * {@link #addClassSearchTo(CompoundVertexTest, Class)}
-	 * 
+	 *
 	 * @param database
 	 *            queried DB (we will get indexes on that)
 	 * @param vertexTest
@@ -54,7 +55,7 @@ public class OptimizedGraphExecutableQuery extends AbstractGraphExecutableQuery 
 	 * @param searchedClass
 	 *            searched value class
 	 */
-	public OptimizedGraphExecutableQuery(AbstractBluePrintsBackedFinderService<?, ?, ?> service, CompoundVertexTest vertexTest, SortingExpression sortingExpression) {
+	public OptimizedGraphExecutableQuery(AbstractBluePrintsBackedFinderService<GraphType, ?, ?> service, CompoundVertexTest vertexTest, SortingExpression sortingExpression) {
 		super(service, addDefaultSearchTo(service, vertexTest), sortingExpression);
 	}
 
@@ -62,7 +63,7 @@ public class OptimizedGraphExecutableQuery extends AbstractGraphExecutableQuery 
 	 * Adds a default search mechanism to that query.
 	 * That default search mechanism allows queries to work even when no equals query is specified.
 	 * Effective used default seearch depends upon {@link GraphMappingStrategy}
-	 * 
+	 *
 	 * @param service
 	 * @param vertexTest
 	 * @return
@@ -74,7 +75,7 @@ public class OptimizedGraphExecutableQuery extends AbstractGraphExecutableQuery 
 	/**
 	 * Get a quite reduced set of vertices to examine. This method return an iterable of vertices containing the ones corresponding to query solutions.
 	 * This iterable is not optimal (there are elements in which than may not be query solutions). But it should be, in most cases
-	 * a better solution space than the one given by {@link BasicGraphExecutableQuery} (which, as a reminder, always return all vertices linked 
+	 * a better solution space than the one given by {@link BasicGraphExecutableQuery} (which, as a reminder, always return all vertices linked
 	 * to the queried class through an object.classes edge).
 	 * @return
 	 * @see com.dooapp.gaedo.blueprints.queries.executable.AbstractGraphExecutableQuery#getVerticesToExamine()
@@ -104,9 +105,8 @@ public class OptimizedGraphExecutableQuery extends AbstractGraphExecutableQuery 
 	 */
 	private VertexValueRange findBestRootIn(Map<Iterable<Vertex>, Iterable<Property>> possibleRoots) {
 		VertexValueRange initial = new VertexValueRange();
-		Vertex root;
 		for(Entry<Iterable<Vertex>, Iterable<Property>> entry : possibleRoots.entrySet()) {
-			initial = initial.findBestMatch(entry); 
+			initial = initial.findBestMatch(entry);
 		}
 		return initial;
 	}
@@ -115,8 +115,8 @@ public class OptimizedGraphExecutableQuery extends AbstractGraphExecutableQuery 
 	 * Create out of given test a map linking possible query roots to the
 	 * property path used to go from an object vertex to the vertex representing
 	 * that root (hopefully this one is simply a copy of vertex test path).
-	 * 
-	 * @param test test that will be 
+	 *
+	 * @param test test that will be
 	 * @return
 	 */
 	private Map<Iterable<Vertex>, Iterable<Property>> getPossibleRootsOf(VertexTest test) {

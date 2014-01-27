@@ -5,6 +5,7 @@ import javax.persistence.CascadeType;
 import com.dooapp.gaedo.blueprints.GraphDatabaseDriver;
 import com.dooapp.gaedo.blueprints.Kind;
 import com.dooapp.gaedo.blueprints.ObjectCache;
+import com.dooapp.gaedo.properties.TypeProperty;
 import com.tinkerpop.blueprints.Vertex;
 
 /**
@@ -14,58 +15,31 @@ import com.tinkerpop.blueprints.Vertex;
  *@param Type type of transformed data (to avoid cast)
  */
 public interface LiteralTransformer<Type> extends Transformer {
-	/**
-	 * Get expected vertex id for the given value
-	 * @param value input value
-	 * @return the id used for the vertex representing this value
-	 */
-	public String getVertexId(Type value);
-	/**
-	 * Get vertex for given object. This vertex may be simple or the root of a sub-graph
-	 * @param database
-	 * @param cascade cascade type. if nor PERSIST neither MERGE and vertex doesn't exist, null may be returned
-	 * @param cascade
-	 * @return
-	 */
-	Vertex getVertexFor(GraphDatabaseDriver database, Type value, CascadeType cascade);
 
 	/**
-	 * Load given vertex into an object. Notice this method is mainly to be used during search (and particularly to identify matching vertices)
-	 * @param key
-	 * @return
+	 * Get value of given property from a string.
+	 * This method is used to load literal values stored as vertex additional property
+	 * @param valueClass property to read
+	 * @param classloader classloader used to load that value. It should be of no use (excepted maybe for enums)
+	 * @param objectCache cache from which value can be read to win some time
+	 * @return the literal value. null is not possible.
 	 */
-	public Type loadObject(GraphDatabaseDriver driver, Vertex key);
+	Type fromString(String propertyValue, Class valueClass, ClassLoader classloader, ObjectCache objectCache);
 
 	/**
-	 * Method loading class in given classloader and the loading given object
-	 * @param driver TODO
-	 * @param classLoader used classloader
-	 * @param effectiveType type name
-	 * @param key vertex associated to value
-	 * @param objectsBeingAccessed
-	 * @return loaded object
-	 * @see #loadObject(GraphDatabaseDriver, Class, Vertex)
+	 * Get value for object. It's this value that will be used in graph
+	 *
+	 * @param value
+	 * @return a value for that vertex. Again, null is NOT allowed. Notice this value contains a class prefix allowing us to disambiguate cases where value
+	 * may be refered from a more generic class (think about fields of types Object or Serializable)
 	 */
-	public Object loadObject(GraphDatabaseDriver driver, ClassLoader classLoader, String effectiveType, Vertex key, ObjectCache objectsBeingAccessed);
+	public String toString(Type value);
 
 	/**
-	 * Check if vertex content is equals to provided object
-	 * @param driver TODO
-	 * @param currentVertex currently analyzed vertex
+	 * Test method verifying that given object is equals to given graph value
 	 * @param expected expected value
-	 * @return true if vertex is supposed ton contain value, false otherwise
+	 * @param effectiveGraphValue effective value
+	 * @return true if both are equals according o transformation available with this transformer.
 	 */
-	public boolean isVertexEqualsTo(GraphDatabaseDriver driver, Vertex currentVertex, Type expected);
-	/**
-	 * @return Kind of object to associate to the literals managed by this transformer. Used to separate Classes (which are fake literals) from others
-	 */
-	public Kind getKind();
-
-	/**
-	 * Get graph type of the vertex associated to that value
-	 * @param value value to get type of
-	 * @return the graph type of that value. Most often a direct call to {@link TypeUtils} will be done
-	 */
-	public String getTypeOf(Object value);
-
+	boolean areEquals(Object expected, String effectiveGraphValue);
 }

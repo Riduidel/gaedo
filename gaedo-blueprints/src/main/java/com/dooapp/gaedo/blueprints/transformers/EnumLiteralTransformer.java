@@ -13,13 +13,8 @@ public class EnumLiteralTransformer extends AbstractLiteralTransformer<Enum> imp
 	private static final Logger logger = Logger.getLogger(EnumLiteralTransformer.class.getName());
 
 	@Override
-	protected Object getVertexValue(Enum value) {
+	public String valueToString(Enum value) {
 		return value.name();
-	}
-
-	@Override
-	protected Class getValueClass(Enum value) {
-		return value==null ? Enum.class : value.getClass();
 	}
 
 	@Override
@@ -40,8 +35,9 @@ public class EnumLiteralTransformer extends AbstractLiteralTransformer<Enum> imp
 		}
 	}
 
-	@Override
-	public Kind getKind() {
-		return Kind.bnode;
+	public boolean areEquals(Object expected, String effectiveGraphValue) {
+		if(Enum.class.isAssignableFrom(expected.getClass()))
+			return toString(Enum.class.cast(expected)).equals(effectiveGraphValue);
+		return false;
 	}
 }

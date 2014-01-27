@@ -12,7 +12,7 @@ import com.dooapp.gaedo.utils.Utils;
  *
  */
 public class Transformers {
-	
+
 	public static <TransformerType extends Transformer> TransformerType get(TransformerAssociation<TransformerType>[] values, ClassLoader classLoader, String effectiveType) {
 		for(TransformerAssociation l : values) {
 			if(l.canHandle(classLoader, effectiveType)) {
@@ -37,7 +37,7 @@ public class Transformers {
 	public static boolean containsKey(TransformerAssociation[] values, Class<? extends Object> valueClass) {
 		if(valueClass!=null) {
 			for(TransformerAssociation l : values) {
-				if(l.getDataClass().isAssignableFrom(valueClass)) {
+				if(l.getDataClass().isAssignableFrom(Utils.maybeObjectify(valueClass))) {
 					return true;
 				}
 			}

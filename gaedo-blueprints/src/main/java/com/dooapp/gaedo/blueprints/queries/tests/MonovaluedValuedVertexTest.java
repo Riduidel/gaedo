@@ -8,6 +8,7 @@ import com.dooapp.gaedo.blueprints.AbstractBluePrintsBackedFinderService;
 import com.dooapp.gaedo.blueprints.GraphDatabaseDriver;
 import com.dooapp.gaedo.blueprints.ObjectCache;
 import com.dooapp.gaedo.blueprints.indexable.IndexableGraphBackedFinderService;
+import com.dooapp.gaedo.blueprints.operations.Loader;
 import com.dooapp.gaedo.blueprints.strategies.GraphMappingStrategy;
 import com.dooapp.gaedo.blueprints.utils.VertexPathNavigator;
 import com.dooapp.gaedo.blueprints.utils.VertexPathNavigator.VertexLocation;
@@ -139,5 +140,17 @@ public abstract class MonovaluedValuedVertexTest<ValueType extends Object> exten
 		StringBuilder returned = super.toString(deepness, builder);
 		returned.append(expected).append("\n");
 		return returned;
+	}
+
+	/**
+	 * Helper method transforming a vertex property into a literal. mainly useful for "basic" literals
+	 * @param currentVertex
+	 * @param finalProperty
+	 * @return
+	 */
+	protected ValueType getLiteralValue(Vertex currentVertex, Property finalProperty) {
+		Loader loader = new Loader();
+		ClassLoader classLoader = expected==null ? expected.getClass().getClassLoader() : getClass().getClassLoader();
+		return (ValueType) loader.loadSingleLiteral(classLoader, finalProperty, currentVertex, objectsBeingAccessed);
 	}
 }

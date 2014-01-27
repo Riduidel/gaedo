@@ -8,7 +8,7 @@ public class URILiteralTransformer extends AbstractSimpleLiteralTransformer<URI>
 	}
 
 	@Override
-	protected Object getVertexValue(URI value) {
+	public String valueToString(URI value) {
 		return value==null ? "null" : value.toString();
 	}
 

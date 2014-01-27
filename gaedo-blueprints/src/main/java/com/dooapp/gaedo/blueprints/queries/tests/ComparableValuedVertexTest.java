@@ -36,7 +36,8 @@ public abstract class ComparableValuedVertexTest<ComparableType extends Comparab
 
 	@Override
 	protected boolean callMatchLiteral(Vertex currentVertex, Property finalProperty) {
-		ComparableType value = (ComparableType) Literals.get(finalProperty.getType()).loadObject(getDriver(), currentVertex);
-		return doCompare(value);
+		throw new UnsupportedOperationException(getClass().getName()+"match literal is not yet re-implemented");
+//		ComparableType value = (ComparableType) Literals.get(finalProperty.getType()).loadObject(getDriver(), currentVertex);
+//		return doCompare(value);
 	}
 }

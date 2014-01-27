@@ -1,6 +1,7 @@
 package com.dooapp.gaedo.blueprints.queries.tests;
 
 import com.dooapp.gaedo.blueprints.GraphDatabaseDriver;
+import com.dooapp.gaedo.blueprints.GraphUtils;
 import com.dooapp.gaedo.blueprints.strategies.GraphMappingStrategy;
 import com.dooapp.gaedo.blueprints.transformers.LiteralTransformer;
 import com.dooapp.gaedo.blueprints.transformers.Literals;
@@ -33,13 +34,25 @@ public class EqualsTo extends MonovaluedValuedVertexTest<Object> implements Vert
 	}
 
 	@Override
-	protected boolean callMatchLiteral(Vertex currentVertex, Property finalProperty) {
+	public boolean callMatchLiteral(Vertex currentVertex, Property finalProperty) {
 		LiteralTransformer used = Literals.get(finalProperty.getGenericType());
+		return testOnVertex(expected, currentVertex, finalProperty, used);
+	}
+
+	public static boolean testOnVertex(Object expected, Vertex currentVertex, Property finalProperty, LiteralTransformer used) {
 		if(used==null) {
 			throw new UnsupportedOperationException(finalProperty+" doesn't seems to store literal value. How could we check its value then ?");
 		} else {
-			return used.isVertexEqualsTo(getDriver(), currentVertex, getExpectedAsValue());
+			if (expected == null) {
+				return currentVertex == null || currentVertex.getProperty(GraphUtils.getEdgeNameFor(finalProperty)) == null;
+			} else {
+				if (currentVertex == null) {
+					return false;
+				} else {
+					String effectiveGraphValue = currentVertex.getProperty(GraphUtils.getEdgeNameFor(finalProperty));
+					return used.areEquals(expected, effectiveGraphValue);
+				}
+			}
 		}
 	}
-
 }

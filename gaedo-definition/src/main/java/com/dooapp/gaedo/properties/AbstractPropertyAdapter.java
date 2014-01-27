@@ -231,4 +231,14 @@ public abstract class AbstractPropertyAdapter implements Property {
 		setAnnotation(a);
 		return this;
 	}
+
+	/**
+	 * Copy all annotations of the given property
+	 * @param p
+	 */
+	protected void copyAnnotationsFrom(Property p) {
+		for(Annotation a : p.getAnnotations()) {
+			setAnnotation(a);
+		}
+	}
 }

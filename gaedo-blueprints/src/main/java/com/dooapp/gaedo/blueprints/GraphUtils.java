@@ -85,33 +85,6 @@ public class GraphUtils {
 	}
 
 	/**
-	 * Create a vertex out of a basic object. if object is of a simple type,
-	 * we'll use value as id. Elsewhere, we will generate an id for object
-	 *
-	 * @param database
-	 *            database in which vertex will be stored
-	 * @param value
-	 *            value to get
-	 * @param cascade
-	 *            cascade type. if nor PERSIST neither MERGE and vertex doesn't
-	 *            exist, null may be returned
-	 * @return vertex associated to literal or null if none found.
-	 */
-	public static Vertex getVertexForLiteral(GraphDatabaseDriver database, Object value, CascadeType cascade) {
-		Vertex returned = null;
-		// Now distinct behaviour between known objects and unknown ones
-		Class<? extends Object> valueClass = value.getClass();
-		if (Literals.containsKey(valueClass)) {
-			LiteralTransformer transformer = Literals.get(valueClass);
-			returned = transformer.getVertexFor(database, valueClass.cast(value), cascade);
-		} else {
-			throw new ObjectIsNotARealLiteralException(value, valueClass);
-			// TODO do not forget to set id property
-		}
-		return returned;
-	}
-
-	/**
 	 * Create an object instance from a literal vertex compatible with this
 	 * service contained class
 	 *
@@ -143,9 +116,11 @@ public class GraphUtils {
 			throw new UnspecifiedClassLoader();
 		}
 		try {
+			// for legacy reasons, we support loading a detached literal value
 			if (Literals.containsKey(classLoader, effectiveType) && !repository.containsKey(effectiveType)) {
-				LiteralTransformer transformer = Literals.get(classLoader, effectiveType);
-				return transformer.loadObject(driver, classLoader, effectiveType, key, objectsBeingAccessed);
+				Class<?> type = classLoader.loadClass(effectiveType);
+				LiteralTransformer<?> transformer = Literals.get(type);
+				return transformer.fromString(key.getProperty(Properties.value.name()).toString(), type, classLoader, objectsBeingAccessed);
 			} else {
 				Class<?> type = loadClass(classLoader, effectiveType);
 				if (Tuples.containsKey(type) && !repository.containsKey(type)) {
@@ -357,7 +332,7 @@ public class GraphUtils {
 	public static void toString(Element objectVertex, StringBuilder sOut) {
 		sOut.append("graph id=").append(objectVertex.getId().toString());
 		for (String s : objectVertex.getPropertyKeys()) {
-			sOut.append("; ");
+			sOut.append("\n\t");
 			sOut.append(s).append("=").append(objectVertex.getProperty(s));
 		}
 	}
@@ -391,7 +366,7 @@ public class GraphUtils {
 				logger.log(Level.WARNING, "We tried to remove non existing edge " + toString(existing));
 			}
 		} else {
-			removeFromIndex(database, existing, IndexNames.EDGES);
+			removeFromIndex(database, existing);
 			database.removeEdge(toRemove);
 			if (logger.isLoggable(REMOVAL_LOG_LEVEL)) {
 				logger.log(REMOVAL_LOG_LEVEL, "REMOVED " + toRemove);
@@ -409,7 +384,7 @@ public class GraphUtils {
 				logger.log(Level.WARNING, "We tried to remove non existing vertex " + toString(existing));
 			}
 		} else {
-			removeFromIndex(database, existing, IndexNames.VERTICES);
+			removeFromIndex(database, existing);
 			database.removeVertex(toRemove);
 			if (logger.isLoggable(REMOVAL_LOG_LEVEL)) {
 				logger.log(REMOVAL_LOG_LEVEL, "REMOVED " + toRemove);
@@ -418,14 +393,38 @@ public class GraphUtils {
 	}
 
 	/**
+	 * Safely set property of entity to the given value.
+	 * Notice that, if graph is indexable,
+	 * @param database
+	 * @param entity
+	 * @param propertyName
+	 * @param newValue
+	 */
+	public static <Type extends Element> void setIndexedProperty(Graph database, Type entity, String propertyName, Object newValue) {
+		Object oldValue = entity.getProperty(propertyName);
+		entity.setProperty(propertyName, newValue);
+		if(database instanceof IndexableGraph) {
+			IndexableGraph indexable = (IndexableGraph) database;
+			IndexNames indexName = IndexNames.forElement(entity);
+			Index<Type> index = (Index<Type>) indexable.getIndex(indexName.getIndexName(), indexName.getIndexed());
+			if(oldValue!=null) {
+				index.remove(propertyName, oldValue, entity);
+			}
+			if(newValue!=null) {
+				index.put(propertyName, newValue, entity);
+			}
+		}
+	}
+
+	/**
 	 * Remove given element from index by removing all bindings from its properties names to its properties values
 	 * @param database graph on which remove operation will be performed (must be indexable)
 	 * @param existing element to remove index entries
-	 * @param indexName name of index associated to element
 	 */
-	public static <Type extends Element> void removeFromIndex(Graph database, Type existing, IndexNames indexName) {
+	public static <Type extends Element> void removeFromIndex(Graph database, Type existing) {
 		if (database instanceof IndexableGraph) {
 			IndexableGraph indexable = (IndexableGraph) database;
+			IndexNames indexName = IndexNames.forElement(existing);
 			if(indexName.isUsable()) {
 				Index<Type> index = (Index<Type>) indexable.getIndex(indexName.getIndexName(), indexName.getIndexed());
 				for(String propertyName : existing.getPropertyKeys()) {
@@ -448,22 +447,6 @@ public class GraphUtils {
 			return true;
 		default:
 			return false;
-		}
-	}
-
-	/**
-	 * Set an indexed property on any graph element, updating the given list of indices
-	 * @param graph graph from which indices should be loaded
-	 * @param graphElement graph element to update
-	 * @param propertyName property to set
-	 * @param propertyValue value to set
-	 * @param indexName index to update. Notice removing value from index on mutation is not supported, as gaedo vertices and edges are not considered as mutable
-	 */
-	public static <ElementType extends Element> void setIndexedProperty(IndexableGraph graph, ElementType graphElement, String propertyName, Object propertyValue, IndexNames indexName) {
-		graphElement.setProperty(propertyName, propertyValue);
-		if(IndexNames.usableIndices().contains(indexName)) {
-			Index<ElementType> index = graph.getIndex(indexName.getIndexName(), (Class<ElementType>) indexName.getIndexed());
-			index.put(propertyName, propertyValue, graphElement);
 		}
 	}
 }

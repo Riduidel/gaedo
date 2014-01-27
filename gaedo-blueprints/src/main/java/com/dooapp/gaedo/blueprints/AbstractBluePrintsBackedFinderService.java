@@ -7,7 +7,6 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.Map;
 import java.util.SortedSet;
-import java.util.TreeMap;
 import java.util.TreeSet;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -15,7 +14,9 @@ import java.util.logging.Logger;
 import javax.persistence.CascadeType;
 
 import com.dooapp.gaedo.blueprints.indexable.IndexableGraphBackedFinderService;
-import com.dooapp.gaedo.blueprints.queries.DataTypeIterable;
+import com.dooapp.gaedo.blueprints.operations.Deleter;
+import com.dooapp.gaedo.blueprints.operations.Loader;
+import com.dooapp.gaedo.blueprints.operations.Updater;
 import com.dooapp.gaedo.blueprints.strategies.GraphMappingStrategy;
 import com.dooapp.gaedo.blueprints.strategies.StrategyType;
 import com.dooapp.gaedo.blueprints.strategies.StrategyUtils;
@@ -31,7 +32,6 @@ import com.dooapp.gaedo.finders.QueryExpression;
 import com.dooapp.gaedo.finders.QueryStatement;
 import com.dooapp.gaedo.finders.expressions.Expressions;
 import com.dooapp.gaedo.finders.id.IdBasedService;
-import com.dooapp.gaedo.finders.projection.NoopProjectionBuilder;
 import com.dooapp.gaedo.finders.repository.ServiceRepository;
 import com.dooapp.gaedo.finders.root.AbstractFinderService;
 import com.dooapp.gaedo.finders.root.InformerFactory;
@@ -39,7 +39,6 @@ import com.dooapp.gaedo.properties.Property;
 import com.dooapp.gaedo.properties.PropertyProvider;
 import com.tinkerpop.blueprints.Direction;
 import com.tinkerpop.blueprints.Edge;
-import com.tinkerpop.blueprints.Graph;
 import com.tinkerpop.blueprints.IndexableGraph;
 import com.tinkerpop.blueprints.TransactionalGraph;
 import com.tinkerpop.blueprints.Vertex;
@@ -53,7 +52,7 @@ import com.tinkerpop.blueprints.Vertex;
  * @param <DataType>
  * @param <InformerType>
  */
-public abstract class AbstractBluePrintsBackedFinderService<GraphClass extends Graph, DataType, InformerType extends Informer<DataType>>
+public abstract class AbstractBluePrintsBackedFinderService<GraphClass extends IndexableGraph, DataType, InformerType extends Informer<DataType>>
     extends	AbstractFinderService<DataType, InformerType>
     implements InViewService<DataType, InformerType, SortedSet<String>>,
         IdBasedService<DataType> {
@@ -140,10 +139,7 @@ public abstract class AbstractBluePrintsBackedFinderService<GraphClass extends G
      * Get access to the service repository to handle links between objects
      */
     protected final ServiceRepository repository;
-    /**
-     * Adaptation layer
-     */
-    protected BluePrintsPersister persister;
+
     private GraphMappingStrategy<DataType> strategy;
 
     /**
@@ -186,8 +182,6 @@ public abstract class AbstractBluePrintsBackedFinderService<GraphClass extends G
         this.strategy = strategy;
         strategy.reloadWith(this);
         this.migrator = VersionMigratorFactory.create(containedClass);
-        // Updater builds managed nodes here
-        this.persister = new BluePrintsPersister(Kind.uri);
         // if there is a migrator, generate property from it
         if (logger.isLoggable(Level.FINE)) {
             logger.log(Level.FINE, "created graph service handling " + containedClass.getCanonicalName());
@@ -280,7 +274,7 @@ public abstract class AbstractBluePrintsBackedFinderService<GraphClass extends G
         Vertex objectVertex = loadVertexFor(vertexId, toDeleteClass.getName());
         if (objectVertex != null) {
             Map<Property, Collection<CascadeType>> containedProperties = strategy.getContainedProperties(toDelete, objectVertex, CascadeType.REMOVE);
-            persister.performDelete(this, new VertexCachingDriver(new DelegatingDriver()), vertexId, objectVertex, toDeleteClass, containedProperties, toDelete, CascadeType.REMOVE, objectsBeingAccessed);
+            new Deleter().performDelete(this, new VertexCachingDriver(new DelegatingDriver()), vertexId, objectVertex, toDeleteClass, containedProperties, toDelete, CascadeType.REMOVE, objectsBeingAccessed);
         }
     }
 
@@ -294,7 +288,7 @@ public abstract class AbstractBluePrintsBackedFinderService<GraphClass extends G
      * @param value
      *            object value
      */
-    <Type> void deleteOutEdgeVertex(Vertex objectVertex, Vertex valueVertex, Type value, ObjectCache objectsBeingUpdated) {
+    public <Type> void deleteOutEdgeVertex(Vertex objectVertex, Vertex valueVertex, Type value, ObjectCache objectsBeingUpdated) {
         // Delete vertex and other associated ones, only if they have no
         // other input links (elsewhere delete is silently ignored)
         if (valueVertex.getEdges(Direction.IN).iterator().hasNext()) {
@@ -397,7 +391,7 @@ public abstract class AbstractBluePrintsBackedFinderService<GraphClass extends G
         Class<? extends Object> toUpdateClass = toUpdate.getClass();
         Vertex objectVertex = loadVertexFor(objectVertexId, toUpdateClass.getName());
         Map<Property, Collection<CascadeType>> containedProperties = strategy.getContainedProperties(toUpdate, objectVertex, cascade);
-        return (DataType) persister.performUpdate(this, new VertexCachingDriver(getDriver()), objectVertexId, objectVertex, toUpdateClass, containedProperties, toUpdate,
+        return (DataType) new Updater().performUpdate(this, new VertexCachingDriver(getDriver()), objectVertexId, objectVertex, toUpdateClass, containedProperties, toUpdate,
                         cascade, treeMap);
     }
 
@@ -431,7 +425,7 @@ public abstract class AbstractBluePrintsBackedFinderService<GraphClass extends G
                 throw new IncompatibleServiceException(service, valueClass);
             }
         } else if (Literals.containsKey(valueClass)) {
-            return getVertexForLiteral(value, cascade);
+        	throw new CantCreateAVertexForALiteralException("impossible to create a vertex for "+value);
         } else if (Tuples.containsKey(valueClass)) {
             return getVertexForTuple(new VertexCachingDriver(getDriver()), value, cascade, objectsBeingUpdated);
         } else {
@@ -496,17 +490,6 @@ public abstract class AbstractBluePrintsBackedFinderService<GraphClass extends G
     }
 
     /**
-     * Get vertex for a given literal
-     * @param value value to get
-     * @param cascade cascade mode
-     * @return the vertex associated to that literal, or null if cascade mode prevented that cascade loading.
-     * @see GraphUtils#getVertexForLiteral(GraphDatabaseDriver, Object)
-     */
-    protected Vertex getVertexForLiteral(Object value, CascadeType cascade) {
-        return GraphUtils.getVertexForLiteral(getDriver(), value, cascade);
-    }
-
-    /**
      * Object query is done by simply looking up all objects of that class using
      * a standard query
      *
@@ -550,7 +533,7 @@ public abstract class AbstractBluePrintsBackedFinderService<GraphClass extends G
     public DataType loadObject(String objectVertexId, ObjectCache objectsBeingAccessed) {
         // If cast fails, well, that's some fuckin mess, no ?
         Vertex objectVertex = loadVertexFor(objectVertexId, containedClass.getName());
-        return persister.loadObject(this, new VertexCachingDriver(getDriver()), objectVertexId, objectVertex, objectsBeingAccessed);
+        return new Loader().loadObject(this, new VertexCachingDriver(getDriver()), objectVertexId, objectVertex, objectsBeingAccessed);
     }
 
     /**
@@ -586,7 +569,7 @@ public abstract class AbstractBluePrintsBackedFinderService<GraphClass extends G
      * @see #loadObject(String, Vertex, Map)
      */
     public DataType loadObject(Vertex objectVertex, ObjectCache objectsBeingAccessed) {
-        return persister.loadObject(this, objectVertex, objectsBeingAccessed);
+        return new Loader().loadObject(this, objectVertex, objectsBeingAccessed);
     }
 
     /**
@@ -620,7 +603,7 @@ public abstract class AbstractBluePrintsBackedFinderService<GraphClass extends G
             }).getFirst();
         } else {
             // root vertex can be directly found ! so load it immediatly
-            return loadObject(vertexIdValue, ObjectCache.create(CascadeType.REFRESH));
+            return loadObject(rootVertex, ObjectCache.create(CascadeType.REFRESH));
         }
     }
 
