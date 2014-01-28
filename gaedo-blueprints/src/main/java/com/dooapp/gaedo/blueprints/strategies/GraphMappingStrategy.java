@@ -38,7 +38,7 @@ public interface GraphMappingStrategy<DataType> {
 	/**
 	 * Get an id string for the given object
 	 * @param object
-	 * @return
+	 * @return id of that object, or null if no id can be constructed.
 	 */
 	public String getIdString(DataType object);
 
