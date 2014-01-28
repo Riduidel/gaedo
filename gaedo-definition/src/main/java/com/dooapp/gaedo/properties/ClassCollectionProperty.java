@@ -11,11 +11,11 @@ public class ClassCollectionProperty extends AbstractPropertyAdapter implements 
 	public static final String CLASSES = "classes";
 
 	private Class<?> declaring;
-	
+
 	private Collection<Class<?>> values;
 
 	private static Method allClassesOf;
-	
+
 	static {
 		try {
 			allClassesOf = Utils.class.getDeclaredMethod("allClassesOf", Class.class);
@@ -34,7 +34,7 @@ public class ClassCollectionProperty extends AbstractPropertyAdapter implements 
 		setModifier(Modifier.FINAL, true);
 		setModifier(Modifier.PUBLIC, true);
 	}
-	
+
 	@Override
 	public Object get(Object obj) {
 		return values;
@@ -53,40 +53,6 @@ public class ClassCollectionProperty extends AbstractPropertyAdapter implements 
 	public Object fromString(String value) {
 		// TODO Auto-generated method stub
 		throw new UnsupportedOperationException("method "+Property.class.getName()+"#fromString has not yet been implemented AT ALL");
-	}
-
-	/**
-	 * @return
-	 * @see java.lang.Object#hashCode()
-	 */
-	@Override
-	public int hashCode() {
-		final int prime = 31;
-		int result = 1;
-		result = prime * result + ((getDeclaringClass() == null) ? 0 : getDeclaringClass().hashCode());
-		return result;
-	}
-
-	/**
-	 * @param obj
-	 * @return
-	 * @see java.lang.Object#equals(java.lang.Object)
-	 */
-	@Override
-	public boolean equals(Object obj) {
-		if (this == obj)
-			return true;
-		if (obj == null)
-			return false;
-		if (getClass() != obj.getClass())
-			return false;
-		ClassCollectionProperty other = (ClassCollectionProperty) obj;
-		if (getDeclaringClass() == null) {
-			if (other.getDeclaringClass() != null)
-				return false;
-		} else if (!getDeclaringClass().getCanonicalName().equals(other.getDeclaringClass().getCanonicalName()))
-			return false;
-		return true;
 	}
 
 	public ClassCollectionProperty withAnnotation(Annotation a) {
