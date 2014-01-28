@@ -30,7 +30,8 @@ class OperateOnProperties {
                 if (entry.getValue().contains(cascade)) {
                     used = cascade;
                 } else {
-                	Logger logger = Logger.getLogger(operation.getClass().getName());
+                	// Internal class means getName will introduce an unwanted "$" sign
+                	Logger logger = Logger.getLogger(operation.getClass().getCanonicalName());
                 	if(logger.isLoggable(Level.FINE)) {
                 		// just don't output anything for type or class collections, as they're special properties
                 		if(!(TypeProperty.INSTANCE.equals(p) || new ClassCollectionProperty(getClass()).equals(p)))
