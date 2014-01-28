@@ -75,6 +75,8 @@ public abstract class AbstractMappingStrategy<DataType> implements GraphMappingS
 	@Override
 	public String getIdString(DataType object) {
 		Object objectId = idProperty.get(object);
+		if(objectId==null)
+			return null;
 		// modified due to https://github.com/Riduidel/gaedo/issues/23
 		return GraphUtils.getIdOfLiteral(object.getClass(), idProperty, objectId);
 	}

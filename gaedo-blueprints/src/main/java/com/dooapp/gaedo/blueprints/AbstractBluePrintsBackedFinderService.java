@@ -326,7 +326,10 @@ public abstract class AbstractBluePrintsBackedFinderService<GraphClass extends I
      * @return first matching node if found, and null if not
      */
     public Vertex getIdVertexFor(DataType object, boolean allowIdGeneration) {
-        return loadVertexFor(getIdVertexId(object, allowIdGeneration), object.getClass().getName());
+        String objectId = getIdVertexId(object, allowIdGeneration);
+        if(objectId==null)
+        	return null;
+		return loadVertexFor(objectId, object.getClass().getName());
     }
 
     /**
@@ -339,7 +342,7 @@ public abstract class AbstractBluePrintsBackedFinderService<GraphClass extends I
      *            set to true when effective id generation is required. Allow to
      *            generate id only on create operations
      * @return a composite id containing the service class, the data class and
-     *         the the instance value
+     *         the instance value. This may be null if object has no id defined.
      * @see GraphUtils#getIdVertexId(IndexableGraph, Class, Object, Property)
      */
     public String getIdVertexId(DataType object, boolean requiresIdGeneration) {
