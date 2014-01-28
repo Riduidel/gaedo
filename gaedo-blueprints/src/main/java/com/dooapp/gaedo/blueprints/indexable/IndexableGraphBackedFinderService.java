@@ -1,24 +1,20 @@
 package com.dooapp.gaedo.blueprints.indexable;
 
-import java.util.Iterator;
 import java.util.SortedSet;
 import java.util.UUID;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import com.dooapp.gaedo.blueprints.AbstractBluePrintsBackedFinderService;
-import com.dooapp.gaedo.blueprints.CantCreateAVertexForALiteralException;
 import com.dooapp.gaedo.blueprints.GraphUtils;
 import com.dooapp.gaedo.blueprints.Kind;
 import com.dooapp.gaedo.blueprints.Properties;
 import com.dooapp.gaedo.blueprints.VertexHasNoPropertyException;
-import com.dooapp.gaedo.blueprints.queries.tests.EqualsTo;
+import com.dooapp.gaedo.blueprints.indexable.IndexBrowser.VertexMatcher;
 import com.dooapp.gaedo.blueprints.strategies.GraphMappingStrategy;
 import com.dooapp.gaedo.blueprints.strategies.StrategyType;
-import com.dooapp.gaedo.blueprints.strategies.UnableToGetVertexTypeException;
 import com.dooapp.gaedo.blueprints.transformers.ClassLiteralTransformer;
 import com.dooapp.gaedo.blueprints.transformers.Literals;
-import com.dooapp.gaedo.blueprints.transformers.Tuples;
 import com.dooapp.gaedo.extensions.views.InViewService;
 import com.dooapp.gaedo.finders.Informer;
 import com.dooapp.gaedo.finders.repository.ServiceRepository;
@@ -26,14 +22,11 @@ import com.dooapp.gaedo.finders.root.InformerFactory;
 import com.dooapp.gaedo.properties.Property;
 import com.dooapp.gaedo.properties.PropertyProvider;
 import com.dooapp.gaedo.properties.TypeProperty;
-import com.tinkerpop.blueprints.CloseableIterable;
 import com.tinkerpop.blueprints.Edge;
 import com.tinkerpop.blueprints.Element;
 import com.tinkerpop.blueprints.Index;
 import com.tinkerpop.blueprints.IndexableGraph;
 import com.tinkerpop.blueprints.Vertex;
-import com.tinkerpop.blueprints.util.wrappers.event.EventIndexableGraph;
-import com.tinkerpop.blueprints.util.wrappers.event.listener.GraphChangedListener;
 
 /**
  * Indexable graph backed version of finder service.
@@ -58,7 +51,7 @@ import com.tinkerpop.blueprints.util.wrappers.event.listener.GraphChangedListene
 public class IndexableGraphBackedFinderService<DataType, InformerType extends Informer<DataType>> extends
 				AbstractBluePrintsBackedFinderService<IndexableGraph, DataType, InformerType> {
 
-	private static final Logger logger = Logger.getLogger(IndexableGraphBackedFinderService.class.getName());
+	public static final Logger logger = Logger.getLogger(IndexableGraphBackedFinderService.class.getName());
 
 	public static final String TYPE_EDGE_NAME = GraphUtils.getEdgeNameFor(TypeProperty.INSTANCE);
 
@@ -152,53 +145,23 @@ public class IndexableGraphBackedFinderService<DataType, InformerType extends In
 
 	@Override
 	public Vertex loadVertexFor(String objectVertexId, String className) {
-		Vertex defaultVertex = null;
-		CloseableIterable<Vertex> matchingIterable = database.getIndex(IndexNames.VERTICES.getIndexName(), Vertex.class).get(Properties.value.name(),
-						objectVertexId);
-		Iterator<Vertex> matching = matchingIterable.iterator();
-		if (matching.hasNext()) {
-			while (matching.hasNext()) {
-				Vertex vertex = matching.next();
-				String vertexTypeName = null;
-				Kind vertexKind = null;
-				String vertexId = null;
-				try {
-					/// BEWARE : order is signifiant here : read id then kind then type for catch clauses to work correctly
-					vertexId = getIdOfVertex(vertex);
-					vertexKind = GraphUtils.getKindOf(vertex);
-					vertexTypeName = getEffectiveType(vertex);
-					// this slow-down is a direct consequence of https://github.com/Riduidel/gaedo/issues/66
-					if (objectVertexId.equals(vertexId)) {
-						switch (vertexKind) {
-						case literal:
-						case bnode:
-						case uri:
-							if (Literals.classes.getTransformer().areEquals(className, vertexTypeName)) {
-								return vertex;
-							}
-							break;
-						default:
-							return vertex;
-						}
-					}
-				} catch (VertexHasNoPropertyException e) {
-					// vertex is clearly not the match we expected so just navigate to next in index
-					if (logger.isLoggable(Level.WARNING)) {
-						logger.log(Level.WARNING,
-										"your index may be corrupted...\nWhen looking for value=\"" + objectVertexId + "\", that vertex loaded badly", e);
-					}
-				} catch (UnableToGetVertexTypeException e) {
-					if (GraphMappingStrategy.STRING_TYPE.equals(className)) {
-						// in that very case, we can use a type-less vertex as our result
-						defaultVertex = vertex;
-					} else {
-						if (Kind.uri == vertexKind && objectVertexId.equals(vertexId))
-							defaultVertex = vertex;
-					}
-				}
+		return new IndexBrowser().browseFor(getDatabase(), objectVertexId, className, new VertexMatcher() {
+
+			@Override
+			public String getTypeOf(Vertex vertex) {
+				return getEffectiveType(vertex);
 			}
-		}
-		return defaultVertex;
+
+			@Override
+			public Kind getKindOf(Vertex vertex) {
+				return GraphUtils.getKindOf(vertex);
+			}
+
+			@Override
+			public String getIdOf(Vertex vertex) {
+				return getIdOfVertex(vertex);
+			}
+		});
 	}
 
 	@Override
@@ -224,25 +187,7 @@ public class IndexableGraphBackedFinderService<DataType, InformerType extends In
 	protected Vertex createEmptyVertex(String vertexId, Class<? extends Object> valueClass, Object value) {
 		// technical vertex id is no more used by gaedo which only rley upon the
 		// getIdOfVertex method !
-		Vertex returned = database.addVertex(valueClass.getName() + ":" + vertexId);
-		GraphUtils.setIndexedProperty(database, returned, Properties.value.name(), vertexId);
-		if (Literals.containsKey(valueClass)) {
-			throw new CantCreateAVertexForALiteralException("Impossible to create a vertex for "+value);
-		} else {
-			if (repository.containsKey(valueClass)) {
-				GraphUtils.setIndexedProperty(database, returned, Properties.kind.name(), Kind.uri.name());
-			} else if (Tuples.containsKey(valueClass)) {
-				// some literals aren't so ... literal, as they can accept
-				// incoming connections (like classes)
-				GraphUtils.setIndexedProperty(database, returned, Properties.kind.name(), Tuples.get(valueClass).getKind().name());
-			}
-			// no more edge to class creation : as TYPE and ClassCollectionProperty now are literals, one should rely upon classical index search
-		}
-		// Yup, this if has no default else statement, and that's normal.
-		if (logger.isLoggable(Level.FINE)) {
-			logger.log(Level.FINE, "created vertex " + GraphUtils.toString(returned));
-		}
-		return returned;
+		return GraphUtils.createEmptyVertexFor(getDatabase(), repository, vertexId, valueClass, value);
 	}
 
 	@Override

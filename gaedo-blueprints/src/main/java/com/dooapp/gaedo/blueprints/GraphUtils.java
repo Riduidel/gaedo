@@ -449,4 +449,35 @@ public class GraphUtils {
 			return false;
 		}
 	}
+
+	/**
+	 * Creates an empty vertex with some interesting properties set
+	 * @param database database in which the vertex is to be created
+	 * @param repository service repository allowing us to set specific properties ({@link Properties#kind} , namely)
+	 * @param vertexId expected vertex id, which will be set in the {@link Properties#value}
+	 * @param valueClass class of value for which a vertex is expected.
+	 * @param value the value for which a vertex is to be created.
+	 * @return
+	 */
+	public static Vertex createEmptyVertexFor(Graph database, ServiceRepository repository, String vertexId, Class<? extends Object> valueClass, Object value) {
+		Vertex returned = database.addVertex(valueClass.getName() + ":" + vertexId);
+		setIndexedProperty(database, returned, Properties.value.name(), vertexId);
+		if (Literals.containsKey(valueClass)) {
+			throw new CantCreateAVertexForALiteralException("Impossible to create a vertex for "+value);
+		} else {
+			if (repository.containsKey(valueClass)) {
+				setIndexedProperty(database, returned, Properties.kind.name(), Kind.uri.name());
+			} else if (Tuples.containsKey(valueClass)) {
+				// some literals aren't so ... literal, as they can accept
+				// incoming connections (like classes)
+				setIndexedProperty(database, returned, Properties.kind.name(), Tuples.get(valueClass).getKind().name());
+			}
+			// no more edge to class creation : as TYPE and ClassCollectionProperty now are literals, one should rely upon classical index search
+		}
+		// Yup, this if has no default else statement, and that's normal.
+		if (logger.isLoggable(Level.FINE)) {
+			logger.log(Level.FINE, "created vertex " + toString(returned));
+		}
+		return returned;
+	}
 }
