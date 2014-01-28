@@ -55,7 +55,8 @@ public abstract class AbstractLiteralTransformer<Type> {
 	 * @return
 	 */
 	public Type fromString(String propertyValue, Class valueClass, ClassLoader classloader, ObjectCache objectCache) {
-		if(propertyValue.startsWith(valueClass.getName())) {
+		String className = Utils.maybeObjectify(valueClass.getName());
+		if(propertyValue.startsWith(className)) {
 			return internalLoadObject(valueClass, Literals.getValueIn(propertyValue), objectCache);
 		} else {
 			return internalLoadObject(valueClass, propertyValue, objectCache);

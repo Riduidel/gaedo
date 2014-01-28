@@ -9,6 +9,7 @@ import javax.persistence.CascadeType;
 
 import org.hamcrest.core.Is;
 import org.hamcrest.core.IsSame;
+import org.hamcrest.number.IsGreaterThan;
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -47,15 +48,41 @@ public class TestFor73_AKA_SomeSearchMayFailWithPropertyGraph extends AbstractGr
 	}
 
 	@Test
-	public void loadAllTagsAfterHavingFoundAllTheirVertices() {
+	public void lookupUsingAnythingWork() {
 		List<Post> posts = CollectionUtils.asList(getPostService().find().matching(new QueryBuilder<PostInformer>() {
 
 			@Override
 			public QueryExpression createMatchingExpression(PostInformer informer) {
-				return informer.getId().isAnything();
+				return informer.getNote().isAnything();
 			}
 		}).getAll());
 		// 3 posts and the about one
-		assertThat(posts.size(), Is.is(4));
+		assertThat(posts.size(), new IsGreaterThan<Integer>(0));
+	}
+
+	@Test
+	public void lookupUsingGreaterThanWork() {
+		List<Post> posts = CollectionUtils.asList(getPostService().find().matching(new QueryBuilder<PostInformer>() {
+
+			@Override
+			public QueryExpression createMatchingExpression(PostInformer informer) {
+				return informer.getNote().greaterThan(-1d);
+			}
+		}).getAll());
+		// 3 posts and the about one
+		assertThat(posts.size(), new IsGreaterThan<Integer>(0));
+	}
+
+	@Test
+	public void lookupUsingLowerThanWork() {
+		List<Post> posts = CollectionUtils.asList(getPostService().find().matching(new QueryBuilder<PostInformer>() {
+
+			@Override
+			public QueryExpression createMatchingExpression(PostInformer informer) {
+				return informer.getNote().lowerThan(10d);
+			}
+		}).getAll());
+		// 3 posts and the about one
+		assertThat(posts.size(), new IsGreaterThan<Integer>(0));
 	}
 }

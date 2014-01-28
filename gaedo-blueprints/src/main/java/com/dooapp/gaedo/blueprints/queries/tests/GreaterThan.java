@@ -12,7 +12,7 @@ public class GreaterThan<ComparableType extends Comparable<ComparableType>> exte
 
 	@Override
 	protected boolean doCompare(ComparableType effective) {
-		return strictly ? effective.compareTo(expected)>0 : effective.compareTo(expected)>=0;
+		return strictly ? compareCasted(effective, expected)>0 : compareCasted(effective, expected)>=0;
 	}
 
 	@Override

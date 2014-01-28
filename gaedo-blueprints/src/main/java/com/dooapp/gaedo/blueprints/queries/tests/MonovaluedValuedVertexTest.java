@@ -77,12 +77,22 @@ public abstract class MonovaluedValuedVertexTest<ValueType extends Object> exten
 		if(expected==null) {
 			return currentVertex==null;
 		} else {
-			if(getRepository().containsKey(expected.getClass())) {
+			if(shouldMatchManagedVertex(currentVertex, finalProperty)) {
 				return callMatchManaged(currentVertex, finalProperty);
 			} else {
 				return callMatchLiteral(currentVertex, finalProperty);
 			}
 		}
+	}
+
+	/**
+	 * Check if match should be made for a literal value or a managed value.
+	 * @param currentVertex currently evaluated verted
+	 * @param finalProperty property on which match should be performed
+	 * @return
+	 */
+	protected boolean shouldMatchManagedVertex(Vertex currentVertex, Property finalProperty) {
+		return getRepository().containsKey(expected.getClass());
 	}
 
 	/**

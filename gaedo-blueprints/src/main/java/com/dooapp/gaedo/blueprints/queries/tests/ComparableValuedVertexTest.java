@@ -1,18 +1,36 @@
 package com.dooapp.gaedo.blueprints.queries.tests;
 
-import java.util.TreeMap;
-
-import javax.persistence.CascadeType;
-
 import com.dooapp.gaedo.blueprints.AbstractBluePrintsBackedFinderService;
 import com.dooapp.gaedo.blueprints.GraphDatabaseDriver;
-import com.dooapp.gaedo.blueprints.ObjectCache;
+import com.dooapp.gaedo.blueprints.GraphUtils;
 import com.dooapp.gaedo.blueprints.strategies.GraphMappingStrategy;
+import com.dooapp.gaedo.blueprints.transformers.LiteralTransformer;
 import com.dooapp.gaedo.blueprints.transformers.Literals;
 import com.dooapp.gaedo.properties.Property;
+import com.dooapp.gaedo.utils.PrimitiveUtils;
+import com.dooapp.gaedo.utils.Utils;
 import com.tinkerpop.blueprints.Vertex;
 
 public abstract class ComparableValuedVertexTest<ComparableType extends Comparable<ComparableType>> extends MonovaluedValuedVertexTest<ComparableType> {
+
+	/**
+	 * Comparison utility method, ensuring no comaprison of number can drop a ClassCastException
+	 * @param effective
+	 * @param expected
+	 * @return their comparison ... what did you expect ?
+	 */
+	protected static <ComparableType extends Comparable<ComparableType>> int compareCasted(ComparableType effective, ComparableType expected) {
+		Class expectedClass = Utils.maybeObjectify(expected.getClass());
+		if(Number.class.isAssignableFrom(expectedClass)) {
+			Double effectiveDouble = PrimitiveUtils.as((Number) effective, Double.class);
+			Double expectedDouble = PrimitiveUtils.as((Number) expected, Double.class);
+			return effectiveDouble.compareTo(expectedDouble);
+		} else {
+			// nothing can be done for non number classes
+			return -1*expected.compareTo(effective);
+		}
+	}
+
 
 	/**
 	 * When true, comparison is strict
@@ -36,8 +54,11 @@ public abstract class ComparableValuedVertexTest<ComparableType extends Comparab
 
 	@Override
 	protected boolean callMatchLiteral(Vertex currentVertex, Property finalProperty) {
-		throw new UnsupportedOperationException(getClass().getName()+"match literal is not yet re-implemented");
-//		ComparableType value = (ComparableType) Literals.get(finalProperty.getType()).loadObject(getDriver(), currentVertex);
-//		return doCompare(value);
+		Class<?> valueClass = finalProperty.getType();
+		LiteralTransformer literalTransformer = Literals.get(valueClass);
+		String effectiveGraphValue = currentVertex.getProperty(GraphUtils.getEdgeNameFor(finalProperty));
+		ClassLoader classLoader = expected.getClass().getClassLoader();
+		ComparableType value = (ComparableType) literalTransformer.fromString(effectiveGraphValue, valueClass, classLoader, objectsBeingAccessed);
+		return doCompare(value);
 	}
 }

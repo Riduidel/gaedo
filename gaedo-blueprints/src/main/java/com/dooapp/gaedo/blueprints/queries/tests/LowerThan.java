@@ -11,7 +11,7 @@ public class LowerThan<ComparableType extends Comparable<ComparableType>> extend
 	}
 
 	public boolean doCompare(ComparableType effective) {
-		return strictly ? effective.compareTo(expected)<0 : effective.compareTo(expected)<=0;
+		return strictly ? compareCasted(effective, expected)<0 : compareCasted(effective, expected)<=0;
 	}
 
 	@Override

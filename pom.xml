@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>com.dooapp</groupId>
 	<artifactId>gaedo</artifactId>
@@ -105,14 +106,20 @@
 				<version>2.1.0</version>
 				<scope>test</scope>
 			</dependency>
+			<dependency>
+				<groupId>org.hamcrest</groupId>
+				<artifactId>hamcrest-all</artifactId>
+				<version>1.1</version>
+				<scope>test</scope>
+			</dependency>
 		</dependencies>
 	</dependencyManagement>
 	<scm>
 		<url>https://github.com/Riduidel/gaedo.git</url>
 		<connection>scm:git:ssh://git@github.com/Riduidel/gaedo.git</connection>
 		<developerConnection>scm:git:ssh://git@github.com/Riduidel/gaedo.git</developerConnection>
-	  <tag>HEAD</tag>
-  </scm>
+		<tag>HEAD</tag>
+	</scm>
 	<ciManagement>
 		<system>Jenkins</system>
 		<url>https://buildhive.cloudbees.com/job/Riduidel/job/gaedo/</url>
