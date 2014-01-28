@@ -6,6 +6,7 @@ import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.Map;
 import java.util.Set;
+import java.util.TreeSet;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.regex.Matcher;
@@ -329,11 +330,16 @@ public class GraphUtils {
 		return sOut.append("}").toString();
 	}
 
-	public static void toString(Element objectVertex, StringBuilder sOut) {
-		sOut.append("graph id=").append(objectVertex.getId().toString());
-		for (String s : objectVertex.getPropertyKeys()) {
+	/**
+	 * List all vertex properties in alphabetical order
+	 * @param element element for which we want some details
+	 * @param sOut output buffer
+	 */
+	public static void toString(Element element, StringBuilder sOut) {
+		sOut.append("graph id=").append(element.getId().toString());
+		for (String s : new TreeSet<String>(element.getPropertyKeys())) {
 			sOut.append("\n\t");
-			sOut.append(s).append("=").append(objectVertex.getProperty(s));
+			sOut.append(s).append("=").append(element.getProperty(s));
 		}
 	}
 
