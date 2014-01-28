@@ -9,7 +9,9 @@ import java.util.logging.Logger;
 import javax.persistence.CascadeType;
 
 import com.dooapp.gaedo.finders.id.AnnotationsFinder.Annotations;
+import com.dooapp.gaedo.properties.ClassCollectionProperty;
 import com.dooapp.gaedo.properties.Property;
+import com.dooapp.gaedo.properties.TypeProperty;
 
 /**
  * Internal class allowing easy iteration over properties of one object
@@ -30,6 +32,8 @@ class OperateOnProperties {
                 } else {
                 	Logger logger = Logger.getLogger(operation.getClass().getName());
                 	if(logger.isLoggable(Level.FINE)) {
+                		// just don't output anything for type or class collections, as they're special properties
+                		if(!(TypeProperty.INSTANCE.equals(p) || new ClassCollectionProperty(getClass()).equals(p)))
                 		logger.log(Level.FINE, "operation not performed on "+p.toGenericString()+" has no cascade "+cascade+" defined");
                 	}
                 }
