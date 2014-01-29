@@ -16,7 +16,11 @@ public class CollectionSizeProperty extends AbstractPropertyAdapter {
 	}
 
 	public static String getName(Property p) {
-		return p.getName()+".size";
+		return getNameFor(p.getName());
+	}
+
+	public static String getNameFor(String propertyName) {
+		return propertyName+".size";
 	}
 
 	@Override

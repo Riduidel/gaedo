@@ -1,6 +1,5 @@
 package com.dooapp.gaedo.blueprints.operations;
 
-import java.lang.reflect.Modifier;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -24,7 +23,6 @@ import com.dooapp.gaedo.blueprints.ObjectCache;
 import com.dooapp.gaedo.blueprints.Properties;
 import com.dooapp.gaedo.blueprints.transformers.LiteralTransformer;
 import com.dooapp.gaedo.blueprints.transformers.Literals;
-import com.dooapp.gaedo.finders.id.AnnotationsFinder.Annotations;
 import com.dooapp.gaedo.properties.AbstractPropertyAdapter;
 import com.dooapp.gaedo.properties.Property;
 import com.dooapp.gaedo.utils.CollectionUtils;
@@ -69,7 +67,7 @@ public class Updater {
 	}
 
 	public static final Boolean ELEMENT_IN_COLLECTION_MARKER = Boolean.TRUE;
-	public static final Object ELEMENT_IN_COLLECTION_MARKER_GRAPH_VALUE = Literals.get(ELEMENT_IN_COLLECTION_MARKER.getClass()).toString(ELEMENT_IN_COLLECTION_MARKER);
+	public static final String ELEMENT_IN_COLLECTION_MARKER_GRAPH_VALUE = Literals.get(ELEMENT_IN_COLLECTION_MARKER.getClass()).toString(ELEMENT_IN_COLLECTION_MARKER);
 
 	private static final Logger logger = Logger.getLogger(Updater.class.getName());
 
