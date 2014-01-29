@@ -330,7 +330,9 @@ public class Utils {
 	}
 
 	/**
-	 * Put all classes extended or implemented by this one (including itself) in a collection
+	 * Put all classes extended or implemented by this one (including itself) in a collection.
+	 * <b>WARNING</b> Notice this method should not be renamed or refactored in any fashion, as it is used by ClassCollectionProperty to obtain a generic type
+	 * object retpresenting a Collection<Class<?>>
 	 * @param declaring
 	 * @return
 	 */
