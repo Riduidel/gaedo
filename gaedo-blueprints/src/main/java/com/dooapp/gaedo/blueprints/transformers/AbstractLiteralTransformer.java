@@ -97,14 +97,6 @@ public abstract class AbstractLiteralTransformer<Type> {
 	}
 
 	/**
-	 * Resolve type to a loadable one
-	 *
-	 * @param effectiveType
-	 * @return
-	 */
-	protected abstract String resolveType(String effectiveType);
-
-	/**
 	 * Load object of given class
 	 *
 	 * @param driver

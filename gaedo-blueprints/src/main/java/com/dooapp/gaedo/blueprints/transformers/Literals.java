@@ -73,19 +73,6 @@ public enum Literals implements TransformerAssociation<LiteralTransformer> {
 	}
 
 	/**
-	 * Load given value by analyzing property value prefix then using the literal transformer associated with that prefix
-	 * @param objectVertex
-	 * @param p
-	 * @param classloader
-	 * @param objectsBeingAccessed
-	 * @return
-	 */
-	public static Object load(Vertex objectVertex, Property p, ClassLoader classloader, ObjectCache objectsBeingAccessed) {
-		// TODO Auto-generated method stub
-		throw new UnsupportedOperationException("method "+Literals.class.getName()+"#load has not yet been implemented AT ALL");
-	}
-
-	/**
 	 * Get type prefix of the given literal transformer for later loading it
 	 * @param propertyValue a value in which we want to extract type prefix
 	 * @return the value before ":"

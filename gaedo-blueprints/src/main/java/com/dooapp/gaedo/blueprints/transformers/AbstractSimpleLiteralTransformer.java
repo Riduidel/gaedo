@@ -11,11 +11,6 @@ public abstract class AbstractSimpleLiteralTransformer<Type> extends AbstractLit
 	}
 
 
-	@Override
-	protected String resolveType(String effectiveType) {
-		return typeName;
-	}
-
 	public boolean canHandle(ClassLoader classLoader, String effectiveType) {
 		return typeName.equals(effectiveType);
 	}

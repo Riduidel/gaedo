@@ -38,22 +38,6 @@ public class NumberLiteralTransformer extends AbstractLiteralTransformer<Number>
 		return value==null ? "0" : value.toString();
 	}
 
-	/**
-	 * This method is heavy as hell, but necessary
-	 * @param effectiveType
-	 * @return
-	 * @see com.dooapp.gaedo.blueprints.transformers.AbstractLiteralTransformer#resolveType(java.lang.String)
-	 */
-	@Override
-	protected String resolveType(String effectiveType) {
-		Class<?> used = lookupOptimizer.get(effectiveType);
-		if(used==null)
-			return effectiveType;
-		if(used.isPrimitive())
-			return Utils.maybeObjectify(used).getName();
-		return effectiveType;
-	}
-
 	@Override
 	public boolean canHandle(ClassLoader classLoader, String effectiveType) {
 		return lookupOptimizer.containsKey(effectiveType);

@@ -19,11 +19,6 @@ public class ClassLiteralTransformer extends AbstractSimpleLiteralTransformer<Cl
 		return value==null ? Object.class.getCanonicalName() : value.getCanonicalName();
 	}
 
-
-	@Override
-	protected String resolveType(String effectiveType) {
-		return Class.class.getName();
-	}
 	/**
 	 * Magic method allowing a string to be considered as a class value
 	 * @param className

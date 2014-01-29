@@ -18,11 +18,6 @@ public class EnumLiteralTransformer extends AbstractLiteralTransformer<Enum> imp
 	}
 
 	@Override
-	protected String resolveType(String effectiveType) {
-		return effectiveType;
-	}
-
-	@Override
 	public boolean canHandle(ClassLoader classLoader, String effectiveType) {
 		try {
 			return Enum.class.isAssignableFrom(GraphUtils.loadClass(classLoader, effectiveType));
