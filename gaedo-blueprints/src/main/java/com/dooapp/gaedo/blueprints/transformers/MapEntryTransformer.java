@@ -56,7 +56,7 @@ public class MapEntryTransformer extends AbstractTupleTransformer<Map.Entry> imp
 							cascade);
 			// Adding the class collection property to this class to make sure we can get it back
 			containedProperties.put(new ClassCollectionProperty(Map.Entry.class), cascade);
-			containedProperties.put(new TypeProperty(Map.Entry.class), cascade);
+			containedProperties.put(new TypeProperty(), cascade);
 		} catch(Exception e) {
 			throw new UnableToGetKeyOrValueProperty(e);
 		}

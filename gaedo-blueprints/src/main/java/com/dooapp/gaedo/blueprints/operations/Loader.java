@@ -20,6 +20,7 @@ import com.dooapp.gaedo.blueprints.MapLazyLoader;
 import com.dooapp.gaedo.blueprints.ObjectCache;
 import com.dooapp.gaedo.blueprints.ObjectCache.ValueLoader;
 import com.dooapp.gaedo.blueprints.strategies.GraphMappingStrategy;
+import com.dooapp.gaedo.blueprints.transformers.ClassIdentifierHelper;
 import com.dooapp.gaedo.blueprints.transformers.ClassIsNotAKnownLiteralException;
 import com.dooapp.gaedo.blueprints.transformers.LiteralTransformer;
 import com.dooapp.gaedo.blueprints.transformers.Literals;
@@ -217,9 +218,18 @@ public class Loader {
 	public Object loadSingleLiteral(ClassLoader classloader, Property p, Vertex objectVertex, ObjectCache objectsBeingAccessed) {
 		// if no edge exist, we may be in the case of a literal stored in node property. In that case, check if vertex has a property having same name than edge
 		String propertyValue = objectVertex.getProperty(GraphUtils.getEdgeNameFor(p));
-		String propertyType = Literals.getTypePrefix(propertyValue);
-		Class propertyClass = (Class) Literals.classes.getTransformer().fromString(propertyType, Class.class, classloader, objectsBeingAccessed);
-		LiteralTransformer<?> transformer = Literals.get(classloader, propertyType);
+		LiteralTransformer transformer = null;
+		Class propertyClass = null;
+		if(Literals.containsKey(p.getType())) {
+			propertyClass = p.getType();
+			transformer = Literals.get(p.getType());
+		} else {
+			// will be useful only for fields typed as Object or Serializable, as others will go in the if upper
+			String propertyType = ClassIdentifierHelper.getTypePrefix(propertyValue);
+			propertyValue = ClassIdentifierHelper.getValueIn(propertyValue);
+			propertyClass = (Class) Literals.classes.getTransformer().fromString(propertyType, Class.class, classloader, objectsBeingAccessed);
+			transformer = Literals.get(classloader, propertyType);
+		}
 		Object returned = transformer.fromString(propertyValue, propertyClass, classloader, objectsBeingAccessed);
 		return returned;
 	}

@@ -19,26 +19,17 @@ public class ClassLiteralTransformer extends AbstractSimpleLiteralTransformer<Cl
 		return value==null ? Object.class.getCanonicalName() : value.getCanonicalName();
 	}
 
-	/**
-	 * Magic method allowing a string to be considered as a class value
-	 * @param className
-	 * @return the same result than {@link LiteralTransformer#toString(Object)}, but with a class given as a string
-	 */
-	public String toString(String className) {
-		return typeToString(Class.class)+Literals.CLASS_VALUE_SEPARATOR+className;
-	}
-
 	public boolean areEquals(Object expected, String effectiveGraphValue) {
 		if(type.isAssignableFrom(expected.getClass()))
 			return toString(type.cast(expected)).equals(effectiveGraphValue);
 		if(expected instanceof String)
-			return expected.equals(Literals.getValueIn(effectiveGraphValue));
+			return expected.equals(ClassIdentifierHelper.getValueIn(effectiveGraphValue));
 		return false;
 	}
 
 	public Class fromString(String propertyValue, Class valueClass, ClassLoader classloader, ObjectCache objectCache) {
 		try {
-			String classValue = Utils.maybeObjectify(Literals.getValueIn(propertyValue));
+			String classValue = Utils.maybeObjectify(propertyValue);
 			return classloader.loadClass(classValue);
 		} catch (ClassNotFoundException e) {
 			throw new BadLiteralException("unable to load class \""+propertyValue+"\" using given classloader");

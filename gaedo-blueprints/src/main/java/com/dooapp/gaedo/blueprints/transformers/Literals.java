@@ -22,7 +22,6 @@ public enum Literals implements TransformerAssociation<LiteralTransformer> {
 	dates(Date.class, new DateLiteralTransformer()),
 	classes(Class.class, new ClassLiteralTransformer());
 
-	public static final char CLASS_VALUE_SEPARATOR = ':';
 	/**
 	 * Source dataclass
 	 */
@@ -70,18 +69,5 @@ public enum Literals implements TransformerAssociation<LiteralTransformer> {
 	@Override
 	public boolean canHandle(ClassLoader classLoader, String effectiveType) {
 		return transformer.canHandle(classLoader, effectiveType);
-	}
-
-	/**
-	 * Get type prefix of the given literal transformer for later loading it
-	 * @param propertyValue a value in which we want to extract type prefix
-	 * @return the value before ":"
-	 */
-	public static String getTypePrefix(String propertyValue) {
-		return propertyValue.substring(0, propertyValue.indexOf(CLASS_VALUE_SEPARATOR));
-	}
-
-	public static String getValueIn(String propertyValue) {
-		return propertyValue.substring(propertyValue.indexOf(CLASS_VALUE_SEPARATOR)+1);
 	}
 }

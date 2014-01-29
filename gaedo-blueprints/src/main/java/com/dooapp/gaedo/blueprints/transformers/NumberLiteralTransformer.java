@@ -3,6 +3,7 @@ package com.dooapp.gaedo.blueprints.transformers;
 import java.util.Map;
 import java.util.TreeMap;
 
+import com.dooapp.gaedo.utils.PrimitiveUtils;
 import com.dooapp.gaedo.utils.Utils;
 
 public class NumberLiteralTransformer extends AbstractLiteralTransformer<Number> implements LiteralTransformer<Number> {
@@ -44,16 +45,11 @@ public class NumberLiteralTransformer extends AbstractLiteralTransformer<Number>
 	}
 
 	@Override
-	protected String typeToString(Class<? extends Number> numberClass) {
-		return numberClass.getName();
-	}
-
-	@Override
 	public boolean areEquals(Object expected, String effectiveGraphValue) {
 		if(expected instanceof Number) {
 			Number expectedNumber = (Number) expected;
-			String prefix = Literals.getTypePrefix(effectiveGraphValue);
-			Number value = loadValueFromString(lookupOptimizer.get(prefix), Literals.getValueIn(effectiveGraphValue));
+			Number value = loadValueFromString(Double.class, ClassIdentifierHelper.getValueIn(effectiveGraphValue));
+			expectedNumber = PrimitiveUtils.as(expectedNumber, Double.class);
 			return expectedNumber.doubleValue()==value.doubleValue();
 		} else {
 			return false;

@@ -15,11 +15,6 @@ public abstract class AbstractSimpleLiteralTransformer<Type> extends AbstractLit
 		return typeName.equals(effectiveType);
 	}
 
-	@Override
-	protected String typeToString(Class<? extends Type> valueClass) {
-		return typeName;
-	}
-
 	public boolean areEquals(Object expected, String effectiveGraphValue) {
 		if(type.isAssignableFrom(expected.getClass()))
 			return toString(type.cast(expected)).equals(effectiveGraphValue);

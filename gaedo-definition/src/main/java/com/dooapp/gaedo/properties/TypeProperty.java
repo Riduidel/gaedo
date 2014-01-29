@@ -7,16 +7,16 @@ public class TypeProperty extends AbstractPropertyAdapter implements Property {
 	/**
 	 * Constant instance used to generate some links
 	 */
-	public static final TypeProperty INSTANCE = new TypeProperty(TypeProperty.class);
+	public static final TypeProperty INSTANCE = new TypeProperty();
 
 	public static final String TYPE = "type";
 
-	public TypeProperty(Class declaring) {
+	public TypeProperty() {
 		super();
 		setDeclaringClass(Object.class);
 		setName(TYPE);
-		setType(declaring);
-		setGenericType(declaring);
+		setType(Class.class);
+		setGenericType(Class.class);
 		setModifier(Modifier.FINAL, true);
 		setModifier(Modifier.PUBLIC, true);
 	}

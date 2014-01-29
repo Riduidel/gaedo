@@ -24,7 +24,7 @@ import com.dooapp.gaedo.blueprints.queries.tests.CollectionContains;
 import com.dooapp.gaedo.blueprints.queries.tests.CompoundVertexTest;
 import com.dooapp.gaedo.blueprints.queries.tests.VertexTestVisitor;
 import com.dooapp.gaedo.blueprints.queries.tests.VertexTestVisitorAdapter;
-import com.dooapp.gaedo.blueprints.transformers.Literals;
+import com.dooapp.gaedo.blueprints.transformers.ClassIdentifierHelper;
 import com.dooapp.gaedo.blueprints.transformers.TypeUtils;
 import com.dooapp.gaedo.extensions.migrable.Migrator;
 import com.dooapp.gaedo.properties.ClassCollectionProperty;
@@ -125,7 +125,7 @@ public class BeanBasedMappingStrategy<DataType> extends AbstractMappingStrategy<
 			try {
 				ClassCollectionProperty classes = new ClassCollectionProperty(objectClass).withAnnotation(new ManyObjectsToOneType(objectClass.getClass()));
 				beanPropertiesFor.put(classes, StrategyUtils.extractCascadeOfJPAAnnotations(classes));
-				TypeProperty type = new TypeProperty(objectClass).withAnnotation(new ManyObjectsToOneType(objectClass.getClass()));
+				TypeProperty type = new TypeProperty().withAnnotation(new ManyObjectsToOneType(objectClass.getClass()));
 				beanPropertiesFor.put(type, StrategyUtils.extractCascadeOfJPAAnnotations(type));
 			} catch (Exception e) {
 				logger.log(Level.SEVERE, "what ? a class without a \"class\" field ? WTF", e);
@@ -160,7 +160,7 @@ public class BeanBasedMappingStrategy<DataType> extends AbstractMappingStrategy<
 			return TypeUtils.getClass(vertex.getProperty(Properties.type.name()).toString());
 		} else if(vertex.getProperty(GraphUtils.getEdgeNameFor(TypeProperty.INSTANCE))!=null) {
 			String typePropertyText = vertex.getProperty(GraphUtils.getEdgeNameFor(TypeProperty.INSTANCE));
-			return TypeUtils.getClass(Literals.getValueIn(typePropertyText));
+			return TypeUtils.getClass(typePropertyText);
 		} else {
 			// This part of code is totally deprecated, but kept for .. well, no good reason
             if(Kind.literal.equals(GraphUtils.getKindOf(vertex))) {
@@ -172,7 +172,12 @@ public class BeanBasedMappingStrategy<DataType> extends AbstractMappingStrategy<
                     Vertex type = toType.getVertex(Direction.IN);
                     // Do not use ClassLiteral here as this method must be blazing fast
                     String value = type.getProperty(Properties.value.name());
-                    return Literals.getValueIn(value);
+                    /*
+                     *  usage of edge implies we refer to a remote class vertex, in which class is stored as an URI
+                     *  (for compliance with the URI kind we set for class vertices). As a consequence, we have to use
+                     *  that getValueIn call to obtain the effective class name
+                     */
+                    return ClassIdentifierHelper.getValueIn(value);
                 }
             }
 		}

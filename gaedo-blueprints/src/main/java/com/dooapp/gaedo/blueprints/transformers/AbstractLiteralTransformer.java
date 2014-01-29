@@ -55,12 +55,7 @@ public abstract class AbstractLiteralTransformer<Type> {
 	 * @return
 	 */
 	public Type fromString(String propertyValue, Class valueClass, ClassLoader classloader, ObjectCache objectCache) {
-		String className = Utils.maybeObjectify(valueClass.getName());
-		if(propertyValue.startsWith(className)) {
-			return internalLoadObject(valueClass, Literals.getValueIn(propertyValue), objectCache);
-		} else {
-			return internalLoadObject(valueClass, propertyValue, objectCache);
-		}
+		return internalLoadObject(valueClass, propertyValue, objectCache);
 	}
 
 	/**
@@ -177,11 +172,7 @@ public abstract class AbstractLiteralTransformer<Type> {
 	 * @return a value for that vertex. Again, null is NOT allowed.
 	 */
 	public final String toString(Type value) {
-		return typeToString((Class<? extends Type>) value.getClass())+Literals.CLASS_VALUE_SEPARATOR+valueToString(value);
-	}
-
-	protected String typeToString(Class<? extends Type> valueClass) {
-		return valueClass.getName();
+		return valueToString(value);
 	}
 
 	protected abstract String valueToString(Type value);

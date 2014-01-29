@@ -82,7 +82,7 @@ public class SerializableTransformer implements TupleTransformer<Serializable> {
 			returned = service.getDriver().createEmptyVertex(Serializable.class, serialized, value);
 			service.getDriver().setValue(returned, serialized);
 		}
-		new Updater().updateLiteralPropertyIn(service.getDatabase(), serialized, returned, new TypeProperty(valueClass), valueClass);
+		new Updater().updateLiteralPropertyIn(service.getDatabase(), serialized, returned, new TypeProperty(), valueClass);
 		return returned;
 	}
 
