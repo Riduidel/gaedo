@@ -21,6 +21,12 @@ import com.tinkerpop.blueprints.Vertex;
 public interface GraphMappingStrategy<DataType> {
 
     public static final String STRING_TYPE = String.class.getName();
+    /**
+     * Helper method providing the required properties for a class. It is an equivalent of {@link #getContainedProperties(Object, Vertex, CascadeType)}
+     * @param objectClass class for which properties are required
+     * @return map linking properties to their cascade mode
+     */
+	public Map<Property, Collection<CascadeType>> getContainedProperties(Class<? extends Object> objectClass);
 	/**
 	 * Delegation method allowing one to get the map linking properties to cascade types
 	 * @param object object for which we want the properties

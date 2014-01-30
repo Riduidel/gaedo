@@ -24,7 +24,7 @@ import com.dooapp.gaedo.blueprints.queries.tests.CollectionContains;
 import com.dooapp.gaedo.blueprints.queries.tests.CompoundVertexTest;
 import com.dooapp.gaedo.blueprints.queries.tests.VertexTestVisitor;
 import com.dooapp.gaedo.blueprints.queries.tests.VertexTestVisitorAdapter;
-import com.dooapp.gaedo.blueprints.transformers.ClassIdentifierHelper;
+import com.dooapp.gaedo.blueprints.transformers.LiteralHelper;
 import com.dooapp.gaedo.blueprints.transformers.TypeUtils;
 import com.dooapp.gaedo.extensions.migrable.Migrator;
 import com.dooapp.gaedo.properties.ClassCollectionProperty;
@@ -177,7 +177,7 @@ public class BeanBasedMappingStrategy<DataType> extends AbstractMappingStrategy<
                      *  (for compliance with the URI kind we set for class vertices). As a consequence, we have to use
                      *  that getValueIn call to obtain the effective class name
                      */
-                    return ClassIdentifierHelper.getValueIn(value);
+                    return LiteralHelper.getValueIn(value);
                 }
             }
 		}
