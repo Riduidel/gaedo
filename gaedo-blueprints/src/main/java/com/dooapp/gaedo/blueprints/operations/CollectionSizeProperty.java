@@ -11,7 +11,7 @@ public class CollectionSizeProperty extends AbstractPropertyAdapter {
 		super();
 		setDeclaringClass(p.getDeclaringClass());
 		setName(getName(p));
-		setType(Integer.TYPE);
+		setGenericType(Integer.TYPE);
 		copyAnnotationsFrom(p);
 	}
 

@@ -15,7 +15,6 @@ public class TypeProperty extends AbstractPropertyAdapter implements Property {
 		super();
 		setDeclaringClass(Object.class);
 		setName(TYPE);
-		setType(Class.class);
 		setGenericType(Class.class);
 		setModifier(Modifier.FINAL, true);
 		setModifier(Modifier.PUBLIC, true);

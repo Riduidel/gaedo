@@ -27,7 +27,6 @@ public class ClassCollectionProperty extends AbstractPropertyAdapter implements 
 	public ClassCollectionProperty(Class<?> declaring) {
 		setDeclaringClass(Object.class);
 		setName(CLASSES);
-		setType(allClassesOf.getReturnType());
 		setGenericType(allClassesOf.getGenericReturnType());
 		this.declaring = declaring;
 		values = Utils.allClassesOf(declaring);

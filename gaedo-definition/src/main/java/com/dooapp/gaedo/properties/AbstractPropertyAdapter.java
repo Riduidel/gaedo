@@ -2,7 +2,10 @@ package com.dooapp.gaedo.properties;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Modifier;
+import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
+import java.lang.reflect.TypeVariable;
+import java.lang.reflect.WildcardType;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
@@ -15,7 +18,7 @@ import java.util.Map;
  */
 public abstract class AbstractPropertyAdapter implements Property {
 	private Map<Class<?>, Annotation> annotations = new HashMap<Class<?>, Annotation>();
-	
+
 	/**
 	 * Property declaring class
 	 */
@@ -35,7 +38,7 @@ public abstract class AbstractPropertyAdapter implements Property {
 	 * Property name
 	 */
 	private String name;
-	
+
 	/**
 	 * Property class (not to be confused with {@link #genericType}. Notice that this class should be the non-generic version of {@link #genericType}.
 	 * As an example, if genericType is List<String>, this field should contain List.
@@ -83,7 +86,7 @@ public abstract class AbstractPropertyAdapter implements Property {
 	public Class<?> getDeclaringClass() {
 		return declaringClass;
 	}
-	
+
 	@Override
 	public Type getGenericType() {
 		return genericType;
@@ -93,12 +96,12 @@ public abstract class AbstractPropertyAdapter implements Property {
 	public String getName() {
 		return name;
 	}
-	
+
 	@Override
 	public Class<?> getType() {
 		return type;
 	}
-	
+
 	/**
 	 * @return
 	 * @see java.lang.Object#hashCode()
@@ -129,7 +132,7 @@ public abstract class AbstractPropertyAdapter implements Property {
 	public void setDeclaringClass(Class<?> declaringClass) {
 		this.declaringClass = declaringClass;
 	}
-	
+
 	/**
 	 * @param declaringClass new value for #declaringClass
 	 * @category fluent
@@ -143,14 +146,40 @@ public abstract class AbstractPropertyAdapter implements Property {
 	}
 
 	/**
+	 * Set generic type and type accordingly, as we do not want these to be desynchronized.
 	 * @param genericType the genericType to set
 	 * @category setter
 	 * @category genericType
 	 */
 	public void setGenericType(Type genericType) {
 		this.genericType = genericType;
+		try {
+			setType(genericType);
+		} catch(UnusableTypeException e) {
+			throw new UnusableTypeException("unable to build a class from input generic type "+genericType.toString(), e);
+		}
 	}
-	
+
+	/**
+	 * Set type from generic type by recursively unfolding all type elements
+	 * @param genericType
+	 */
+	private void setType(Type genericType) {
+		if(genericType instanceof Class) {
+			setType((Class<?>) genericType);
+		} else if(genericType instanceof ParameterizedType) {
+			try {
+				setType(((ParameterizedType) genericType).getRawType());
+			} catch(UnusableTypeException e) {
+				throw new UnusableTypeException("unable to use raw type of parameterized type "+genericType.toString(), e);
+			}
+		} else if(genericType instanceof WildcardType) {
+			throw new UnusableTypeException("we can't use as type the wildcard type "+genericType.toString());
+		} else if(genericType instanceof TypeVariable) {
+			throw new UnusableTypeException("we can't use as type the type variable "+genericType.toString());
+		}
+	}
+
 	/**
 	 * @param genericType new value for #genericType
 	 * @category fluent
@@ -185,20 +214,8 @@ public abstract class AbstractPropertyAdapter implements Property {
 	 * @category setter
 	 * @category type
 	 */
-	public void setType(Class<?> type) {
+	private void setType(Class<?> type) {
 		this.type = type;
-	}
-	
-	/**
-	 * @param type new value for #type
-	 * @category fluent
-	 * @category setter
-	 * @category type
-	 * @return this object for chaining calls
-	 */
-	public AbstractPropertyAdapter withType(Class<?> type) {
-		this.setType(type);
-		return this;
 	}
 
 	/**
