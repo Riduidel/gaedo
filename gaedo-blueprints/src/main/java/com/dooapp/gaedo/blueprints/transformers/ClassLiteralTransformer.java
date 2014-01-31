@@ -23,7 +23,7 @@ public class ClassLiteralTransformer extends AbstractSimpleLiteralTransformer<Cl
 		if(type.isAssignableFrom(expected.getClass()))
 			return toString(type.cast(expected)).equals(effectiveGraphValue);
 		if(expected instanceof String)
-			return expected.equals(ClassIdentifierHelper.getValueIn(effectiveGraphValue));
+			return expected.equals(LiteralHelper.getValueIn(effectiveGraphValue));
 		return false;
 	}
 

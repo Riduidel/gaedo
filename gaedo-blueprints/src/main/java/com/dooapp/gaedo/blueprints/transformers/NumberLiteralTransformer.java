@@ -48,7 +48,7 @@ public class NumberLiteralTransformer extends AbstractLiteralTransformer<Number>
 	public boolean areEquals(Object expected, String effectiveGraphValue) {
 		if(expected instanceof Number) {
 			Number expectedNumber = (Number) expected;
-			Number value = loadValueFromString(Double.class, ClassIdentifierHelper.getValueIn(effectiveGraphValue));
+			Number value = loadValueFromString(Double.class, LiteralHelper.getValueIn(effectiveGraphValue));
 			expectedNumber = PrimitiveUtils.as(expectedNumber, Double.class);
 			return expectedNumber.doubleValue()==value.doubleValue();
 		} else {

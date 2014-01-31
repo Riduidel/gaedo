@@ -21,8 +21,7 @@ import com.dooapp.gaedo.blueprints.GraphDatabaseDriver;
 import com.dooapp.gaedo.blueprints.GraphUtils;
 import com.dooapp.gaedo.blueprints.ObjectCache;
 import com.dooapp.gaedo.blueprints.Properties;
-import com.dooapp.gaedo.blueprints.transformers.ClassIdentifierHelper;
-import com.dooapp.gaedo.blueprints.transformers.LiteralTransformer;
+import com.dooapp.gaedo.blueprints.transformers.LiteralHelper;
 import com.dooapp.gaedo.blueprints.transformers.Literals;
 import com.dooapp.gaedo.properties.AbstractPropertyAdapter;
 import com.dooapp.gaedo.properties.Property;
@@ -471,15 +470,7 @@ public class Updater {
 
 	public void updateLiteralPropertyIn(Graph database, Object toUpdate, Vertex vertexToUpdate, Property property, Object propertyValue) {
 		Class propertyClass = property.getType();
-		String text = null;
-		if(Literals.containsKey(propertyClass)) {
-			LiteralTransformer<Object> transformer = Literals.get(propertyClass);
-			text = transformer.toString(propertyValue);
-		} else {
-			Class<?> valueClass = propertyValue.getClass();
-			LiteralTransformer<Object> transformer = Literals.get(valueClass);
-			text = ClassIdentifierHelper.toString(valueClass, transformer.toString(propertyValue));
-		}
-		GraphUtils.setIndexedProperty(database, vertexToUpdate, GraphUtils.getEdgeNameFor(property), text);
+		GraphUtils.setIndexedProperty(database, vertexToUpdate, GraphUtils.getEdgeNameFor(property),
+						LiteralHelper.getLiteralTextFor(propertyClass, propertyValue));
 	}
 }
