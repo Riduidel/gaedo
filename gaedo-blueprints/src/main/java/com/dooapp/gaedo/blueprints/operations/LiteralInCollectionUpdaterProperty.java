@@ -1,9 +1,15 @@
 package com.dooapp.gaedo.blueprints.operations;
 
+import java.lang.reflect.ParameterizedType;
+import java.lang.reflect.Type;
+import java.lang.reflect.TypeVariable;
+import java.lang.reflect.WildcardType;
+
 import com.dooapp.gaedo.blueprints.transformers.LiteralTransformer;
 import com.dooapp.gaedo.blueprints.transformers.Literals;
 import com.dooapp.gaedo.properties.AbstractPropertyAdapter;
 import com.dooapp.gaedo.properties.Property;
+import com.dooapp.gaedo.properties.UnusableTypeException;
 
 /**
  * Delegate property allowing creatin of a "sub" property on vertex.
@@ -67,6 +73,42 @@ public class LiteralInCollectionUpdaterProperty extends AbstractPropertyAdapter 
 		// TODO Auto-generated method stub
 		throw new UnsupportedOperationException("method " + LiteralInCollectionUpdaterProperty.class.getName()
 						+ "#fromString has not yet been implemented AT ALL");
+	}
+
+	/**
+	 * Helper method allowing one to set property type for this object from a given collection type (for cases where direct obtaining is not possible).
+	 * @param collectionType
+	 */
+	public void setGenericTypeFromCollection(Type collectionType) {
+		setGenericType(inferElementTypeIn(collectionType));
+	}
+
+	/**
+	 * Infer value type in one collection type
+	 * @param genericType
+	 * @return
+	 */
+	public static Type inferElementTypeIn(Type collectionType) {
+		if(collectionType instanceof Class) {
+			return Object.class;
+		} else if(collectionType instanceof ParameterizedType) {
+			ParameterizedType parameterizedCollectionType = (ParameterizedType) collectionType;
+			Type collectionValueType = parameterizedCollectionType.getActualTypeArguments()[0];
+			if(collectionValueType instanceof Class) {
+				return (Class) collectionValueType;
+			} else if(collectionValueType instanceof ParameterizedType) {
+				return (ParameterizedType) collectionValueType;
+			} else if(collectionValueType instanceof WildcardType) {
+				throw new UnusableTypeException("we can't infer element type in widlcard type "+collectionType.toString());
+			} else if(collectionValueType instanceof TypeVariable) {
+				throw new UnusableTypeException("we can't infer element type in type variable "+collectionType.toString());
+			}
+		} else if(collectionType instanceof WildcardType) {
+			throw new UnusableTypeException("we can't infer element type in widlcard type "+collectionType.toString());
+		} else if(collectionType instanceof TypeVariable) {
+			throw new UnusableTypeException("we can't infer element type in type variable "+collectionType.toString());
+		}
+		throw new UnusableTypeException("we can't infer element type in "+collectionType.toString());
 	}
 
 }
