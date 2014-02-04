@@ -337,7 +337,7 @@ public class Utils {
 	 * @return
 	 */
 	public static Collection<Class<?>> allClassesOf(Class<?> declaring) {
-		Collection<Class<?>> returned = new LinkedList<Class<?>>();
+		Collection<Class<?>> returned = new HashSet<Class<?>>();
 		if(declaring!=null) {
 			if(!declaring.equals(Object.class)) {
 				returned.add(declaring);
