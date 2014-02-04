@@ -1,8 +1,7 @@
 package com.dooapp.gaedo.blueprints.queries.executable;
 
-import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
+import java.util.SortedSet;
 
 import com.dooapp.gaedo.blueprints.AbstractBluePrintsBackedFinderService;
 import com.dooapp.gaedo.blueprints.GraphUtils;
@@ -11,7 +10,6 @@ import com.dooapp.gaedo.blueprints.queries.tests.CompoundVertexTest;
 import com.dooapp.gaedo.blueprints.queries.tests.VertexTest;
 import com.dooapp.gaedo.blueprints.strategies.GraphMappingStrategy;
 import com.dooapp.gaedo.finders.SortingExpression;
-import com.dooapp.gaedo.properties.Property;
 import com.tinkerpop.blueprints.IndexableGraph;
 import com.tinkerpop.blueprints.Vertex;
 
@@ -34,7 +32,7 @@ import com.tinkerpop.blueprints.Vertex;
  * Post:class => { Property[class] }
  * </pre>
  * One question remain : from these three vertices, which one will be linked (through the given property path) to the smallest number of vertices ?
- * To answer this question, the {@link #findBestRootIn(Map)} method creates a {@link VertexValueRange} object which can back-navigate the edges representing these properties
+ * To answer this question, the {@link #findBestRootIn(Map)} method creates a {@link VertexSet} object which can back-navigate the edges representing these properties
  * and directly give us the best query root.
  *
  * @author ndx
@@ -83,12 +81,13 @@ public class OptimizedGraphExecutableQuery<GraphType extends IndexableGraph> ext
 	@Override
 	protected Iterable<Vertex> getVerticesToExamine() {
 		// First step is to get all possible query root vertices
-		Map<Iterable<Vertex>, Iterable<Property>> possibleRoots = getPossibleRootsOf(test);
-		VertexValueRange bestMatch = findBestRootIn(possibleRoots);
-		List<Vertex> returned = bestMatch.getValues();
+		SortedSet<VertexSet> possibleRoots = getPossibleRootsOf(test);
+		VertexSet bestMatch = findBestRootIn(possibleRoots);
+		LazyLoader vertices = bestMatch.getVertices();
+		Iterable<Vertex> returned = vertices.get();
 		if(QueryLog.logger.isLoggable(QueryLog.QUERY_LOGGING_LEVEL)) {
 			StringBuilder sOut = new StringBuilder();
-			sOut.append("query roots for test ").append(test).append("\nare the ").append(returned.size()).append(" following vertices");
+			sOut.append("query roots for test ").append(test).append("\nare the ").append(vertices.size()).append(" following vertices");
 			for(Vertex v : returned) {
 				sOut.append("\n").append(GraphUtils.toString(v));
 			}
@@ -98,17 +97,25 @@ public class OptimizedGraphExecutableQuery<GraphType extends IndexableGraph> ext
 	}
 
 	/**
- 	 * Find, from all roots returned by {@link #getPossibleRootsOf(VertexTest)}, the one linked to the smallest iterable of vertices for the given
- 	 * property path.
-	 * @param possibleRoots a map linking vertices to the property path used to navigate from searched vertices to these vertices.
+ 	 * Find, from all roots returned by {@link #getPossibleRootsOf(VertexTest)}, the one linked to the smallest iterable
+ 	 * of vertices for the given* property path. To do so, we simply call VertexSet#canGoBack and VertexSet#goBack on
+ 	 * head element of possibleRoots as long as canGoBack return true. Indeed, when VertexSet#canGoBack return false, it emans that {@link VertexSet}
+ 	 * is totally resolved and can be used for testing vertices out.
+	 * @param possibleRoots a list of vertex value range allowing lazy loading of matching vertices
 	 * @return an object containing informations about the best matching vertex (like a cache of vertices in solution space).
 	 */
-	private VertexValueRange findBestRootIn(Map<Iterable<Vertex>, Iterable<Property>> possibleRoots) {
-		VertexValueRange initial = new VertexValueRange();
-		for(Entry<Iterable<Vertex>, Iterable<Property>> entry : possibleRoots.entrySet()) {
-			initial = initial.findBestMatch(entry);
+	private VertexSet findBestRootIn(SortedSet<VertexSet> possibleRoots) {
+		VertexSet tested = possibleRoots.first();
+		while(tested.canGoBack()) {
+			possibleRoots.remove(tested);
+			tested.goBack();
+			/* notice how we just remvoed/put back the vertex set in the list of possible roots ?
+			 * Well, it's an optimization : possibleRoots is sorted by smaller first. So each turn we expand the smallest set.
+			 * In the worst-case scenario, all will be expanded. But I hope it won't happen that often.
+			 */
+			possibleRoots.add(tested);
 		}
-		return initial;
+		return tested;
 	}
 
 	/**
@@ -119,7 +126,7 @@ public class OptimizedGraphExecutableQuery<GraphType extends IndexableGraph> ext
 	 * @param test test that will be
 	 * @return
 	 */
-	private Map<Iterable<Vertex>, Iterable<Property>> getPossibleRootsOf(VertexTest test) {
+	private SortedSet<VertexSet> getPossibleRootsOf(VertexTest test) {
 		VertexRootsCollector collector = new VertexRootsCollector(service);
 		test.accept(collector);
 		return collector.getResult();

@@ -7,8 +7,8 @@
 	<body>
 		<!-- Put reports at the end -->
 		<menu name="about gaedo-blueprints">
-			<item name="An introduction to gaedo graph storage" href="1_gaedo_graph_storage.html" />
- 			<item name="Access to generic nodes" href="2_gaedo_generic_storage.html" />
+			<item name="An introduction to WRONG gaedo graph storage" href="1_gaedo_graph_storage.html" />
+			<item name="An introduction to fixed (?) gaedo graph storage" href="5_overcoming_supernodes.html" />
 			<item name="Querying a graph" href="3_querying_graph.html" />
 			<item name="Migrating to Blueprints 2.*" href="4_migrating_to_blueprints_2.3.html" />
 		</menu>

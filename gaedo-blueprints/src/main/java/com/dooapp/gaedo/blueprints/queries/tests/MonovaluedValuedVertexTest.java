@@ -127,7 +127,7 @@ public abstract class MonovaluedValuedVertexTest<ValueType extends Object> exten
 	 * @category getter
 	 * @category expected
 	 */
-	public ValueType getExpected() {
+	protected ValueType getExpected() {
 		return expected;
 	}
 

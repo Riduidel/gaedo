@@ -89,7 +89,7 @@ One may however ask where is the `Tag#rendering` property. It is easy, it is mis
 
 As one can see, the implementation rendered is conceptually similar to the one a `SaigGraph` can produce, and for a good reason : all objects stored by gaedo in graphc an be exported as RDF statements, like `GraphPostFinderServiceTest#allowExport()` test method clearly shows.
 
-But, as the documentation about queries explain, it is absolutely not the only advantage of that persistence strategy.
+But, as the documentation about queries explain, it is absolutely not the only advantage of that persistence strategy. Unfortunatly, this leads to one big - and unknown when this implementation was forged - drawback : the supernode problem. This will be fixed by gaedo 1.0 (which unfortunatly break absolutly all this). For more informations, see [Overcoming supernodes by the grace of heavy nodes and indices][7].
 
 
   [1]: https://github.com/tinkerpop/blueprints/wiki
@@ -98,3 +98,4 @@ But, as the documentation about queries explain, it is absolutely not the only a
   [4]: https://en.wikipedia.org/wiki/Vertex_(graph_theory)
   [5]: https://en.wikipedia.org/wiki/Edge_(geometry)
   [6]: http://code.google.com/p/reflections/
+  [7]: 5_overcoming_supernodes.html

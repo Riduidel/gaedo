@@ -1,4 +1,8 @@
-Previous document explained with a lot of details how it was possible to store POJOs ina graph using gaedo. This document focuses on the opposite approach : how to start from a pre-existing graph and have it transformed into "'usable" Java objects.
+Previous document explained with a lot of details how it was possible to store POJOs ina graph using gaedo. This document focuses on the opposite approach : how to start from a pre-existing graph and have it transformed into "'usable" Java objects
+
+# Don't read that ! #
+
+**Since gaedo 0.6, all this has been removed (it was slow, bugged as hell and an obvious pain in the ass).**
 
 ## An example graph ##
 

@@ -375,7 +375,7 @@ public class GraphPostFinderServiceTest extends AbstractGraphPostTest {
 		// set value
 		third.text = "3.0";
 		third = getPostService().update(third);
-		// get modified post
+		// get modified post (notice we test here note to be equals to 3 - AS AN INTEGER - which allows us to test equality between integer and float by the way)
 		third= getPostService().find().matching(new FindPostByNote(3)).getFirst();
 		assertThat(third, IsNull.notNullValue());
 		assertThat(third.note, Is.is(3.0f));
