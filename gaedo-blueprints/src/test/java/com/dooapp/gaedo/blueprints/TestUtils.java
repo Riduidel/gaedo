@@ -100,7 +100,7 @@ public class TestUtils {
 	public static Collection<GraphProvider> providers() {
 		Collection<GraphProvider> returned = new LinkedList<GraphProvider>();
 		returned.addAll(tinker());
-//		returned.addAll(neo4j());
+		returned.addAll(neo4j());
 		return returned;
 
 	}
