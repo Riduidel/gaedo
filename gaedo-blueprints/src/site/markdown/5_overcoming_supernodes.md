@@ -32,3 +32,24 @@ So here is current state of graph data storage with gaedo
 
 So, considering canonical example of a Tag object storing the "a text" value, it now looks like this
 
+Well, sorry, but I can't make Neoclipse work with my test graph. Just assume that each literal property is stored as a Vertex property, like this text block shows
+
+	{graph id=com.dooapp.gaedo.test.beans.Tag:com.dooapp.gaedo.test.beans.Tag:1
+	com.dooapp.gaedo.test.beans.Tag:text=tag text
+	com.dooapp.gaedo.test.beans.base.Identified:id=1
+	java.lang.Object:classes.size=4
+	java.lang.Object:classes:0=com.dooapp.gaedo.test.beans.Tag
+	java.lang.Object:classes:1=com.dooapp.gaedo.test.beans.base.Identified
+	java.lang.Object:classes:2=java.io.Serializable
+	java.lang.Object:classes:3=java.io.Serializable
+	java.lang.Object:classes:com.dooapp.gaedo.test.beans.Tag=true
+	java.lang.Object:classes:com.dooapp.gaedo.test.beans.base.Identified=true
+	java.lang.Object:classes:java.io.Serializable=true
+	java.lang.Object:type=com.dooapp.gaedo.test.beans.Tag
+	kind=uri
+	value=com.dooapp.gaedo.test.beans.Tag:1}
+
+(yup, all that is a single vertex). Obviously, links to other vertices are expressed as edges, as usual. Now let's consider some new funny things.
+
+* Each collection property now has an integer property "size", which could allow us in the future to query collections for size. Cool ? Or not ?
+* Each collection element is present in two properties : one direct indicating index of element in collection, and one reverse indicating if element is in collection. This could have been only indicated in index, for sure, but I prefer to have the index content be reflected directly in graph.
