@@ -1,11 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>com.dooapp</groupId>
 	<artifactId>gaedo</artifactId>
 	<name>Gaedo</name>
-	<version>0.6.9-SNAPSHOT</version>
+	<version>1.0.0</version>
 	<description>Google App Engine Data Object Library</description>
 	<url>https://github.com/Riduidel/gaedo/</url>
 	<packaging>pom</packaging>
@@ -118,7 +117,7 @@
 		<url>https://github.com/Riduidel/gaedo.git</url>
 		<connection>scm:git:ssh://git@github.com/Riduidel/gaedo.git</connection>
 		<developerConnection>scm:git:ssh://git@github.com/Riduidel/gaedo.git</developerConnection>
-		<tag>HEAD</tag>
+		<tag>gaedo-1.0.0</tag>
 	</scm>
 	<ciManagement>
 		<system>Jenkins</system>
