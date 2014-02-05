@@ -2,6 +2,7 @@ package com.dooapp.gaedo.blueprints.transformers;
 
 import java.text.ParseException;
 import java.util.Date;
+import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.TreeMap;
 import java.util.WeakHashMap;
@@ -28,7 +29,7 @@ public class DateLiteralTransformer extends AbstractSimpleLiteralTransformer<Dat
 	/**
 	 * Map linking date format specification (a uri like xsd:date or http://www.w3.org/2001/XMLSchema#date) to the format string used to parse it.
 	 */
-	private static final Map<String, String> FORMATS = new TreeMap<String, String>();
+	private static final Map<String, String> FORMATS = new LinkedHashMap<String, String>();
 
 	static {
 		FORMATS.put("xsd:date", "yyyy-MM-dd'T'HH:mm:ssz");
@@ -42,7 +43,7 @@ public class DateLiteralTransformer extends AbstractSimpleLiteralTransformer<Dat
 	private static final Map<String, DateFormatThreadedLoader> loaders = new TreeMap<String, DateFormatThreadedLoader>();
 
 	/**
-	 * Cache linking dates to toeir associated format definition.
+	 * Cache linking dates to their associated format definition.
 	 * As the dates are in memory, and the formats are constants, this weak hash map should have very low memory impact.
 	 */
 	private static Map<Date, String> dateCache = new WeakHashMap<Date, String>();
@@ -102,10 +103,14 @@ public class DateLiteralTransformer extends AbstractSimpleLiteralTransformer<Dat
 	 */
 	@Override
 	protected Date loadValueFromString(Class valueClass, String valueString) {
-		for(String format : FORMATS.values()) {
+		for(Map.Entry<String, String> format : FORMATS.entrySet()) {
 			try {
-				return getLoader(format).parse(valueString);
+				DateFormatThreadedLoader parser = getLoader(format.getValue());
+				Date parsed = parser.parse(valueString);
+				dateCache.put(parsed, format.getKey());
+				return parsed;
 			} catch(ParseException e) {
+				// unable to parse ? No problem, we'll just use next parser
 			}
 		}
 		// if value can't be loaded, well, delegate to superclass (it will fail for sure)
