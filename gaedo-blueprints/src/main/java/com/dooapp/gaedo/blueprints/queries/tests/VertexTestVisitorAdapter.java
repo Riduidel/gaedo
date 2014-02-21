@@ -77,4 +77,12 @@ public abstract class VertexTestVisitorAdapter implements VertexTestVisitor {
 	@Override
 	public void visit(VertexPropertyTest vertexPropertyTest) {
 	}
+
+	@Override
+	public void visit(EqualsToIgnoreCase equalsToIgnoreCase) {
+	}
+
+	@Override
+	public void visit(Matches equalsToIgnoreCase) {
+	}
 }

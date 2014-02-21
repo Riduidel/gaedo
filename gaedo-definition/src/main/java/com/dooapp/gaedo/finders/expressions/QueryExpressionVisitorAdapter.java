@@ -46,6 +46,10 @@ public class QueryExpressionVisitorAdapter implements QueryExpressionVisitor {
 	}
 
 	@Override
+	public void visit(EqualsToIgnoreCaseExpression equalsToIgnoreCaseExpression) {
+	}
+
+	@Override
 	public void visit(ContainsStringExpression containsStringExpression) {
 	}
 
@@ -71,6 +75,10 @@ public class QueryExpressionVisitorAdapter implements QueryExpressionVisitor {
 
 	@Override
 	public void visit(AnythingExpression anythingExpression) {
+	}
+
+	@Override
+	public void visit(MatchesRegexpExpression matchesRegexpExpression) {
 	}
 
 }

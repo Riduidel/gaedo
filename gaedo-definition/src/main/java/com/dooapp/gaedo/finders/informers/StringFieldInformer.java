@@ -1,9 +1,13 @@
 package com.dooapp.gaedo.finders.informers;
 
+import java.util.regex.Pattern;
+
 import com.dooapp.gaedo.finders.FieldInformer;
 import com.dooapp.gaedo.finders.QueryExpression;
 import com.dooapp.gaedo.finders.expressions.ContainsStringExpression;
 import com.dooapp.gaedo.finders.expressions.EndsWithExpression;
+import com.dooapp.gaedo.finders.expressions.EqualsToIgnoreCaseExpression;
+import com.dooapp.gaedo.finders.expressions.MatchesRegexpExpression;
 import com.dooapp.gaedo.finders.expressions.StartsWithExpression;
 import com.dooapp.gaedo.properties.Property;
 
@@ -19,12 +23,39 @@ public class StringFieldInformer extends ObjectFieldInformer<String>{
 	}
 
 	/**
+	 * Creates an expression checking this field is equals to (ignoring case) given text
+	 * @param comparedTo text we compare this value to
+	 * @return a {@link EqualsToIgnoreCaseExpression}
+	 */
+	public QueryExpression equalsToIgnoreCase(String comparedTo) {
+		return new EqualsToIgnoreCaseExpression(source, getFieldPath(), comparedTo);
+	}
+
+	/**
 	 * Create an expression checking this field contains the given String
 	 * @param contained string that field should contain
 	 * @return a {@link ContainsStringExpression}
 	 */
 	public QueryExpression contains(String contained) {
 		return new ContainsStringExpression(source, getFieldPath(), contained);
+	}
+
+	/**
+	 * Creates an expression checking this field matches given regular expression
+	 * @param pattern against which text is checked
+	 * @return a {@link MatchesRegexpExpression}
+	 */
+	public QueryExpression matches(String pattern) {
+		return matches(Pattern.compile(pattern));
+	}
+
+	/**
+	 * Creates an expression checking this field matches given regular expression
+	 * @param pattern against which text is checked
+	 * @return a {@link MatchesRegexpExpression}
+	 */
+	public QueryExpression matches(Pattern pattern) {
+		return new MatchesRegexpExpression(source, getFieldPath(), pattern);
 	}
 
 	/**

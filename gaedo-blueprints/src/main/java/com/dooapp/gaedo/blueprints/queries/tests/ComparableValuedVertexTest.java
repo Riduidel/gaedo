@@ -11,7 +11,7 @@ import com.dooapp.gaedo.utils.PrimitiveUtils;
 import com.dooapp.gaedo.utils.Utils;
 import com.tinkerpop.blueprints.Vertex;
 
-public abstract class ComparableValuedVertexTest<ComparableType extends Comparable<ComparableType>> extends MonovaluedValuedVertexTest<ComparableType> {
+public abstract class ComparableValuedVertexTest<ComparableType extends Comparable<ComparableType>> extends MonovaluedValuedVertexTest<ComparableType, ComparableType> {
 
 	/**
 	 * Comparison utility method, ensuring no comaprison of number can drop a ClassCastException

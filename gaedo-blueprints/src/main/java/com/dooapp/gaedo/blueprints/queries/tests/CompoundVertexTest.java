@@ -1,5 +1,7 @@
 package com.dooapp.gaedo.blueprints.queries.tests;
 
+import java.util.regex.Pattern;
+
 import com.dooapp.gaedo.properties.Property;
 
 /**
@@ -55,6 +57,8 @@ public interface CompoundVertexTest extends VertexTest {
 
 	VertexTest endsWith(Iterable<Property> path, String end);
 
+	VertexTest matches(Iterable<Property> fieldPath, Pattern pattern);
+
 	VertexTest collectionContains(Iterable<Property> path, Object contained);
 
 	VertexTest mapContainsValue(Iterable<Property> path, Object contained);
@@ -62,5 +66,7 @@ public interface CompoundVertexTest extends VertexTest {
 	VertexTest mapContainsKey(Iterable<Property> path, Object contained);
 
 	VertexTest anything(Iterable<Property> path);
+
+	VertexTest equalsToIgnoreCase(Iterable<Property> fieldPath, String compared);
 
 }

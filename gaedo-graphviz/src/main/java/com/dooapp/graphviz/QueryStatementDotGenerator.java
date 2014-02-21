@@ -14,9 +14,11 @@ import com.dooapp.gaedo.finders.expressions.CollectionContaingExpression;
 import com.dooapp.gaedo.finders.expressions.ContainsStringExpression;
 import com.dooapp.gaedo.finders.expressions.EndsWithExpression;
 import com.dooapp.gaedo.finders.expressions.EqualsExpression;
+import com.dooapp.gaedo.finders.expressions.EqualsToIgnoreCaseExpression;
 import com.dooapp.gaedo.finders.expressions.GreaterThanExpression;
 import com.dooapp.gaedo.finders.expressions.LowerThanExpression;
 import com.dooapp.gaedo.finders.expressions.MapContainingKeyExpression;
+import com.dooapp.gaedo.finders.expressions.MatchesRegexpExpression;
 import com.dooapp.gaedo.finders.expressions.NotQueryExpression;
 import com.dooapp.gaedo.finders.expressions.OrQueryExpression;
 import com.dooapp.gaedo.finders.expressions.StartsWithExpression;
@@ -42,12 +44,12 @@ public class QueryStatementDotGenerator implements QueryExpressionContainerVisit
 	 * Built String
 	 */
 	private StringBuilder sOut = new StringBuilder();
-	
+
 	/**
 	 * Stack of ndoes, to allow and operations
 	 */
 	private Stack<String> nodes = new Stack<String>();
-	
+
 	/**
 	 * Global index of node (to ensure no name gets duplicated)
 	 */
@@ -91,7 +93,7 @@ public class QueryStatementDotGenerator implements QueryExpressionContainerVisit
 	private void setLabel(String nodeId, String label) {
 		setAttribute(nodeId, "label", label);
 	}
-	
+
 	private void setAttribute(String nodeId, String attributeName, String attributeValue) {
 		sOut.append("\t").append(nodeId).append("["+attributeName+"=\""+attributeValue+"\"];").append("\n");
 	}
@@ -112,10 +114,10 @@ public class QueryStatementDotGenerator implements QueryExpressionContainerVisit
 	private void addNode(String nodeName) {
 		addNode(nodeName, nodes.peek(), nodes.peek()+END_SUFFIX);
 	}
-	
+
 	/**
 	 * Adds a node id to the stack, and branch both its start and end view to given parent nodes.
-	 * 
+	 *
 	 * @param nodeName node name to add
 	 * @param startNode start node, may be null
 	 * @param endNode end node may be null
@@ -134,7 +136,7 @@ public class QueryStatementDotGenerator implements QueryExpressionContainerVisit
 	public void endVisit(OrQueryExpression orQueryExpression) {
 		createNodes(nodes.pop(), "OR", "");
 	}
-	
+
 	public void addQueryExpression() {
 		// Stack only contains query statement, we branch on it, then on SortingExpression
 		if(nodes.size()==1) {
@@ -195,7 +197,7 @@ public class QueryStatementDotGenerator implements QueryExpressionContainerVisit
 	public void endVisit(NotQueryExpression notQueryExpression) {
 		createNodes(nodes.pop(), "NOT", "");
 	}
-	
+
 
 	@Override
 	public void visit(AnythingExpression expression) {
@@ -238,6 +240,18 @@ public class QueryStatementDotGenerator implements QueryExpressionContainerVisit
 		putNode("LowerThanQuery", QUERY_EXPRESSION);
 		String nodeId = putNode("LowerThanQuery", QUERY_EXPRESSION);
 		setLabel(nodeId, expression.getField().getName()+(expression.isStrictly() ? " <? " : "=<?")+expression.getValue().toString());
+	}
+
+	@Override
+	public void visit(EqualsToIgnoreCaseExpression expression) {
+		String nodeId = putNode("EqualsToIgnoreCaseQuery", QUERY_EXPRESSION);
+		setLabel(nodeId, expression.getField().getName()+" ==(a==A)? "+expression.getCompared());
+	}
+
+	@Override
+	public void visit(MatchesRegexpExpression expression) {
+		String nodeId = putNode("MatchesRegexpQuery", QUERY_EXPRESSION);
+		setLabel(nodeId, expression.getField().getName()+" matches? "+expression.getPattern().toString());
 	}
 
 	@Override

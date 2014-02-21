@@ -10,7 +10,7 @@ import com.dooapp.gaedo.blueprints.transformers.Tuples;
 import com.dooapp.gaedo.properties.Property;
 import com.tinkerpop.blueprints.Vertex;
 
-public class MapContainsKey extends MonovaluedValuedVertexTest<Object> implements VertexTest {
+public class MapContainsKey extends MonovaluedValuedVertexTest<Object, Object> implements VertexTest {
 
 	public MapContainsKey(GraphMappingStrategy<?> strategy, GraphDatabaseDriver driver, Iterable<Property> p, Object value) {
 		super(strategy, driver, ((MapEntryTransformer) Tuples.get(Map.Entry.class)).constructMapEntryKeyIterable(p), value);

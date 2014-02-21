@@ -7,70 +7,70 @@ import com.dooapp.gaedo.patterns.Visitor;
 /**
  * Interface implemented by visitors constructing query statements from query
  * expressions
- * 
+ *
  * @author ndx
- * 
+ *
  */
 public interface QueryExpressionVisitor extends Visitor {
 	/**
 	 * Transforms the equals expression in usable code
-	 * 
+	 *
 	 * @param expression
 	 */
 	void visit(EqualsExpression expression);
 
 	/**
 	 * Transforms the or expression in usable code
-	 * 
+	 *
 	 * @param orQueryExpression
 	 */
 	void startVisit(OrQueryExpression orQueryExpression);
 
 	/**
 	 * Terminates processing of an or expression
-	 * 
+	 *
 	 * @param orQueryExpression
 	 */
 	void endVisit(OrQueryExpression orQueryExpression);
 
 	/**
 	 * Transforms the and expression in usable code
-	 * 
+	 *
 	 * @param andQueryExpression
 	 */
 	void startVisit(AndQueryExpression andQueryExpression);
 
 	/**
 	 * Terminates processing of an and expression
-	 * 
+	 *
 	 * @param andQueryExpression
 	 */
 	void endVisit(AndQueryExpression andQueryExpression);
 
 	/**
 	 * Transforms the not expression in usable code
-	 * 
+	 *
 	 * @param notQueryExpression
 	 */
 	void startVisit(NotQueryExpression notQueryExpression);
 
 	/**
 	 * Terminates the visit of the not expression
-	 * 
+	 *
 	 * @param notQueryExpression
 	 */
 	void endVisit(NotQueryExpression notQueryExpression);
 
 	/**
 	 * Transforms the greater than expression in usable code
-	 * 
+	 *
 	 * @param greaterThanExpression
 	 */
 	<ComparableType extends Comparable<ComparableType>> void visit(GreaterThanExpression<ComparableType> greaterThanExpression);
 
 	/**
 	 * Transforms the lower than expression in usable code
-	 * 
+	 *
 	 * @param lowerThanExpression
 	 */
 	<ComparableType extends Comparable<ComparableType>> void visit(LowerThanExpression<ComparableType> lowerThanExpression);
@@ -116,5 +116,17 @@ public interface QueryExpressionVisitor extends Visitor {
 	 * @param anythingExpression
 	 */
 	void visit(AnythingExpression anythingExpression);
+
+	/**
+	 * Visit an equalsToIgnoreCase expression
+	 * @param equalsToIgnoreCaseExpression
+	 */
+	void visit(EqualsToIgnoreCaseExpression equalsToIgnoreCaseExpression);
+
+	/**
+	 * Visit a pattern match expressio
+	 * @param matchesRegexpExpression
+	 */
+	void visit(MatchesRegexpExpression matchesRegexpExpression);
 
 }

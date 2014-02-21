@@ -2,6 +2,7 @@ package com.dooapp.gaedo.blueprints.queries.tests;
 
 import java.util.Collection;
 import java.util.LinkedList;
+import java.util.regex.Pattern;
 
 import com.dooapp.gaedo.blueprints.GraphDatabaseDriver;
 import com.dooapp.gaedo.blueprints.strategies.GraphMappingStrategy;
@@ -19,15 +20,15 @@ public abstract class AggregatedTargettedVertexTest extends TargettedVertexTest 
 		this.tests.add(test);
 		return test;
 	}
-	
+
 	public OrVertexTest or() {
 		return add(new OrVertexTest(strategy, getDriver(), path));
 	}
-	
+
 	public AndVertexTest and() {
 		return add(new AndVertexTest(strategy, getDriver(), path));
 	}
-	
+
 	public NotVertexTest not() {
 		return add(new NotVertexTest(strategy, getDriver(), path));
 	}
@@ -42,7 +43,7 @@ public abstract class AggregatedTargettedVertexTest extends TargettedVertexTest 
 	public VertexTest equalsTo(Iterable<Property> path, Object value) {
 		return add(new EqualsTo(strategy, getDriver(), path, value));
 	}
-	
+
 	/**
 	 * Adds a new {@link GreaterThan} test to {@link #tests} and returns it
 	 * @param path
@@ -67,8 +68,18 @@ public abstract class AggregatedTargettedVertexTest extends TargettedVertexTest 
 	}
 
 	@Override
+	public VertexTest matches(Iterable<Property> path, Pattern pattern) {
+		return add(new Matches(strategy, getDriver(), path, pattern));
+	}
+
+	@Override
 	public VertexTest containsString(Iterable<Property> path, String contained) {
 		return add(new ContainsString(strategy, getDriver(), path, contained));
+	}
+
+	@Override
+	public VertexTest equalsToIgnoreCase(Iterable<Property> path, String compared) {
+		return add(new EqualsToIgnoreCase(strategy, getDriver(), path, compared));
 	}
 
 	@Override

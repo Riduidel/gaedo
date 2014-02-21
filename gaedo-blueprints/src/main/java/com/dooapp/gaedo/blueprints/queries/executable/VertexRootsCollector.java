@@ -18,6 +18,7 @@ import com.dooapp.gaedo.blueprints.operations.LiteralInCollectionUpdaterProperty
 import com.dooapp.gaedo.blueprints.operations.Updater;
 import com.dooapp.gaedo.blueprints.queries.tests.CollectionContains;
 import com.dooapp.gaedo.blueprints.queries.tests.EqualsTo;
+import com.dooapp.gaedo.blueprints.queries.tests.EqualsToIgnoreCase;
 import com.dooapp.gaedo.blueprints.queries.tests.NotVertexTest;
 import com.dooapp.gaedo.blueprints.queries.tests.OrVertexTest;
 import com.dooapp.gaedo.blueprints.queries.tests.VertexTestVisitorAdapter;

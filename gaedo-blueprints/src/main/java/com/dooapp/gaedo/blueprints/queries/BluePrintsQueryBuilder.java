@@ -17,9 +17,11 @@ import com.dooapp.gaedo.finders.expressions.CollectionContaingExpression;
 import com.dooapp.gaedo.finders.expressions.ContainsStringExpression;
 import com.dooapp.gaedo.finders.expressions.EndsWithExpression;
 import com.dooapp.gaedo.finders.expressions.EqualsExpression;
+import com.dooapp.gaedo.finders.expressions.EqualsToIgnoreCaseExpression;
 import com.dooapp.gaedo.finders.expressions.GreaterThanExpression;
 import com.dooapp.gaedo.finders.expressions.LowerThanExpression;
 import com.dooapp.gaedo.finders.expressions.MapContainingKeyExpression;
+import com.dooapp.gaedo.finders.expressions.MatchesRegexpExpression;
 import com.dooapp.gaedo.finders.expressions.NotQueryExpression;
 import com.dooapp.gaedo.finders.expressions.OrQueryExpression;
 import com.dooapp.gaedo.finders.expressions.QueryExpressionVisitor;
@@ -109,6 +111,16 @@ public class BluePrintsQueryBuilder<DataType, InformerType extends Informer<Data
 	@Override
 	public <ComparableType extends Comparable<ComparableType>> void visit(LowerThanExpression<ComparableType> lowerThanExpression) {
 		tests.peek().lowerThan(lowerThanExpression.getFieldPath(), lowerThanExpression.getValue(), lowerThanExpression.isStrictly());
+	}
+
+	@Override
+	public void visit(EqualsToIgnoreCaseExpression equalsToIgnoreCaseExpression) {
+		tests.peek().equalsToIgnoreCase(equalsToIgnoreCaseExpression.getFieldPath(), equalsToIgnoreCaseExpression.getCompared());
+	}
+
+	@Override
+	public void visit(MatchesRegexpExpression matchesRegexpExpression) {
+		tests.peek().matches(matchesRegexpExpression.getFieldPath(), matchesRegexpExpression.getPattern());
 	}
 
 	@Override

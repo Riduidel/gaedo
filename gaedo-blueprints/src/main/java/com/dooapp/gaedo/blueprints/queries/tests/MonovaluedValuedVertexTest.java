@@ -28,14 +28,14 @@ import com.tinkerpop.blueprints.Vertex;
  *
  * @param <ValueType> current value type
  */
-public abstract class MonovaluedValuedVertexTest<ValueType extends Object> extends TargettedVertexTest implements VertexTest {
+public abstract class MonovaluedValuedVertexTest<ValueType extends Object, ExpectedType extends Object> extends TargettedVertexTest implements VertexTest {
 
 	/**
 	 * Expected value
 	 */
-	protected final ValueType expected;
+	protected final ExpectedType expected;
 
-	public MonovaluedValuedVertexTest(GraphMappingStrategy<?> strategy, GraphDatabaseDriver driver, Iterable<Property> p, ValueType value) {
+	public MonovaluedValuedVertexTest(GraphMappingStrategy<?> strategy, GraphDatabaseDriver driver, Iterable<Property> p, ExpectedType value) {
 		super(strategy, driver, p);
 		this.expected = value;
 	}
@@ -64,7 +64,7 @@ public abstract class MonovaluedValuedVertexTest<ValueType extends Object> exten
 	 * @return true if expected is null, false elsewhere.
 	 */
 	protected boolean matchesNull() {
-		return getExpected()==null;
+		return expected==null;
 	}
 
 	/**
@@ -122,17 +122,8 @@ public abstract class MonovaluedValuedVertexTest<ValueType extends Object> exten
 		return (AbstractBluePrintsBackedFinderService) getRepository().get(expected.getClass());
 	}
 
-	/**
-	 * @return the expected
-	 * @category getter
-	 * @category expected
-	 */
-	protected ValueType getExpected() {
-		return expected;
-	}
-
 	public Object getExpectedAsValue() {
-		return getExpectedAsValueOf(getEndProperty(), getExpected());
+		return getExpectedAsValueOf(getEndProperty(), expected);
 	}
 
 	public static Object getExpectedAsValueOf(Property used, Object expected) {

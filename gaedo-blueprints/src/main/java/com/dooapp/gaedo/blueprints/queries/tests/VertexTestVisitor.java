@@ -22,7 +22,7 @@ public interface VertexTestVisitor extends Visitor {
 	 * @param andVertexTest
 	 */
 	void endVisit(AndVertexTest andVertexTest);
-	
+
 	/**
 	 * Start visiting an or compound vertex. Notice {@link #endVisit(AndVertexTest)} should always been called
 	 * @param orVertexTest
@@ -31,13 +31,13 @@ public interface VertexTestVisitor extends Visitor {
 	 * @category compound
 	 */
 	boolean startVisit(OrVertexTest orVertexTest);
-	
+
 	/**
 	 * @category compound
 	 * @param orVertexTest
 	 */
 	void endVisit(OrVertexTest orVertexTest);
-	
+
 	/**
 	 * Start visiting an not compound vertex. Notice {@link #endVisit(AndVertexTest)} should always been called
 	 * @param notVertexTest
@@ -46,7 +46,7 @@ public interface VertexTestVisitor extends Visitor {
 	 * @category compound
 	 */
 	boolean startVisit(NotVertexTest notVertexTest);
-	
+
 	/**
 	 * @category compound
 	 * @param notVertexTest
@@ -56,8 +56,12 @@ public interface VertexTestVisitor extends Visitor {
 	void visit(Anything anything);
 
 	<ComparableType extends Comparable<ComparableType>>void visit(LowerThan<ComparableType> anything);
-	
+
 	<ComparableType extends Comparable<ComparableType>>void visit(ComparableValuedVertexTest<ComparableType> anything);
+
+	void visit(EqualsToIgnoreCase equalsToIgnoreCase);
+
+	void visit(Matches equalsToIgnoreCase);
 
 	void visit(StartsWith startsWith);
 
@@ -74,5 +78,6 @@ public interface VertexTestVisitor extends Visitor {
 	void visit(EqualsTo equalsTo);
 
 	void visit(VertexPropertyTest vertexPropertyTest);
+
 
 }

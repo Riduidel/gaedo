@@ -10,7 +10,7 @@ import com.tinkerpop.blueprints.Direction;
 import com.tinkerpop.blueprints.Edge;
 import com.tinkerpop.blueprints.Vertex;
 
-public class Anything extends MonovaluedValuedVertexTest<Object> implements VertexTest {
+public class Anything extends MonovaluedValuedVertexTest<Object, Object> implements VertexTest {
 
 	public Anything(GraphMappingStrategy<?> strategy, GraphDatabaseDriver driver, Iterable<Property> p) {
 		super(strategy, driver, p, "" /* we define no value for expected value, as we won't match it "directly". But we also don't use null, which is unfortunatly a special case */);

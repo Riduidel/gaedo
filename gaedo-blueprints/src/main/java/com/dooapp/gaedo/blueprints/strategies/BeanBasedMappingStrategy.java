@@ -22,6 +22,8 @@ import com.dooapp.gaedo.blueprints.indexable.IndexableGraphBackedFinderService;
 import com.dooapp.gaedo.blueprints.queries.tests.AndVertexTest;
 import com.dooapp.gaedo.blueprints.queries.tests.CollectionContains;
 import com.dooapp.gaedo.blueprints.queries.tests.CompoundVertexTest;
+import com.dooapp.gaedo.blueprints.queries.tests.EqualsToIgnoreCase;
+import com.dooapp.gaedo.blueprints.queries.tests.Matches;
 import com.dooapp.gaedo.blueprints.queries.tests.VertexTestVisitor;
 import com.dooapp.gaedo.blueprints.queries.tests.VertexTestVisitorAdapter;
 import com.dooapp.gaedo.blueprints.transformers.LiteralHelper;

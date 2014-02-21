@@ -1,5 +1,7 @@
 package com.dooapp.gaedo.blueprints.queries.tests;
 
+import java.util.regex.Pattern;
+
 import com.dooapp.gaedo.blueprints.GraphDatabaseDriver;
 import com.dooapp.gaedo.blueprints.strategies.GraphMappingStrategy;
 import com.dooapp.gaedo.properties.Property;

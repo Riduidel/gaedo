@@ -2,6 +2,7 @@ package com.dooapp.gaedo.utils;
 
 import java.io.Serializable;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -30,7 +31,7 @@ public class CollectionUtils {
 		}
 		return paramMap;
 	}
-	
+
 	/**
 	 * Convert any object into a list
 	 * @param source
@@ -53,6 +54,8 @@ public class CollectionUtils {
 	public static <Bean> List<Bean> asList(Iterable<Bean> source) {
 		if(source instanceof List && source instanceof Serializable) {
 			return (List<Bean>) source;
+		} else if(source==null) {
+			return Collections.emptyList();
 		} else {
 			List<Bean> returned = new LinkedList<Bean>();
 			for(Bean b : source) {
@@ -70,6 +73,8 @@ public class CollectionUtils {
 	public static <Bean> Set<Bean> asSet(Iterable<Bean> source) {
 		if(source instanceof Set && source instanceof Serializable) {
 			return (Set<Bean>) source;
+		} else if(source==null) {
+			return Collections.emptySet();
 		} else {
 			Set<Bean> returned = new HashSet<Bean>();
 			for(Bean b : source) {

@@ -77,7 +77,7 @@ public class ToStringVisitor implements QueryExpressionVisitor {
 	public String toString() {
 		return out.toString();
 	}
-	
+
 	/**
 	 * Replace a potentially null value with a non null one
 	 * @param value
@@ -102,6 +102,13 @@ public class ToStringVisitor implements QueryExpressionVisitor {
 				"<").append(lowerThanExpression.isStrictly() ? "" : "=")
 				.append("?").append(unNull(lowerThanExpression.getValue()).toString())
 				.append("\n");
+	}
+
+	@Override
+	public void visit(EqualsToIgnoreCaseExpression expression) {
+		out.append(deepnessString()).append(
+						getFieldText(expression)).append(
+						" ==(a==A)? ").append(expression.getCompared()).append("\n");
 	}
 
 	@Override
@@ -144,5 +151,12 @@ public class ToStringVisitor implements QueryExpressionVisitor {
 		out.append(deepnessString()).append(
 				getFieldText(expression)).append(
 				" containsValue? ").append(unNull(expression.getContained()).toString()).append("\n");
+	}
+
+	@Override
+	public void visit(MatchesRegexpExpression expression) {
+		out.append(deepnessString()).append(
+						getFieldText(expression)).append(
+						" matches? ").append(expression.getPattern().toString()).append("\n");
 	}
 }

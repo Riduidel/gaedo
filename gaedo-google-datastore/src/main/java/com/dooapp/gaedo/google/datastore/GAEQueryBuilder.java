@@ -17,9 +17,11 @@ import com.dooapp.gaedo.finders.expressions.CollectionContaingExpression;
 import com.dooapp.gaedo.finders.expressions.ContainsStringExpression;
 import com.dooapp.gaedo.finders.expressions.EndsWithExpression;
 import com.dooapp.gaedo.finders.expressions.EqualsExpression;
+import com.dooapp.gaedo.finders.expressions.EqualsToIgnoreCaseExpression;
 import com.dooapp.gaedo.finders.expressions.GreaterThanExpression;
 import com.dooapp.gaedo.finders.expressions.LowerThanExpression;
 import com.dooapp.gaedo.finders.expressions.MapContainingKeyExpression;
+import com.dooapp.gaedo.finders.expressions.MatchesRegexpExpression;
 import com.dooapp.gaedo.finders.expressions.NotQueryExpression;
 import com.dooapp.gaedo.finders.expressions.OrQueryExpression;
 import com.dooapp.gaedo.finders.expressions.QueryExpressionVisitor;
@@ -70,7 +72,7 @@ public class GAEQueryBuilder<DataType> implements QueryExpressionVisitor {
 
 	/**
 	 * Creates visitor with required elements
-	 * 
+	 *
 	 * @param defaultKind
 	 *            default kind used to create the {@link #query} object. See
 	 *            this object's doc for more details about variable kind.
@@ -89,7 +91,7 @@ public class GAEQueryBuilder<DataType> implements QueryExpressionVisitor {
 
 	/**
 	 * Get optimal query for finding results as fast as possible
-	 * 
+	 *
 	 * @param datastore
 	 *            used datastore
 	 * @param sortingExpression
@@ -201,6 +203,20 @@ public class GAEQueryBuilder<DataType> implements QueryExpressionVisitor {
 	}
 
 	@Override
+	public void visit(EqualsToIgnoreCaseExpression expression) {
+		throw new UnsupportedOperationException(expression.getClass()
+				.getName()
+				+ " is not supported. For more details, ask Google ");
+	}
+
+	@Override
+	public void visit(MatchesRegexpExpression expression) {
+		throw new UnsupportedOperationException(expression.getClass()
+						.getName()
+						+ " is not supported. For more details, ask Google ");
+	}
+
+	@Override
 	public void visit(ContainsStringExpression expression) {
 		if (not) {
 			throw new UnsupportedOperationException(expression.getClass()
@@ -255,7 +271,7 @@ public class GAEQueryBuilder<DataType> implements QueryExpressionVisitor {
 	/**
 	 * Get field name associated to query. This method also manages the id
 	 * field, by replacing its classical name with the key column.
-	 * 
+	 *
 	 * @param expression
 	 * @return
 	 */
@@ -267,13 +283,13 @@ public class GAEQueryBuilder<DataType> implements QueryExpressionVisitor {
 
 	/**
 	 * Resolve value to translate keys
-	 * 
+	 *
 	 * @param field
 	 *            input field, should be used for translating value in Key
 	 * @param value
 	 *            input value
 	 * @return output value, as resolved if key
-	 * 
+	 *
 	 */
 	/*
 	 * Remove generic types to fix strange compilation failure with maven:

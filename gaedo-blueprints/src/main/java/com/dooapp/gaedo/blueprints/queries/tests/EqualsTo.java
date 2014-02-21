@@ -8,7 +8,7 @@ import com.dooapp.gaedo.blueprints.transformers.Literals;
 import com.dooapp.gaedo.properties.Property;
 import com.tinkerpop.blueprints.Vertex;
 
-public class EqualsTo extends MonovaluedValuedVertexTest<Object> implements VertexTest {
+public class EqualsTo extends MonovaluedValuedVertexTest<Object, Object> implements VertexTest {
 	public EqualsTo(GraphMappingStrategy<?> strategy, GraphDatabaseDriver driver, Iterable<Property> p, Object value) {
 		super(strategy, driver, p, value);
 	}

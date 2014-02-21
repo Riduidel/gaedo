@@ -8,9 +8,11 @@ import com.dooapp.gaedo.finders.expressions.CollectionContaingExpression;
 import com.dooapp.gaedo.finders.expressions.ContainsStringExpression;
 import com.dooapp.gaedo.finders.expressions.EndsWithExpression;
 import com.dooapp.gaedo.finders.expressions.EqualsExpression;
+import com.dooapp.gaedo.finders.expressions.EqualsToIgnoreCaseExpression;
 import com.dooapp.gaedo.finders.expressions.GreaterThanExpression;
 import com.dooapp.gaedo.finders.expressions.LowerThanExpression;
 import com.dooapp.gaedo.finders.expressions.MapContainingKeyExpression;
+import com.dooapp.gaedo.finders.expressions.MatchesRegexpExpression;
 import com.dooapp.gaedo.finders.expressions.NotQueryExpression;
 import com.dooapp.gaedo.finders.expressions.OrQueryExpression;
 import com.dooapp.gaedo.finders.expressions.QueryExpressionVisitor;
@@ -96,6 +98,16 @@ public class Matcher<DataType> implements QueryExpressionVisitor {
 
 	public <ComparableType extends Comparable<ComparableType>> void visit(LowerThanExpression<ComparableType> expression) {
 		evaluators.peek().add(new LowerThanEvaluator<DataType>(expression.getField(), expression.isStrictly(), expression.getValue()));
+	}
+
+	@Override
+	public void visit(EqualsToIgnoreCaseExpression expression) {
+		evaluators.peek().add(new EqualsToIgnoreCaseEvaluator<DataType>(expression.getField(), expression.getCompared()));
+	}
+
+	@Override
+	public void visit(MatchesRegexpExpression expression) {
+		evaluators.peek().add(new MatchesRegexpEvaluator<DataType>(expression.getField(), expression.getPattern()));
 	}
 
 	@Override
