@@ -5,6 +5,7 @@ import java.util.logging.Logger;
 
 import org.hamcrest.core.Is;
 import org.hamcrest.core.IsCollectionContaining;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
@@ -24,6 +25,7 @@ import static com.dooapp.gaedo.blueprints.TestUtils.simpleTest;
 
 import static org.junit.Assert.assertThat;
 
+@Ignore
 @RunWith(Parameterized.class)
 public class TestFor19_AKA_ImplementHasItemWhich extends AbstractGraphPostTest {
 	private static final Logger logger = Logger.getLogger(TestFor19_AKA_ImplementHasItemWhich.class.getName());
