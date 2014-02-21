@@ -5,7 +5,7 @@ import java.util.List;
 import org.hamcrest.core.Is;
 import org.hamcrest.core.IsCollectionContaining;
 import org.hamcrest.core.IsInstanceOf;
-import org.junit.Assert;
+import org.hamcrest.core.IsNot;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -137,8 +137,7 @@ public class CollectionBackedTagFinderServiceTest {
 	}
 
 	/**
-	 * This is the deadly test that check that synthetic getter calls work
-	 * correctly
+	 * Ensure projectores work correctly by returning list of tag text, instead of tags
 	 */
 	@Test
 	public void testFindAndProject() {
@@ -161,6 +160,27 @@ public class CollectionBackedTagFinderServiceTest {
 					}
 				}).getAll();
 		assertThat(values, IsCollectionContaining.hasItems(A, B, C));
+	}
+
+	/**
+	 * Ensure projectores work correctly by returning list of tag text, instead of tags
+	 */
+	@Test
+	public void ensureBug77IsSolved() {
+		Tag a = new Tag(A);
+		tagService.create(a);
+		Tag b = tagService.create(new Tag(B));
+		Tag c = tagService.create(new Tag(C));
+		Iterable<Tag> values = tagService.find().matching(
+				new QueryBuilder<TagInformer>() {
+
+					public QueryExpression createMatchingExpression(
+							TagInformer object) {
+						return object.getText().equalsToIgnoreCase("a");
+					}
+				}).getAll();
+		assertThat(values, IsCollectionContaining.hasItems(a));
+		assertThat(values, IsNot.not(IsCollectionContaining.hasItems(b, c)));
 	}
 
 	/**
