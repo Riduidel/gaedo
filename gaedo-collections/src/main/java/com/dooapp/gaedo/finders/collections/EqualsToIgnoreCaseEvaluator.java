@@ -14,7 +14,7 @@ public class EqualsToIgnoreCaseEvaluator<DataType> extends AbstractBasicEvaluato
 	@Override
 	public boolean matches(DataType element) {
 		String value = (String) getValue(element);
-		return value.equalsIgnoreCase(value);
+		return value.equalsIgnoreCase(compared);
 	}
 
 }
