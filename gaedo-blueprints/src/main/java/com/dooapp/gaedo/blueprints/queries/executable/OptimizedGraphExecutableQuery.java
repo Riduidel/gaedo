@@ -79,7 +79,7 @@ public class OptimizedGraphExecutableQuery<GraphType extends IndexableGraph> ext
 	 * @see com.dooapp.gaedo.blueprints.queries.executable.AbstractGraphExecutableQuery#getVerticesToExamine()
 	 */
 	@Override
-	protected Iterable<Vertex> getVerticesToExamine() {
+	public Iterable<Vertex> getVerticesToExamine() {
 		// First step is to get all possible query root vertices
 		SortedSet<VertexSet> possibleRoots = getPossibleRootsOf(test);
 		VertexSet bestMatch = findBestRootIn(possibleRoots);

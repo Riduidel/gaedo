@@ -33,7 +33,7 @@ public class BasicGraphExecutableQuery extends AbstractGraphExecutableQuery impl
 	 * Get the list of vertices to examine
 	 * @return
 	 */
-	protected Iterable<Vertex> getVerticesToExamine() {
+	public Iterable<Vertex> getVerticesToExamine() {
 		throw new UnsupportedOperationException("not yet rewritten, as I don't yet know how to serialize literal collections ... and classes ARE literals");
 	}
 }

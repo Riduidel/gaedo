@@ -122,7 +122,12 @@ public class GraphQueryStatement<
 	 */
 	private ProjectionBuilder<ValueType, DataType, InformerType> projector = new NoopProjectionBuilder();
 
-	private GraphExecutableQuery prepareQuery() {
+	/**
+	 * Method used to visit query and prepare elements to be used.
+	 * This method is not intended for any other external use than testing.
+	 * @return
+	 */
+	public GraphExecutableQuery prepareQuery() {
 		try {
 			if (QueryLog.logger.isLoggable(QueryLog.QUERY_LOGGING_LEVEL)) {
 				QueryLog.logger.log(QueryLog.QUERY_LOGGING_LEVEL, "preparing query "+id);

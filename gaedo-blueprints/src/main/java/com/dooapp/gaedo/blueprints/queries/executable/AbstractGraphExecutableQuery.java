@@ -63,7 +63,7 @@ public abstract class AbstractGraphExecutableQuery<GraphType extends IndexableGr
 	 * result a superset of all valid vertices. Obviously, the goal is to find fast the smaller superset.
 	 * @return an unordered superset of matching vertices.
 	 */
-	protected abstract Iterable<Vertex> getVerticesToExamine();
+	public abstract Iterable<Vertex> getVerticesToExamine();
 
 
 
@@ -116,6 +116,17 @@ public abstract class AbstractGraphExecutableQuery<GraphType extends IndexableGr
 		}
 		builder.append("]");
 		return builder.toString();
+	}
+
+
+
+	/**
+	 * @return the test
+	 * @category getter
+	 * @category test
+	 */
+	public VertexTest getTest() {
+		return test;
 	}
 
 
