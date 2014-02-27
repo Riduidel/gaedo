@@ -193,7 +193,7 @@ public class VertexRootsCollector extends VertexTestVisitorAdapter {
 			if (vertexFor == null) {
 				return new VertexSet().withVertices(new LinkedList<Vertex>()).withPropertyPath(new LinkedList<Property>());
 			} else {
-				return new VertexSet().withVertices(Arrays.asList(vertexFor)).withPropertyPath(path);
+				return new VertexSet().withVertices(Arrays.asList(vertexFor)).withPropertyPath(new LinkedList<Property>(CollectionUtils.asList(path)));
 			}
 		}
 	}
