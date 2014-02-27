@@ -159,4 +159,11 @@ public class ToStringVisitor implements QueryExpressionVisitor {
 						getFieldText(expression)).append(
 						" matches? ").append(expression.getPattern().toString()).append("\n");
 	}
+
+	@Override
+	public void visit(InstanceOfExpression expression) {
+		out.append(deepnessString()).append(
+						getFieldText(expression)).append(
+						" instanceof? ").append(expression.getType().getCanonicalName()).append("\n");
+	}
 }

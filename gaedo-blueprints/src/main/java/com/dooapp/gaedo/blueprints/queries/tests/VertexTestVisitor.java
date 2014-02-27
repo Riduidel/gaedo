@@ -79,5 +79,7 @@ public interface VertexTestVisitor extends Visitor {
 
 	void visit(VertexPropertyTest vertexPropertyTest);
 
+	void visit(InstanceOf instanceOf);
+
 
 }

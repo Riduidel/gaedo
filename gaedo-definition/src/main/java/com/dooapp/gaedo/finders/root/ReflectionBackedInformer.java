@@ -14,6 +14,7 @@ import com.dooapp.gaedo.finders.FieldInformerAPI;
 import com.dooapp.gaedo.finders.Informer;
 import com.dooapp.gaedo.finders.QueryExpression;
 import com.dooapp.gaedo.finders.expressions.EqualsExpression;
+import com.dooapp.gaedo.finders.expressions.InstanceOfExpression;
 import com.dooapp.gaedo.properties.Property;
 import com.dooapp.gaedo.properties.PropertyProvider;
 
@@ -64,6 +65,11 @@ public class ReflectionBackedInformer<DataType> implements Informer<DataType> {
 		@Override
 		public QueryExpression equalsTo(Object value) {
 			return new EqualsExpression(field, getFieldPath(), value);
+		}
+
+		@Override
+		public QueryExpression instanceOf(Class<? extends DataType> type) {
+			return new InstanceOfExpression(field, getFieldPath(), type);
 		}
 
 		@Override
@@ -135,7 +141,7 @@ public class ReflectionBackedInformer<DataType> implements Informer<DataType> {
 		}
 
 		@Override
-		public FieldInformer with(Collection propertyPath) {
+		public FieldInformer with(Collection<Property> propertyPath) {
 			return new AsFieldInformer(field, new LinkedList<Property>(propertyPath));
 		}
 	}
@@ -269,6 +275,11 @@ public class ReflectionBackedInformer<DataType> implements Informer<DataType> {
 	}
 
 	@Override
+	public QueryExpression instanceOf(Class<? extends DataType> type) {
+		return new InstanceOfExpression(null, new LinkedList<Property>(), type);
+	}
+
+	@Override
 	public Informer asField(Property field) {
 		return new AsFieldInformer(field);
 	}
@@ -318,12 +329,6 @@ public class ReflectionBackedInformer<DataType> implements Informer<DataType> {
 	@Override
 	public Iterable<Property> getFieldPath() {
 		return Collections.emptyList();
-	}
-
-	@Override
-	public FieldInformer with(Collection propertyPath) {
-		// TODO Auto-generated method stub
-		throw new UnsupportedOperationException("method "+FieldInformerAPI.class.getName()+"#use has not yet been implemented AT ALL");
 	}
 
 	/**
@@ -388,5 +393,11 @@ public class ReflectionBackedInformer<DataType> implements Informer<DataType> {
 	 */
 	public Class<DataType> getInformedClass() {
 		return informedClass;
+	}
+
+	@Override
+	public FieldInformer with(Collection<Property> propertyPath) {
+		// TODO Auto-generated method stub
+		throw new UnsupportedOperationException("method FieldInformerAPI<DataType>#with has not yet been implemented AT ALL");
 	}
 }

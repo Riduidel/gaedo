@@ -39,6 +39,10 @@ public abstract class VertexTestVisitorAdapter implements VertexTestVisitor {
 	}
 
 	@Override
+	public void visit(InstanceOf instanceOf) {
+	}
+
+	@Override
 	public <ComparableType extends Comparable<ComparableType>> void visit(LowerThan<ComparableType> anything) {
 	}
 

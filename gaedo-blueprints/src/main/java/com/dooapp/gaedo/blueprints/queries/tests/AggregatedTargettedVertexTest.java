@@ -44,6 +44,11 @@ public abstract class AggregatedTargettedVertexTest extends TargettedVertexTest 
 		return add(new EqualsTo(strategy, getDriver(), path, value));
 	}
 
+	@Override
+	public VertexTest instanceOf(Iterable<Property> path, Class<?> type) {
+		return add(new InstanceOf(strategy, getDriver(), path, type));
+	}
+
 	/**
 	 * Adds a new {@link GreaterThan} test to {@link #tests} and returns it
 	 * @param path

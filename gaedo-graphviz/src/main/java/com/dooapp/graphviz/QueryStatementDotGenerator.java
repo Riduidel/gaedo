@@ -16,6 +16,7 @@ import com.dooapp.gaedo.finders.expressions.EndsWithExpression;
 import com.dooapp.gaedo.finders.expressions.EqualsExpression;
 import com.dooapp.gaedo.finders.expressions.EqualsToIgnoreCaseExpression;
 import com.dooapp.gaedo.finders.expressions.GreaterThanExpression;
+import com.dooapp.gaedo.finders.expressions.InstanceOfExpression;
 import com.dooapp.gaedo.finders.expressions.LowerThanExpression;
 import com.dooapp.gaedo.finders.expressions.MapContainingKeyExpression;
 import com.dooapp.gaedo.finders.expressions.MatchesRegexpExpression;
@@ -314,5 +315,11 @@ public class QueryStatementDotGenerator implements QueryExpressionContainerVisit
 	public void visit(MapContainingKeyExpression expression) {
 		String nodeId = putNode("MapContaingQuery", QUERY_EXPRESSION);
 		setLabel(nodeId, expression.getField().getName()+" containsValue? "+expression.getContained());
+	}
+
+	@Override
+	public void visit(InstanceOfExpression expression) {
+		String nodeId = putNode("InstanceOf", QUERY_EXPRESSION);
+		setLabel(nodeId, expression.getField().getName()+" instanceof? "+expression.getType().getCanonicalName());
 	}
 }

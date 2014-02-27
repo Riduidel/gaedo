@@ -11,6 +11,7 @@ import com.dooapp.gaedo.finders.QueryExpression;
 import com.dooapp.gaedo.finders.expressions.AnythingExpression;
 import com.dooapp.gaedo.finders.expressions.EqualsExpression;
 import com.dooapp.gaedo.finders.expressions.Expressions;
+import com.dooapp.gaedo.finders.expressions.InstanceOfExpression;
 import com.dooapp.gaedo.properties.Property;
 
 public class ObjectFieldInformer<InformedType> implements
@@ -26,6 +27,18 @@ public class ObjectFieldInformer<InformedType> implements
 	public ObjectFieldInformer(Property source) {
 		super();
 		this.source = source;
+	}
+
+	/**
+	 * Refining in accessed type. It is indeed possible to have some subtypes accessed through parent services.
+	 * In such a case, it is useful to be able to restrict on a given type. This expression allows that kind of search.
+	 * Notice operation is equivalent to "this instanceof type" and, as a consequence, is not a strict equals, but
+	 * rather a "classes contains type".
+	 * @param type type we want returned objects to be instances of. it is of course a subtype of this informed type.
+	 * @return an
+	 */
+	public QueryExpression instanceOf(Class<? extends InformedType> type) {
+		return new InstanceOfExpression(source, getFieldPath(), type);
 	}
 
 	/**

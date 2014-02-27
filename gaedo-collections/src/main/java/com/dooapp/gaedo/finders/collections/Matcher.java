@@ -10,6 +10,7 @@ import com.dooapp.gaedo.finders.expressions.EndsWithExpression;
 import com.dooapp.gaedo.finders.expressions.EqualsExpression;
 import com.dooapp.gaedo.finders.expressions.EqualsToIgnoreCaseExpression;
 import com.dooapp.gaedo.finders.expressions.GreaterThanExpression;
+import com.dooapp.gaedo.finders.expressions.InstanceOfExpression;
 import com.dooapp.gaedo.finders.expressions.LowerThanExpression;
 import com.dooapp.gaedo.finders.expressions.MapContainingKeyExpression;
 import com.dooapp.gaedo.finders.expressions.MatchesRegexpExpression;
@@ -123,6 +124,11 @@ public class Matcher<DataType> implements QueryExpressionVisitor {
 	@Override
 	public void visit(EndsWithExpression expression) {
 		evaluators.peek().add(new EndsWithEvaluator<DataType>(expression.getField(), expression.getEnd()));
+	}
+
+	@Override
+	public void visit(InstanceOfExpression expression) {
+		evaluators.peek().add(new InstanceOfEvaluator<DataType>(expression.getField(), expression.getType()));
 	}
 
 	@Override

@@ -57,7 +57,7 @@ public interface CompoundVertexTest extends VertexTest {
 
 	VertexTest endsWith(Iterable<Property> path, String end);
 
-	VertexTest matches(Iterable<Property> fieldPath, Pattern pattern);
+	VertexTest matches(Iterable<Property> path, Pattern pattern);
 
 	VertexTest collectionContains(Iterable<Property> path, Object contained);
 
@@ -67,6 +67,8 @@ public interface CompoundVertexTest extends VertexTest {
 
 	VertexTest anything(Iterable<Property> path);
 
-	VertexTest equalsToIgnoreCase(Iterable<Property> fieldPath, String compared);
+	VertexTest equalsToIgnoreCase(Iterable<Property> path, String compared);
+
+	VertexTest instanceOf(Iterable<Property> path, Class<?> type);
 
 }

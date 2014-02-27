@@ -129,4 +129,10 @@ public interface QueryExpressionVisitor extends Visitor {
 	 */
 	void visit(MatchesRegexpExpression matchesRegexpExpression);
 
+	/**
+	 * Visit an instanceof expression
+	 * @param instanceOfExpression
+	 */
+	void visit(InstanceOfExpression instanceOfExpression);
+
 }

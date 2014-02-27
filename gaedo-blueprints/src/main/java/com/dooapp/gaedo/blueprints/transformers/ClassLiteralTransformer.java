@@ -30,6 +30,9 @@ public class ClassLiteralTransformer extends AbstractSimpleLiteralTransformer<Cl
 	public Class fromString(String propertyValue, Class valueClass, ClassLoader classloader, ObjectCache objectCache) {
 		try {
 			String classValue = Utils.maybeObjectify(propertyValue);
+			if(classloader==null) {
+				classloader = getClass().getClassLoader();
+			}
 			return classloader.loadClass(classValue);
 		} catch (ClassNotFoundException e) {
 			throw new BadLiteralException("unable to load class \""+propertyValue+"\" using given classloader");

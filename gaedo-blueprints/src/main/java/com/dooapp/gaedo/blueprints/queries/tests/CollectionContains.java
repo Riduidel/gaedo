@@ -49,12 +49,12 @@ public class CollectionContains extends CollectionTargettedVertexTest implements
 	 * @param property
 	 * @return
 	 */
-	private boolean callMatchLiteral(Vertex examined, Property property) {
+	public boolean callMatchLiteral(Vertex examined, Property property) {
 		EqualsTo used = new EqualsTo(strategy, getDriver(), path, Updater.ELEMENT_IN_COLLECTION_MARKER);
 		return used.matchesVertex(examined, new LiteralInCollectionUpdaterProperty(property, expected, Updater.ELEMENT_IN_COLLECTION_MARKER));
 	}
 
-	private boolean callMatchManaged(Vertex examined, Property property) {
+	public boolean callMatchManaged(Vertex examined, Property property) {
 		EqualsTo used = new EqualsTo(strategy, getDriver(), path, expected);
 		return used.matchesVertex(examined, property);
 	}

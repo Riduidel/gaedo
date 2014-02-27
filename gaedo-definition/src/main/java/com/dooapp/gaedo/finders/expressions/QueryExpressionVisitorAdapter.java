@@ -81,4 +81,8 @@ public class QueryExpressionVisitorAdapter implements QueryExpressionVisitor {
 	public void visit(MatchesRegexpExpression matchesRegexpExpression) {
 	}
 
+	@Override
+	public void visit(InstanceOfExpression instanceOfExpression) {
+	}
+
 }

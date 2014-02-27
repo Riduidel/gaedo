@@ -19,6 +19,7 @@ import com.dooapp.gaedo.finders.expressions.EndsWithExpression;
 import com.dooapp.gaedo.finders.expressions.EqualsExpression;
 import com.dooapp.gaedo.finders.expressions.EqualsToIgnoreCaseExpression;
 import com.dooapp.gaedo.finders.expressions.GreaterThanExpression;
+import com.dooapp.gaedo.finders.expressions.InstanceOfExpression;
 import com.dooapp.gaedo.finders.expressions.LowerThanExpression;
 import com.dooapp.gaedo.finders.expressions.MapContainingKeyExpression;
 import com.dooapp.gaedo.finders.expressions.MatchesRegexpExpression;
@@ -71,6 +72,16 @@ public class BluePrintsQueryBuilder<DataType, InformerType extends Informer<Data
 	@Override
 	public void visit(EqualsExpression expression) {
 		tests.peek().equalsTo(expression.getFieldPath(), expression.getValue());
+	}
+
+	/**
+	 * Converts the instance of test into a test over classes collection.
+	 * @param instanceOfExpression
+	 * @see com.dooapp.gaedo.finders.expressions.QueryExpressionVisitor#visit(com.dooapp.gaedo.finders.expressions.InstanceOfExpression)
+	 */
+	@Override
+	public void visit(InstanceOfExpression expression) {
+		tests.peek().instanceOf(expression.getFieldPath(), expression.getType());
 	}
 
 	@Override

@@ -7,6 +7,7 @@ import java.util.Stack;
 
 import com.dooapp.gaedo.blueprints.strategies.GraphMappingStrategy;
 import com.dooapp.gaedo.blueprints.transformers.Literals;
+import com.dooapp.gaedo.blueprints.transformers.Tuples;
 import com.dooapp.gaedo.properties.Property;
 import com.dooapp.gaedo.utils.CollectionUtils;
 import com.tinkerpop.blueprints.Direction;
@@ -118,7 +119,7 @@ public class VertexPathNavigator {
 				returned.push(edges.next().getVertex(Direction.IN));
 			} else {
 				// maybe that property can contain literal value
-				if(Literals.containsKey(currentProperty.getType())) {
+				if(Literals.containsKey(currentProperty.getType()) || Tuples.containsKey(currentProperty.getType())) {
 					returned.setNavigationSuccessfull(true);
 				} else {
 					returned.setNavigationSuccessfull(false);

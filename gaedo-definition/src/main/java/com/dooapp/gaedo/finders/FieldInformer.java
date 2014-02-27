@@ -23,6 +23,16 @@ public interface FieldInformer<InformedType> {
 	public QueryExpression equalsTo(Object value);
 
 	/**
+	 * Refining in accessed type. It is indeed possible to have some subtypes accessed through parent services.
+	 * In such a case, it is useful to be able to restrict on a given type. This expression allows that kind of search.
+	 * Notice operation is equivalent to "this instanceof type" and, as a consequence, is not a strict equals, but
+	 * rather a "classes contains type".
+	 * @param type type we want returned objects to be instances of. it is of course a subtype of this informed type.
+	 */
+	public QueryExpression instanceOf(Class<? extends InformedType> type);
+
+
+	/**
 	 * Get the field this informer talks about
 	 * @return
 	 */

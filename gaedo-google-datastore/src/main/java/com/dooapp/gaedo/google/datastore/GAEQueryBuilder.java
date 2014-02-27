@@ -19,6 +19,7 @@ import com.dooapp.gaedo.finders.expressions.EndsWithExpression;
 import com.dooapp.gaedo.finders.expressions.EqualsExpression;
 import com.dooapp.gaedo.finders.expressions.EqualsToIgnoreCaseExpression;
 import com.dooapp.gaedo.finders.expressions.GreaterThanExpression;
+import com.dooapp.gaedo.finders.expressions.InstanceOfExpression;
 import com.dooapp.gaedo.finders.expressions.LowerThanExpression;
 import com.dooapp.gaedo.finders.expressions.MapContainingKeyExpression;
 import com.dooapp.gaedo.finders.expressions.MatchesRegexpExpression;
@@ -266,6 +267,12 @@ public class GAEQueryBuilder<DataType> implements QueryExpressionVisitor {
 		// query.addFilter(getQueryFieldName(expression),
 		// Query.FilterOperator.IN,
 		// resolve(expression.getField(), expression.getEnd()));
+	}
+
+	@Override
+	public void visit(InstanceOfExpression instanceOfExpression) {
+		// TODO Auto-generated method stub
+		throw new UnsupportedOperationException("method QueryExpressionVisitor#visit has not yet been implemented AT ALL. In fact, I forgot how to do such things on GAE");
 	}
 
 	/**
