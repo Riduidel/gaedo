@@ -60,7 +60,7 @@ public class GraphQueryStatement<
 
 			@Override
 			public <Type> Type getValue(FieldInformer<Type> propertyDescriptor) {
-				VertexPathNavigator navigator = new VertexPathNavigator(service.getStrategy(), input);
+				VertexPathNavigator navigator = new VertexPathNavigator(service.getStrategy(), service.getDriver(), input);
 				VertexLocation destination = navigator.navigateOn(propertyDescriptor.getFieldPath());
 
 				Vertex destinationVertex = destination.vertex();

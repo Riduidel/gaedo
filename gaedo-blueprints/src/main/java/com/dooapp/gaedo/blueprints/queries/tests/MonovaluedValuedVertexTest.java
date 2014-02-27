@@ -61,7 +61,7 @@ public abstract class MonovaluedValuedVertexTest<ValueType extends Object, Expec
 			return matchesVertex(examined, null);
 		} else {
 			// Navigates to the first target edge and perform test when reached
-			VertexPathNavigator navigator = new VertexPathNavigator(strategy, examined);
+			VertexPathNavigator navigator = new VertexPathNavigator(strategy, driver, examined);
 			VertexLocation destination = navigator.navigateOn(path);
 			// null final property indicates object has no value for that
 			// property

@@ -4,8 +4,13 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Stack;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
+import com.dooapp.gaedo.blueprints.GraphDatabaseDriver;
+import com.dooapp.gaedo.blueprints.GraphUtils;
 import com.dooapp.gaedo.blueprints.strategies.GraphMappingStrategy;
+import com.dooapp.gaedo.blueprints.transformers.LiteralHelper;
 import com.dooapp.gaedo.blueprints.transformers.Literals;
 import com.dooapp.gaedo.blueprints.transformers.Tuples;
 import com.dooapp.gaedo.properties.Property;
@@ -20,6 +25,7 @@ import com.tinkerpop.blueprints.Vertex;
  *
  */
 public class VertexPathNavigator {
+	private static final Logger logger = Logger.getLogger(VertexPathNavigator.class.getName());
 	/**
 	 * Indicate from a source path a list of interesting elements :
 	 * <ul>
@@ -98,9 +104,11 @@ public class VertexPathNavigator {
 
 	private Vertex source;
 	private GraphMappingStrategy<?> strategy;
+	private GraphDatabaseDriver driver;
 
-	public VertexPathNavigator(GraphMappingStrategy<?> strategy, Vertex source) {
+	public VertexPathNavigator(GraphMappingStrategy<?> strategy, GraphDatabaseDriver driver, Vertex source) {
 		this.strategy = strategy;
+		this.driver = driver;
 		this.source = source;
 	}
 
@@ -118,11 +126,48 @@ public class VertexPathNavigator {
 			if(edges.hasNext()) {
 				returned.push(edges.next().getVertex(Direction.IN));
 			} else {
-				// maybe that property can contain literal value
-				if(Literals.containsKey(currentProperty.getType()) || Tuples.containsKey(currentProperty.getType())) {
-					returned.setNavigationSuccessfull(true);
-				} else {
+				/*
+				 * maybe that property can contain literal value.
+				 * This literal value can be stored either as a direct literal (type is a literal one) or using the infamous
+				 * TUples.serializables, in which case further analysis must be performed ...
+				 */
+				Class<?> propertyType = currentProperty.getType();
+				if(driver.getRepository().containsKey(propertyType)) {
 					returned.setNavigationSuccessfull(false);
+				} else {
+					Object value = currentVertex.getProperty(GraphUtils.getEdgeNameFor(currentProperty));
+					if(value==null) {
+						returned.setNavigationSuccessfull(true);
+					} else {
+						if(Literals.containsKey(propertyType)) {
+							returned.setNavigationSuccessfull(true);
+						} else if(Tuples.containsKey(propertyType)) {
+							if(Tuples.serializables.getDataClass().isAssignableFrom(propertyType)) {
+								// we must here unfrtonatly read value prefix to see if it is a literal
+								String valueType = LiteralHelper.getTypePrefix(value.toString());
+								try {
+									ClassLoader classLoader = propertyType.getClassLoader();
+									classLoader = (classLoader==null ? getClass().getClassLoader() : classLoader);
+									Class valueClass = classLoader.loadClass(valueType);
+									returned.setNavigationSuccessfull(Literals.containsKey(valueClass));
+								} catch (ClassNotFoundException e) {
+									if (logger.isLoggable(Level.WARNING)) {
+										logger.log(Level.WARNING, String.format("Did you really decide to store an enum in a Serializable ?\n"
+														+ "Gaedo is not strong enough for that, dude."
+														+ "I would suggest to replace storage of %s"
+														+ "from Serializable to ... somethign else.\n"
+														+ "For additional reference, implied vertex is %s",
+															currentProperty,
+															GraphUtils.toString(currentVertex)), e);
+									}
+									returned.setNavigationSuccessfull(false);
+								}
+							} else {
+								// Map entries are stored as effective objects in graph due to their multiple relationships
+								returned.setNavigationSuccessfull(false);
+							}
+						}
+					}
 				}
 			}
 		}
