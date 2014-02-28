@@ -97,7 +97,7 @@ public abstract class AbstractGraphEnvironment<GraphType extends Graph> {
 	protected final GraphProvider graphProvider;
 	protected ThreadLocal<GaedoComponentBag> bag = new ThreadLocal<GaedoComponentBag>();
 
-	private StrategyType strategy = StrategyType.beanBased;
+	public final StrategyType strategy = StrategyType.beanBased;
 
 	public AbstractGraphEnvironment(GraphProvider graph) {
 		this.name = getClass().getSimpleName()+" "+graph.getName();
