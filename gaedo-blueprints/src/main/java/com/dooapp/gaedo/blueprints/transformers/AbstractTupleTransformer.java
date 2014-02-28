@@ -25,7 +25,7 @@ public abstract class AbstractTupleTransformer<TupleType> {
 	public <DataType> Vertex getVertexFor(AbstractBluePrintsBackedFinderService<? extends Graph, DataType, ?> service, GraphDatabaseDriver driver, TupleType cast, CascadeType cascade,
 					ObjectCache objectsBeingUpdated) {
 		// First step is to build an id for given tuple by concatenating key and value id (which is hopefully done separately)
-		String entryVertexId = getIdOfTuple(service.getRepository(), cast);
+		String entryVertexId = getIdOfTuple(service.getRepository(), cast, cascade);
 		// No need to memorize updated version
 		String className = cast.getClass().getName();
 		Vertex objectVertex = service.loadVertexFor(entryVertexId, className);
@@ -47,8 +47,8 @@ public abstract class AbstractTupleTransformer<TupleType> {
 	/**
 	 * Create a long string id by concatenating all contained properties ones
 	 */
-	public String getIdOfTuple(ServiceRepository repository, TupleType value) {
-		return getIdOfTuple(repository, value, getContainedProperties().keySet());
+	public String getIdOfTuple(ServiceRepository repository, TupleType value, CascadeType cascade) {
+		return getIdOfTuple(repository, value, getContainedProperties().keySet(), cascade);
 	}
 
 	/**
@@ -56,9 +56,10 @@ public abstract class AbstractTupleTransformer<TupleType> {
 	 * @param repository
 	 * @param value
 	 * @param idProperties
+	 * @param cascade
 	 * @return
 	 */
-	protected String getIdOfTuple(ServiceRepository repository, TupleType value, Iterable<Property> idProperties) {
+	protected String getIdOfTuple(ServiceRepository repository, TupleType value, Iterable<Property> idProperties, CascadeType cascade) {
 		StringBuilder sOut = new StringBuilder();
 		Map<Property, Object> propertiesWithoutIds = new HashMap<Property, Object>();
 		for(Property p : idProperties) {
@@ -66,7 +67,15 @@ public abstract class AbstractTupleTransformer<TupleType> {
 			if(propertyValue!=null) {
 				String id = GraphUtils.getIdOf(repository, propertyValue);
 				if(id==null) {
-					propertiesWithoutIds.put(p, propertyValue);
+					// we'll try to generate it : that missing id can only refer to managed object
+					// (as literals and tuples can't be in that case)
+					if(cascade.equals(CascadeType.PERSIST)||cascade.equals(CascadeType.MERGE)) {
+						// try to create an id by directly asking the service to do so
+						AbstractBluePrintsBackedFinderService service = (AbstractBluePrintsBackedFinderService) repository.get(propertyValue);
+						id = service.getIdVertexId(propertyValue, true);
+					}
+					if(id==null)
+						propertiesWithoutIds.put(p, propertyValue);
 				}
 				sOut.append(p.getName()).append(":").append(id).append("-");
 			}

@@ -210,6 +210,7 @@ public class GraphUtils {
 	 * @param repository
 	 * @param value
 	 * @return id of object. may be null if value has no known id (typically the case for non persisted managed objects)
+	 * @see https://github.com/Riduidel/gaedo/issues/80
 	 */
 	public static <DataType> String getIdOf(ServiceRepository repository, DataType value) {
 		Class<? extends Object> valueClass = value.getClass();
@@ -274,7 +275,7 @@ public class GraphUtils {
 	 *         vertex associated to that object
 	 */
 	public static String getIdOfTuple(ServiceRepository repository, Class<?> declaredClass, Object value) {
-		return Tuples.get(declaredClass).getIdOfTuple(repository, value);
+		return Tuples.get(declaredClass).getIdOfTuple(repository, value, CascadeType.REFRESH);
 	}
 
 	/**

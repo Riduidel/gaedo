@@ -71,14 +71,19 @@ public class MapEntryTransformer extends AbstractTupleTransformer<Map.Entry> imp
 	}
 
 	/**
-	 * Before to persist, we make sure entry is a {@link WriteableKeyEntry} instance
+	 * Before to persist, we make sure entry is a {@link WriteableKeyEntry} instance ... and that both key and values have id.
+	 * Because if one of them don't, well, https://github.com/Riduidel/gaedo/issues/80 will come byte us.
+	 * If needed, an id will be created.
 	 * @param service
 	 * @param cast
 	 * @param objectsBeingUpdated
 	 * @return
 	 */
 	@Override
-	public <DataType> Vertex getVertexFor(AbstractBluePrintsBackedFinderService<? extends Graph, DataType, ?> service, GraphDatabaseDriver driver, Entry cast, CascadeType cascade,
+	public <DataType> Vertex getVertexFor(AbstractBluePrintsBackedFinderService<? extends Graph, DataType, ?> service,
+					GraphDatabaseDriver driver,
+					Entry cast,
+					CascadeType cascade,
 					ObjectCache objectsBeingUpdated) {
 		if(!(cast instanceof WriteableKeyEntry)) {
 			cast = new WriteableKeyEntry(cast.getKey(), cast.getValue());
@@ -90,7 +95,6 @@ public class MapEntryTransformer extends AbstractTupleTransformer<Map.Entry> imp
 	public Entry instanciateTupleFor(ClassLoader classLoader, Vertex key) {
 		try {
 			return new WriteableKeyEntry();
-//			return (Entry) classLoader.loadClass(WriteableKeyEntry.class.getCanonicalName()).newInstance();
 		} catch (Exception e) {
 			throw new UnableToInstanciateWriteableEntryException(e);
 		}
@@ -138,11 +142,11 @@ public class MapEntryTransformer extends AbstractTupleTransformer<Map.Entry> imp
 	 * @param repository
 	 * @param value
 	 * @return
-	 * @see com.dooapp.gaedo.blueprints.transformers.AbstractTupleTransformer#getIdOfTuple(com.dooapp.gaedo.finders.repository.ServiceRepository, java.lang.Object)
+	 * @see com.dooapp.gaedo.blueprints.transformers.AbstractTupleTransformer#getIdOfTuple(com.dooapp.gaedo.finders.repository.ServiceRepository, java.lang.Object, CascadeType)
 	 */
 	@Override
-	public String getIdOfTuple(ServiceRepository repository, Entry value) {
-		return getIdOfTuple(repository, value, Arrays.asList(KEY_PROPERTY, VALUE_PROPERTY));
+	public String getIdOfTuple(ServiceRepository repository, Entry value, CascadeType cascade) {
+		return getIdOfTuple(repository, value, Arrays.asList(KEY_PROPERTY, VALUE_PROPERTY), cascade);
 	}
 
 }
