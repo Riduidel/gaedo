@@ -1,6 +1,7 @@
 package com.dooapp.gaedo.blueprints.transformers;
 
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.Map;
 
 import javax.persistence.CascadeType;
@@ -59,12 +60,19 @@ public abstract class AbstractTupleTransformer<TupleType> {
 	 */
 	protected String getIdOfTuple(ServiceRepository repository, TupleType value, Iterable<Property> idProperties) {
 		StringBuilder sOut = new StringBuilder();
+		Map<Property, Object> propertiesWithoutIds = new HashMap<Property, Object>();
 		for(Property p : idProperties) {
 			Object propertyValue = p.get(value);
 			if(propertyValue!=null) {
 				String id = GraphUtils.getIdOf(repository, propertyValue);
+				if(id==null) {
+					propertiesWithoutIds.put(p, propertyValue);
+				}
 				sOut.append(p.getName()).append(":").append(id).append("-");
 			}
+		}
+		if(propertiesWithoutIds.size()>0) {
+			throw TupleCantBeIdentifiedException.dueTo(value, propertiesWithoutIds);
 		}
 		return sOut.toString();
 	}

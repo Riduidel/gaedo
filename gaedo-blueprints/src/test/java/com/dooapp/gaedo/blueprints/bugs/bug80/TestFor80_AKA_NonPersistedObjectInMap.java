@@ -5,6 +5,7 @@ import java.util.SortedSet;
 
 import org.hamcrest.collection.IsMapContaining;
 import org.hamcrest.core.Is;
+import org.hamcrest.core.IsNot;
 import org.hamcrest.core.IsNull;
 import org.junit.Before;
 import org.junit.Test;
@@ -14,9 +15,11 @@ import org.junit.runners.Parameterized.Parameters;
 
 import com.dooapp.gaedo.blueprints.AbstractGraphEnvironment;
 import com.dooapp.gaedo.blueprints.AbstractGraphPostTest;
+import com.dooapp.gaedo.blueprints.finders.FindPostByText;
 import com.dooapp.gaedo.extensions.views.InViewService;
 import com.dooapp.gaedo.finders.QueryBuilder;
 import com.dooapp.gaedo.finders.QueryExpression;
+import com.dooapp.gaedo.test.beans.Post;
 
 import static com.dooapp.gaedo.blueprints.TestUtils.simpleTest;
 
@@ -80,10 +83,26 @@ public class TestFor80_AKA_NonPersistedObjectInMap extends AbstractGraphPostTest
 		Bug80Value loaded = bug80ValueService.create(new Bug80Value().withText(METHOD_NAME));
 		assertThat(loaded.getId(), IsNull.notNullValue());
 		// now come the hard part
-		loaded.getElements().put("a", new Bug80Value().withText("in map"));
+		String textOfValueInMap = "in map";
+		loaded.getElements().put("a", new Bug80Value().withText(textOfValueInMap));
 		loaded = bug80ValueService.update(loaded);
 		loaded = bug80ValueService.find().matching(new FindById(METHOD_NAME)).getFirst();
 		assertThat(loaded.getElements(), IsMapContaining.hasKey("a"));
 		assertThat(loaded.getElements().get("a"), Is.isA((Class)Bug80Value.class));
+		assertThat(((Bug80Value)loaded.getElements().get("a")).getText(), Is.is(textOfValueInMap));
+	}
+
+	@Test
+	public void can_perists_a_value_in_a_serializable() {
+		final String METHOD_NAME = getClass().getName()+"#can_perists_a_value_in_a_serializable";
+		Post newPost = new Post();
+		newPost.text = METHOD_NAME;
+		newPost.associatedData = new Bug80Value().withText(METHOD_NAME);
+		getPostService().create(newPost);
+		newPost = getPostService().find().matching(new FindPostByText(METHOD_NAME)).getFirst();
+		assertThat(newPost.id, IsNot.not(0l));
+		assertThat(newPost.associatedData, IsNull.notNullValue());
+		assertThat(newPost.associatedData, Is.isA((Class)Bug80Value.class));
+		assertThat(((Bug80Value)newPost.associatedData).getText(), Is.is(METHOD_NAME));
 	}
 }

@@ -1,5 +1,6 @@
 package com.dooapp.gaedo.blueprints.bugs.bug80;
 
+import java.io.Serializable;
 import java.util.Map;
 import java.util.TreeMap;
 
@@ -7,11 +8,11 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 
 /**
- * Some null
+ * Some class allowing easy exposition of that extremely confusing bug
  * @author ndx
  *
  */
-public class Bug80Value {
+public class Bug80Value implements Serializable {
 	@Id @GeneratedValue private String id;
 	private String text;
 	private Map<String, Object> elements = new TreeMap<String, Object>();

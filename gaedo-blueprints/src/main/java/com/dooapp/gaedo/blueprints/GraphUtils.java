@@ -209,7 +209,7 @@ public class GraphUtils {
 	 *
 	 * @param repository
 	 * @param value
-	 * @return
+	 * @return id of object. may be null if value has no known id (typically the case for non persisted managed objects)
 	 */
 	public static <DataType> String getIdOf(ServiceRepository repository, DataType value) {
 		Class<? extends Object> valueClass = value.getClass();
@@ -217,7 +217,11 @@ public class GraphUtils {
 			AbstractBluePrintsBackedFinderService<IndexableGraph, DataType, ?> service = (AbstractBluePrintsBackedFinderService<IndexableGraph, DataType, ?>) repository
 							.get(valueClass);
 			// All ids are string, don't worry about it
-			return service.getIdOf(value).toString();
+			Object idOf = service.getIdOf(value);
+			if(idOf==null)
+				return null;
+			else
+				return idOf.toString();
 		} else if (Literals.containsKey(valueClass)) {
 			return getIdOfLiteral(valueClass, null, value);
 		} else if (Tuples.containsKey(valueClass)) {
