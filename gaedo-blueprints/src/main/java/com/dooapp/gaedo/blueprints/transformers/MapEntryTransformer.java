@@ -142,11 +142,11 @@ public class MapEntryTransformer extends AbstractTupleTransformer<Map.Entry> imp
 	 * @param repository
 	 * @param value
 	 * @return
-	 * @see com.dooapp.gaedo.blueprints.transformers.AbstractTupleTransformer#getIdOfTuple(com.dooapp.gaedo.finders.repository.ServiceRepository, java.lang.Object, CascadeType)
+	 * @see com.dooapp.gaedo.blueprints.transformers.AbstractTupleTransformer#getIdOfTuple(com.dooapp.gaedo.finders.repository.ServiceRepository, java.lang.Object, CascadeType, ObjectCache)
 	 */
 	@Override
-	public String getIdOfTuple(ServiceRepository repository, Entry value, CascadeType cascade) {
-		return getIdOfTuple(repository, value, Arrays.asList(KEY_PROPERTY, VALUE_PROPERTY), cascade);
+	public String getIdOfTuple(ServiceRepository repository, Entry value, CascadeType cascade, ObjectCache cache) {
+		return getIdOfTuple(repository, value, Arrays.asList(KEY_PROPERTY, VALUE_PROPERTY), cascade, cache);
 	}
 
 }

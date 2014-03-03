@@ -87,7 +87,7 @@ public class SerializableTransformer implements TupleTransformer<Serializable> {
 	}
 
 	@Override
-	public String getIdOfTuple(ServiceRepository repository, Serializable value, CascadeType cascade) {
+	public String getIdOfTuple(ServiceRepository repository, Serializable value, CascadeType cascade, ObjectCache cache) {
 		// some first-level check to see if someone else than this transformer has any knowledge of value (because, well, this id will be longer than hell)
 		Class<? extends Serializable> valueClass = value.getClass();
 		if(Tuples.containsKey(valueClass)) {

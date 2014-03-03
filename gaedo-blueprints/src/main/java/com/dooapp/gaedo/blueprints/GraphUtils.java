@@ -275,7 +275,7 @@ public class GraphUtils {
 	 *         vertex associated to that object
 	 */
 	public static String getIdOfTuple(ServiceRepository repository, Class<?> declaredClass, Object value) {
-		return Tuples.get(declaredClass).getIdOfTuple(repository, value, CascadeType.REFRESH);
+		return Tuples.get(declaredClass).getIdOfTuple(repository, value, CascadeType.REFRESH, new ObjectCache());
 	}
 
 	/**
