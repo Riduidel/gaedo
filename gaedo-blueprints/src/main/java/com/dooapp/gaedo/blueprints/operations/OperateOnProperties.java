@@ -20,6 +20,8 @@ import com.dooapp.gaedo.properties.TypeProperty;
  */
 class OperateOnProperties {
 	public void execute(Map<Property, Collection<CascadeType>> containedProperties, CascadeType cascade, Operation operation) {
+		String operationSimpleName = operation.getClass().getSimpleName();
+    	Logger logger = Logger.getLogger(operation.getClass().getName());
         for (Map.Entry<Property, Collection<CascadeType>> entry : containedProperties.entrySet()) {
             Property p = entry.getKey();
             // Static properties are by design not written
@@ -30,12 +32,17 @@ class OperateOnProperties {
                 if (entry.getValue().contains(cascade)) {
                     used = cascade;
                 } else {
-                	// Internal class means getName will introduce an unwanted "$" sign
-                	Logger logger = Logger.getLogger(operation.getClass().getCanonicalName());
                 	if(logger.isLoggable(Level.FINE)) {
                 		// just don't output anything for type or class collections, as they're special properties
                 		if(!(TypeProperty.INSTANCE.equals(p) || new ClassCollectionProperty(getClass()).equals(p)))
-                		logger.log(Level.FINE, "operation not performed on "+p.toGenericString()+" has no cascade "+cascade+" defined");
+                		logger.log(Level.FINE,
+                						String.format("operation %s not performed on %s has no cascade %s defined\n"
+                										+ "To fix that, simply add %s.%s to its JPA annotation",
+                										operationSimpleName,
+                										p.toGenericString(),
+                										cascade,
+                										cascade.getClass().getSimpleName(),
+                										cascade));
                 	}
                 }
                 // We only perform operations on cascaded fields

@@ -164,6 +164,6 @@ public class ToStringVisitor implements QueryExpressionVisitor {
 	public void visit(InstanceOfExpression expression) {
 		out.append(deepnessString()).append(
 						getFieldText(expression)).append(
-						" instanceof? ").append(expression.getType().getCanonicalName()).append("\n");
+						" instanceof? ").append(expression.getType().getName()).append("\n");
 	}
 }

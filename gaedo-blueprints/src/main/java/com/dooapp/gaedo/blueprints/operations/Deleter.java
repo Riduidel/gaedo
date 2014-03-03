@@ -21,7 +21,7 @@ import com.tinkerpop.blueprints.Graph;
 import com.tinkerpop.blueprints.Vertex;
 
 public class Deleter {
-	public final class DeleteProperties<DataType> extends AbstractCardinalityDistinguishingOperation {
+	public class DeleteProperties<DataType> extends AbstractCardinalityDistinguishingOperation {
 		private final Map<Property, Collection<CascadeType>> containedProperties;
 		private final Graph database;
 		private final ObjectCache objectsBeingAccessed;

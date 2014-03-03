@@ -32,7 +32,7 @@ import com.tinkerpop.blueprints.Graph;
 import com.tinkerpop.blueprints.Vertex;
 
 public class Updater {
-	public final class UpdateProperties<DataType> extends AbstractCardinalityDistinguishingOperation {
+	public class UpdateProperties<DataType> extends AbstractCardinalityDistinguishingOperation {
 		private final GraphDatabaseDriver driver;
 		private final Graph database;
 		private final AbstractBluePrintsBackedFinderService<? extends Graph, DataType, ?> service;

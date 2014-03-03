@@ -11,6 +11,6 @@ import com.dooapp.gaedo.finders.FinderCrudService;
 public class IncompatibleServiceException extends BluePrintsCrudServiceException {
 
 	public IncompatibleServiceException(FinderCrudService service, Class<? extends Object> valueClass) {
-		super("service "+service.getClass().getCanonicalName()+" is associated with values of type "+valueClass.getCanonicalName()+" but IS NOT compatible with requirements of "+IndexableGraphBackedFinderService.class.getName());
+		super("service "+service.getClass().getName()+" is associated with values of type "+valueClass.getCanonicalName()+" but IS NOT compatible with requirements of "+IndexableGraphBackedFinderService.class.getName());
 	}
 }

@@ -24,7 +24,7 @@ public class ServiceGeneratorImpl implements ServiceGenerator {
 	 * Application-wide property provider
 	 */
 	protected final PropertyProvider provider;
-	
+
 	public ServiceGeneratorImpl(PropertyProvider provider) {
 		this.provider = provider;
 	}
@@ -48,10 +48,10 @@ public class ServiceGeneratorImpl implements ServiceGenerator {
 			return proxy;
 		} catch(UnableToCreateInvocationHandlerException e) {
 			if (logger.isLoggable(Level.SEVERE)) {
-				logger.log(Level.SEVERE, "Unable to create implementation of "+toImplement.getCanonicalName()+" " +
-						"using as back-end "+backEnd.getClass().getCanonicalName()+
-						"<"+backEnd.getContainedClass().getCanonicalName()+", "+
-						backEnd.getInformer().getClass().getCanonicalName()+">");
+				logger.log(Level.SEVERE, "Unable to create implementation of "+toImplement.getName()+" " +
+						"using as back-end "+backEnd.getClass().getName()+
+						"<"+backEnd.getContainedClass().getName()+", "+
+						backEnd.getInformer().getClass().getName()+">");
 			}
 			throw e;
 		}

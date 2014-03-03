@@ -184,7 +184,7 @@ public abstract class AbstractBluePrintsBackedFinderService<GraphClass extends I
         this.migrator = VersionMigratorFactory.create(containedClass);
         // if there is a migrator, generate property from it
         if (logger.isLoggable(Level.FINE)) {
-            logger.log(Level.FINE, "created graph service handling " + containedClass.getCanonicalName());
+            logger.log(Level.FINE, "created graph service handling " + containedClass.getName());
         }
     }
 

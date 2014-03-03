@@ -34,7 +34,7 @@ import com.tinkerpop.blueprints.IndexableGraph;
 import com.tinkerpop.blueprints.Vertex;
 
 public class Loader {
-    public final class LoadProperties<DataType> extends AbstractCardinalityDistinguishingOperation {
+    public class LoadProperties<DataType> extends AbstractCardinalityDistinguishingOperation {
 		private final ObjectCache objectsBeingAccessed;
 		private final ClassLoader classLoader;
 		private final DataType returned;

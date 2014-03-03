@@ -9,7 +9,7 @@ import com.dooapp.gaedo.blueprints.BluePrintsCrudServiceException;
 public class ClassIsNotAKnownLiteralException extends BluePrintsCrudServiceException {
 
 	public ClassIsNotAKnownLiteralException(TransformerAssociation<?>[] values, Class dataClass) {
-		this(values, dataClass.getCanonicalName());
+		this(values, dataClass.getName());
 	}
 
 	public ClassIsNotAKnownLiteralException(TransformerAssociation<?>[] values, Type t) {

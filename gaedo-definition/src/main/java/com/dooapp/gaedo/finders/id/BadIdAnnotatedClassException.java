@@ -1,5 +1,5 @@
 /**
- * 
+ *
  */
 package com.dooapp.gaedo.finders.id;
 
@@ -29,7 +29,7 @@ public class BadIdAnnotatedClassException extends CrudServiceException {
 		StringBuilder sOut = new StringBuilder();
 		if(expectedIdClasses!=null) {
 			for(Class<?> c : expectedIdClasses) {
-				sOut.append("\n\t").append(c.getCanonicalName());
+				sOut.append("\n\t").append(c.getName());
 			}
 		}
 		return sOut.toString();
@@ -46,6 +46,6 @@ public class BadIdAnnotatedClassException extends CrudServiceException {
 	public BadIdAnnotatedClassException(Class<?> containedClass) {
 		this("Class "+containedClass.getName()+" must have EXACTLY one field annotated with @Id");
 	}
-	
-	
+
+
 }

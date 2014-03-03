@@ -16,7 +16,7 @@ public class ClassLiteralTransformer extends AbstractSimpleLiteralTransformer<Cl
 	}
 	@Override
 	public String valueToString(Class value) {
-		return value==null ? Object.class.getCanonicalName() : value.getCanonicalName();
+		return value==null ? Object.class.getName() : value.getName();
 	}
 
 	public boolean areEquals(Object expected, String effectiveGraphValue) {

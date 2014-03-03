@@ -17,9 +17,9 @@ import com.dooapp.gaedo.test.beans.base.Identified;
 
 /**
  * A post is the standard content of any kind of blog
- * 
+ *
  * @author Nicolas
- * 
+ *
  */
 public class Post extends Identified implements Serializable, Message {
 
@@ -36,18 +36,18 @@ public class Post extends Identified implements Serializable, Message {
 	public User author;
 
 	public Map<String, String> annotations = new TreeMap<String, String>();
-	
-	@ManyToMany(cascade={CascadeType.PERSIST, CascadeType.MERGE})
+
+	@ManyToMany(cascade={CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REFRESH})
 	public Set<Tag> tags = new HashSet<Tag>();
-	
+
 	public Date publicationDate = new Date();
-	
+
 	public Serializable associatedData;
-	
+
 	public Post() {
-		
+
 	}
-	
+
 	public Post(long id, String text, float note, State state, User author) {
 		this.id = id;
 		this.text = text;
@@ -110,7 +110,7 @@ public class Post extends Identified implements Serializable, Message {
 	@Override
 	public String toString() {
 		StringBuilder b = new StringBuilder();
-		
+
 		b.append("Post id = " + id + ":");
 		if(null != author)
 			b.append("\nauthor: " + author);
@@ -121,7 +121,7 @@ public class Post extends Identified implements Serializable, Message {
 			b.append("\nstate: " + state);
 		if(null != text)
 			b.append("\ntext: " + text);
-		
+
 		return b.toString();
 	}
 }
