@@ -213,7 +213,7 @@ public class Loader {
 	}
 
 
-	public Object loadSingleLiteral(ClassLoader classloader, Property p, Vertex objectVertex, ObjectCache objectsBeingAccessed) {
+	public static Object loadSingleLiteral(ClassLoader classloader, Property p, Vertex objectVertex, ObjectCache objectsBeingAccessed) {
 		// if no edge exist, we may be in the case of a literal stored in node property. In that case, check if vertex has a property having same name than edge
 		String propertyValue = objectVertex.getProperty(GraphUtils.getEdgeNameFor(p));
 		if(propertyValue==null)

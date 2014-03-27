@@ -307,6 +307,7 @@ public class Updater {
 					// We also add an inverted property allowing fast query of containing collection
 					// Value here is not signifiant : we only want to mark collection as containing value. And for that, one simple string is enough
 					AbstractPropertyAdapter elementByValueProperty = new LiteralInCollectionUpdaterProperty(p, element, ELEMENT_IN_COLLECTION_MARKER);
+					elementByValueProperty.setGenericType(ELEMENT_IN_COLLECTION_MARKER.getClass());
 					updateLiteralPropertyIn(service.getDatabase(), toUpdate, rootVertex, elementByValueProperty, ELEMENT_IN_COLLECTION_MARKER);
 					suspectProperties.remove(GraphUtils.getEdgeNameFor(elementByValueProperty));
 					order++;

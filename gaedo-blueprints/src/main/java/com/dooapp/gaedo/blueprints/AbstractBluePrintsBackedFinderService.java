@@ -382,13 +382,15 @@ public abstract class AbstractBluePrintsBackedFinderService<GraphClass extends I
      * inconvenient to force us to use only PERSIST during #create
      *
      * @param toUpdate
-     *            object to update
+     *            object to update. if null, nothing will be done.
      * @param cascade
      *            type. As mentionned upper, beware to value used !
      * @param treeMap
      *            map of objects already used
      */
     private DataType doUpdate(DataType toUpdate, CascadeType cascade, ObjectCache treeMap) {
+    	if(toUpdate==null)
+    		return toUpdate;
         boolean generatesId = strategy.isIdGenerationRequired() ? (CascadeType.PERSIST == cascade) : false;
         String objectVertexId = getIdVertexId(toUpdate, generatesId);
         Class<? extends Object> toUpdateClass = toUpdate.getClass();

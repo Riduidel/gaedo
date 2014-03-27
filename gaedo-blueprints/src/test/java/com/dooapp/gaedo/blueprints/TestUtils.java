@@ -67,20 +67,6 @@ public class TestUtils {
 		return graphDir+"/sail";
 	}
 
-	public static Collection<Object[]> loadTestProviders() {
-		Collection<Object[]> returned = new LinkedList<Object[]>();
-//		returned.add(new Object[] { "tinkergraph", new Tinker()});
-//		returned.add(new Object[] { "orientgraph", new OrientDB()});
-		returned.add(new Object[] { new Neo4j(),10l});
-		returned.add(new Object[] { new Neo4j(),1000l});
-		returned.add(new Object[] { new Neo4j(),10000l});
-		returned.add(new Object[] { new Neo4j(),100000l});
-//		returned.add(new Object[] { "neo4jgraph", new Neo4j(),1000000l});
-//		returned.add(new Object[] { "neo4jgraph", new Neo4j(),1000000000l});
-//		returned.add(new Object[] { "neo4jgraph", new Neo4j(),1000000000000l});
-		return returned;
-	}
-
 	/**
 	 * One elemtn collection containing only neo4j
 	 * @return
@@ -105,10 +91,6 @@ public class TestUtils {
 
 	}
 
-	public static Collection<Object[]> simpleTestProviders() {
-		return simpleTestProviders(providers());
-	}
-
 	/**
 	 * Transform providers into their arrays counterpart for encapsulation
 	 * @param providers
@@ -122,8 +104,26 @@ public class TestUtils {
 		return returned;
 	}
 
+	public static Collection<Object[]> loadTestProviders() {
+		Collection<Object[]> returned = new LinkedList<Object[]>();
+//		returned.add(new Object[] { "tinkergraph", new Tinker()});
+//		returned.add(new Object[] { "orientgraph", new OrientDB()});
+		returned.add(new Object[] { new Neo4j(),10l});
+		returned.add(new Object[] { new Neo4j(),1000l});
+		returned.add(new Object[] { new Neo4j(),10000l});
+		returned.add(new Object[] { new Neo4j(),100000l});
+//		returned.add(new Object[] { "neo4jgraph", new Neo4j(),1000000l});
+//		returned.add(new Object[] { "neo4jgraph", new Neo4j(),1000000000l});
+//		returned.add(new Object[] { "neo4jgraph", new Neo4j(),1000000000000l});
+		return returned;
+	}
+
 	public static Collection<Object[]> loadTest() {
 		return environmentsFor(loadTestProviders());
+	}
+
+	public static Collection<Object[]> simpleTestProviders() {
+		return simpleTestProviders(providers());
 	}
 
 	public static Collection<Object[]> simpleTest() {

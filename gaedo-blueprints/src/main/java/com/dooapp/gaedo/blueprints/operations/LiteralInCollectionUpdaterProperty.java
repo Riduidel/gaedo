@@ -45,7 +45,7 @@ public class LiteralInCollectionUpdaterProperty extends AbstractPropertyAdapter 
 
 	public LiteralInCollectionUpdaterProperty(Property p, Object key, Object value) {
 		setDeclaringClass(p.getDeclaringClass());
-		setGenericType(value.getClass());
+		setGenericType(inferElementTypeIn(p.getGenericType()));
 		copyAnnotationsFrom(p);
 		String name = getName(p, key);
 		setName(name);

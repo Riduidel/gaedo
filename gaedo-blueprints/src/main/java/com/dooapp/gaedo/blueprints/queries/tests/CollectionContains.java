@@ -51,7 +51,9 @@ public class CollectionContains extends CollectionTargettedVertexTest implements
 	 */
 	public boolean callMatchLiteral(Vertex examined, Property property) {
 		EqualsTo used = new EqualsTo(strategy, getDriver(), path, Updater.ELEMENT_IN_COLLECTION_MARKER);
-		return used.matchesVertex(examined, new LiteralInCollectionUpdaterProperty(property, expected, Updater.ELEMENT_IN_COLLECTION_MARKER));
+		LiteralInCollectionUpdaterProperty finalProperty = new LiteralInCollectionUpdaterProperty(property, expected, Updater.ELEMENT_IN_COLLECTION_MARKER);
+		finalProperty.setGenericType(Updater.ELEMENT_IN_COLLECTION_MARKER.getClass());
+		return used.matchesVertex(examined, finalProperty);
 	}
 
 	public boolean callMatchManaged(Vertex examined, Property property) {
