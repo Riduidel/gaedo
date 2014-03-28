@@ -3,7 +3,7 @@
 	<parent>
 		<artifactId>gaedo</artifactId>
 		<groupId>com.dooapp</groupId>
-		<version>1.0.8-SNAPSHOT</version>
+		<version>1.0.8</version>
 	</parent>
 	<groupId>com.dooapp</groupId>
 	<artifactId>gaedo-prevalence</artifactId>
