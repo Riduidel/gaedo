@@ -14,6 +14,7 @@ import com.dooapp.gaedo.blueprints.AbstractBluePrintsBackedFinderService;
 import com.dooapp.gaedo.blueprints.GraphUtils;
 import com.dooapp.gaedo.blueprints.ObjectCache;
 import com.dooapp.gaedo.blueprints.indexable.IndexNames;
+import com.dooapp.gaedo.blueprints.operations.CollectionAccessByValueProperty;
 import com.dooapp.gaedo.blueprints.operations.LiteralInCollectionUpdaterProperty;
 import com.dooapp.gaedo.blueprints.operations.Updater;
 import com.dooapp.gaedo.blueprints.queries.tests.CollectionContains;
@@ -175,7 +176,7 @@ public class VertexRootsCollector extends VertexTestVisitorAdapter {
 			String propertyKeyInIndex = null;
 			String propertyValueInIndex = null;
 			if (Collection.class.isAssignableFrom(lastProperty.getType())) {
-				propertyKeyInIndex = GraphUtils.getEdgeNameFor(new LiteralInCollectionUpdaterProperty(lastProperty, expected, Updater.ELEMENT_IN_COLLECTION_MARKER));
+				propertyKeyInIndex = GraphUtils.getEdgeNameFor(new CollectionAccessByValueProperty(lastProperty, expected, Updater.ELEMENT_IN_COLLECTION_MARKER));
 				propertyValueInIndex = Updater.ELEMENT_IN_COLLECTION_MARKER_GRAPH_VALUE;
 			} else {
 				propertyKeyInIndex = GraphUtils.getEdgeNameFor(lastProperty);

@@ -4,12 +4,15 @@ import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.lang.reflect.TypeVariable;
 import java.lang.reflect.WildcardType;
+import java.util.Map;
 
+import com.dooapp.gaedo.blueprints.GraphUtils;
 import com.dooapp.gaedo.blueprints.transformers.LiteralTransformer;
 import com.dooapp.gaedo.blueprints.transformers.Literals;
 import com.dooapp.gaedo.properties.AbstractPropertyAdapter;
 import com.dooapp.gaedo.properties.Property;
 import com.dooapp.gaedo.properties.UnusableTypeException;
+import com.dooapp.gaedo.utils.Entry;
 
 /**
  * Delegate property allowing creatin of a "sub" property on vertex.
@@ -18,7 +21,9 @@ import com.dooapp.gaedo.properties.UnusableTypeException;
  * @author ndx
  *
  */
-public class LiteralInCollectionUpdaterProperty extends AbstractPropertyAdapter implements Property {
+public abstract class LiteralInCollectionUpdaterProperty extends AbstractPropertyAdapter implements Property {
+	private static final String SEPARATOR = ":";
+
 	/**
 	 * Get used property name
 	 * @param p initial property
@@ -37,9 +42,23 @@ public class LiteralInCollectionUpdaterProperty extends AbstractPropertyAdapter 
 	 * @return a property name
 	 */
 	public static String getName(String propertyName, String propertyKey) {
-		return propertyName+":"+propertyKey;
+		return propertyName+SEPARATOR+propertyKey;
 	}
 
+	/**
+	 * Extract property and key from given property name
+	 * @param propertyName full property name
+	 * @return a Map Entry containing as key the parent property and as value the property key
+	 */
+	public static Map.Entry<String, String> getKey(String propertyName, Property container) {
+		String containerName = GraphUtils.getEdgeNameFor(container);
+		int positionOfSeparator = propertyName.indexOf(SEPARATOR, containerName.length());
+		if(positionOfSeparator<0)
+			return null;
+		String key = propertyName.substring(0, positionOfSeparator);
+		String value = propertyName.substring(positionOfSeparator+SEPARATOR.length());
+		return new Entry<String, String>(key, value);
+	}
 
 	private Object value;
 

@@ -1,6 +1,7 @@
 package com.dooapp.gaedo.blueprints.queries.tests;
 
 import com.dooapp.gaedo.blueprints.GraphDatabaseDriver;
+import com.dooapp.gaedo.blueprints.operations.CollectionAccessByValueProperty;
 import com.dooapp.gaedo.blueprints.operations.LiteralInCollectionUpdaterProperty;
 import com.dooapp.gaedo.blueprints.operations.Updater;
 import com.dooapp.gaedo.blueprints.strategies.GraphMappingStrategy;
@@ -51,7 +52,7 @@ public class CollectionContains extends CollectionTargettedVertexTest implements
 	 */
 	public boolean callMatchLiteral(Vertex examined, Property property) {
 		EqualsTo used = new EqualsTo(strategy, getDriver(), path, Updater.ELEMENT_IN_COLLECTION_MARKER);
-		LiteralInCollectionUpdaterProperty finalProperty = new LiteralInCollectionUpdaterProperty(property, expected, Updater.ELEMENT_IN_COLLECTION_MARKER);
+		LiteralInCollectionUpdaterProperty finalProperty = new CollectionAccessByValueProperty(property, expected, Updater.ELEMENT_IN_COLLECTION_MARKER);
 		finalProperty.setGenericType(Updater.ELEMENT_IN_COLLECTION_MARKER.getClass());
 		return used.matchesVertex(examined, finalProperty);
 	}

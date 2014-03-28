@@ -4,6 +4,7 @@ import java.io.ObjectStreamException;
 import java.io.Serializable;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
@@ -12,6 +13,7 @@ import java.util.TreeMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import com.dooapp.gaedo.blueprints.operations.CollectionAccessByIndexProperty;
 import com.dooapp.gaedo.blueprints.operations.CollectionSizeProperty;
 import com.dooapp.gaedo.blueprints.operations.LiteralInCollectionUpdaterProperty;
 import com.dooapp.gaedo.blueprints.operations.Loader;
@@ -140,26 +142,11 @@ public class CollectionLazyLoader extends AbstractLazyLoader implements Invocati
 		try {
 			// First thing first, get collection size, which is stored during update
 			CollectionSizeProperty sizeProperty = new CollectionSizeProperty(property);
-			int collectionSize = (Integer) Loader.loadSingleLiteral(classLoader, sizeProperty, rootVertex, objectsBeingAccessed);
+			Integer collectionSize = (Integer) Loader.loadSingleLiteral(classLoader, sizeProperty, rootVertex, objectsBeingAccessed);
 			// using a treemap to allow filling in any order AND unnumbered items to be at the end
 			Map<Integer, ValueLoader> loaders = new TreeMap<Integer, CollectionLazyLoader.ValueLoader>();
-			for(Edge e : strategy.getOutEdgesFor(rootVertex, property)) {
-				if(e.getProperty(Properties.collection_index.name()) != null) {
-					loaders.put((Integer) e.getProperty(Properties.collection_index.name()), new LoadValueBehindEdge(e));
-				} else {
-					// These items are pushed to the latest element (after collectionSize) which has no value set
-					int index = collectionSize+1;
-					while(loaders.containsKey(index)) { index++; }
-					loaders.put(index, new LoadValueBehindEdge(e));
-				}
-			}
-			// Not all values were laoded from external edges, maybe they're stored as properties ...
-			for (int index = 0; index < collectionSize; index++) {
-				AbstractPropertyAdapter elementByIndexProperty = new LiteralInCollectionUpdaterProperty(property, index, null);
-				if(rootVertex.getPropertyKeys().contains(GraphUtils.getEdgeNameFor(elementByIndexProperty))) {
-					loaders.put(index, new LoadValueInProperty(elementByIndexProperty));
-				}
-			}
+			loaders.putAll(addEdgesLoaders());
+			loaders.putAll(addPropertyValueLoaders());
 
 			for(ValueLoader loader : loaders.values()) {
 				try {
@@ -173,6 +160,39 @@ public class CollectionLazyLoader extends AbstractLazyLoader implements Invocati
 		} finally {
 			loaded = true;
 		}
+	}
+
+	private Map<? extends Integer, ? extends ValueLoader> addPropertyValueLoaders() {
+		Map<Integer, ValueLoader> returned = new TreeMap<Integer, ValueLoader>();
+		String propertyNamePrefix = GraphUtils.getEdgeNameFor(property);
+		for(String propertyName : rootVertex.getPropertyKeys()) {
+			Map.Entry<String, String> mapping = LiteralInCollectionUpdaterProperty.getKey(propertyName, property);
+			if(mapping!=null && mapping.getKey().equals(propertyNamePrefix)) {
+				// a valid property for that map ! is property key an integer ?
+				try {
+					int index = Integer.parseInt(mapping.getValue());
+					returned.put(index, new LoadValueInProperty(new CollectionAccessByIndexProperty(property, index, null)));
+				} catch(NumberFormatException e) {
+					// nothing to do : value is just non matching.
+				}
+			}
+		}
+		return returned;
+	}
+
+	protected Map<Integer, ValueLoader> addEdgesLoaders() {
+		Map<Integer, ValueLoader> returned = new TreeMap<Integer, ValueLoader>();
+		for(Edge e : strategy.getOutEdgesFor(rootVertex, property)) {
+			if(e.getProperty(Properties.collection_index.name()) != null) {
+				returned.put((Integer) e.getProperty(Properties.collection_index.name()), new LoadValueBehindEdge(e));
+			} else {
+				// These items are pushed to the latest element (after collectionSize) which has no value set
+				int index = Integer.MAX_VALUE-1;
+				while(returned.containsKey(index)) { index--; }
+				returned.put(index, new LoadValueBehindEdge(e));
+			}
+		}
+		return returned;
 	}
 
 	protected Object loadValue(ObjectCache objectsBeingAccessed, Vertex value) {

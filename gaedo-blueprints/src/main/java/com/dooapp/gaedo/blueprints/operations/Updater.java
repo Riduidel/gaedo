@@ -301,12 +301,12 @@ public class Updater {
 					edgeForVertex.setProperty(Properties.collection_index.name(), order++);
 				} else {
 					// Element is a literal value, so it won't require a vertex, but a literal saving
-					AbstractPropertyAdapter elementByIndexProperty = new LiteralInCollectionUpdaterProperty(p, order, element);
+					AbstractPropertyAdapter elementByIndexProperty = new CollectionAccessByIndexProperty(p, order, element);
 					updateLiteralPropertyIn(service.getDatabase(), toUpdate, rootVertex, elementByIndexProperty, element);
 					suspectProperties.remove(GraphUtils.getEdgeNameFor(elementByIndexProperty));
 					// We also add an inverted property allowing fast query of containing collection
 					// Value here is not signifiant : we only want to mark collection as containing value. And for that, one simple string is enough
-					AbstractPropertyAdapter elementByValueProperty = new LiteralInCollectionUpdaterProperty(p, element, ELEMENT_IN_COLLECTION_MARKER);
+					AbstractPropertyAdapter elementByValueProperty = new CollectionAccessByValueProperty(p, element, ELEMENT_IN_COLLECTION_MARKER);
 					elementByValueProperty.setGenericType(ELEMENT_IN_COLLECTION_MARKER.getClass());
 					updateLiteralPropertyIn(service.getDatabase(), toUpdate, rootVertex, elementByValueProperty, ELEMENT_IN_COLLECTION_MARKER);
 					suspectProperties.remove(GraphUtils.getEdgeNameFor(elementByValueProperty));
