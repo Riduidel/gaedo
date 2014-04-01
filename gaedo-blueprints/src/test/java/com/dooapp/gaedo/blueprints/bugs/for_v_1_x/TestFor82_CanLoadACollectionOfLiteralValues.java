@@ -45,7 +45,7 @@ public class TestFor82_CanLoadACollectionOfLiteralValues extends AbstractGraphPo
 		super(environment);
 	}
 
-//	@Test
+	@Test
 	public void a_collection_with_one_string_is_ok() {
 		String METHOD_NAME = "a_collection_with_one_string_is_ok";
 		TestFor82_StringOnlyCollection tested = new TestFor82_StringOnlyCollection();
@@ -58,7 +58,7 @@ public class TestFor82_CanLoadACollectionOfLiteralValues extends AbstractGraphPo
 		assertThat(tested.extension, hasItem(METHOD_NAME));
 	}
 
-//	@Test
+	@Test
 	public void a_collection_with_one_string_and_one_object_is_ok() {
 		String METHOD_NAME = "a_collection_with_one_string_is_ok";
 		TestFor82_ObjectCollection tested = new TestFor82_ObjectCollection();
