@@ -51,6 +51,23 @@ import com.tinkerpop.blueprints.Vertex;
 public class IndexableGraphBackedFinderService<DataType, InformerType extends Informer<DataType>> extends
 				AbstractBluePrintsBackedFinderService<IndexableGraph, DataType, InformerType> {
 
+	private class IndexableVertexMatcher implements VertexMatcher {
+		@Override
+		public String getTypeOf(Vertex vertex) {
+			return getEffectiveType(vertex);
+		}
+
+		@Override
+		public Kind getKindOf(Vertex vertex) {
+			return GraphUtils.getKindOf(vertex);
+		}
+
+		@Override
+		public String getIdOf(Vertex vertex) {
+			return getIdOfVertex(vertex);
+		}
+	}
+
 	public static final Logger logger = Logger.getLogger(IndexableGraphBackedFinderService.class.getName());
 
 	public static final String TYPE_EDGE_NAME = GraphUtils.getEdgeNameFor(TypeProperty.INSTANCE);
@@ -145,23 +162,11 @@ public class IndexableGraphBackedFinderService<DataType, InformerType extends In
 
 	@Override
 	public Vertex loadVertexFor(String objectVertexId, String className) {
-		return new IndexBrowser().browseFor(getDatabase(), objectVertexId, className, new VertexMatcher() {
+		return new IndexBrowser().browseFor(getDatabase(), objectVertexId, className, vertexMatcher());
+	}
 
-			@Override
-			public String getTypeOf(Vertex vertex) {
-				return getEffectiveType(vertex);
-			}
-
-			@Override
-			public Kind getKindOf(Vertex vertex) {
-				return GraphUtils.getKindOf(vertex);
-			}
-
-			@Override
-			public String getIdOf(Vertex vertex) {
-				return getIdOfVertex(vertex);
-			}
-		});
+	public VertexMatcher vertexMatcher() {
+		return new IndexableVertexMatcher();
 	}
 
 	@Override
