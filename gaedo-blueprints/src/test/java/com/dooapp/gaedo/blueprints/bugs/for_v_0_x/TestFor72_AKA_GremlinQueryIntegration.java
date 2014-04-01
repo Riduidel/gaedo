@@ -1,4 +1,4 @@
-package com.dooapp.gaedo.blueprints.bugs;
+package com.dooapp.gaedo.blueprints.bugs.for_v_0_x;
 
 import java.util.ArrayList;
 import java.util.Collection;

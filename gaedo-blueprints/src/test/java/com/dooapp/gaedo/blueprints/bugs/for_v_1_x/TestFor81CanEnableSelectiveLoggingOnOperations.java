@@ -1,4 +1,4 @@
-package com.dooapp.gaedo.blueprints.bugs;
+package com.dooapp.gaedo.blueprints.bugs.for_v_1_x;
 
 import java.util.Collection;
 import java.util.logging.Handler;
