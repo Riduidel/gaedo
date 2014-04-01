@@ -4,6 +4,7 @@ import java.util.Collection;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import org.hamcrest.Matchers;
 import org.hamcrest.core.Is;
 import org.hamcrest.core.IsCollectionContaining;
 import org.junit.AfterClass;
@@ -23,6 +24,7 @@ import com.dooapp.gaedo.blueprints.finders.FindPostByNote;
 import com.dooapp.gaedo.blueprints.indexable.IndexNames;
 import com.dooapp.gaedo.blueprints.indexable.IndexableGraphBackedFinderService;
 import com.dooapp.gaedo.test.beans.Post;
+import com.dooapp.gaedo.utils.CollectionUtils;
 import com.tinkerpop.blueprints.Graph;
 import com.tinkerpop.blueprints.Index;
 import com.tinkerpop.blueprints.IndexableGraph;
@@ -110,7 +112,8 @@ public class TestFor66_AKA_IndexMayLie extends AbstractGraphPostTest {
 		post.annotations.put(key, value);
 		final long postId = post.id;
 		getPostService().update(post);
-		assertThat(vertices.get(Properties.value.name(), pollutionKey).iterator().next(), Is.is(pollution));
+		Collection<Vertex> matching = CollectionUtils.asList(vertices.get(Properties.value.name(), pollutionKey));
+		assertThat(matching, Matchers.hasItem(pollution));
 
 		// now load it back
 		post = getPostService().find().matching(new FindPostById(postId)).getFirst();
