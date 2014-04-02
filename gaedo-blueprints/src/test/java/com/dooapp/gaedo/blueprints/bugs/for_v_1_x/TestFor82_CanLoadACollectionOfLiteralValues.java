@@ -32,6 +32,10 @@ public class TestFor82_CanLoadACollectionOfLiteralValues extends AbstractGraphPo
 		public Collection<String> extension = new ArrayList<String>();
 		public TestFor82_StringOnlyCollection() {}
 	}
+	public static class TestFor83_IntegerOnlyCollection extends Post {
+		public Collection<Integer> extension = new ArrayList<Integer>();
+		public TestFor83_IntegerOnlyCollection() {}
+	}
 	public static class TestFor82_ObjectCollection extends Post {
 		public Collection<Serializable> extension = new ArrayList<Serializable>();
 		public TestFor82_ObjectCollection() {}
@@ -100,5 +104,19 @@ public class TestFor82_CanLoadACollectionOfLiteralValues extends AbstractGraphPo
 		tested = (TestFor82_ObjectCollection) getPostService().find().matching(new FindPostById(tested.id)).getFirst();
 		assertThat(tested, instanceOf(TestFor82_ObjectCollection.class));
 		assertThat(tested.extension, Matchers.hasItems(METHOD_NAME, author));
+	}
+
+	@Test
+	public void a_collection_with_integer_values_is_ok() {
+		String METHOD_NAME = "a_collection_with_integer_values_is_ok";
+		TestFor83_IntegerOnlyCollection tested = new TestFor83_IntegerOnlyCollection();
+		tested.text = METHOD_NAME;
+		tested.extension.add(2);
+		tested.extension.add(5);
+		tested = (TestFor83_IntegerOnlyCollection) getPostService().create(tested);
+		// Now load it .. and hope the collection is correct
+		tested = (TestFor83_IntegerOnlyCollection) getPostService().find().matching(new FindPostById(tested.id)).getFirst();
+		assertThat(tested, instanceOf(TestFor83_IntegerOnlyCollection.class));
+		assertThat(tested.extension, Matchers.hasItems(2,5));
 	}
 }
