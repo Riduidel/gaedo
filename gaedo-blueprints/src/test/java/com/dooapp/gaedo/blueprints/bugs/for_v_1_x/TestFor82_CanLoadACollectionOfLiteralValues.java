@@ -36,6 +36,10 @@ public class TestFor82_CanLoadACollectionOfLiteralValues extends AbstractGraphPo
 		public Collection<Integer> extension = new ArrayList<Integer>();
 		public TestFor83_IntegerOnlyCollection() {}
 	}
+	public static class TestFor83_BooleanOnlyCollection extends Post {
+		public Collection<Boolean> extension = new ArrayList<Boolean>();
+		public TestFor83_BooleanOnlyCollection() {}
+	}
 	public static class TestFor82_ObjectCollection extends Post {
 		public Collection<Serializable> extension = new ArrayList<Serializable>();
 		public TestFor82_ObjectCollection() {}
@@ -106,6 +110,9 @@ public class TestFor82_CanLoadACollectionOfLiteralValues extends AbstractGraphPo
 		assertThat(tested.extension, Matchers.hasItems(METHOD_NAME, author));
 	}
 
+	/**
+	 * Typical case exposed in bug 83
+	 */
 	@Test
 	public void a_collection_with_integer_values_is_ok() {
 		String METHOD_NAME = "a_collection_with_integer_values_is_ok";
@@ -118,5 +125,42 @@ public class TestFor82_CanLoadACollectionOfLiteralValues extends AbstractGraphPo
 		tested = (TestFor83_IntegerOnlyCollection) getPostService().find().matching(new FindPostById(tested.id)).getFirst();
 		assertThat(tested, instanceOf(TestFor83_IntegerOnlyCollection.class));
 		assertThat(tested.extension, Matchers.hasItems(2,5));
+	}
+
+	/**
+	 * Possible side effect of fixing 83 : boolean collections may be degraded
+	 */
+	@Test
+	public void a_collection_with_boolean_values_is_ok() {
+		String METHOD_NAME = "a_collection_with_boolean_values_is_ok";
+		TestFor83_BooleanOnlyCollection tested = new TestFor83_BooleanOnlyCollection();
+		tested.text = METHOD_NAME;
+		tested.extension.add(true);
+		tested.extension.add(false);
+		tested = (TestFor83_BooleanOnlyCollection) getPostService().create(tested);
+		// Now load it .. and hope the collection is correct
+		tested = (TestFor83_BooleanOnlyCollection) getPostService().find().matching(new FindPostById(tested.id)).getFirst();
+		assertThat(tested, instanceOf(TestFor83_BooleanOnlyCollection.class));
+		assertThat(tested.extension, Matchers.hasItems(true, false));
+	}
+
+	/**
+	 * I had an intuition about collection of Serializable containing mixed integers and booleans, and this intuition revealed true :
+	 * when writing indexing properties for values 1 and 2, boolean values are overwritten.
+	 */
+//	@Test
+	public void a_collection_mixing_booleans_and_integers_is_ok() {
+		String METHOD_NAME = "a_collection_mixing_booleans_and_integers_is_ok";
+		TestFor82_ObjectCollection tested = new TestFor82_ObjectCollection();
+		tested.text = METHOD_NAME;
+		tested.extension.add(true);
+		tested.extension.add(false);
+		tested.extension.add(1);
+		tested.extension.add(2);
+		tested = (TestFor82_ObjectCollection) getPostService().create(tested);
+		// Now load it .. and hope the collection is correct
+		tested = (TestFor82_ObjectCollection) getPostService().find().matching(new FindPostById(tested.id)).getFirst();
+		assertThat(tested, instanceOf(TestFor82_ObjectCollection.class));
+		assertThat(tested.extension, Matchers.hasItems((Serializable) true, false, 1, 2));
 	}
 }

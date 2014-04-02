@@ -18,6 +18,7 @@ import com.dooapp.gaedo.blueprints.operations.CollectionSizeProperty;
 import com.dooapp.gaedo.blueprints.operations.LiteralInCollectionUpdaterProperty;
 import com.dooapp.gaedo.blueprints.operations.Loader;
 import com.dooapp.gaedo.blueprints.strategies.GraphMappingStrategy;
+import com.dooapp.gaedo.blueprints.transformers.Literals;
 import com.dooapp.gaedo.finders.FinderCrudService;
 import com.dooapp.gaedo.finders.repository.ServiceRepository;
 import com.dooapp.gaedo.patterns.WriteReplaceable;
@@ -171,7 +172,20 @@ public class CollectionLazyLoader extends AbstractLazyLoader implements Invocati
 				// a valid property for that map ! is property key an integer ?
 				try {
 					int index = Integer.parseInt(mapping.getValue());
-					returned.put(index, new LoadValueInProperty(new CollectionAccessByIndexProperty(property, index, null)));
+					// notice no loader is added if property type is boolean and collection isn't expected to contain booleans
+					CollectionAccessByIndexProperty valueInCollectionProperty = new CollectionAccessByIndexProperty(property, index, null);
+					String value = rootVertex.getProperty(propertyName).toString();
+					// Mind you, BooleanLiteralTransformer will load any non boolean value as false boolean, so we can't use it there
+					if(value.equalsIgnoreCase(Boolean.TRUE.toString()) || value.equalsIgnoreCase(Boolean.FALSE.toString())) {
+						// collection contains only boolean values, so all is ok
+						if(valueInCollectionProperty.getType().equals(Boolean.class)) {
+							returned.put(index, new LoadValueInProperty(valueInCollectionProperty));
+						} else {
+							// collection doesn't contain boolean values, but value is a pure boolean ? then it's an indexing property
+						}
+					} else {
+						returned.put(index, new LoadValueInProperty(valueInCollectionProperty));
+					}
 				} catch(NumberFormatException e) {
 					// nothing to do : value is just non matching.
 				}
