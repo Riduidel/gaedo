@@ -4,7 +4,7 @@
 	<groupId>com.dooapp</groupId>
 	<artifactId>gaedo</artifactId>
 	<name>Gaedo</name>
-	<version>1.0.10-SNAPSHOT</version>
+	<version>1.0.10</version>
 	<description>Google App Engine Data Object Library</description>
 	<url>https://github.com/Riduidel/gaedo/</url>
 	<packaging>pom</packaging>
@@ -117,7 +117,7 @@
 		<url>https://github.com/Riduidel/gaedo.git</url>
 		<connection>scm:git:ssh://git@github.com/Riduidel/gaedo.git</connection>
 		<developerConnection>scm:git:ssh://git@github.com/Riduidel/gaedo.git</developerConnection>
-		<tag>HEAD</tag>
+		<tag>gaedo-1.0.10</tag>
 	</scm>
 	<ciManagement>
 		<system>Jenkins</system>

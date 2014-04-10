@@ -3,7 +3,7 @@
   <parent>
     <artifactId>gaedo</artifactId>
     <groupId>com.dooapp</groupId>
-    <version>1.0.10-SNAPSHOT</version>
+    <version>1.0.10</version>
   </parent>
   <groupId>com.dooapp</groupId>
   <artifactId>languages-bindings</artifactId>
