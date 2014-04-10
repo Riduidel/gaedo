@@ -10,6 +10,7 @@ import java.util.logging.Logger;
 import javax.persistence.CascadeType;
 
 import com.dooapp.gaedo.blueprints.AbstractBluePrintsBackedFinderService;
+import com.dooapp.gaedo.blueprints.CantCreateAVertexForALiteralException;
 import com.dooapp.gaedo.blueprints.GraphDatabaseDriver;
 import com.dooapp.gaedo.blueprints.GraphUtils;
 import com.dooapp.gaedo.blueprints.ObjectCache;
@@ -113,9 +114,22 @@ public class Deleter {
                 // yes, delete it forever (but before, see if there aren't more datas to delete
                 Object value = p.get(toDelete);
                 if(value!=null) {
-                	Vertex knownValueVertex = service.getVertexFor(value, CascadeType.REFRESH, objectsBeingAccessed);
-                	if(knownValueVertex!=null && knownValueVertex.equals(valueVertex))
-                		service.deleteOutEdgeVertex(objectVertex, valueVertex, value, objectsBeingAccessed);
+                	try {
+	                	Vertex knownValueVertex = service.getVertexFor(value, CascadeType.REFRESH, objectsBeingAccessed);
+	                	if(knownValueVertex!=null && knownValueVertex.equals(valueVertex))
+	                		service.deleteOutEdgeVertex(objectVertex, valueVertex, value, objectsBeingAccessed);
+                	} catch(CantCreateAVertexForALiteralException vertexWontBeDeleted) {
+                		// According to https://github.com/Riduidel/gaedo/issues/85, this case should be simply ignored ...
+                		// but I'll nevertheless write a memo log
+                		if (logger.isLoggable(Level.WARNING)) {
+							logger.log(Level.WARNING,
+											String.format("You tried to delete a vertex for a literal which is what is said here :\n\t%s"
+															+ "\nThis is not possible. As a consequence, vertex %s\nwill continue "
+															+ "it's polluting lifestyle in your graph.",
+															vertexWontBeDeleted.getMessage(),
+															GraphUtils.toString(valueVertex)));
+						}
+                	}
                 }
 
             }
