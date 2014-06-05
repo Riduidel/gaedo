@@ -15,7 +15,7 @@ import com.dooapp.gaedo.utils.PropertyChangeEmitter;
 import com.dooapp.gaedo.utils.PropertyChangeEmitterImpl;
 
 /**
- * Simple implementation providing default overridable operations 
+ * Simple implementation providing default overridable operations
  * @author Nicolas
  *
  */
@@ -24,14 +24,14 @@ public class SimpleServiceRepository implements ServiceRepository {
 	 * Collection of already known services
 	 */
 	private Map<Class<?>, FinderCrudService<?, ?>> services = new HashMap<Class<?>, FinderCrudService<?, ?>>();
-	
+
 	/**
 	 * Unmodifiable view of services, used for all map methods
 	 */
 	private Map<Class<?>, FinderCrudService<?, ?>>  delegateMap = Collections.unmodifiableMap(services);
-	
+
 	private PropertyChangeEmitterImpl support;
-	
+
 	public boolean containsKey(Class<?> arg0) {
 		return services.containsKey(arg0);
 	}
@@ -87,7 +87,11 @@ public class SimpleServiceRepository implements ServiceRepository {
 	}
 
 	public boolean containsKey(Object key) {
-		return delegateMap.containsKey(key);
+		if(key instanceof Class) {
+			return containsKey((Class) key);
+		} else {
+			return containsKey(key.getClass());
+		}
 	}
 
 	public boolean containsValue(Object value) {

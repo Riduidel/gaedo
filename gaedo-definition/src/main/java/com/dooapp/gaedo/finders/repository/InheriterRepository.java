@@ -29,7 +29,7 @@ public class InheriterRepository extends SimpleServiceRepository {
 			}
 		}
 	}
-	
+
 	@Override
 	public <DataType, InformerType extends Informer<DataType>> FinderCrudService<DataType, InformerType> get(Class<DataType> dataType) {
 		return get(dataType, dataType);
