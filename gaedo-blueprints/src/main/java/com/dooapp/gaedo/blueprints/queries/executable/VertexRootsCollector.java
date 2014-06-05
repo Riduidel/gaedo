@@ -2,9 +2,7 @@ package com.dooapp.gaedo.blueprints.queries.executable;
 
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.HashSet;
 import java.util.LinkedList;
-import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
 
@@ -15,11 +13,10 @@ import com.dooapp.gaedo.blueprints.GraphUtils;
 import com.dooapp.gaedo.blueprints.ObjectCache;
 import com.dooapp.gaedo.blueprints.indexable.IndexNames;
 import com.dooapp.gaedo.blueprints.operations.CollectionAccessByValueProperty;
-import com.dooapp.gaedo.blueprints.operations.LiteralInCollectionUpdaterProperty;
 import com.dooapp.gaedo.blueprints.operations.Updater;
 import com.dooapp.gaedo.blueprints.queries.tests.CollectionContains;
 import com.dooapp.gaedo.blueprints.queries.tests.EqualsTo;
-import com.dooapp.gaedo.blueprints.queries.tests.EqualsToIgnoreCase;
+import com.dooapp.gaedo.blueprints.queries.tests.InstanceOf;
 import com.dooapp.gaedo.blueprints.queries.tests.NotVertexTest;
 import com.dooapp.gaedo.blueprints.queries.tests.OrVertexTest;
 import com.dooapp.gaedo.blueprints.queries.tests.VertexTestVisitorAdapter;
@@ -142,6 +139,13 @@ public class VertexRootsCollector extends VertexTestVisitorAdapter {
 	@Override
 	public void visit(CollectionContains collectionContains) {
 		result.add(load(collectionContains.getExpectedAsValue(), collectionContains.getPath()));
+	}
+
+	@Override
+	public void visit(InstanceOf instanceOf) {
+		if(instanceOf.getRepository().containsKey(instanceOf.getExpectedAsValue())) {
+			result.add(load(instanceOf.getExpectedAsValue(), instanceOf.getPath()));
+		}
 	}
 
 	/**

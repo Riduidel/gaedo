@@ -104,7 +104,7 @@ public class OptimizedGraphExecutableQuery<GraphType extends IndexableGraph> ext
 	 * @param possibleRoots a list of vertex value range allowing lazy loading of matching vertices
 	 * @return an object containing informations about the best matching vertex (like a cache of vertices in solution space).
 	 */
-	private VertexSet findBestRootIn(SortedSet<VertexSet> possibleRoots) {
+	public VertexSet findBestRootIn(SortedSet<VertexSet> possibleRoots) {
 		VertexSet tested = possibleRoots.first();
 		while(tested.canGoBack()) {
 			possibleRoots.remove(tested);
@@ -126,7 +126,7 @@ public class OptimizedGraphExecutableQuery<GraphType extends IndexableGraph> ext
 	 * @param test test that will be
 	 * @return
 	 */
-	private SortedSet<VertexSet> getPossibleRootsOf(VertexTest test) {
+	public SortedSet<VertexSet> getPossibleRootsOf(VertexTest test) {
 		VertexRootsCollector collector = new VertexRootsCollector(service);
 		test.accept(collector);
 		return collector.getResult();
