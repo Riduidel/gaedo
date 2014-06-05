@@ -27,7 +27,7 @@ import static com.dooapp.gaedo.blueprints.TestUtils.simpleTest;
 import static org.junit.Assert.assertThat;
 
 @RunWith(Parameterized.class)
-public class TestFor81CanEnableSelectiveLoggingOnOperations extends AbstractGraphPostTest {
+public class TestFor81_CanEnableSelectiveLoggingOnOperations extends AbstractGraphPostTest {
 	public static class TestFor81PostSubClass extends Post {
 		@OneToOne(cascade={CascadeType.PERSIST})
 		public String onlyOnCreate;
@@ -38,7 +38,7 @@ public class TestFor81CanEnableSelectiveLoggingOnOperations extends AbstractGrap
 		return simpleTest();
 	}
 
-	public TestFor81CanEnableSelectiveLoggingOnOperations(AbstractGraphEnvironment<?> environment) {
+	public TestFor81_CanEnableSelectiveLoggingOnOperations(AbstractGraphEnvironment<?> environment) {
 		super(environment);
 	}
 
