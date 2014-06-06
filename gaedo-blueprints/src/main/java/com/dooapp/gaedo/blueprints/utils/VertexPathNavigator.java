@@ -136,42 +136,48 @@ public class VertexPathNavigator {
 					returned.setNavigationSuccessfull(false);
 				} else {
 					Object value = currentVertex.getProperty(GraphUtils.getEdgeNameFor(currentProperty));
-					if(value==null) {
-						returned.setNavigationSuccessfull(true);
-					} else {
-						if(Literals.containsKey(propertyType)) {
-							returned.setNavigationSuccessfull(true);
-						} else if(Tuples.containsKey(propertyType)) {
-							if(Tuples.serializables.getDataClass().isAssignableFrom(propertyType)) {
-								// we must here unfrtonatly read value prefix to see if it is a literal
-								String valueType = LiteralHelper.getTypePrefix(value.toString());
-								try {
-									ClassLoader classLoader = propertyType.getClassLoader();
-									classLoader = (classLoader==null ? getClass().getClassLoader() : classLoader);
-									Class valueClass = classLoader.loadClass(valueType);
-									returned.setNavigationSuccessfull(Literals.containsKey(valueClass));
-								} catch (ClassNotFoundException e) {
-									if (logger.isLoggable(Level.WARNING)) {
-										logger.log(Level.WARNING, String.format("Did you really decide to store an enum in a Serializable ?\n"
-														+ "Gaedo is not strong enough for that, dude."
-														+ "I would suggest to replace storage of %s"
-														+ "from Serializable to ... somethign else.\n"
-														+ "For additional reference, implied vertex is %s",
-															currentProperty,
-															GraphUtils.toString(currentVertex)), e);
-									}
-									returned.setNavigationSuccessfull(false);
-								}
-							} else {
-								// Map entries are stored as effective objects in graph due to their multiple relationships
-								returned.setNavigationSuccessfull(false);
-							}
-						}
+					if(Literals.containsKey(propertyType)) {
+						returned.setNavigationSuccessfull(endNavigationForLiteral(value));
+					} else if(Tuples.containsKey(propertyType)) {
+						returned.setNavigationSuccessfull(endNavigationForTuple(currentProperty, currentVertex, propertyType, value));
 					}
 				}
 			}
 		}
 		return returned;
+	}
+
+	protected boolean endNavigationForTuple(Property currentProperty, Vertex currentVertex, Class<?> propertyType, Object value) {
+		if(Tuples.serializables.getDataClass().isAssignableFrom(propertyType)) {
+			if(value==null)
+				return false;
+			// we must here unfortunatly read value prefix to see if it is a literal
+			String valueType = LiteralHelper.getTypePrefix(value.toString());
+			try {
+				ClassLoader classLoader = propertyType.getClassLoader();
+				classLoader = (classLoader==null ? getClass().getClassLoader() : classLoader);
+				Class valueClass = classLoader.loadClass(valueType);
+				return Literals.containsKey(valueClass);
+			} catch (ClassNotFoundException e) {
+				if (logger.isLoggable(Level.WARNING)) {
+					logger.log(Level.WARNING, String.format("Did you really decide to store an enum in a Serializable ?\n"
+									+ "Gaedo is not strong enough for that, dude."
+									+ "I would suggest to replace storage of %s"
+									+ "from Serializable to ... somethign else.\n"
+									+ "For additional reference, implied vertex is %s",
+										currentProperty,
+										GraphUtils.toString(currentVertex)), e);
+				}
+				return false;
+			}
+		} else {
+			// Map entries are stored as effective objects in graph due to their multiple relationships
+			return false;
+		}
+	}
+
+	protected boolean endNavigationForLiteral(Object value) {
+		return value!=null;
 	}
 
 }
