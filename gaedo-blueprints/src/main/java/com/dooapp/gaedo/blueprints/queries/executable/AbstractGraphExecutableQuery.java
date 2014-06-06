@@ -33,28 +33,8 @@ public abstract class AbstractGraphExecutableQuery<GraphType extends IndexableGr
 	 * @return
 	 */
 	protected List<Vertex> getVertices() {
-		Collection<Vertex> unsortedVertices = null;
-		if(sort==null)
-			unsortedVertices = new LinkedList<Vertex>();
-		else
-			unsortedVertices = new TreeSet<Vertex>(new SortingComparator(service, sort));
-		Iterable<Vertex> examinedVertices = getVerticesToExamine();
-		if (QueryLog.logger.isLoggable(QueryLog.QUERY_LOGGING_LEVEL)) {
-			if(examinedVertices instanceof Collection) {
-				QueryLog.logger.log(QueryLog.QUERY_LOGGING_LEVEL, "vertex test "+test+" returned a total of "+((Collection)examinedVertices).size()+" vertices to examine");
-			}
-		}
-		for(Vertex v : examinedVertices) {
-			if(test.matches(v)) {
-				unsortedVertices.add(v);
-			}
-			// We don't need to add specific sorting here, as it is done by the Comparator
-		}
-		if (QueryLog.logger.isLoggable(QueryLog.QUERY_LOGGING_LEVEL)) {
-			QueryLog.logger.log(QueryLog.QUERY_LOGGING_LEVEL, "In these, "+unsortedVertices.size()+" vertices matched given test "+test);
-		}
-		// Hopefully, CollectionUtils#asList method is smart enough to not transform a list (which is what we obtain when no sorting expression is given)
-		return CollectionUtils.asList(unsortedVertices);
+		GraphExecutionPlan examinedVertices = getExecutionPlan();
+		return examinedVertices.getVertices();
 	}
 
 	/**
@@ -63,9 +43,7 @@ public abstract class AbstractGraphExecutableQuery<GraphType extends IndexableGr
 	 * result a superset of all valid vertices. Obviously, the goal is to find fast the smaller superset.
 	 * @return an unordered superset of matching vertices.
 	 */
-	public abstract Iterable<Vertex> getVerticesToExamine();
-
-
+	public abstract GraphExecutionPlan getExecutionPlan();
 
 	@Override
 	public int count() {

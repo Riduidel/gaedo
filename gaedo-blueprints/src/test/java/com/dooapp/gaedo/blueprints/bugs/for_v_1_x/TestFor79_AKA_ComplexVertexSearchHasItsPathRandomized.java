@@ -69,7 +69,7 @@ public class TestFor79_AKA_ComplexVertexSearchHasItsPathRandomized extends Abstr
 		assertThat(query, isA((Class)OptimizedGraphExecutableQuery.class));
 		OptimizedGraphExecutableQuery optimizedQuery = (OptimizedGraphExecutableQuery) query;
 		optimizedQuery.getTest().accept(new PathIsCorrect());
-		optimizedQuery.getVerticesToExamine();
+		optimizedQuery.getExecutionPlan();
 		optimizedQuery.getTest().accept(new PathIsCorrect());
 	}
 }

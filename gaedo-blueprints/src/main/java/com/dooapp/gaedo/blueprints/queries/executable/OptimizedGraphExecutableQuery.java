@@ -73,13 +73,13 @@ public class OptimizedGraphExecutableQuery<GraphType extends IndexableGraph> ext
 	/**
 	 * Get a quite reduced set of vertices to examine. This method return an iterable of vertices containing the ones corresponding to query solutions.
 	 * This iterable is not optimal (there are elements in which than may not be query solutions). But it should be, in most cases
-	 * a better solution space than the one given by {@link BasicGraphExecutableQuery} (which, as a reminder, always return all vertices linked
+	 * a better solution space than the one given by previous BasicGraphExecutableQuery (which, as a reminder, always return all vertices linked
 	 * to the queried class through an object.classes edge).
 	 * @return
 	 * @see com.dooapp.gaedo.blueprints.queries.executable.AbstractGraphExecutableQuery#getVerticesToExamine()
 	 */
 	@Override
-	public Iterable<Vertex> getVerticesToExamine() {
+	public GraphExecutionPlan getExecutionPlan() {
 		// First step is to get all possible query root vertices
 		SortedSet<VertexSet> possibleRoots = getPossibleRootsOf(test);
 		VertexSet bestMatch = findBestRootIn(possibleRoots);
@@ -93,7 +93,7 @@ public class OptimizedGraphExecutableQuery<GraphType extends IndexableGraph> ext
 			}
 			QueryLog.logger.log(QueryLog.QUERY_LOGGING_LEVEL, sOut.toString());
 		}
-		return returned;
+		return new GraphExecutionPlan(service, test, sort, returned);
 	}
 
 	/**
