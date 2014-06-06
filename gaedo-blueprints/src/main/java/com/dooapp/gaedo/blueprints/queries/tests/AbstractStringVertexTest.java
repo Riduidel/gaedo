@@ -28,6 +28,8 @@ public abstract class AbstractStringVertexTest<ExpectedType> extends MonovaluedV
 	@Override
 	protected boolean callMatchLiteral(Vertex currentVertex, Property finalProperty) {
 		String value = getLiteralValue(currentVertex, finalProperty);
+		if(value==null)
+			return matchesNull();
 		return testString(value, expected);
 	}
 
