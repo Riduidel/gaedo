@@ -61,4 +61,44 @@ public abstract class ComparableValuedVertexTest<ComparableType extends Comparab
 		ComparableType value = (ComparableType) literalTransformer.fromString(effectiveGraphValue, valueClass, classLoader, objectsBeingAccessed);
 		return doCompare(value);
 	}
+
+	/**
+	 * @return the strictly
+	 * @category getter
+	 * @category strictly
+	 */
+	public boolean isStrictly() {
+		return strictly;
+	}
+
+	/**
+	 * @return
+	 * @see java.lang.Object#hashCode()
+	 */
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = super.hashCode();
+		result = prime * result + (strictly ? 1231 : 1237);
+		return result;
+	}
+
+	/**
+	 * @param obj
+	 * @return
+	 * @see java.lang.Object#equals(java.lang.Object)
+	 */
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (!super.equals(obj))
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		ComparableValuedVertexTest other = (ComparableValuedVertexTest) obj;
+		if (strictly != other.strictly)
+			return false;
+		return true;
+	}
 }

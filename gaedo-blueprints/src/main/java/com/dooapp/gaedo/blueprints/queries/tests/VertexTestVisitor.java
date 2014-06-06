@@ -57,7 +57,7 @@ public interface VertexTestVisitor extends Visitor {
 
 	<ComparableType extends Comparable<ComparableType>>void visit(LowerThan<ComparableType> anything);
 
-	<ComparableType extends Comparable<ComparableType>>void visit(ComparableValuedVertexTest<ComparableType> anything);
+	<ComparableType extends Comparable<ComparableType>>void visit(GreaterThan<ComparableType> anything);
 
 	void visit(EqualsToIgnoreCase equalsToIgnoreCase);
 

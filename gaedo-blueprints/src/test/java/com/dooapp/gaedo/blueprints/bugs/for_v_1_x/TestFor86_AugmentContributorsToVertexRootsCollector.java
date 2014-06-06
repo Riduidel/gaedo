@@ -2,7 +2,7 @@ package com.dooapp.gaedo.blueprints.bugs.for_v_1_x;
 
 import java.util.Collection;
 import java.util.List;
-import java.util.SortedSet;
+import java.util.SortedMap;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -17,6 +17,7 @@ import com.dooapp.gaedo.blueprints.beans.PostSubClass;
 import com.dooapp.gaedo.blueprints.queries.executable.GraphExecutableQuery;
 import com.dooapp.gaedo.blueprints.queries.executable.OptimizedGraphExecutableQuery;
 import com.dooapp.gaedo.blueprints.queries.executable.VertexSet;
+import com.dooapp.gaedo.blueprints.queries.tests.VertexTest;
 import com.dooapp.gaedo.finders.QueryBuilder;
 import com.dooapp.gaedo.finders.QueryExpression;
 import com.dooapp.gaedo.test.beans.Post;
@@ -62,9 +63,9 @@ public class TestFor86_AugmentContributorsToVertexRootsCollector extends Abstrac
     	GraphExecutableQuery executable = query.prepareQuery();
     	assertThat(executable, instanceOf(OptimizedGraphExecutableQuery.class));
     	OptimizedGraphExecutableQuery optimized = (OptimizedGraphExecutableQuery) executable;
-    	SortedSet<VertexSet> roots = optimized.getPossibleRootsOf(optimized.getTest());
+    	SortedMap<VertexSet, VertexTest> roots = optimized.getPossibleRootsOf(optimized.getTest());
     	assertThat(roots.size(), is(2));
-    	VertexSet set = roots.first();
+    	VertexSet set = roots.firstKey();
     	List<Vertex> values = CollectionUtils.asList(set.getVertices().get());
     	assertThat(values.size(), is(1));
     }

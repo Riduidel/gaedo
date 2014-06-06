@@ -1,5 +1,6 @@
 package com.dooapp.gaedo.blueprints.queries.tests;
 
+import java.util.Collection;
 import java.util.regex.Pattern;
 
 import com.dooapp.gaedo.properties.Property;
@@ -71,4 +72,9 @@ public interface CompoundVertexTest extends VertexTest {
 
 	VertexTest instanceOf(Iterable<Property> path, Class<?> type);
 
+	/**
+	 * Get contained list of tests. Please do not call it from user space, as it is of virtually no use to you.
+	 * @return
+	 */
+	Collection<VertexTest> getTests();
 }

@@ -129,4 +129,47 @@ public abstract class AggregatedTargettedVertexTest extends TargettedVertexTest 
 		}
 		return returned;
 	}
+
+	/**
+	 * @return the tests
+	 * @category getter
+	 * @category tests
+	 */
+	public Collection<VertexTest> getTests() {
+		return tests;
+	}
+
+	/**
+	 * @return
+	 * @see java.lang.Object#hashCode()
+	 */
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = super.hashCode();
+		result = prime * result + ((tests == null) ? 0 : tests.hashCode());
+		return result;
+	}
+
+	/**
+	 * @param obj
+	 * @return
+	 * @see java.lang.Object#equals(java.lang.Object)
+	 */
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (!super.equals(obj))
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		AggregatedTargettedVertexTest other = (AggregatedTargettedVertexTest) obj;
+		if (tests == null) {
+			if (other.tests != null)
+				return false;
+		} else if (!tests.equals(other.tests))
+			return false;
+		return true;
+	}
 }

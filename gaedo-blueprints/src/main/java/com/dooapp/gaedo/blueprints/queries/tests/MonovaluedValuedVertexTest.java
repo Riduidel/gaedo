@@ -195,4 +195,47 @@ public abstract class MonovaluedValuedVertexTest<ValueType extends Object, Expec
 		ClassLoader classLoader = expected == null ? expected.getClass().getClassLoader() : getClass().getClassLoader();
 		return (ValueType) loader.loadSingleLiteral(classLoader, finalProperty, currentVertex, objectsBeingAccessed);
 	}
+
+	/**
+	 * @return the expected
+	 * @category getter
+	 * @category expected
+	 */
+	public ExpectedType getExpected() {
+		return expected;
+	}
+
+	/**
+	 * @return
+	 * @see java.lang.Object#hashCode()
+	 */
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = super.hashCode();
+		result = prime * result + ((expected == null) ? 0 : expected.hashCode());
+		return result;
+	}
+
+	/**
+	 * @param obj
+	 * @return
+	 * @see java.lang.Object#equals(java.lang.Object)
+	 */
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (!super.equals(obj))
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		MonovaluedValuedVertexTest other = (MonovaluedValuedVertexTest) obj;
+		if (expected == null) {
+			if (other.expected != null)
+				return false;
+		} else if (!expected.equals(other.expected))
+			return false;
+		return true;
+	}
 }

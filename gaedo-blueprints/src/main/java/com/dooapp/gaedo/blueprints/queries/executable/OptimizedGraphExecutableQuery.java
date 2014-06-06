@@ -1,7 +1,9 @@
 package com.dooapp.gaedo.blueprints.queries.executable;
 
 import java.util.Map;
+import java.util.SortedMap;
 import java.util.SortedSet;
+import java.util.TreeSet;
 
 import com.dooapp.gaedo.blueprints.AbstractBluePrintsBackedFinderService;
 import com.dooapp.gaedo.blueprints.GraphUtils;
@@ -80,20 +82,37 @@ public class OptimizedGraphExecutableQuery<GraphType extends IndexableGraph> ext
 	 */
 	@Override
 	public GraphExecutionPlan getExecutionPlan() {
-		// First step is to get all possible query root vertices
-		SortedSet<VertexSet> possibleRoots = getPossibleRootsOf(test);
-		VertexSet bestMatch = findBestRootIn(possibleRoots);
-		LazyLoader vertices = bestMatch.getVertices();
-		Iterable<Vertex> returned = vertices.get();
-		if(QueryLog.logger.isLoggable(QueryLog.QUERY_LOGGING_LEVEL)) {
-			StringBuilder sOut = new StringBuilder();
-			sOut.append("query roots for test ").append(test).append("\nare the ").append(vertices.size()).append(" following vertices");
-			for(Vertex v : returned) {
-				sOut.append("\n").append(GraphUtils.toString(v));
+		Iterable<Vertex> verticesToExamine = getVerticesToExamine();
+		VertexTest toUse = test;
+		if(verticesToExamine==null) {
+			// First step is to get all possible query root vertices
+			SortedMap<VertexSet, VertexTest> possibleRoots = getPossibleRootsOf(test);
+			// extract the set from the map. Too bad it can't be provided directly by Java
+			SortedSet<VertexSet> rootsSet = new TreeSet<VertexSet>(possibleRoots.comparator());
+			rootsSet.addAll(possibleRoots.keySet());
+			VertexSet bestMatch = findBestRootIn(rootsSet);
+			toUse = possibleRoots.get(bestMatch);
+			LazyLoader vertices = bestMatch.getVertices();
+			verticesToExamine = vertices.get();
+			if(QueryLog.logger.isLoggable(QueryLog.QUERY_LOGGING_LEVEL)) {
+				StringBuilder sOut = new StringBuilder();
+				sOut.append("query roots for test ").append(test).append("\nare the ").append(vertices.size()).append(" following vertices");
+				for(Vertex v : verticesToExamine) {
+					sOut.append("\n").append(GraphUtils.toString(v));
+				}
+				QueryLog.logger.log(QueryLog.QUERY_LOGGING_LEVEL, sOut.toString());
 			}
-			QueryLog.logger.log(QueryLog.QUERY_LOGGING_LEVEL, sOut.toString());
 		}
-		return new GraphExecutionPlan(service, test, sort, returned);
+		return new GraphExecutionPlan(service, toUse, sort, verticesToExamine);
+	}
+
+	/**
+	 * Override of the list of vertices to load. Allow bypassing of the optimized part of {@link #getExecutionPlan()}.
+	 * Conclusion is obvious : unless you really know what you do, please don't override it creatively.
+	 * @return
+	 */
+	public Iterable<Vertex> getVerticesToExamine() {
+		return null;
 	}
 
 	/**
@@ -126,10 +145,8 @@ public class OptimizedGraphExecutableQuery<GraphType extends IndexableGraph> ext
 	 * @param test test that will be
 	 * @return
 	 */
-	public SortedSet<VertexSet> getPossibleRootsOf(VertexTest test) {
-		VertexRootsCollector collector = new VertexRootsCollector(service);
-		test.accept(collector);
-		return collector.getResult();
+	public SortedMap<VertexSet, VertexTest> getPossibleRootsOf(VertexTest test) {
+		return new VertexRootsCollector(service).getSetsToProcessedTests(test);
 	}
 
 }

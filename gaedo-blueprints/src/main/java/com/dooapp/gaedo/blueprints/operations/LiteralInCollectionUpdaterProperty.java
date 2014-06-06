@@ -116,7 +116,8 @@ public abstract class LiteralInCollectionUpdaterProperty extends AbstractPropert
 			if(collectionValueType instanceof Class) {
 				return (Class) collectionValueType;
 			} else if(collectionValueType instanceof ParameterizedType) {
-				return (ParameterizedType) collectionValueType;
+				ParameterizedType type = (ParameterizedType) collectionValueType;
+				return type.getRawType();
 			} else if(collectionValueType instanceof WildcardType) {
 				throw new UnusableTypeException("we can't infer element type in widlcard type "+collectionType.toString());
 			} else if(collectionValueType instanceof TypeVariable) {

@@ -3,8 +3,8 @@ package com.dooapp.gaedo.blueprints.queries.executable;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.LinkedList;
-import java.util.SortedSet;
-import java.util.TreeSet;
+import java.util.SortedMap;
+import java.util.TreeMap;
 
 import javax.persistence.CascadeType;
 
@@ -19,7 +19,9 @@ import com.dooapp.gaedo.blueprints.queries.tests.EqualsTo;
 import com.dooapp.gaedo.blueprints.queries.tests.InstanceOf;
 import com.dooapp.gaedo.blueprints.queries.tests.NotVertexTest;
 import com.dooapp.gaedo.blueprints.queries.tests.OrVertexTest;
+import com.dooapp.gaedo.blueprints.queries.tests.VertexTest;
 import com.dooapp.gaedo.blueprints.queries.tests.VertexTestVisitorAdapter;
+import com.dooapp.gaedo.blueprints.queries.tests.VertextTestUtils;
 import com.dooapp.gaedo.blueprints.transformers.LiteralTransformer;
 import com.dooapp.gaedo.blueprints.transformers.Literals;
 import com.dooapp.gaedo.properties.Property;
@@ -82,16 +84,18 @@ public class VertexRootsCollector extends VertexTestVisitorAdapter {
 	}
 
 	/**
-	 * Result collector. Each of the given vertex set has a count field which
-	 * will be used as primary comparison field by built-in comparator
+	 * Temporary map linking sets to the tests that should be executed, were those sets to be chosen as reference ones
+	 *
 	 */
-	private SortedSet<VertexSet> result = new TreeSet<VertexSet>(new VertexSetSizeComparator());
+	private SortedMap<VertexSet, VertexTest> result = new TreeMap<VertexSet, VertexTest>(new VertexSetSizeComparator());
 
-	private AbstractBluePrintsBackedFinderService<?, ?, ?> service;
+	private final AbstractBluePrintsBackedFinderService<?, ?, ?> service;
 	/**
 	 * Cache of objects being loaded during roots collection building
 	 */
 	private transient ObjectCache objectsBeingAccessed = ObjectCache.create(CascadeType.REFRESH);
+
+	private VertexTest initialTest;
 
 	public VertexRootsCollector(AbstractBluePrintsBackedFinderService<?, ?, ?> service) {
 		this.service = service;
@@ -102,7 +106,9 @@ public class VertexRootsCollector extends VertexTestVisitorAdapter {
 	 *
 	 * @return
 	 */
-	public SortedSet<VertexSet> getResult() {
+	public SortedMap<VertexSet, VertexTest> getSetsToProcessedTests(VertexTest testToScan) {
+		this.initialTest = testToScan;
+		testToScan.accept(this);
 		return result;
 	}
 
@@ -138,13 +144,13 @@ public class VertexRootsCollector extends VertexTestVisitorAdapter {
 	 */
 	@Override
 	public void visit(CollectionContains collectionContains) {
-		result.add(load(collectionContains.getExpectedAsValue(), collectionContains.getPath()));
+		result.put(load(collectionContains.getExpectedAsValue(), collectionContains.getPath()), testWithout(collectionContains));
 	}
 
 	@Override
 	public void visit(InstanceOf instanceOf) {
 		if(instanceOf.getRepository().containsKey(instanceOf.getExpectedAsValue())) {
-			result.add(load(instanceOf.getExpectedAsValue(), instanceOf.getPath()));
+			result.put(load(instanceOf.getExpectedAsValue(), instanceOf.getPath()), testWithout(instanceOf));
 		}
 	}
 
@@ -156,7 +162,16 @@ public class VertexRootsCollector extends VertexTestVisitorAdapter {
 	@Override
 	public void visit(EqualsTo equalsTo) {
 		if(equalsTo.getExpectedAsValue()!=null)
-			result.add(load(equalsTo.getExpectedAsValue(), equalsTo.getPath()));
+			result.put(load(equalsTo.getExpectedAsValue(), equalsTo.getPath()), testWithout(equalsTo));
+	}
+
+	/**
+	 * Create a test from initial one without the given one
+	 * @param toRemove test to remove from initial test
+	 * @return
+	 */
+	private VertexTest testWithout(VertexTest toRemove) {
+		return VertextTestUtils.testWithout(initialTest, toRemove);
 	}
 
 	/**
