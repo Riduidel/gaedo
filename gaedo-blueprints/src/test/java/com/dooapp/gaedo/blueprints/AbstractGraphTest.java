@@ -2,6 +2,8 @@ package com.dooapp.gaedo.blueprints;
 
 import org.junit.After;
 import org.junit.Before;
+import org.junit.FixMethodOrder;
+import org.junit.runners.MethodSorters;
 
 import com.dooapp.gaedo.blueprints.beans.PostSubClass;
 import com.dooapp.gaedo.blueprints.beans.PostSubClassInformer;
@@ -13,6 +15,7 @@ import com.dooapp.gaedo.test.beans.TagInformer;
 import com.dooapp.gaedo.test.beans.User;
 import com.dooapp.gaedo.test.beans.UserInformer;
 
+@FixMethodOrder(MethodSorters.NAME_ASCENDING)
 public class AbstractGraphTest  {
 
 	protected final AbstractGraphEnvironment<?> environment;

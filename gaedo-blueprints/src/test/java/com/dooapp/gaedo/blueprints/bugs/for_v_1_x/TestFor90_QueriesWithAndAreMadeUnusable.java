@@ -91,7 +91,7 @@ public class TestFor90_QueriesWithAndAreMadeUnusable extends AbstractGraphPostSu
     	assertThat(vertexSets.size(), is(3));
     	// I guess best match should be the one related to creator (there is only one object matching)
     	VertexSet best = optimized.findBestRootIn(vertexSets);
-    	assertThat(best.getVertices(), IsInstanceOf.instanceOf(EagerLoader.class));
+    	assertThat(best.size(), is(1l));
 
     }
 }
