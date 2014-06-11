@@ -4,6 +4,7 @@ import java.util.Collection;
 import java.util.Map;
 import java.util.SortedSet;
 
+import org.hamcrest.core.IsInstanceOf;
 import org.hamcrest.core.IsNot;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -19,12 +20,14 @@ import com.dooapp.gaedo.blueprints.finders.FindPostByAuthor;
 import com.dooapp.gaedo.blueprints.queries.executable.GraphExecutableQuery;
 import com.dooapp.gaedo.blueprints.queries.executable.OptimizedGraphExecutableQuery;
 import com.dooapp.gaedo.blueprints.queries.executable.VertexSet;
+import com.dooapp.gaedo.blueprints.queries.executable.VertexSet.EagerLoader;
 import com.dooapp.gaedo.blueprints.queries.tests.VertexTest;
 import com.dooapp.gaedo.finders.QueryBuilder;
 import com.dooapp.gaedo.finders.QueryExpression;
 import com.dooapp.gaedo.finders.expressions.Expressions;
 import com.dooapp.gaedo.test.beans.Post;
 import com.dooapp.gaedo.test.beans.User;
+import com.dooapp.gaedo.utils.CollectionUtils;
 
 import static com.dooapp.gaedo.blueprints.TestUtils.simpleTest;
 import static org.hamcrest.core.Is.is;
@@ -51,7 +54,7 @@ public class TestFor90_QueriesWithAndAreMadeUnusable extends AbstractGraphPostSu
     	final String METHOD_NAME = getClass().getSimpleName()+"#can_do_a_query_with_and";
     	final User creator = getUserService().create(new User().withLogin(METHOD_NAME));
     	// just create as much posts with same note than we have posts with same author
-    	int postsByAuthor = getPostService().find().matching(new FindPostByAuthor(author)).count();
+    	int postsByAuthor = 5;
     	// we remove "1" as we have one post by given author that have the 1 note
     	for (int i = 0; i < postsByAuthor; i++) {
     		PostSubClass toCreate = new PostSubClass(0, METHOD_NAME+"-"+i, 1, null, null);
@@ -86,5 +89,9 @@ public class TestFor90_QueriesWithAndAreMadeUnusable extends AbstractGraphPostSu
     	assertThat(roots.size(), is(3));
     	SortedSet<VertexSet> vertexSets = optimized.sortedVertexSetsOf(roots);
     	assertThat(vertexSets.size(), is(3));
+    	// I guess best match should be the one related to creator (there is only one object matching)
+    	VertexSet best = optimized.findBestRootIn(vertexSets);
+    	assertThat(best.getVertices(), IsInstanceOf.instanceOf(EagerLoader.class));
+
     }
 }

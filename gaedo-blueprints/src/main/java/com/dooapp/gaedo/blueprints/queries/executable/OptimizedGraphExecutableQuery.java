@@ -129,17 +129,12 @@ public class OptimizedGraphExecutableQuery<GraphType extends IndexableGraph> ext
 	 * @return an object containing informations about the best matching vertex (like a cache of vertices in solution space).
 	 */
 	public VertexSet findBestRootIn(SortedSet<VertexSet> possibleRoots) {
-		VertexSet tested = possibleRoots.first();
-		while(tested.canGoBack()) {
-			possibleRoots.remove(tested);
-			tested.goBack();
-			/* notice how we just remvoed/put back the vertex set in the list of possible roots ?
-			 * Well, it's an optimization : possibleRoots is sorted by smaller first. So each turn we expand the smallest set.
-			 * In the worst-case scenario, all will be expanded. But I hope it won't happen that often.
-			 */
-			possibleRoots.add(tested);
+		for (VertexSet first = possibleRoots.first(); first.canGoBack(); first = possibleRoots.first()) {
+			possibleRoots.remove(first);
+			first.goBack();
+			possibleRoots.add(first);
 		}
-		return tested;
+		return possibleRoots.first();
 	}
 
 	/**

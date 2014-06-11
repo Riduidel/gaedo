@@ -36,7 +36,7 @@ import com.tinkerpop.blueprints.Vertex;
  *
  */
 public class VertexRootsCollector extends VertexTestVisitorAdapter {
-	private final class IndexLazyLoader implements LazyLoader, Comparable<LazyLoader> {
+	public final class IndexLazyLoader implements LazyLoader, Comparable<LazyLoader> {
 		private final Index<Vertex> vertices;
 		private final String propertyKeyInIndex;
 		private final String propertyValueInIndex;

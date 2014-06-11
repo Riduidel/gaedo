@@ -31,7 +31,7 @@ public class VertexSet {
 	 * @author ndx
 	 *
 	 */
-	private static class EagerLoader implements LazyLoader, Comparable<LazyLoader> {
+	public static class EagerLoader implements LazyLoader, Comparable<LazyLoader> {
 
 		private Collection<Vertex> loaded;
 		private Collection<String> verticesIds;
@@ -99,7 +99,7 @@ public class VertexSet {
 	 * @author ndx
 	 *
 	 */
-	private class PathNavigator {
+	public class PathNavigator {
 		/**
 		 * Load one level of property vertices. For that, previous lazy laoder
 		 * is loaded
@@ -107,7 +107,7 @@ public class VertexSet {
 		 * @author ndx
 		 *
 		 */
-		private class RunOneStepBack implements LazyLoader {
+		public class RunOneStepBack implements LazyLoader {
 
 			private Property property;
 			private LazyLoader vertices;
