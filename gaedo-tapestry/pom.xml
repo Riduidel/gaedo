@@ -2,7 +2,7 @@
 	<parent>
 		<artifactId>gaedo</artifactId>
 		<groupId>com.dooapp</groupId>
-		<version>1.0.12</version>
+		<version>1.0.12-SNAPSHOT</version>
 	</parent>
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>com.dooapp</groupId>
