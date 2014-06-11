@@ -1,8 +1,8 @@
 package com.dooapp.gaedo.blueprints.bugs.for_v_1_x;
 
 import java.util.Collection;
-import java.util.List;
-import java.util.SortedMap;
+import java.util.Map;
+import java.util.SortedSet;
 
 import org.hamcrest.core.IsNot;
 import org.junit.Before;
@@ -24,8 +24,6 @@ import com.dooapp.gaedo.finders.QueryExpression;
 import com.dooapp.gaedo.test.beans.Post;
 import com.dooapp.gaedo.test.beans.PostInformer;
 import com.dooapp.gaedo.test.beans.State;
-import com.dooapp.gaedo.utils.CollectionUtils;
-import com.tinkerpop.blueprints.Vertex;
 
 import static com.dooapp.gaedo.blueprints.TestUtils.simpleTest;
 import static org.hamcrest.core.Is.is;
@@ -64,10 +62,11 @@ public class TestFor88_DoNotRunTestTwice extends AbstractGraphPostSubClassTest {
     	GraphExecutableQuery executable = query.prepareQuery();
     	assertThat(executable, instanceOf(OptimizedGraphExecutableQuery.class));
     	OptimizedGraphExecutableQuery optimized = (OptimizedGraphExecutableQuery) executable;
-    	SortedMap<VertexSet, VertexTest> roots = optimized.getPossibleRootsOf(optimized.getTest());
+    	Map<VertexSet, VertexTest> roots = optimized.getPossibleRootsOf(optimized.getTest());
     	assertThat(roots.size(), is(2));
-    	VertexTest firstTest = roots.get(roots.firstKey());
-    	VertexTest lastTest = roots.get(roots.lastKey());
+    	SortedSet<VertexSet> rootSet = optimized.sortedVertexSetsOf(roots);
+    	VertexTest firstTest = roots.get(rootSet.first());
+    	VertexTest lastTest = roots.get(rootSet.last());
     	assertThat(firstTest, IsNot.not(lastTest));
     }
 }

@@ -22,4 +22,9 @@ public interface LazyLoader {
 	 */
 	long size();
 
+	/**
+	 * Get the loader this loader calls
+	 * @return
+	 */
+	public LazyLoader getSourceLoader();
 }

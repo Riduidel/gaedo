@@ -5,8 +5,10 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
+import java.util.TreeSet;
 
 import com.dooapp.gaedo.blueprints.GraphUtils;
+import com.dooapp.gaedo.blueprints.Properties;
 import com.dooapp.gaedo.properties.Property;
 import com.dooapp.gaedo.utils.CollectionUtils;
 import com.tinkerpop.blueprints.Direction;
@@ -29,9 +31,10 @@ public class VertexSet {
 	 * @author ndx
 	 *
 	 */
-	private static class EagerLoader implements LazyLoader {
+	private static class EagerLoader implements LazyLoader, Comparable<LazyLoader> {
 
 		private Collection<Vertex> loaded;
+		private Collection<String> verticesIds;
 
 		public EagerLoader(Collection<Vertex> loaded) {
 			this.loaded = loaded;
@@ -61,6 +64,31 @@ public class VertexSet {
 			}
 			builder.append("]");
 			return builder.toString();
+		}
+
+		@Override
+		public LazyLoader getSourceLoader() {
+			return this;
+		}
+
+		@Override
+		public int compareTo(LazyLoader o) {
+			if (o instanceof EagerLoader) {
+				EagerLoader loader = (EagerLoader) o;
+				return CollectionUtils.compare(getVerticesIds(), loader.getVerticesIds());
+			} else {
+				return getClass().getSimpleName().compareTo(o.getClass().getSimpleName());
+			}
+		}
+
+		private Iterable<String> getVerticesIds() {
+			if(verticesIds==null) {
+				verticesIds = new TreeSet<String>();
+				for(Vertex v : loaded) {
+					verticesIds.add(v.getProperty(Properties.value.name()).toString());
+				}
+			}
+			return verticesIds;
 		}
 
 	}
@@ -163,6 +191,11 @@ public class VertexSet {
 			 */
 			public void setVertices(LazyLoader vertices) {
 				this.vertices = vertices;
+			}
+
+			@Override
+			public LazyLoader getSourceLoader() {
+				return vertices.getSourceLoader();
 			}
 		}
 

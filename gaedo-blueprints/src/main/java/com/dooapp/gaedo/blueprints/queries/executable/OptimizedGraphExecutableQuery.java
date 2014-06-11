@@ -86,10 +86,9 @@ public class OptimizedGraphExecutableQuery<GraphType extends IndexableGraph> ext
 		VertexTest toUse = test;
 		if(verticesToExamine==null) {
 			// First step is to get all possible query root vertices
-			SortedMap<VertexSet, VertexTest> possibleRoots = getPossibleRootsOf(test);
+			Map<VertexSet, VertexTest> possibleRoots = getPossibleRootsOf(test);
 			// extract the set from the map. Too bad it can't be provided directly by Java
-			SortedSet<VertexSet> rootsSet = new TreeSet<VertexSet>(possibleRoots.comparator());
-			rootsSet.addAll(possibleRoots.keySet());
+			SortedSet<VertexSet> rootsSet = sortedVertexSetsOf(possibleRoots);
 			VertexSet bestMatch = findBestRootIn(rootsSet);
 			toUse = possibleRoots.get(bestMatch);
 			LazyLoader vertices = bestMatch.getVertices();
@@ -104,6 +103,12 @@ public class OptimizedGraphExecutableQuery<GraphType extends IndexableGraph> ext
 			}
 		}
 		return new GraphExecutionPlan(service, toUse, sort, verticesToExamine);
+	}
+
+	public SortedSet<VertexSet> sortedVertexSetsOf(Map<VertexSet, VertexTest> possibleRoots) {
+		SortedSet<VertexSet> rootsSet = new TreeSet<VertexSet>(new VertexSetSizeComparator());
+		rootsSet.addAll(possibleRoots.keySet());
+		return rootsSet;
 	}
 
 	/**
@@ -142,10 +147,11 @@ public class OptimizedGraphExecutableQuery<GraphType extends IndexableGraph> ext
 	 * property path used to go from an object vertex to the vertex representing
 	 * that root (hopefully this one is simply a copy of vertex test path).
 	 *
-	 * @param test test that will be
-	 * @return
+	 * @param test test that will be filtered and used to collect possilbe qeury roots
+	 * @return a hash map associating {@link VertexSet} to the optimal {@link VertexTest} that can be used to filter objects in key set.
+	 * This map is NOT sorted according to "best vertex set" rules, as used comparator is not so good.
 	 */
-	public SortedMap<VertexSet, VertexTest> getPossibleRootsOf(VertexTest test) {
+	public Map<VertexSet, VertexTest> getPossibleRootsOf(VertexTest test) {
 		return new VertexRootsCollector(service).getSetsToProcessedTests(test);
 	}
 

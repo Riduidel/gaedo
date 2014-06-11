@@ -2,9 +2,9 @@ package com.dooapp.gaedo.blueprints.queries.executable;
 
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.LinkedHashMap;
 import java.util.LinkedList;
-import java.util.SortedMap;
-import java.util.TreeMap;
+import java.util.Map;
 
 import javax.persistence.CascadeType;
 
@@ -36,7 +36,7 @@ import com.tinkerpop.blueprints.Vertex;
  *
  */
 public class VertexRootsCollector extends VertexTestVisitorAdapter {
-	private final class IndexLazyLoader implements LazyLoader {
+	private final class IndexLazyLoader implements LazyLoader, Comparable<LazyLoader> {
 		private final Index<Vertex> vertices;
 		private final String propertyKeyInIndex;
 		private final String propertyValueInIndex;
@@ -81,13 +81,35 @@ public class VertexRootsCollector extends VertexTestVisitorAdapter {
 			builder.append("]");
 			return builder.toString();
 		}
+
+		@Override
+		public LazyLoader getSourceLoader() {
+			return this;
+		}
+
+		@Override
+		public int compareTo(LazyLoader o) {
+			if (o instanceof IndexLazyLoader) {
+				IndexLazyLoader loader = (IndexLazyLoader) o;
+				int returned = 0;
+				if(returned==0) {
+					returned = propertyKeyInIndex.compareTo(loader.propertyKeyInIndex);
+				}
+				if(returned==0) {
+					returned = propertyValueInIndex.compareTo(loader.propertyValueInIndex);
+				}
+				return returned;
+			} else {
+				return getClass().getSimpleName().compareTo(o.getClass().getSimpleName());
+			}
+		}
 	}
 
 	/**
 	 * Temporary map linking sets to the tests that should be executed, were those sets to be chosen as reference ones
 	 *
 	 */
-	private SortedMap<VertexSet, VertexTest> result = new TreeMap<VertexSet, VertexTest>(new VertexSetSizeComparator());
+	private Map<VertexSet, VertexTest> result = new LinkedHashMap<VertexSet, VertexTest>();
 
 	private final AbstractBluePrintsBackedFinderService<?, ?, ?> service;
 	/**
@@ -106,7 +128,7 @@ public class VertexRootsCollector extends VertexTestVisitorAdapter {
 	 *
 	 * @return
 	 */
-	public SortedMap<VertexSet, VertexTest> getSetsToProcessedTests(VertexTest testToScan) {
+	public Map<VertexSet, VertexTest> getSetsToProcessedTests(VertexTest testToScan) {
 		this.initialTest = testToScan;
 		testToScan.accept(this);
 		return result;

@@ -1,7 +1,8 @@
 package com.dooapp.gaedo.blueprints.bugs.for_v_1_x;
 
 import java.util.Collection;
-import java.util.SortedMap;
+import java.util.Map;
+import java.util.SortedSet;
 
 import org.hamcrest.core.IsNot;
 import org.junit.Test;
@@ -23,7 +24,6 @@ import com.dooapp.gaedo.finders.QueryBuilder;
 import com.dooapp.gaedo.finders.QueryExpression;
 import com.dooapp.gaedo.finders.expressions.Expressions;
 import com.dooapp.gaedo.test.beans.Post;
-import com.dooapp.gaedo.test.beans.PostInformer;
 import com.dooapp.gaedo.test.beans.User;
 
 import static com.dooapp.gaedo.blueprints.TestUtils.simpleTest;
@@ -75,8 +75,8 @@ public class TestFor90_QueriesWithAndAreMadeUnusable extends AbstractGraphPostSu
     	// now go deeper and do some white-box testing
     	GraphExecutableQuery executable = matching.prepareQuery();
     	assertThat(executable, instanceOf(OptimizedGraphExecutableQuery.class));
-    	OptimizedGraphExecutableQuery optimized = (OptimizedGraphExecutableQuery) executable;
-    	SortedMap<VertexSet, VertexTest> roots = optimized.getPossibleRootsOf(optimized.getTest());
+    	OptimizedGraphExecutableQuery<?> optimized = (OptimizedGraphExecutableQuery<?>) executable;
+    	Map<VertexSet, VertexTest> roots = optimized.getPossibleRootsOf(optimized.getTest());
     	/* we should have 3 query roots :
     	 * 1- class post
     	 * 2- author user
@@ -84,8 +84,7 @@ public class TestFor90_QueriesWithAndAreMadeUnusable extends AbstractGraphPostSu
     	 * Any other case indicates a confusion of roots collector, which may result in poorly formed queries.
     	*/
     	assertThat(roots.size(), is(3));
-    	VertexTest firstTest = roots.get(roots.firstKey());
-    	VertexTest lastTest = roots.get(roots.lastKey());
-    	assertThat(firstTest, IsNot.not(lastTest));
+    	SortedSet<VertexSet> vertexSets = optimized.sortedVertexSetsOf(roots);
+    	assertThat(vertexSets.size(), is(3));
     }
 }

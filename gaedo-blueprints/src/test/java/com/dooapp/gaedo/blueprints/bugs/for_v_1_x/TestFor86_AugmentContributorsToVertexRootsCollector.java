@@ -2,7 +2,7 @@ package com.dooapp.gaedo.blueprints.bugs.for_v_1_x;
 
 import java.util.Collection;
 import java.util.List;
-import java.util.SortedMap;
+import java.util.Map;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -62,10 +62,10 @@ public class TestFor86_AugmentContributorsToVertexRootsCollector extends Abstrac
     	// Now for some officialy crazy whitebox testing ...
     	GraphExecutableQuery executable = query.prepareQuery();
     	assertThat(executable, instanceOf(OptimizedGraphExecutableQuery.class));
-    	OptimizedGraphExecutableQuery optimized = (OptimizedGraphExecutableQuery) executable;
-    	SortedMap<VertexSet, VertexTest> roots = optimized.getPossibleRootsOf(optimized.getTest());
+    	OptimizedGraphExecutableQuery<?> optimized = (OptimizedGraphExecutableQuery<?>) executable;
+    	Map<VertexSet, VertexTest> roots = optimized.getPossibleRootsOf(optimized.getTest());
     	assertThat(roots.size(), is(2));
-    	VertexSet set = roots.firstKey();
+    	VertexSet set = optimized.sortedVertexSetsOf(roots).first();
     	List<Vertex> values = CollectionUtils.asList(set.getVertices().get());
     	assertThat(values.size(), is(1));
     }
