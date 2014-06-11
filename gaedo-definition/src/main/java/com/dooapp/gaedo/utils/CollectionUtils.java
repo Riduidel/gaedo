@@ -2,9 +2,12 @@ package com.dooapp.gaedo.utils;
 
 import java.io.Serializable;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -84,4 +87,56 @@ public class CollectionUtils {
 		}
 	}
 
+	public static <Bean extends Comparable<Bean>> int compareCollections(Iterable<Bean> first, Iterable<Bean> second) {
+		return compareCollections(first, second, new Comparator<Bean>() {
+
+			@Override
+			public int compare(Bean o1, Bean o2) {
+				return o1.compareTo(o2);
+			}
+
+		});
+	}
+
+	public static <Bean extends Comparable<Bean>> int compareCollections(Collection<Bean> first, Collection<Bean> second) {
+		return compareCollections(first, second, new Comparator<Bean>() {
+
+			@Override
+			public int compare(Bean o1, Bean o2) {
+				return o1.compareTo(o2);
+			}
+
+		});
+	}
+
+	public static <Bean> int compareCollections(Collection<Bean> first, Collection<Bean> second, Comparator<Bean> comparator) {
+		int returned = (int) Math.signum(first.size()-second.size());
+		if(returned==0) {
+			return compareCollections((Iterable<Bean>) first, (Iterable<Bean>) second, comparator);
+		}
+		return returned;
+	}
+	public static <Bean> int compareCollections(Iterable<Bean> first, Iterable<Bean> second, Comparator<Bean> comparator) {
+		int returned = 0;
+		Iterator<Bean> firstIterator = first.iterator();
+		Iterator<Bean> secondIterator = second.iterator();
+		boolean firstHasNext = firstIterator.hasNext();
+		boolean secondHasNext = secondIterator.hasNext();
+		for (Bean firstValue = null, secondValue = null; returned==0 && (firstHasNext||secondHasNext); /* no increment, as it is done in loop */) {
+			firstHasNext = firstIterator.hasNext();
+			secondHasNext = secondIterator.hasNext();
+			if(firstHasNext)
+				firstValue = firstIterator.next();
+			else
+				returned = secondHasNext ? -1 : 0;
+			if(secondHasNext)
+				secondValue = secondIterator.next();
+			else
+				returned = firstHasNext ? 1 : 0;
+			if(returned==0) {
+				returned = comparator.compare(firstValue, secondValue);
+			}
+		}
+		return returned;
+	}
 }

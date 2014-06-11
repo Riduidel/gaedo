@@ -109,7 +109,7 @@ public class OptimizedGraphExecutableQuery<GraphType extends IndexableGraph> ext
 	/**
 	 * Override of the list of vertices to load. Allow bypassing of the optimized part of {@link #getExecutionPlan()}.
 	 * Conclusion is obvious : unless you really know what you do, please don't override it creatively.
-	 * @return
+	 * @return null to have {@link #getExecutionPlan()} compute an "optimal" execution
 	 */
 	public Iterable<Vertex> getVerticesToExamine() {
 		return null;

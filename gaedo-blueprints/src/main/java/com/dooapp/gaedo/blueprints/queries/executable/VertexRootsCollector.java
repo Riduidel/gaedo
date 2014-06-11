@@ -36,58 +36,11 @@ import com.tinkerpop.blueprints.Vertex;
  *
  */
 public class VertexRootsCollector extends VertexTestVisitorAdapter {
-	private final class IndexLazyLoader implements LazyLoader {
-		private final Index<Vertex> vertices;
-		private final String propertyKeyInIndex;
-		private final String propertyValueInIndex;
-
-		public IndexLazyLoader(Index<Vertex> vertices, String propertyKeyInIndex, String propertyValueInIndex) {
-			super();
-			this.propertyValueInIndex = propertyValueInIndex;
-			this.propertyKeyInIndex = propertyKeyInIndex;
-			this.vertices = vertices;
-		}
-
-		@Override
-		public Iterable<Vertex> get() {
-			return vertices.get(propertyKeyInIndex, propertyValueInIndex);
-		}
-
-		@Override
-		public long size() {
-			return vertices.count(propertyKeyInIndex, propertyValueInIndex);
-		}
-
-		/**
-		 * @return
-		 * @see java.lang.Object#toString()
-		 */
-		@Override
-		public String toString() {
-			StringBuilder builder = new StringBuilder();
-			builder.append("IndexLazyLoader [");
-			if (propertyKeyInIndex != null) {
-				builder.append("key=");
-				builder.append(propertyKeyInIndex);
-				builder.append(", ");
-			}
-			if (propertyValueInIndex != null) {
-				builder.append("value=");
-				builder.append(propertyValueInIndex);
-				builder.append(", ");
-			}
-			builder.append("size()=");
-			builder.append(size());
-			builder.append("]");
-			return builder.toString();
-		}
-	}
-
 	/**
 	 * Temporary map linking sets to the tests that should be executed, were those sets to be chosen as reference ones
 	 *
 	 */
-	private SortedMap<VertexSet, VertexTest> result = new TreeMap<VertexSet, VertexTest>(new VertexSetSizeComparator());
+	private SortedMap<VertexSet, VertexTest> result = new TreeMap<VertexSet, VertexTest>();
 
 	private final AbstractBluePrintsBackedFinderService<?, ?, ?> service;
 	/**
