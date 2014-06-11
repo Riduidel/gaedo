@@ -1,5 +1,7 @@
 package com.dooapp.gaedo.blueprints.queries.executable;
 
+import java.util.Collection;
+
 import com.tinkerpop.blueprints.Vertex;
 
 /**
@@ -7,7 +9,7 @@ import com.tinkerpop.blueprints.Vertex;
  * @author ndx
  *
  */
-public interface LazyLoader extends Comparable<LazyLoader>{
+public interface LazyLoader {
 	/**
 	 * Obtain list of vertices for this lazy loader
 	 * @return
@@ -19,11 +21,5 @@ public interface LazyLoader extends Comparable<LazyLoader>{
 	 * @return
 	 */
 	long size();
-
-	/**
-	 * Dive through this lazy loader to the set of loaded vertices.
-	 * @return
-	 */
-	LazyLoader diveIntoLoadedSet();
 
 }
