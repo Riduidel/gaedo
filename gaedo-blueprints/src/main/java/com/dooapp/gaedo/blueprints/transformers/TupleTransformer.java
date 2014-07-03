@@ -58,4 +58,5 @@ public interface TupleTransformer<Type> extends Transformer {
 
 	public Kind getKind();
 
+    public <DataType> void deleteVertex(AbstractBluePrintsBackedFinderService<? extends Graph, DataType, ?> service, GraphDatabaseDriver driver, Vertex objectVertex, Vertex valueVertex, Type value, ObjectCache objectsBeingUpdated);
 }

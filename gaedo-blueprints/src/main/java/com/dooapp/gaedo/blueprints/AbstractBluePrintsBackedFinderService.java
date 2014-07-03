@@ -301,13 +301,16 @@ public abstract class AbstractBluePrintsBackedFinderService<GraphClass extends I
             }
         } else {
             // OK, time to delete value vertex. Is it a managed node ?
-            if (repository.containsKey(value.getClass())) {
-                FinderCrudService<Type, ?> finderCrudService = (FinderCrudService<Type, ?>) repository.get(value.getClass());
+            Class<? extends Object> valueClass = value.getClass();
+			if (repository.containsKey(valueClass)) {
+                FinderCrudService<Type, ?> finderCrudService = (FinderCrudService<Type, ?>) repository.get(valueClass);
                 if (finderCrudService instanceof AbstractBluePrintsBackedFinderService) {
                     ((AbstractBluePrintsBackedFinderService<?, Type, ?>) finderCrudService).doDelete(value, objectsBeingUpdated);
                 } else {
-                    throw new IncompatibleServiceException(finderCrudService, value.getClass());
+                    throw new IncompatibleServiceException(finderCrudService, valueClass);
                 }
+            } else if(Tuples.containsKey(valueClass)){
+            	Tuples.get(valueClass).deleteVertex(this, getDriver(), objectVertex, valueVertex, value, objectsBeingUpdated);
             } else {
                 // Literal nodes can be deleted without any trouble
                 GraphUtils.removeSafely(database, valueVertex);

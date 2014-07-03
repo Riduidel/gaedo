@@ -16,6 +16,7 @@ import com.dooapp.gaedo.blueprints.Kind;
 import com.dooapp.gaedo.blueprints.ObjectCache;
 import com.dooapp.gaedo.blueprints.operations.Updater;
 import com.dooapp.gaedo.blueprints.strategies.GraphMappingStrategy;
+import com.dooapp.gaedo.finders.FinderCrudService;
 import com.dooapp.gaedo.finders.repository.ServiceRepository;
 import com.dooapp.gaedo.properties.TypeProperty;
 import com.tinkerpop.blueprints.Graph;
@@ -45,6 +46,22 @@ public class SerializableTransformer implements TupleTransformer<Serializable> {
 		} catch (IOException e) {
 			throw new UnableToStoreSerializableException("impossible to store serializable value "+value, e);
 		}
+	}
+
+	@Override
+    public <DataType> void deleteVertex(AbstractBluePrintsBackedFinderService<? extends Graph, DataType, ?> service, GraphDatabaseDriver driver, Vertex objectVertex, Vertex valueVertex, Serializable value, ObjectCache objectsBeingUpdated) {
+		ServiceRepository repository = driver.getRepository();
+		// some first-level check to see if someone else than this transformer has any knowledge of value (because, well, this id will be longer than hell)
+		Class<? extends Serializable> valueClass = value.getClass();
+		if(repository.containsKey(valueClass)) {
+			FinderCrudService dedicated = repository.get(valueClass);
+			if (dedicated instanceof AbstractBluePrintsBackedFinderService) {
+				AbstractBluePrintsBackedFinderService blueprints= (AbstractBluePrintsBackedFinderService) dedicated;
+				blueprints.deleteOutEdgeVertex(objectVertex, valueVertex, value, objectsBeingUpdated);
+				return;
+			}
+		}
+		GraphUtils.removeSafely(service.getDatabase(), valueVertex);
 	}
 
 	/**
