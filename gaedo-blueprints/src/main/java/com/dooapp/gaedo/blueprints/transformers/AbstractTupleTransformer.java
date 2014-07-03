@@ -33,8 +33,23 @@ public abstract class AbstractTupleTransformer<TupleType> {
 		String className = cast.getClass().getName();
 		Vertex objectVertex = service.loadVertexFor(entryVertexId, className);
 		new Updater().performUpdate(service, driver, entryVertexId, objectVertex, getContainedClass(), getContainedProperties(), cast, cascade, objectsBeingUpdated);
-		if(objectVertex==null)
+		/* If object was null, this operation was a create.
+		 * As a consequence, the upper update call may have persisted key or value, which implies the id may have changed
+		 * See https://github.com/Riduidel/gaedo/issues/91#issuecomment-47937526 for more awful details
+		 */
+		if(objectVertex==null) {
+			String persistentId = getIdOfTuple(service.getRepository(), cast, cascade, objectsBeingUpdated);
+			if(!persistentId.equals(entryVertexId)) {
+				/* the update changed the id in some way. It mostly is the case when creating map entries (or at least it's where I spotted
+				 * that bug). In such a case, only one solution is valid : delete the vertex we just created and re-create it.
+				 */
+				objectVertex = service.loadVertexFor(entryVertexId, className);
+				GraphUtils.removeSafely(service.getDatabase(), objectVertex);
+				// Yes, it's a recursive call
+				return getVertexFor(service, driver, cast, cascade, objectsBeingUpdated);
+			}
 			objectVertex = service.loadVertexFor(entryVertexId, className);
+		}
 		return objectVertex;
 	}
 
