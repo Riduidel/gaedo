@@ -2,7 +2,7 @@
   <parent>
     <artifactId>gaedo</artifactId>
     <groupId>com.dooapp</groupId>
-    <version>1.0.16</version>
+    <version>1.0.17-SNAPSHOT</version>
   </parent>
   <modelVersion>4.0.0</modelVersion>
   <groupId>com.dooapp</groupId>
@@ -31,6 +31,6 @@
 		<connection>scm:svn:https://svn.origo.ethz.ch/gaedo/gaedo-collections/trunk</connection>
 		<developerConnection>scm:svn:https://svn.origo.ethz.ch/gaedo/gaedo-collections/trunk</developerConnection>
 		<url>https://svn.origo.ethz.ch/gaedo/gaedo-collections/trunk</url>
-	  <tag>gaedo-1.0.16</tag>
+	  <tag>HEAD</tag>
   </scm>
 </project>
