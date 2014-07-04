@@ -174,18 +174,20 @@ public class MapEntryTransformer extends AbstractTupleTransformer<Map.Entry> imp
 
 	public <DataType> void deleteVertexOf(AbstractBluePrintsBackedFinderService<? extends Graph, DataType, ?> service, GraphDatabaseDriver driver,
 					Vertex entryVertex, String edgeName, Object value, ObjectCache objectsBeingUpdated) {
-		try {
-			List<Edge> linking = CollectionUtils.asList(entryVertex.getEdges(Direction.OUT, edgeName));
-			if(linking.size()>0) {
-				for(Edge e : linking) {
-					GraphUtils.removeSafely(service.getDatabase(), e);
+		if(value!=null) {
+			try {
+				List<Edge> linking = CollectionUtils.asList(entryVertex.getEdges(Direction.OUT, edgeName));
+				if(linking.size()>0) {
+					for(Edge e : linking) {
+						GraphUtils.removeSafely(service.getDatabase(), e);
+					}
 				}
+				Vertex valueVertex = service.getVertexFor(value, CascadeType.REMOVE, objectsBeingUpdated);
+				// we got a vertex, now delete it, please, but for that, we before must delete edge linking entry vertex to that vertex
+				service.deleteOutEdgeVertex(entryVertex, valueVertex, value, objectsBeingUpdated);
+			} catch(LiteralsHaveNoAssociatedVerticesException e) {
+				// a literal ? Then nothing has to be done, which is COOL
 			}
-			Vertex valueVertex = service.getVertexFor(value, CascadeType.REMOVE, objectsBeingUpdated);
-			// we got a vertex, now delete it, please, but for that, we before must delete edge linking entry vertex to that vertex
-			service.deleteOutEdgeVertex(entryVertex, valueVertex, value, objectsBeingUpdated);
-		} catch(LiteralsHaveNoAssociatedVerticesException e) {
-			// a literal ? Then nothing has to be done, which is COOL
 		}
 	}
 }
